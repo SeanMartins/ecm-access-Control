@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ECM — Report Finale</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#F5F3EE;
+  --surface:#FFFFFF;
+  --surface2:#F0EDE6;
+  --border:#E0DAD0;
+  --border2:#C8C0B4;
+  --text:#1A1714;
+  --text2:#6B6560;
+  --text3:#9B948C;
+  --accent:#2B4EFF;
+  --accent-light:#EEF1FF;
+  --success:#1A7A4A;
+  --success-light:#E8F5EE;
+  --danger:#C13B2A;
+  --danger-light:#FDEEE9;
+  --warn:#B07A10;
+  --warn-light:#FDF5E0;
+  --radius:10px;
+  --radius-lg:16px;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 4px 16px rgba(0,0,0,0.06);
+}
+
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
+
+header{background:var(--text);color:white;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{font-size:15px;font-weight:600;letter-spacing:0.04em;display:flex;align-items:center;gap:10px}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:#FF6B35}
+.nav-pills{display:flex;gap:4px}
+.nav-pill{padding:5px 14px;border-radius:20px;font-size:13px;font-weight:500;color:rgba(255,255,255,0.45)}
+.nav-pill.active{background:var(--accent);color:white}
+.nav-pill.done{color:rgba(255,255,255,0.7)}
+
+main{max-width:1060px;margin:0 auto;padding:36px 20px 100px}
+.page-title{font-size:28px;font-weight:600;letter-spacing:-0.02em;margin-bottom:6px}
+.page-sub{color:var(--text2);font-size:15px;margin-bottom:32px}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:20px;box-shadow:var(--shadow)}
+.card-title{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.step-badge{width:22px;height:22px;border-radius:50%;background:var(--text);color:white;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0}
+
+/* SUMMARY CARDS */
+.summary-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+.sum-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;box-shadow:var(--shadow)}
+.sum-num{font-size:30px;font-weight:600;letter-spacing:-0.02em;margin-bottom:2px}
+.sum-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em}
+.sum-card.green .sum-num{color:var(--success)}
+.sum-card.red .sum-num{color:var(--danger)}
+.sum-card.blue .sum-num{color:var(--accent)}
+.sum-card.warn .sum-num{color:var(--warn)}
+
+/* EVENT INFO */
+.ev-info-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+.ev-info-box{background:var(--surface2);border-radius:var(--radius);padding:14px}
+.ev-info-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.ev-info-val{font-size:14px;font-weight:500;color:var(--text)}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.toolbar input,.toolbar select{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color 0.2s}
+.toolbar input:focus,.toolbar select:focus{border-color:var(--accent);background:white}
+.toolbar input{flex:1;min-width:180px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.18s;border:none;text-decoration:none}
+.btn-primary{background:var(--accent);color:white}
+.btn-primary:hover{background:#1a3ce0;transform:translateY(-1px)}
+.btn-success{background:var(--success);color:white}
+.btn-success:hover{background:#145e38}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-outline:hover{background:var(--surface2)}
+.btn-warn{background:var(--warn-light);color:var(--warn);border:1px solid rgba(176,122,16,0.3)}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none!important}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--surface2);position:sticky;top:0}
+th{padding:10px 14px;text-align:left;font-weight:600;color:var(--text2);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+th:hover{color:var(--accent)}
+th .sort-icon{margin-left:4px;opacity:0.4}
+th.sorted .sort-icon{opacity:1;color:var(--accent)}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.mono{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
+
+/* PILLS */
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.pill-ok{background:var(--success-light);color:var(--success)}
+.pill-no{background:var(--danger-light);color:var(--danger)}
+.pill-parz{background:var(--warn-light);color:var(--warn)}
+.pill-assente{background:var(--surface2);color:var(--text3)}
+
+/* PROGRESS BAR */
+.presence-bar{height:6px;border-radius:100px;background:var(--surface2);overflow:hidden;min-width:80px}
+.presence-fill{height:100%;border-radius:100px;transition:width 0.3s}
+.fill-ok{background:var(--success)}
+.fill-parz{background:var(--warn)}
+.fill-no{background:var(--danger)}
+.fill-zero{background:var(--border2)}
+
+/* DETTAGLIO ROW */
+.detail-row{display:none;background:var(--surface2)}
+.detail-row.open{display:table-row}
+.detail-inner{padding:12px 14px 16px 40px}
+.detail-log{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.log-pill{padding:4px 12px;border-radius:20px;font-size:11px;font-family:'DM Mono',monospace}
+.log-in{background:var(--success-light);color:var(--success)}
+.log-out{background:var(--danger-light);color:var(--danger)}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px}
+.tab{padding:10px 18px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;background:none;border-left:none;border-right:none;border-top:none;font-family:'DM Sans',sans-serif}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* CHART */
+.chart-wrap{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.chart-row{display:flex;align-items:center;gap:10px;font-size:12px}
+.chart-label{min-width:140px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px}
+.chart-bar-bg{flex:1;height:20px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.chart-bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:10px;font-weight:600;color:white;min-width:2px;transition:width 0.5s}
+.chart-val{min-width:60px;text-align:right;color:var(--text2);font-family:'DM Mono',monospace;font-size:11px}
+
+/* ALERT */
+.alert{padding:12px 16px;border-radius:var(--radius);font-size:13px;margin-bottom:16px}
+.alert-error{background:var(--danger-light);color:var(--danger);border:1px solid rgba(193,59,42,0.25)}
+.alert-info{background:var(--accent-light);color:var(--accent);border:1px solid rgba(43,78,255,0.2)}
+
+/* EXPORT CARD */
+.export-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.export-box{border:1px solid var(--border);border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;gap:10px}
+.export-icon{font-size:28px}
+.export-title{font-size:14px;font-weight:600}
+.export-desc{font-size:12px;color:var(--text2);line-height:1.5}
+
+/* PAGINATION */
+.pagination{display:flex;justify-content:space-between;align-items:center;padding:12px 0;font-size:12px;color:var(--text2)}
+.page-btns{display:flex;gap:4px}
+.page-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;color:var(--text);font-family:'DM Sans',sans-serif}
+.page-btn:hover{background:var(--surface2)}
+.page-btn.active{background:var(--accent);color:white;border-color:var(--accent)}
+
+/* FOOTER */
+footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;z-index:50}
+.footer-info{font-size:13px;color:var(--text3)}
+.footer-info strong{color:var(--text2)}
+
+/* PRINT */
+@media print{
+  header,footer,.toolbar,.export-grid,.tabs,#tabAnalisi,.btn,
+  .pagination,.page-title,.page-sub,#tabExport{display:none!important}
+  body{background:white}
+  main{padding:0;max-width:100%}
+  .card{box-shadow:none;border:none;padding:0}
+  .summary-grid{grid-template-columns:repeat(5,1fr)}
+}
+
+@media(max-width:700px){
+  .summary-grid{grid-template-columns:1fr 1fr}
+  .ev-info-grid{grid-template-columns:1fr}
+  .export-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span class="logo-dot"></span>ECM Access Control</div>
+  <div class="nav-pills">
+    <div class="nav-pill done">① Setup</div>
+    <div class="nav-pill done">② Badge</div>
+    <div class="nav-pill done">③ Accesso</div>
+    <div class="nav-pill active">④ Report</div>
+  </div>
+</header>
+
+<main>
+  <div class="page-title">Report finale</div>
+  <div class="page-sub">Presenze, ore effettive e crediti ECM per ogni partecipante</div>
+
+  <div class="alert alert-error" id="alertNoData" style="display:none">
+    ⚠️ Nessun dato trovato. <a href="ecm-blocco1.html" style="color:inherit;font-weight:600">Torna al Blocco 1</a>.
+  </div>
+
+  <!-- INFO EVENTO -->
+  <div id="evInfoSection" style="display:none">
+    <div class="ev-info-grid">
+      <div class="ev-info-box"><div class="ev-info-label">Evento</div><div class="ev-info-val" id="infoNome">—</div></div>
+      <div class="ev-info-box"><div class="ev-info-label">Data</div><div class="ev-info-val" id="infoData">—</div></div>
+      <div class="ev-info-box"><div class="ev-info-label">Luogo</div><div class="ev-info-val" id="infoLuogo">—</div></div>
+      <div class="ev-info-box"><div class="ev-info-label">Crediti ECM</div><div class="ev-info-val" id="infoCrediti">—</div></div>
+      <div class="ev-info-box"><div class="ev-info-label">Ore minime richieste</div><div class="ev-info-val" id="infoOreMin">—</div></div>
+      <div class="ev-info-box"><div class="ev-info-label">% presenza minima</div><div class="ev-info-val" id="infoPerc">—</div></div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="summary-grid">
+      <div class="sum-card"><div class="sum-num" id="sTot">0</div><div class="sum-label">Iscritti</div></div>
+      <div class="sum-card green"><div class="sum-num" id="sCrediti">0</div><div class="sum-label">Crediti ECM</div></div>
+      <div class="sum-card red"><div class="sum-num" id="sNoCrediti">0</div><div class="sum-label">Non idonei</div></div>
+      <div class="sum-card warn"><div class="sum-num" id="sAssenti">0</div><div class="sum-label">Assenti</div></div>
+      <div class="sum-card blue"><div class="sum-num" id="sOreMedia">0h</div><div class="sum-label">Ore medie</div></div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div id="mainContent" style="display:none">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('report')">📋 Report presenze</button>
+      <button class="tab" onclick="switchTab('analisi')">📊 Analisi</button>
+      <button class="tab" onclick="switchTab('export')">⬇ Export</button>
+    </div>
+
+    <!-- TAB REPORT -->
+    <div class="tab-panel active" id="tabReport">
+      <div class="toolbar">
+        <input type="text" id="searchInput" placeholder="Cerca per nome, cognome o CF..." oninput="renderTable()">
+        <select id="filterStato" onchange="renderTable()">
+          <option value="">Tutti</option>
+          <option value="ok">✓ Idonei ECM</option>
+          <option value="parz">⚠ Parziale</option>
+          <option value="no">✗ Non idonei</option>
+          <option value="assente">— Assenti</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="window.print()">🖨️ Stampa</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortBy('cognome')">Cognome <span class="sort-icon">↕</span></th>
+              <th onclick="sortBy('nome')">Nome <span class="sort-icon">↕</span></th>
+              <th>CF</th>
+              <th>Professione</th>
+              <th onclick="sortBy('orePresenza')">Ore presenza <span class="sort-icon">↕</span></th>
+              <th>% presenza</th>
+              <th onclick="sortBy('crediti')">Crediti ECM <span class="sort-icon">↕</span></th>
+              <th>Stato</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="pagination">
+        <div id="pageInfo"></div>
+        <div class="page-btns" id="pageBtns"></div>
+      </div>
+    </div>
+
+    <!-- TAB ANALISI -->
+    <div class="tab-panel" id="tabAnalisi">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div class="card" style="margin:0">
+          <div class="card-title">Distribuzione presenze</div>
+          <div class="chart-wrap" id="chartPresenze"></div>
+        </div>
+        <div class="card" style="margin:0">
+          <div class="card-title">Professioni partecipanti</div>
+          <div class="chart-wrap" id="chartProfessioni"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">Andamento entrate/uscite nel tempo</div>
+        <div id="chartTimeline" style="padding:8px 0"></div>
+      </div>
+    </div>
+
+    <!-- TAB EXPORT -->
+    <div class="tab-panel" id="tabExport">
+      <div class="alert alert-info" style="margin-bottom:20px">
+        ℹ️ I file generati sono compatibili con le piattaforme ECM nazionali (Co.Ge.A.P.S., Agenas).
+      </div>
+      <div class="export-grid">
+        <div class="export-box">
+          <div class="export-icon">📊</div>
+          <div class="export-title">Export Excel completo</div>
+          <div class="export-desc">Tutti i partecipanti con ore di presenza, % presenza, crediti ECM ottenuti e log dettagliato entrate/uscite. Compatibile con piattaforme ECM.</div>
+          <button class="btn btn-success" onclick="exportExcel('completo')">⬇ Scarica Excel completo</button>
+        </div>
+        <div class="export-box">
+          <div class="export-icon">✅</div>
+          <div class="export-title">Export idonei ECM</div>
+          <div class="export-desc">Solo i partecipanti che hanno raggiunto la percentuale minima di presenza e ottengono i crediti ECM. Formato standard per upload su piattaforma.</div>
+          <button class="btn btn-success" onclick="exportExcel('idonei')">⬇ Scarica solo idonei</button>
+        </div>
+        <div class="export-box">
+          <div class="export-icon">📋</div>
+          <div class="export-title">Export log presenze</div>
+          <div class="export-desc">Log dettagliato di ogni entrata e uscita con timestamp preciso, utile per verifiche e audit.</div>
+          <button class="btn btn-outline" onclick="exportExcel('log')">⬇ Scarica log entrate/uscite</button>
+        </div>
+        <div class="export-box">
+          <div class="export-icon">📄</div>
+          <div class="export-title">Report PDF stampa</div>
+          <div class="export-desc">Report formattato pronto per la stampa o per l'archiviazione in PDF. Include intestazione evento e tabella riassuntiva.</div>
+          <button class="btn btn-outline" onclick="window.print()">🖨️ Stampa / Salva PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-info">Evento: <strong id="footerEvento">—</strong></div>
+  <div style="display:flex;gap:12px;align-items:center">
+    <a href="ecm-blocco3.html" class="btn btn-outline btn-sm">← Accessi</a>
+    <span class="footer-info">Idonei ECM: <strong id="footerIdonei" style="color:var(--success)">0</strong> / <strong id="footerTot">0</strong></span>
+  </div>
+</footer>
+
+<script>
+// ─── STATE ────────────────────────────────────────────
+let evento = null;
+let partecipanti = [];
+let report = [];
+let sortField = 'cognome';
+let sortAsc = true;
+let currentPage = 0;
+const PER_PAGE = 25;
+
+// ─── INIT ─────────────────────────────────────────────
+window.onload = () => {
+  const saved = localStorage.getItem('ecm_evento');
+  if (!saved) { document.getElementById('alertNoData').style.display = 'block'; return; }
+  evento = JSON.parse(saved);
+  partecipanti = evento.partecipanti || [];
+  if (partecipanti.length === 0) { document.getElementById('alertNoData').style.display = 'block'; return; }
+
+  document.getElementById('evInfoSection').style.display = 'block';
+  document.getElementById('mainContent').style.display = 'block';
+  document.getElementById('footerEvento').textContent = evento.nome || '—';
+
+  fillEventInfo();
+  buildReport();
+  fillSummary();
+  renderTable();
+  renderCharts();
+};
+
+// ─── EVENT INFO ───────────────────────────────────────
+function fillEventInfo() {
+  const fmt = d => d ? new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}) : '—';
+  document.getElementById('infoNome').textContent = evento.nome || '—';
+  document.getElementById('infoData').textContent = fmt(evento.data) + (evento.dataFine ? ' → ' + fmt(evento.dataFine) : '');
+  document.getElementById('infoLuogo').textContent = evento.luogo || '—';
+  document.getElementById('infoCrediti').textContent = (evento.creditiTot || 0) + ' crediti';
+  document.getElementById('infoOreMin').textContent = (evento.oreMin || 0) + ' ore';
+  document.getElementById('infoPerc').textContent = (evento.percMin || 90) + '%';
+}
+
+// ─── BUILD REPORT ─────────────────────────────────────
+function buildReport() {
+  const oreMin = parseFloat(evento.oreMin) || 6;
+  const percMin = parseFloat(evento.percMin) || 90;
+  const creditiTot = parseFloat(evento.creditiTot) || 4;
+
+  report = partecipanti.map(p => {
+    const log = p.log || [];
+    let minutiTot = 0;
+    const sessions = [];
+
+    // Accoppia entrate-uscite
+    let entratePending = [];
+    log.forEach(l => {
+      if (l.tipo === 'entrata') {
+        entratePending.push(l);
+      } else if (l.tipo === 'uscita' && entratePending.length > 0) {
+        const ent = entratePending.shift();
+        const minIn = new Date(ent.ts);
+        const minOut = new Date(l.ts);
+        const diff = Math.max(0, Math.round((minOut - minIn) / 60000));
+        minutiTot += diff;
+        sessions.push({ entrata: ent.ora, uscita: l.ora, minuti: diff });
+      }
+    });
+
+    // Se c'è un'entrata senza uscita (ancora dentro) non contiamo
+    const orePresenza = Math.round(minutiTot / 60 * 10) / 10;
+    const percPresenza = oreMin > 0 ? Math.min(100, Math.round(orePresenza / oreMin * 100)) : 0;
+    const entrate = log.filter(l => l.tipo === 'entrata').length;
+    const assente = entrate === 0;
+
+    let stato, crediti;
+    if (assente) {
+      stato = 'assente'; crediti = 0;
+    } else if (percPresenza >= percMin) {
+      stato = 'ok'; crediti = creditiTot;
+    } else if (percPresenza > 0) {
+      stato = 'parz'; crediti = 0;
+    } else {
+      stato = 'no'; crediti = 0;
+    }
+
+    return {
+      id: p.id, cf: p.cf, cognome: p.cognome, nome: p.nome,
+      professione: p.professione,
+      minutiTot, orePresenza, percPresenza,
+      crediti, stato, sessions,
+      entrate, uscite: log.filter(l => l.tipo === 'uscita').length,
+      log
+    };
+  });
+}
+
+// ─── SUMMARY ──────────────────────────────────────────
+function fillSummary() {
+  const tot = report.length;
+  const ok = report.filter(r => r.stato === 'ok').length;
+  const no = report.filter(r => r.stato === 'no' || r.stato === 'parz').length;
+  const assenti = report.filter(r => r.stato === 'assente').length;
+  const oreMedia = tot > 0
+    ? Math.round(report.filter(r=>r.orePresenza>0).reduce((s,r)=>s+r.orePresenza,0) / Math.max(1,report.filter(r=>r.orePresenza>0).length) * 10) / 10
+    : 0;
+
+  document.getElementById('sTot').textContent = tot;
+  document.getElementById('sCrediti').textContent = ok;
+  document.getElementById('sNoCrediti').textContent = no;
+  document.getElementById('sAssenti').textContent = assenti;
+  document.getElementById('sOreMedia').textContent = oreMedia + 'h';
+  document.getElementById('footerIdonei').textContent = ok;
+  document.getElementById('footerTot').textContent = tot;
+}
+
+// ─── TABLE ────────────────────────────────────────────
+function sortBy(field) {
+  if (sortField === field) sortAsc = !sortAsc;
+  else { sortField = field; sortAsc = true; }
+  document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
+  currentPage = 0;
+  renderTable();
+}
+
+function renderTable() {
+  const q = (document.getElementById('searchInput').value || '').toLowerCase();
+  const f = document.getElementById('filterStato').value;
+
+  let filtered = report.filter(r => {
+    const matchQ = !q || r.cognome.toLowerCase().includes(q) || r.nome.toLowerCase().includes(q) || (r.cf||'').toLowerCase().includes(q);
+    const matchF = !f || r.stato === f;
+    return matchQ && matchF;
+  });
+
+  filtered.sort((a, b) => {
+    let av = a[sortField], bv = b[sortField];
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    return sortAsc ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1);
+  });
+
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / PER_PAGE);
+  if (currentPage >= totalPages) currentPage = Math.max(0, totalPages - 1);
+  const slice = filtered.slice(currentPage * PER_PAGE, (currentPage + 1) * PER_PAGE);
+
+  document.getElementById('tableBody').innerHTML = slice.map(r => {
+    const pillClass = r.stato === 'ok' ? 'pill-ok' : r.stato === 'parz' ? 'pill-parz' : r.stato === 'assente' ? 'pill-assente' : 'pill-no';
+    const pillLabel = r.stato === 'ok' ? '✓ Idoneo' : r.stato === 'parz' ? '⚠ Parziale' : r.stato === 'assente' ? '— Assente' : '✗ Non idoneo';
+    const barClass = r.stato === 'ok' ? 'fill-ok' : r.stato === 'parz' ? 'fill-parz' : r.stato === 'assente' ? 'fill-zero' : 'fill-no';
+    const oreStr = r.orePresenza > 0 ? r.orePresenza + 'h' : '—';
+    const percStr = r.percPresenza > 0 ? r.percPresenza + '%' : '—';
+    const creditiStr = r.crediti > 0 ? `<span style="font-weight:600;color:var(--success)">${r.crediti}</span>` : '—';
+
+    const logPills = r.sessions.map(s =>
+      `<span class="log-pill log-in">▶ ${s.entrata}</span><span class="log-pill log-out">◀ ${s.uscita}</span><span class="log-pill" style="background:var(--surface2);color:var(--text3)">${s.minuti}min</span>`
+    ).join(' ');
+
+    return `<tr onclick="toggleDetail('${r.id}')" style="cursor:pointer">
+      <td><strong>${escHtml(r.cognome)}</strong></td>
+      <td>${escHtml(r.nome)}</td>
+      <td class="mono">${escHtml(r.cf||'—')}</td>
+      <td style="font-size:12px;color:var(--text2)">${escHtml(r.professione||'—')}</td>
+      <td><strong>${oreStr}</strong></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="presence-bar"><div class="presence-fill ${barClass}" style="width:${r.percPresenza}%"></div></div>
+          <span style="font-size:11px;color:var(--text2);min-width:32px">${percStr}</span>
+        </div>
+      </td>
+      <td>${creditiStr}</td>
+      <td><span class="pill ${pillClass}">${pillLabel}</span></td>
+      <td style="color:var(--text3);font-size:12px">▾</td>
+    </tr>
+    <tr class="detail-row" id="detail_${r.id}">
+      <td colspan="9">
+        <div class="detail-inner">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:6px">Sessioni registrate: <strong>${r.sessions.length}</strong> · Entrate: <strong>${r.entrate}</strong> · Uscite: <strong>${r.uscite}</strong></div>
+          <div class="detail-log">${logPills || '<span style="font-size:12px;color:var(--text3)">Nessuna sessione registrata</span>'}</div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Pagination
+  const pag = document.getElementById('pagination');
+  document.getElementById('pageInfo').textContent = `${total} partecipanti · pagina ${currentPage+1} di ${Math.max(1,totalPages)}`;
+  const btns = document.getElementById('pageBtns');
+  btns.innerHTML = '';
+  if (totalPages > 1) {
+    const add = (label, pg, cls='') => {
+      const b = document.createElement('button');
+      b.className = 'page-btn' + (cls ? ' '+cls : '');
+      b.textContent = label;
+      b.onclick = e => { e.stopPropagation(); currentPage = pg; renderTable(); };
+      btns.appendChild(b);
+    };
+    if (currentPage > 0) add('‹', currentPage-1);
+    for (let i = Math.max(0,currentPage-2); i < Math.min(totalPages,currentPage+3); i++) add(i+1, i, i===currentPage?'active':'');
+    if (currentPage < totalPages-1) add('›', currentPage+1);
+  }
+}
+
+function toggleDetail(id) {
+  const row = document.getElementById('detail_' + id);
+  if (row) row.classList.toggle('open');
+}
+
+// ─── CHARTS ───────────────────────────────────────────
+function renderCharts() {
+  // Distribuzione presenze
+  const buckets = [
+    { label: '0% (assente)', count: report.filter(r=>r.percPresenza===0).length, color:'#9B948C' },
+    { label: '1–49%', count: report.filter(r=>r.percPresenza>0&&r.percPresenza<50).length, color:'#C13B2A' },
+    { label: '50–79%', count: report.filter(r=>r.percPresenza>=50&&r.percPresenza<80).length, color:'#B07A10' },
+    { label: '80–89%', count: report.filter(r=>r.percPresenza>=80&&r.percPresenza<90).length, color:'#E0903A' },
+    { label: '≥90% (idoneo)', count: report.filter(r=>r.percPresenza>=90).length, color:'#1A7A4A' },
+  ];
+  const maxB = Math.max(...buckets.map(b=>b.count), 1);
+  document.getElementById('chartPresenze').innerHTML = buckets.map(b => `
+    <div class="chart-row">
+      <div class="chart-label">${b.label}</div>
+      <div class="chart-bar-bg">
+        <div class="chart-bar-fill" style="width:${Math.round(b.count/maxB*100)}%;background:${b.color}">
+          ${b.count > 0 ? '' : ''}
+        </div>
+      </div>
+      <div class="chart-val">${b.count} pers.</div>
+    </div>`).join('');
+
+  // Professioni
+  const profMap = {};
+  report.forEach(r => { const k = r.professione || 'N/D'; profMap[k] = (profMap[k]||0)+1; });
+  const profs = Object.entries(profMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxP = Math.max(...profs.map(p=>p[1]), 1);
+  const colors = ['#2B4EFF','#1A7A4A','#B07A10','#C13B2A','#5A6080','#0F6E56','#854F0B','#534AB7'];
+  document.getElementById('chartProfessioni').innerHTML = profs.map(([prof,cnt],i) => `
+    <div class="chart-row">
+      <div class="chart-label">${prof}</div>
+      <div class="chart-bar-bg">
+        <div class="chart-bar-fill" style="width:${Math.round(cnt/maxP*100)}%;background:${colors[i%colors.length]}"></div>
+      </div>
+      <div class="chart-val">${cnt} pers.</div>
+    </div>`).join('');
+
+  // Timeline entrate/uscite
+  const allLogs = [];
+  report.forEach(r => (r.log||[]).forEach(l => allLogs.push(l)));
+  allLogs.sort((a,b) => new Date(a.ts)-new Date(b.ts));
+
+  if (allLogs.length === 0) {
+    document.getElementById('chartTimeline').innerHTML = '<div style="font-size:13px;color:var(--text3);padding:12px">Nessun log disponibile</div>';
+    return;
+  }
+
+  // Raggruppa per fascia oraria (30 min)
+  const fasceMap = {};
+  allLogs.forEach(l => {
+    const d = new Date(l.ts);
+    const h = d.getHours();
+    const m = d.getMinutes() < 30 ? '00' : '30';
+    const key = `${String(h).padStart(2,'0')}:${m}`;
+    if (!fasceMap[key]) fasceMap[key] = { in:0, out:0 };
+    fasceMap[key][l.tipo === 'entrata' ? 'in' : 'out']++;
+  });
+  const fasce = Object.entries(fasceMap).sort((a,b)=>a[0].localeCompare(b[0]));
+  const maxF = Math.max(...fasce.map(([,v])=>v.in+v.out), 1);
+
+  document.getElementById('chartTimeline').innerHTML = `
+    <div style="display:flex;gap:4px;align-items:flex-end;height:100px;padding:0 4px">
+      ${fasce.map(([ora,v]) => `
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0">
+          <div style="width:100%;display:flex;flex-direction:column;gap:1px;align-items:center">
+            <div style="width:80%;background:var(--success);border-radius:2px 2px 0 0;height:${Math.round(v.in/maxF*60)}px" title="Entrate: ${v.in}"></div>
+            <div style="width:80%;background:var(--danger);border-radius:0 0 2px 2px;height:${Math.round(v.out/maxF*40)}px" title="Uscite: ${v.out}"></div>
+          </div>
+          <div style="font-size:9px;color:var(--text3);writing-mode:vertical-rl;transform:rotate(180deg);margin-top:2px">${ora}</div>
+        </div>`).join('')}
+    </div>
+    <div style="display:flex;gap:16px;margin-top:10px;font-size:11px;color:var(--text2)">
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--success);margin-right:4px;vertical-align:middle"></span>Entrate</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--danger);margin-right:4px;vertical-align:middle"></span>Uscite</span>
+    </div>`;
+}
+
+// ─── TABS ─────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['report','analisi','export'][i] === tab);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+}
+
+// ─── EXPORT EXCEL ─────────────────────────────────────
+function exportExcel(tipo) {
+  const wb = XLSX.utils.book_new();
+  const fmt = d => d ? new Date(d).toLocaleDateString('it-IT') : '—';
+
+  if (tipo === 'completo' || tipo === 'idonei') {
+    const rows = tipo === 'idonei' ? report.filter(r => r.stato === 'ok') : report;
+    const data = [
+      ['REPORT PRESENZE ECM'],
+      ['Evento:', evento.nome || ''],
+      ['Data:', fmt(evento.data)],
+      ['Luogo:', evento.luogo || ''],
+      ['Crediti ECM:', evento.creditiTot || ''],
+      ['Ore minime:', evento.oreMin || ''],
+      ['% presenza minima:', (evento.percMin || 90) + '%'],
+      [],
+      ['Codice Fiscale','Cognome','Nome','Professione','Ore presenza','% presenza','Crediti ECM','Stato','N. sessioni']
+    ];
+    rows.forEach(r => data.push([
+      r.cf || '', r.cognome, r.nome, r.professione || '',
+      r.orePresenza, r.percPresenza + '%',
+      r.crediti,
+      r.stato === 'ok' ? 'IDONEO' : r.stato === 'parz' ? 'PARZIALE' : r.stato === 'assente' ? 'ASSENTE' : 'NON IDONEO',
+      r.sessions.length
+    ]));
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    ws['!cols'] = [{wch:18},{wch:18},{wch:18},{wch:22},{wch:12},{wch:12},{wch:12},{wch:14},{wch:12}];
+    // Style header rows (best effort with xlsx)
+    XLSX.utils.book_append_sheet(wb, ws, tipo === 'idonei' ? 'Idonei ECM' : 'Report completo');
+
+    // Foglio riepilogo
+    const ok = report.filter(r=>r.stato==='ok').length;
+    const riepilogo = [
+      ['RIEPILOGO'],[''],
+      ['Totale iscritti', report.length],
+      ['Idonei ECM', ok],
+      ['Non idonei / parziale', report.filter(r=>r.stato==='no'||r.stato==='parz').length],
+      ['Assenti', report.filter(r=>r.stato==='assente').length],
+      ['Ore medie di presenza', report.filter(r=>r.orePresenza>0).reduce((s,r)=>s+r.orePresenza,0) / Math.max(1,report.filter(r=>r.orePresenza>0).length)],
+    ];
+    const ws2 = XLSX.utils.aoa_to_sheet(riepilogo);
+    XLSX.utils.book_append_sheet(wb, ws2, 'Riepilogo');
+
+  } else if (tipo === 'log') {
+    const logData = [['Codice Fiscale','Cognome','Nome','Tipo','Ora','Timestamp']];
+    report.forEach(r => {
+      (r.log||[]).forEach(l => logData.push([
+        r.cf||'', r.cognome, r.nome,
+        l.tipo === 'entrata' ? 'ENTRATA' : 'USCITA',
+        l.ora, l.ts
+      ]));
+    });
+    logData.sort((a,b) => a[5].localeCompare(b[5]));
+    const ws = XLSX.utils.aoa_to_sheet(logData);
+    ws['!cols'] = [{wch:18},{wch:18},{wch:18},{wch:10},{wch:10},{wch:22}];
+    XLSX.utils.book_append_sheet(wb, ws, 'Log presenze');
+  }
+
+  const nomefile = `ECM_${(evento.nome||'evento').replace(/\s+/g,'_')}_${tipo}_${new Date().toISOString().slice(0,10)}.xlsx`;
+  XLSX.writeFile(wb, nomefile);
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

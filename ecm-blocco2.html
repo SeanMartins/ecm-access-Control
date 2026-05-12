@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ECM — Generazione Badge</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --bg:#F5F3EE;
+  --surface:#FFFFFF;
+  --surface2:#F0EDE6;
+  --border:#E0DAD0;
+  --border2:#C8C0B4;
+  --text:#1A1714;
+  --text2:#6B6560;
+  --text3:#9B948C;
+  --accent:#2B4EFF;
+  --accent-light:#EEF1FF;
+  --accent2:#FF6B35;
+  --success:#1A7A4A;
+  --success-light:#E8F5EE;
+  --danger:#C13B2A;
+  --danger-light:#FDEEE9;
+  --warn:#B07A10;
+  --warn-light:#FDF5E0;
+  --radius:10px;
+  --radius-lg:16px;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 4px 16px rgba(0,0,0,0.06);
+}
+
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
+
+header{background:var(--text);color:white;padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{font-size:15px;font-weight:600;letter-spacing:0.04em;display:flex;align-items:center;gap:10px}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent2);display:inline-block}
+.nav-pills{display:flex;gap:4px}
+.nav-pill{padding:5px 14px;border-radius:20px;font-size:13px;font-weight:500;color:rgba(255,255,255,0.45);cursor:default}
+.nav-pill.active{background:var(--accent);color:white}
+.nav-pill.done{color:rgba(255,255,255,0.7)}
+
+main{max-width:960px;margin:0 auto;padding:40px 24px 100px}
+.page-title{font-size:28px;font-weight:600;letter-spacing:-0.02em;margin-bottom:6px}
+.page-sub{color:var(--text2);font-size:15px;margin-bottom:36px}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:20px;box-shadow:var(--shadow)}
+.card-title{font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.step-badge{width:22px;height:22px;border-radius:50%;background:var(--text);color:white;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.18s;border:none;text-decoration:none}
+.btn-primary{background:var(--accent);color:white}
+.btn-primary:hover{background:#1a3ce0;transform:translateY(-1px)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--border)}
+.btn-success{background:var(--success);color:white}
+.btn-success:hover{background:#145e38}
+.btn-accent2{background:var(--accent2);color:white}
+.btn-accent2:hover{background:#e55a24}
+.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none!important}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center}
+.stat-num{font-size:26px;font-weight:600;letter-spacing:-0.02em}
+.stat-label{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* BADGE SETTINGS */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+label{font-size:12px;font-weight:600;letter-spacing:0.04em;color:var(--text2);text-transform:uppercase}
+input[type=text],input[type=color],select{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color 0.2s,box-shadow 0.2s;width:100%}
+input[type=text]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(43,78,255,0.1);background:white}
+input[type=color]{padding:4px 8px;height:42px;cursor:pointer}
+
+/* PREVIEW AREA */
+.preview-container{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+.preview-frame{flex:0 0 auto}
+.preview-actions{flex:1;min-width:220px;display:flex;flex-direction:column;gap:12px}
+.preview-hint{font-size:13px;color:var(--text2);line-height:1.5}
+
+/* BADGE */
+.badge-card{
+  width:340px;
+  background:white;
+  border-radius:12px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.12);
+  overflow:hidden;
+  position:relative;
+  font-family:'DM Sans',sans-serif;
+  border:1px solid var(--border);
+}
+.badge-header{
+  padding:16px 20px 12px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  border-bottom:1px solid var(--border);
+}
+.badge-logo{max-height:44px;max-width:110px;object-fit:contain}
+.badge-logo-placeholder{
+  height:44px;width:80px;
+  background:var(--surface2);
+  border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:var(--text3);
+  border:1px dashed var(--border2);
+  text-align:center;
+  line-height:1.3;
+}
+.badge-event-name{font-size:12px;font-weight:600;color:var(--text2);letter-spacing:0.02em;flex:1}
+.badge-body{padding:20px;display:flex;gap:16px;align-items:center}
+.badge-qr{flex:0 0 auto;width:100px;height:100px;display:flex;align-items:center;justify-content:center}
+.badge-qr canvas,.badge-qr img{width:100px!important;height:100px!important}
+.badge-info{flex:1}
+.badge-name{font-size:18px;font-weight:600;letter-spacing:-0.01em;line-height:1.2;margin-bottom:4px}
+.badge-surname{font-size:22px;font-weight:600;letter-spacing:-0.02em;color:var(--accent)}
+.badge-cf{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-top:6px}
+.badge-prof{font-size:11px;color:var(--text2);margin-top:3px;font-weight:500}
+.badge-id{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:8px}
+.badge-footer{
+  padding:8px 20px;
+  font-size:10px;
+  color:var(--text3);
+  border-top:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:var(--surface2);
+}
+.badge-accent-bar{height:4px;width:100%}
+
+/* GRID PREVIEW */
+.badge-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,340px);
+  gap:20px;
+  margin-top:20px;
+}
+.badge-grid-item{position:relative}
+.badge-grid-item .item-overlay{
+  position:absolute;top:8px;right:8px;
+  display:flex;gap:6px;
+  opacity:0;
+  transition:opacity 0.2s;
+}
+.badge-grid-item:hover .item-overlay{opacity:1}
+.overlay-btn{
+  background:rgba(0,0,0,0.7);color:white;border:none;
+  border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;
+  font-family:'DM Sans',sans-serif;
+}
+
+/* SEARCH + FILTERS */
+.toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.toolbar input{flex:1;min-width:200px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none}
+.toolbar input:focus{border-color:var(--accent);background:white}
+
+/* PROGRESS */
+.progress-bar-wrap{background:var(--surface2);border-radius:100px;height:8px;overflow:hidden;margin:12px 0}
+.progress-bar-fill{height:100%;background:var(--accent);border-radius:100px;transition:width 0.3s}
+
+/* ACTIONS ROW */
+.actions-row{display:flex;gap:12px;justify-content:flex-end;margin-top:28px;padding-top:20px;border-top:1px solid var(--border);flex-wrap:wrap}
+
+/* ALERT */
+.alert{padding:12px 16px;border-radius:var(--radius);font-size:13px;margin-bottom:16px;display:none;align-items:flex-start;gap:10px}
+.alert-warn{background:var(--warn-light);color:var(--warn);border:1px solid rgba(176,122,16,0.25)}
+.alert-error{background:var(--danger-light);color:var(--danger);border:1px solid rgba(193,59,42,0.25)}
+.alert-success{background:var(--success-light);color:var(--success);border:1px solid rgba(26,122,74,0.25)}
+.alert.show{display:flex}
+
+/* CHIP */
+.chip{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.chip-blue{background:var(--accent-light);color:var(--accent)}
+.chip-green{background:var(--success-light);color:var(--success)}
+
+/* FOOTER */
+footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;z-index:50}
+.footer-info{font-size:13px;color:var(--text3)}
+.footer-info strong{color:var(--text2)}
+
+/* SPINNER */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* PRINT STYLES */
+@media print {
+  header,footer,.card:not(.print-card),.actions-row,.toolbar,.preview-actions,.btn,.alert,
+  .stats-row,.card-title,.settings-grid,.preview-hint,
+  #genBtn,#printBtn,.page-title,.page-sub { display:none!important }
+  body{background:white!important;margin:0;padding:0}
+  main{max-width:100%;padding:0;margin:0}
+  .print-card{box-shadow:none!important;border:none!important;padding:0!important;margin:0!important}
+  .badge-grid{
+    grid-template-columns:repeat(2,1fr)!important;
+    gap:8px!important;
+    padding:8px!important;
+  }
+  .badge-card{
+    break-inside:avoid;
+    box-shadow:0 0 0 1px #e0e0e0!important;
+    page-break-inside:avoid;
+  }
+  .badge-grid-item .item-overlay{display:none!important}
+}
+
+@media(max-width:640px){
+  .stats-row{grid-template-columns:1fr 1fr}
+  .settings-grid{grid-template-columns:1fr}
+  .badge-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span class="logo-dot"></span>ECM Access Control</div>
+  <div class="nav-pills">
+    <div class="nav-pill done">① Setup</div>
+    <div class="nav-pill active">② Badge</div>
+    <div class="nav-pill">③ Accesso</div>
+    <div class="nav-pill">④ Report</div>
+  </div>
+</header>
+
+<main>
+  <div class="page-title">Generazione badge</div>
+  <div class="page-sub">Crea e stampa i badge con QR code per tutti i partecipanti</div>
+
+  <div class="alert alert-error show" id="alertNoData">
+    ⚠️ Nessun dato trovato. <a href="ecm-blocco1.html" style="color:inherit;font-weight:600">Torna al Blocco 1</a> per configurare l'evento e importare i partecipanti.
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row" id="statsRow" style="display:none">
+    <div class="stat-box"><div class="stat-num" id="statTot">0</div><div class="stat-label">Partecipanti</div></div>
+    <div class="stat-box"><div class="stat-num" id="statGen" style="color:var(--accent)">0</div><div class="stat-label">Badge generati</div></div>
+    <div class="stat-box"><div class="stat-num" id="statStamp" style="color:var(--success)">0</div><div class="stat-label">Pronti stampa</div></div>
+    <div class="stat-box">
+      <div class="stat-num" id="statEvento" style="font-size:13px;color:var(--text2);line-height:1.3;margin-top:4px">—</div>
+      <div class="stat-label">Evento</div>
+    </div>
+  </div>
+
+  <!-- IMPOSTAZIONI BADGE -->
+  <div class="card" id="settingsCard" style="display:none">
+    <div class="card-title"><span class="step-badge" style="background:var(--accent)">1</span>Impostazioni badge</div>
+    <div class="settings-grid">
+      <div class="form-group">
+        <label>Colore principale badge</label>
+        <input type="color" id="badgeColor" value="#2B4EFF" onchange="updatePreview()">
+      </div>
+      <div class="form-group">
+        <label>Dimensione testo nome</label>
+        <select id="badgeSize" onchange="updatePreview()">
+          <option value="normal">Normale</option>
+          <option value="large">Grande</option>
+          <option value="small">Piccolo</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Mostra codice fiscale</label>
+        <select id="showCF" onchange="updatePreview()">
+          <option value="yes">Sì</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Mostra professione</label>
+        <select id="showProf" onchange="updatePreview()">
+          <option value="yes">Sì</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- PREVIEW -->
+    <div style="margin-top:24px">
+      <div class="card-title" style="margin-bottom:16px"><span class="step-badge" style="background:var(--accent2)">2</span>Anteprima badge</div>
+      <div class="preview-container">
+        <div class="preview-frame">
+          <div class="badge-card" id="previewBadge">
+            <div class="badge-accent-bar" id="prevBar"></div>
+            <div class="badge-header" id="prevHeader">
+              <div class="badge-logo-placeholder" id="prevLogoPlaceholder">Logo<br>evento</div>
+              <img class="badge-logo" id="prevLogo" src="" alt="logo" style="display:none">
+              <div class="badge-event-name" id="prevEventName">Nome evento</div>
+            </div>
+            <div class="badge-body">
+              <div class="badge-qr" id="prevQR"></div>
+              <div class="badge-info">
+                <div class="badge-name" id="prevNome">Mario</div>
+                <div class="badge-surname" id="prevCognome">ROSSI</div>
+                <div class="badge-prof" id="prevProf">Medico Chirurgo</div>
+                <div class="badge-cf" id="prevCF">RSSMRA80A01H501Z</div>
+                <div class="badge-id">ID: P0001</div>
+              </div>
+            </div>
+            <div class="badge-footer">
+              <span id="prevData">—</span>
+              <span id="prevLuogo" style="text-align:right;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</span>
+            </div>
+          </div>
+        </div>
+        <div class="preview-actions">
+          <div class="preview-hint">Il badge include il <strong>QR code univoco</strong> che verrà scannerizzato all'ingresso e all'uscita dell'evento per registrare la presenza.</div>
+          <button class="btn btn-primary" id="genBtn" onclick="generateAll()">
+            Genera tutti i badge
+          </button>
+          <button class="btn btn-secondary" id="printBtn" onclick="printAll()" disabled>
+            🖨️ Stampa / Salva PDF
+          </button>
+          <div style="font-size:12px;color:var(--text3)">La stampa apre la finestra di sistema. Seleziona "Salva come PDF" per esportare.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BADGE GRID -->
+  <div class="card print-card" id="badgeGridCard" style="display:none">
+    <div class="card-title" id="badgeGridTitle" style="margin-bottom:16px">
+      <span class="step-badge" style="background:var(--success)">3</span>
+      Badge generati
+      <span id="genCount" class="chip chip-blue" style="margin-left:8px">0</span>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" id="searchInput" placeholder="Cerca per nome, cognome o CF..." oninput="filterBadges()">
+      <button class="btn btn-secondary" onclick="document.getElementById('searchInput').value='';filterBadges()">✕</button>
+    </div>
+
+    <div id="progressWrap" style="display:none">
+      <div style="font-size:13px;color:var(--text2)" id="progressLabel">Generazione in corso...</div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+    </div>
+
+    <div class="badge-grid" id="badgeGrid"></div>
+  </div>
+
+  <div class="actions-row" id="actionsRow" style="display:none">
+    <a href="ecm-blocco1.html" class="btn btn-secondary">← Torna al setup</a>
+    <button class="btn btn-success" onclick="goToBlock3()">Vai al controllo accessi →</button>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-info">Evento: <strong id="footerEvento">—</strong></div>
+  <div class="footer-info">Badge generati: <strong id="footerGen">0</strong> / <strong id="footerTot">0</strong></div>
+</footer>
+
+<script>
+// ─── STATE ────────────────────────────────────────────
+let evento = null;
+let partecipanti = [];
+let badgesGenerated = false;
+let badgeSettings = { color: '#2B4EFF', size: 'normal', showCF: true, showProf: true };
+let previewQRDone = false;
+
+// ─── LOAD ─────────────────────────────────────────────
+window.onload = () => {
+  const saved = localStorage.getItem('ecm_evento');
+  if (!saved) { return; }
+  evento = JSON.parse(saved);
+  partecipanti = evento.partecipanti || [];
+  if (partecipanti.length === 0) return;
+
+  document.getElementById('alertNoData').style.display = 'none';
+  document.getElementById('statsRow').style.display = 'grid';
+  document.getElementById('settingsCard').style.display = 'block';
+  document.getElementById('actionsRow').style.display = 'flex';
+
+  document.getElementById('statTot').textContent = partecipanti.length;
+  document.getElementById('statEvento').textContent = evento.nome || '—';
+  document.getElementById('footerEvento').textContent = evento.nome || '—';
+  document.getElementById('footerTot').textContent = partecipanti.length;
+
+  // Se QR già generati
+  const hasQR = partecipanti.some(p => p.qr);
+  if (hasQR) {
+    const n = partecipanti.filter(p => p.qr).length;
+    document.getElementById('statGen').textContent = n;
+    document.getElementById('statStamp').textContent = n;
+    document.getElementById('footerGen').textContent = n;
+    document.getElementById('genCount').textContent = n;
+    badgesGenerated = true;
+    document.getElementById('printBtn').disabled = false;
+    document.getElementById('badgeGridCard').style.display = 'block';
+    renderBadgeGrid(partecipanti);
+  }
+
+  setupPreview();
+  updatePreview();
+};
+
+// ─── PREVIEW ──────────────────────────────────────────
+function setupPreview() {
+  const ev = evento;
+  const fmt = d => d ? new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}) : '—';
+  document.getElementById('prevEventName').textContent = ev.nome || 'Nome evento';
+  document.getElementById('prevData').textContent = fmt(ev.data);
+  document.getElementById('prevLuogo').textContent = ev.luogo || '—';
+
+  if (ev.logo) {
+    document.getElementById('prevLogo').src = ev.logo;
+    document.getElementById('prevLogo').style.display = 'block';
+    document.getElementById('prevLogoPlaceholder').style.display = 'none';
+  }
+
+  // QR preview dummy
+  if (!previewQRDone) {
+    previewQRDone = true;
+    const el = document.getElementById('prevQR');
+    el.innerHTML = '';
+    new QRCode(el, { text: 'ECM-PREVIEW-P0001', width: 100, height: 100, correctLevel: QRCode.CorrectLevel.M });
+  }
+}
+
+function updatePreview() {
+  const color = document.getElementById('badgeColor').value;
+  const size = document.getElementById('badgeSize').value;
+  const showCF = document.getElementById('showCF').value === 'yes';
+  const showProf = document.getElementById('showProf').value === 'yes';
+  badgeSettings = { color, size, showCF, showProf };
+
+  document.getElementById('prevBar').style.background = color;
+  document.getElementById('prevCognome').style.color = color;
+  document.getElementById('prevCF').style.display = showCF ? 'block' : 'none';
+  document.getElementById('prevProf').style.display = showProf ? 'block' : 'none';
+
+  const nameEl = document.getElementById('prevNome');
+  const surnameEl = document.getElementById('prevCognome');
+  if (size === 'large') { nameEl.style.fontSize = '22px'; surnameEl.style.fontSize = '26px'; }
+  else if (size === 'small') { nameEl.style.fontSize = '14px'; surnameEl.style.fontSize = '18px'; }
+  else { nameEl.style.fontSize = '18px'; surnameEl.style.fontSize = '22px'; }
+}
+
+// ─── GENERATE ALL ─────────────────────────────────────
+async function generateAll() {
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Generazione...';
+
+  document.getElementById('badgeGridCard').style.display = 'block';
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('badgeGrid').innerHTML = '';
+
+  const total = partecipanti.length;
+  let done = 0;
+
+  // genera QR in batch
+  for (let i = 0; i < total; i++) {
+    const p = partecipanti[i];
+    const qrText = `ECM|${p.id}|${p.cf}|${p.cognome}|${p.nome}`;
+    p.qr = await generateQRDataURL(qrText);
+    done++;
+    document.getElementById('progressBar').style.width = Math.round(done / total * 100) + '%';
+    document.getElementById('progressLabel').textContent = `Generazione badge: ${done} / ${total}`;
+    if (i % 10 === 0) await sleep(0); // yield UI
+  }
+
+  // salva QR in localStorage
+  evento.partecipanti = partecipanti;
+  localStorage.setItem('ecm_evento', JSON.stringify(evento));
+
+  document.getElementById('progressWrap').style.display = 'none';
+  renderBadgeGrid(partecipanti);
+
+  const n = partecipanti.length;
+  document.getElementById('statGen').textContent = n;
+  document.getElementById('statStamp').textContent = n;
+  document.getElementById('genCount').textContent = n;
+  document.getElementById('footerGen').textContent = n;
+  document.getElementById('printBtn').disabled = false;
+  badgesGenerated = true;
+
+  btn.innerHTML = '✓ Badge rigenerati';
+  btn.style.background = 'var(--success)';
+  setTimeout(() => { btn.innerHTML = 'Rigenera badge'; btn.style.background = ''; btn.disabled = false; }, 2000);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function generateQRDataURL(text) {
+  return new Promise(resolve => {
+    const div = document.createElement('div');
+    div.style.cssText = 'position:absolute;left:-9999px;top:-9999px';
+    document.body.appendChild(div);
+    const qr = new QRCode(div, { text, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
+    setTimeout(() => {
+      const img = div.querySelector('img');
+      const canvas = div.querySelector('canvas');
+      const dataUrl = canvas ? canvas.toDataURL('image/png') : (img ? img.src : '');
+      document.body.removeChild(div);
+      resolve(dataUrl);
+    }, 50);
+  });
+}
+
+// ─── RENDER GRID ──────────────────────────────────────
+function renderBadgeGrid(list) {
+  const grid = document.getElementById('badgeGrid');
+  const color = badgeSettings.color;
+  const showCF = badgeSettings.showCF;
+  const showProf = badgeSettings.showProf;
+  const size = badgeSettings.size;
+  const ev = evento;
+  const fmt = d => d ? new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}) : '—';
+
+  const nameSizes = { large: ['22px','26px'], normal: ['18px','22px'], small: ['14px','18px'] };
+  const [ns, ss] = nameSizes[size] || nameSizes.normal;
+
+  const logoHTML = ev.logo
+    ? `<img class="badge-logo" src="${ev.logo}" alt="logo" style="max-height:44px;max-width:110px;object-fit:contain">`
+    : `<div class="badge-logo-placeholder">Logo<br>evento</div>`;
+
+  grid.innerHTML = list.map(p => `
+    <div class="badge-grid-item" id="badge_${p.id}">
+      <div class="badge-card">
+        <div class="badge-accent-bar" style="background:${color}"></div>
+        <div class="badge-header">
+          ${logoHTML}
+          <div class="badge-event-name">${escHtml(ev.nome || '')}</div>
+        </div>
+        <div class="badge-body">
+          <div class="badge-qr">
+            <img src="${p.qr || ''}" width="100" height="100" alt="QR ${p.id}">
+          </div>
+          <div class="badge-info">
+            <div class="badge-name" style="font-size:${ns}">${escHtml(p.nome)}</div>
+            <div class="badge-surname" style="font-size:${ss};color:${color}">${escHtml(p.cognome)}</div>
+            ${showProf ? `<div class="badge-prof">${escHtml(p.professione || '')}</div>` : ''}
+            ${showCF ? `<div class="badge-cf">${escHtml(p.cf || '')}</div>` : ''}
+            <div class="badge-id">ID: ${p.id}</div>
+          </div>
+        </div>
+        <div class="badge-footer">
+          <span>${fmt(ev.data)}</span>
+          <span style="text-align:right;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(ev.luogo || '')}</span>
+        </div>
+      </div>
+      <div class="item-overlay">
+        <button class="overlay-btn" onclick="printSingle('${p.id}')">🖨️ Stampa</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterBadges() {
+  const q = (document.getElementById('searchInput').value || '').toLowerCase();
+  const filtered = q
+    ? partecipanti.filter(p =>
+        p.nome.toLowerCase().includes(q) ||
+        p.cognome.toLowerCase().includes(q) ||
+        (p.cf || '').toLowerCase().includes(q))
+    : partecipanti;
+  renderBadgeGrid(filtered);
+}
+
+// ─── PRINT ────────────────────────────────────────────
+function printAll() {
+  window.print();
+}
+
+function printSingle(id) {
+  const p = partecipanti.find(x => x.id === id);
+  if (!p) return;
+  const color = badgeSettings.color;
+  const ev = evento;
+  const fmt = d => d ? new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}) : '—';
+  const logoHTML = ev.logo ? `<img src="${ev.logo}" style="max-height:44px;max-width:110px;object-fit:contain">` : '';
+
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+    body{margin:0;padding:20px;font-family:'DM Sans',sans-serif;background:white}
+    .badge-card{width:340px;background:white;border-radius:12px;border:1px solid #e0dad0;overflow:hidden;font-family:'DM Sans',sans-serif}
+    .badge-accent-bar{height:4px;background:${color}}
+    .badge-header{padding:16px 20px 12px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #e0dad0}
+    .badge-body{padding:20px;display:flex;gap:16px;align-items:center}
+    .badge-footer{padding:8px 20px;font-size:10px;color:#9B948C;border-top:1px solid #e0dad0;display:flex;justify-content:space-between;background:#F0EDE6}
+    .badge-event-name{font-size:12px;font-weight:600;color:#6B6560;flex:1}
+    @media print{body{padding:0}}
+  </style></head><body>
+  <div class="badge-card">
+    <div class="badge-accent-bar"></div>
+    <div class="badge-header">${logoHTML}<div class="badge-event-name">${escHtml(ev.nome||'')}</div></div>
+    <div class="badge-body">
+      <div><img src="${p.qr}" width="100" height="100" alt="QR"></div>
+      <div>
+        <div style="font-size:18px;font-weight:600">${escHtml(p.nome)}</div>
+        <div style="font-size:22px;font-weight:600;color:${color}">${escHtml(p.cognome)}</div>
+        <div style="font-size:11px;color:#6B6560;margin-top:3px">${escHtml(p.professione||'')}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:#9B948C;margin-top:6px">${escHtml(p.cf||'')}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:#9B948C;margin-top:8px">ID: ${p.id}</div>
+      </div>
+    </div>
+    <div class="badge-footer"><span>${fmt(ev.data)}</span><span>${escHtml(ev.luogo||'')}</span></div>
+  </div>
+  <script>window.onload=()=>{window.print();}<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+function goToBlock3() {
+  if (!badgesGenerated) {
+    if (!confirm('I badge non sono ancora stati generati. Vuoi procedere comunque?')) return;
+  }
+  window.location.href = 'ecm-blocco3.html';
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

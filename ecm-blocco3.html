@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ECM — Controllo Accessi</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0F1117;
+  --surface:#1A1D27;
+  --surface2:#22263A;
+  --surface3:#2C3150;
+  --border:#2E3348;
+  --border2:#3D4468;
+  --text:#F0F2FF;
+  --text2:#9BA3C8;
+  --text3:#5A6080;
+  --accent:#4D6EFF;
+  --accent-light:rgba(77,110,255,0.15);
+  --accent2:#FF6B35;
+  --success:#22C97A;
+  --success-light:rgba(34,201,122,0.12);
+  --danger:#FF4D4D;
+  --danger-light:rgba(255,77,77,0.12);
+  --warn:#FFB547;
+  --warn-light:rgba(255,181,71,0.12);
+  --radius:10px;
+  --radius-lg:16px;
+}
+
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
+
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{font-size:15px;font-weight:600;letter-spacing:0.04em;display:flex;align-items:center;gap:10px;color:var(--text)}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent2)}
+.nav-pills{display:flex;gap:4px}
+.nav-pill{padding:5px 14px;border-radius:20px;font-size:13px;font-weight:500;color:var(--text3)}
+.nav-pill.active{background:var(--accent);color:white}
+.nav-pill.done{color:var(--text2)}
+
+main{max-width:1100px;margin:0 auto;padding:28px 20px 100px}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:420px 1fr;gap:20px;align-items:start}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;margin-bottom:16px}
+.card-title{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+
+/* SCANNER */
+.scanner-wrap{position:relative;border-radius:var(--radius);overflow:hidden;background:#000;aspect-ratio:1;width:100%}
+#cameraVideo{width:100%;height:100%;object-fit:cover;display:block}
+.scan-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.scan-frame{width:65%;aspect-ratio:1;position:relative}
+.scan-frame::before,.scan-frame::after{content:'';position:absolute;width:28px;height:28px;border-color:var(--accent);border-style:solid}
+.scan-frame::before{top:0;left:0;border-width:3px 0 0 3px;border-radius:4px 0 0 0}
+.scan-frame::after{top:0;right:0;border-width:3px 3px 0 0;border-radius:0 4px 0 0}
+.scan-frame-bl,.scan-frame-br{position:absolute;width:28px;height:28px;border-color:var(--accent);border-style:solid}
+.scan-frame-bl{bottom:0;left:0;border-width:0 0 3px 3px;border-radius:0 0 0 4px}
+.scan-frame-br{bottom:0;right:0;border-width:0 3px 3px 0;border-radius:0 0 4px 0}
+.scan-line{position:absolute;top:0;left:5%;right:5%;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:scanAnim 2s ease-in-out infinite;border-radius:2px}
+@keyframes scanAnim{0%,100%{top:5%}50%{top:95%}}
+.scanner-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--surface2)}
+.cam-icon{font-size:48px;opacity:0.4}
+.scanner-mode-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.18s;border:none;text-decoration:none;justify-content:center}
+.btn-primary{background:var(--accent);color:white}
+.btn-primary:hover{background:#3a58e0}
+.btn-success{background:var(--success);color:#0a1a0f}
+.btn-success:hover{background:#19a864}
+.btn-danger{background:var(--danger);color:white}
+.btn-danger:hover{background:#e03d3d}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-outline:hover{background:var(--surface2);color:var(--text)}
+.btn-warn{background:var(--warn);color:#1a0f00}
+.btn:disabled{opacity:0.35;cursor:not-allowed}
+.btn-lg{padding:13px 24px;font-size:15px}
+.btn-sm{padding:7px 14px;font-size:12px}
+
+/* MODE TOGGLE */
+.mode-toggle{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
+.mode-btn{padding:10px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;color:var(--text3);border:none;background:transparent;font-family:'DM Sans',sans-serif}
+.mode-btn.active-in{background:var(--success-light);color:var(--success)}
+.mode-btn.active-out{background:var(--danger-light);color:var(--danger)}
+
+/* RESULT CARD */
+.result-card{border-radius:var(--radius);padding:16px;margin-top:14px;display:none;animation:slideUp 0.3s ease}
+.result-card.show{display:block}
+.result-card.ok-in{background:var(--success-light);border:1px solid rgba(34,201,122,0.3)}
+.result-card.ok-out{background:var(--danger-light);border:1px solid rgba(255,77,77,0.3)}
+.result-card.warn{background:var(--warn-light);border:1px solid rgba(255,181,71,0.3)}
+.result-card.err{background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.2)}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.result-name{font-size:20px;font-weight:600;margin-bottom:2px}
+.result-cf{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
+.result-status{font-size:13px;font-weight:500;margin-top:8px}
+.result-time{font-family:'DM Mono',monospace;font-size:12px;color:var(--text3);margin-top:4px}
+
+/* MANUAL SEARCH */
+.manual-search{margin-top:14px}
+.search-input-wrap{display:flex;gap:8px}
+.search-input-wrap input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 14px;font-family:'DM Sans',monospace;font-size:14px;color:var(--text);outline:none}
+.search-input-wrap input:focus{border-color:var(--accent)}
+.search-results{margin-top:10px;display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto}
+.search-result-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;transition:border-color 0.15s}
+.search-result-item:hover{border-color:var(--accent)}
+.sri-name{font-size:14px;font-weight:500}
+.sri-cf{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
+.sri-status{font-size:11px;font-weight:600}
+
+/* STATS BAR */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center}
+.stat-num{font-size:28px;font-weight:600;letter-spacing:-0.02em}
+.stat-label{font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:0.06em}
+.stat-num.green{color:var(--success)}
+.stat-num.red{color:var(--danger)}
+.stat-num.yellow{color:var(--warn)}
+
+/* LIVE LIST */
+.live-list{display:flex;flex-direction:column;gap:8px;max-height:460px;overflow-y:auto;padding-right:4px}
+.live-list::-webkit-scrollbar{width:4px}
+.live-list::-webkit-scrollbar-track{background:transparent}
+.live-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.live-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;transition:border-color 0.2s}
+.live-item.inside{border-left:3px solid var(--success)}
+.live-item.outside{border-left:3px solid var(--text3)}
+.live-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.live-dot.green{background:var(--success)}
+.live-dot.gray{background:var(--text3)}
+.live-info{flex:1;min-width:0}
+.live-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-detail{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
+.live-time{font-size:11px;color:var(--text3);text-align:right;white-space:nowrap}
+.live-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+.live-badge.in{background:var(--success-light);color:var(--success)}
+.live-badge.out{background:rgba(255,77,77,0.12);color:var(--danger)}
+
+/* LOG TABLE */
+.log-wrap{max-height:300px;overflow-y:auto;border-radius:var(--radius);border:1px solid var(--border)}
+.log-wrap::-webkit-scrollbar{width:4px}
+.log-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead{background:var(--surface2);position:sticky;top:0}
+th{padding:9px 12px;text-align:left;font-weight:600;color:var(--text3);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--border)}
+td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text)}
+tr:last-child td{border-bottom:none}
+.td-in{color:var(--success);font-weight:600}
+.td-out{color:var(--danger);font-weight:600}
+.mono{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
+
+/* LIVE TICKER */
+.live-ticker{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;font-size:12px;color:var(--text3);margin-bottom:14px;min-height:38px;display:flex;align-items:center;gap:8px}
+.ticker-dot{width:8px;height:8px;border-radius:50%;background:var(--success);flex-shrink:0;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* ALERT */
+.alert{padding:12px 16px;border-radius:var(--radius);font-size:13px;margin-bottom:16px}
+.alert-error{background:var(--danger-light);color:var(--danger);border:1px solid rgba(255,77,77,0.3)}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:16px}
+.tab{padding:9px 16px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;background:none;border-left:none;border-right:none;border-top:none;font-family:'DM Sans',sans-serif}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* FOOTER */
+footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;z-index:50}
+.footer-info{font-size:13px;color:var(--text3)}
+.footer-info strong{color:var(--text2)}
+.live-clock{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent)}
+
+/* CHIP */
+.chip{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.chip-green{background:var(--success-light);color:var(--success)}
+.chip-red{background:var(--danger-light);color:var(--danger)}
+.chip-gray{background:var(--surface2);color:var(--text3)}
+
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+
+@media(max-width:640px){
+  .stats-bar{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span class="logo-dot"></span>ECM Access Control</div>
+  <div class="nav-pills">
+    <div class="nav-pill done">① Setup</div>
+    <div class="nav-pill done">② Badge</div>
+    <div class="nav-pill active">③ Accesso</div>
+    <div class="nav-pill">④ Report</div>
+  </div>
+</header>
+
+<main>
+
+  <div class="alert alert-error" id="alertNoData" style="display:none">
+    ⚠️ Nessun dato trovato. <a href="ecm-blocco1.html" style="color:inherit;font-weight:600">Torna al Blocco 1</a> per configurare l'evento.
+  </div>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-box">
+      <div class="stat-num" id="sTot">0</div>
+      <div class="stat-label">Totale</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num green" id="sDentro">0</div>
+      <div class="stat-label">Dentro ora</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num yellow" id="sUsciti">0</div>
+      <div class="stat-label">Usciti</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num red" id="sAssenti">0</div>
+      <div class="stat-label">Non arrivati</div>
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <!-- COLONNA SX: SCANNER -->
+    <div>
+      <div class="card">
+        <div class="card-title">📷 Scanner QR</div>
+
+        <!-- MODO: ENTRATA / USCITA -->
+        <div class="mode-toggle">
+          <button class="mode-btn active-in" id="modeIn" onclick="setMode('in')">▶ ENTRATA</button>
+          <button class="mode-btn" id="modeOut" onclick="setMode('out')">◀ USCITA</button>
+        </div>
+
+        <!-- CAMERA -->
+        <div class="scanner-wrap" id="scannerWrap">
+          <video id="cameraVideo" autoplay playsinline muted></video>
+          <div class="scan-overlay">
+            <div class="scan-frame">
+              <div class="scan-frame-bl"></div>
+              <div class="scan-frame-br"></div>
+              <div class="scan-line" id="scanLine"></div>
+            </div>
+          </div>
+          <div class="scanner-placeholder" id="scannerPlaceholder">
+            <div class="cam-icon">📷</div>
+            <div style="font-size:14px;color:var(--text2)">Camera non attiva</div>
+            <div style="font-size:12px;color:var(--text3)">Premi Avvia per iniziare</div>
+          </div>
+        </div>
+
+        <div class="scanner-mode-btns">
+          <button class="btn btn-success" id="btnStart" onclick="startCamera()">▶ Avvia camera</button>
+          <button class="btn btn-outline" id="btnStop" onclick="stopCamera()" disabled>⏹ Ferma</button>
+        </div>
+
+        <!-- RESULT -->
+        <div class="result-card" id="resultCard">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <div class="result-name" id="resName">—</div>
+              <div class="result-cf" id="resCF">—</div>
+              <div class="result-status" id="resStatus">—</div>
+              <div class="result-time" id="resTime">—</div>
+            </div>
+            <div id="resEmoji" style="font-size:32px"></div>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- RICERCA MANUALE -->
+        <div class="card-title" style="margin-bottom:10px">🔍 Registrazione manuale</div>
+        <div class="manual-search">
+          <div class="search-input-wrap">
+            <input type="text" id="manualSearch" placeholder="Nome, cognome o CF..." oninput="searchParticipant()">
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('manualSearch').value='';document.getElementById('manualResults').innerHTML=''">✕</button>
+          </div>
+          <div class="search-results" id="manualResults"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLONNA DX: DASHBOARD -->
+    <div>
+      <!-- TICKER -->
+      <div class="live-ticker" id="liveTicker">
+        <div class="ticker-dot"></div>
+        <span id="tickerText">In attesa di scansioni...</span>
+      </div>
+
+      <!-- TABS -->
+      <div class="card" style="padding:16px">
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('presenti')">Dentro ora</button>
+          <button class="tab" onclick="switchTab('tutti')">Tutti</button>
+          <button class="tab" onclick="switchTab('log')">Log eventi</button>
+        </div>
+
+        <!-- TAB: DENTRO ORA -->
+        <div class="tab-panel active" id="tab-presenti">
+          <div class="live-list" id="listPresenti">
+            <div style="color:var(--text3);font-size:13px;padding:20px;text-align:center">Nessun partecipante registrato ancora</div>
+          </div>
+        </div>
+
+        <!-- TAB: TUTTI -->
+        <div class="tab-panel" id="tab-tutti">
+          <div style="margin-bottom:10px">
+            <input type="text" id="tuttiSearch" placeholder="Filtra..." oninput="renderTutti()"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none">
+          </div>
+          <div class="live-list" id="listTutti"></div>
+        </div>
+
+        <!-- TAB: LOG -->
+        <div class="tab-panel" id="tab-log">
+          <div class="log-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ora</th>
+                  <th>Nome</th>
+                  <th>CF</th>
+                  <th>Evento</th>
+                </tr>
+              </thead>
+              <tbody id="logBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- AZIONI -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+        <a href="ecm-blocco1.html" class="btn btn-outline btn-sm">← Setup</a>
+        <button class="btn btn-primary btn-sm" onclick="window.location.href='ecm-blocco4.html'">Report finale →</button>
+        <button class="btn btn-outline btn-sm" onclick="resetLogs()" style="margin-left:auto">🗑 Reset log</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <div class="footer-info">Evento: <strong id="footerEvento">—</strong> · Modo: <strong id="footerModo" style="color:var(--success)">ENTRATA</strong></div>
+  <div class="live-clock" id="liveClock">--:--:--</div>
+</footer>
+
+<canvas id="qrCanvas" style="display:none"></canvas>
+
+<script>
+// ─── STATE ────────────────────────────────────────────
+let evento = null;
+let partecipanti = [];
+let mode = 'in'; // 'in' | 'out'
+let stream = null;
+let scanning = false;
+let scanCooldown = false;
+let animFrame = null;
+const video = document.getElementById('cameraVideo');
+const canvas = document.getElementById('qrCanvas');
+const ctx = canvas.getContext('2d');
+
+// ─── INIT ─────────────────────────────────────────────
+window.onload = () => {
+  const saved = localStorage.getItem('ecm_evento');
+  if (!saved) { document.getElementById('alertNoData').style.display = 'block'; return; }
+  evento = JSON.parse(saved);
+  partecipanti = evento.partecipanti || [];
+  if (partecipanti.length === 0) { document.getElementById('alertNoData').style.display = 'block'; return; }
+  document.getElementById('footerEvento').textContent = evento.nome || '—';
+  updateStats();
+  renderPresenti();
+  renderTutti();
+  renderLog();
+  startClock();
+};
+
+// ─── CLOCK ────────────────────────────────────────────
+function startClock() {
+  setInterval(() => {
+    document.getElementById('liveClock').textContent = new Date().toLocaleTimeString('it-IT');
+  }, 1000);
+}
+
+// ─── MODE ─────────────────────────────────────────────
+function setMode(m) {
+  mode = m;
+  document.getElementById('modeIn').className = 'mode-btn' + (m === 'in' ? ' active-in' : '');
+  document.getElementById('modeOut').className = 'mode-btn' + (m === 'out' ? ' active-out' : '');
+  document.getElementById('footerModo').textContent = m === 'in' ? 'ENTRATA' : 'USCITA';
+  document.getElementById('footerModo').style.color = m === 'in' ? 'var(--success)' : 'var(--danger)';
+  hideResult();
+}
+
+// ─── CAMERA ───────────────────────────────────────────
+async function startCamera() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
+    video.srcObject = stream;
+    document.getElementById('scannerPlaceholder').style.display = 'none';
+    document.getElementById('scanLine').style.display = 'block';
+    document.getElementById('btnStart').disabled = true;
+    document.getElementById('btnStop').disabled = false;
+    scanning = true;
+    requestAnimationFrame(scanFrame);
+  } catch(e) {
+    alert('Impossibile accedere alla camera: ' + e.message + '\n\nUsa la ricerca manuale oppure assicurati di aprire la pagina via HTTPS.');
+  }
+}
+
+function stopCamera() {
+  scanning = false;
+  if (animFrame) cancelAnimationFrame(animFrame);
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  stream = null;
+  video.srcObject = null;
+  document.getElementById('scannerPlaceholder').style.display = 'flex';
+  document.getElementById('btnStart').disabled = false;
+  document.getElementById('btnStop').disabled = true;
+}
+
+function scanFrame() {
+  if (!scanning) return;
+  if (video.readyState === video.HAVE_ENOUGH_DATA) {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+    if (code && !scanCooldown) {
+      handleQR(code.data);
+      scanCooldown = true;
+      setTimeout(() => { scanCooldown = false; }, 2500);
+    }
+  }
+  animFrame = requestAnimationFrame(scanFrame);
+}
+
+// ─── QR HANDLER ───────────────────────────────────────
+function handleQR(raw) {
+  // Formato atteso: ECM|ID|CF|COGNOME|NOME
+  const parts = raw.split('|');
+  if (parts[0] !== 'ECM' || parts.length < 5) {
+    showResult('err', '—', raw, '⚠️ QR non riconosciuto — non è un badge ECM', '');
+    return;
+  }
+  const id = parts[1];
+  const p = partecipanti.find(x => x.id === id);
+  if (!p) {
+    showResult('err', '—', id, '⚠️ Partecipante non trovato nel registro', '');
+    return;
+  }
+  registerAccess(p);
+}
+
+function registerAccess(p) {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const fullTs = now.toISOString();
+
+  if (!p.log) p.log = [];
+
+  // Controlla stato attuale
+  const lastLog = p.log.length ? p.log[p.log.length - 1] : null;
+  const isInside = lastLog && lastLog.tipo === 'entrata' && !p.log.slice(p.log.filter(l=>l.tipo==='entrata').length - 1).find(l=>l.tipo==='uscita');
+  // Calcola se è dentro: conta entrate vs uscite
+  const entrate = p.log.filter(l => l.tipo === 'entrata').length;
+  const uscite = p.log.filter(l => l.tipo === 'uscita').length;
+  const inside = entrate > uscite;
+
+  if (mode === 'in') {
+    if (inside) {
+      showResult('warn', p.nome + ' ' + p.cognome, p.cf, '⚠️ Già registrato in entrata', timeStr);
+      return;
+    }
+    p.log.push({ tipo: 'entrata', ts: fullTs, ora: timeStr });
+    showResult('ok-in', p.nome + ' ' + p.cognome, p.cf, '✓ Entrata registrata', timeStr);
+    updateTicker(`${p.nome} ${p.cognome} — entrata alle ${timeStr}`);
+  } else {
+    if (!inside) {
+      showResult('warn', p.nome + ' ' + p.cognome, p.cf, '⚠️ Non risulta in sala', timeStr);
+      return;
+    }
+    p.log.push({ tipo: 'uscita', ts: fullTs, ora: timeStr });
+    showResult('ok-out', p.nome + ' ' + p.cognome, p.cf, '✓ Uscita registrata', timeStr);
+    updateTicker(`${p.nome} ${p.cognome} — uscita alle ${timeStr}`);
+  }
+
+  // Salva
+  evento.partecipanti = partecipanti;
+  localStorage.setItem('ecm_evento', JSON.stringify(evento));
+
+  updateStats();
+  renderPresenti();
+  renderTutti();
+  renderLog();
+  playBeep(mode === 'in' ? 'success' : 'exit');
+}
+
+// ─── RESULT DISPLAY ───────────────────────────────────
+function showResult(type, name, cf, status, time) {
+  const card = document.getElementById('resultCard');
+  card.className = 'result-card show ' + type;
+  document.getElementById('resName').textContent = name;
+  document.getElementById('resCF').textContent = cf;
+  document.getElementById('resStatus').textContent = status;
+  document.getElementById('resTime').textContent = time ? 'Ore ' + time : '';
+  const emojis = { 'ok-in': '✅', 'ok-out': '🚪', 'warn': '⚠️', 'err': '❌' };
+  document.getElementById('resEmoji').textContent = emojis[type] || '';
+  const colors = { 'ok-in': 'var(--success)', 'ok-out': 'var(--danger)', 'warn': 'var(--warn)', 'err': 'var(--danger)' };
+  document.getElementById('resStatus').style.color = colors[type] || 'var(--text)';
+}
+function hideResult() {
+  document.getElementById('resultCard').className = 'result-card';
+}
+
+// ─── MANUAL SEARCH ────────────────────────────────────
+function searchParticipant() {
+  const q = document.getElementById('manualSearch').value.toLowerCase().trim();
+  const container = document.getElementById('manualResults');
+  if (q.length < 2) { container.innerHTML = ''; return; }
+  const filtered = partecipanti.filter(p =>
+    p.nome.toLowerCase().includes(q) ||
+    p.cognome.toLowerCase().includes(q) ||
+    (p.cf || '').toLowerCase().includes(q)
+  ).slice(0, 8);
+
+  container.innerHTML = filtered.map(p => {
+    const entrate = p.log ? p.log.filter(l => l.tipo === 'entrata').length : 0;
+    const uscite = p.log ? p.log.filter(l => l.tipo === 'uscita').length : 0;
+    const inside = entrate > uscite;
+    const statusLabel = entrate === 0 ? '<span class="chip chip-gray">Non arrivato</span>'
+      : inside ? '<span class="chip chip-green">Dentro</span>'
+      : '<span class="chip chip-red">Uscito</span>';
+    return `<div class="search-result-item" onclick="registerAccess(partecipanti.find(x=>x.id==='${p.id}'))">
+      <div>
+        <div class="sri-name">${p.cognome} ${p.nome}</div>
+        <div class="sri-cf">${p.cf || '—'} · ${p.professione || '—'}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        ${statusLabel}
+        <span style="font-size:18px">${mode === 'in' ? '▶' : '◀'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── STATS ────────────────────────────────────────────
+function updateStats() {
+  const tot = partecipanti.length;
+  let dentro = 0, usciti = 0, assenti = 0;
+  partecipanti.forEach(p => {
+    const entrate = p.log ? p.log.filter(l => l.tipo === 'entrata').length : 0;
+    const uscite = p.log ? p.log.filter(l => l.tipo === 'uscita').length : 0;
+    if (entrate === 0) assenti++;
+    else if (entrate > uscite) dentro++;
+    else usciti++;
+  });
+  document.getElementById('sTot').textContent = tot;
+  document.getElementById('sDentro').textContent = dentro;
+  document.getElementById('sUsciti').textContent = usciti;
+  document.getElementById('sAssenti').textContent = assenti;
+}
+
+// ─── RENDER PRESENTI ──────────────────────────────────
+function renderPresenti() {
+  const inside = partecipanti.filter(p => {
+    const e = p.log ? p.log.filter(l => l.tipo === 'entrata').length : 0;
+    const u = p.log ? p.log.filter(l => l.tipo === 'uscita').length : 0;
+    return e > u;
+  });
+  const container = document.getElementById('listPresenti');
+  if (inside.length === 0) {
+    container.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:20px;text-align:center">Nessuno in sala al momento</div>';
+    return;
+  }
+  container.innerHTML = inside.map(p => {
+    const lastIn = [...p.log].reverse().find(l => l.tipo === 'entrata');
+    return `<div class="live-item inside">
+      <div class="live-dot green"></div>
+      <div class="live-info">
+        <div class="live-name">${p.cognome} ${p.nome}</div>
+        <div class="live-detail">${p.cf || '—'} · ${p.professione || '—'}</div>
+      </div>
+      <div>
+        <div class="live-badge in">DENTRO</div>
+        <div class="live-time">${lastIn ? lastIn.ora : '—'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── RENDER TUTTI ─────────────────────────────────────
+function renderTutti() {
+  const q = (document.getElementById('tuttiSearch')?.value || '').toLowerCase();
+  const filtered = q
+    ? partecipanti.filter(p => p.nome.toLowerCase().includes(q) || p.cognome.toLowerCase().includes(q) || (p.cf||'').toLowerCase().includes(q))
+    : partecipanti;
+
+  document.getElementById('listTutti').innerHTML = filtered.map(p => {
+    const entrate = p.log ? p.log.filter(l => l.tipo === 'entrata').length : 0;
+    const uscite = p.log ? p.log.filter(l => l.tipo === 'uscita').length : 0;
+    const inside = entrate > uscite;
+    const mai = entrate === 0;
+    const dot = mai ? 'gray' : inside ? 'green' : 'gray';
+    const badge = mai
+      ? '<span class="live-badge" style="background:var(--surface3);color:var(--text3)">Non arrivato</span>'
+      : inside
+        ? '<span class="live-badge in">DENTRO</span>'
+        : '<span class="live-badge out">USCITO</span>';
+    const lastLog = p.log && p.log.length ? p.log[p.log.length - 1] : null;
+    return `<div class="live-item ${inside ? 'inside' : 'outside'}">
+      <div class="live-dot ${dot}"></div>
+      <div class="live-info">
+        <div class="live-name">${p.cognome} ${p.nome}</div>
+        <div class="live-detail">${p.cf || '—'}</div>
+      </div>
+      <div style="text-align:right">
+        ${badge}
+        <div class="live-time">${lastLog ? lastLog.ora : '—'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── RENDER LOG ───────────────────────────────────────
+function renderLog() {
+  const logs = [];
+  partecipanti.forEach(p => {
+    (p.log || []).forEach(l => logs.push({ ...l, nome: p.cognome + ' ' + p.nome, cf: p.cf }));
+  });
+  logs.sort((a, b) => new Date(b.ts) - new Date(a.ts));
+  document.getElementById('logBody').innerHTML = logs.slice(0, 200).map(l => `
+    <tr>
+      <td class="mono">${l.ora}</td>
+      <td>${l.nome}</td>
+      <td class="mono">${l.cf || '—'}</td>
+      <td class="${l.tipo === 'entrata' ? 'td-in' : 'td-out'}">${l.tipo === 'entrata' ? '▶ Entrata' : '◀ Uscita'}</td>
+    </tr>`).join('');
+}
+
+// ─── TABS ─────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const names = ['presenti','tutti','log'];
+    t.classList.toggle('active', names[i] === tab);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'tutti') renderTutti();
+  if (tab === 'log') renderLog();
+}
+
+// ─── TICKER ───────────────────────────────────────────
+function updateTicker(msg) {
+  document.getElementById('tickerText').textContent = msg;
+}
+
+// ─── BEEP ─────────────────────────────────────────────
+function playBeep(type) {
+  try {
+    const ctx2 = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx2.createOscillator();
+    const gain = ctx2.createGain();
+    osc.connect(gain); gain.connect(ctx2.destination);
+    if (type === 'success') { osc.frequency.value = 880; gain.gain.value = 0.15; }
+    else if (type === 'exit') { osc.frequency.value = 440; gain.gain.value = 0.1; }
+    else { osc.frequency.value = 220; gain.gain.value = 0.1; }
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx2.currentTime + 0.3);
+    osc.stop(ctx2.currentTime + 0.3);
+  } catch(e) {}
+}
+
+// ─── RESET ────────────────────────────────────────────
+function resetLogs() {
+  if (!confirm('Cancellare tutti i log di entrata/uscita? I dati dei partecipanti rimarranno.')) return;
+  partecipanti.forEach(p => { p.log = []; });
+  evento.partecipanti = partecipanti;
+  localStorage.setItem('ecm_evento', JSON.stringify(evento));
+  updateStats(); renderPresenti(); renderTutti(); renderLog();
+  updateTicker('Log azzerati.');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ECM — Setup Evento</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F5F3EE;
+    --surface: #FFFFFF;
+    --surface2: #F0EDE6;
+    --border: #E0DAD0;
+    --border2: #C8C0B4;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #9B948C;
+    --accent: #2B4EFF;
+    --accent-light: #EEF1FF;
+    --accent2: #FF6B35;
+    --success: #1A7A4A;
+    --success-light: #E8F5EE;
+    --danger: #C13B2A;
+    --danger-light: #FDEEE9;
+    --warn: #B07A10;
+    --warn-light: #FDF5E0;
+    --radius: 10px;
+    --radius-lg: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--text);
+    color: white;
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent2);
+    display: inline-block;
+  }
+  .nav-pills {
+    display: flex;
+    gap: 4px;
+  }
+  .nav-pill {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.5);
+    cursor: default;
+    transition: all 0.2s;
+  }
+  .nav-pill.active {
+    background: var(--accent);
+    color: white;
+  }
+  .nav-pill.done {
+    color: rgba(255,255,255,0.7);
+  }
+
+  /* MAIN */
+  main {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  .page-title {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .page-sub {
+    color: var(--text2);
+    font-size: 15px;
+    margin-bottom: 36px;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .step-badge {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--text);
+    color: white;
+    font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  /* FORM */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .form-grid.full { grid-template-columns: 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.span2 { grid-column: span 2; }
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text2);
+    text-transform: uppercase;
+  }
+  input[type=text], input[type=date], input[type=number], textarea, select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+  }
+  input[type=text]:focus, input[type=date]:focus, input[type=number]:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(43,78,255,0.1);
+    background: white;
+  }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* CREDITI ROW */
+  .crediti-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+  .credito-box {
+    background: var(--accent-light);
+    border: 1px solid rgba(43,78,255,0.2);
+    border-radius: var(--radius);
+    padding: 14px;
+    text-align: center;
+  }
+  .credito-box label {
+    color: var(--accent);
+    margin-bottom: 8px;
+    display: block;
+  }
+  .credito-box input {
+    background: white;
+    border-color: rgba(43,78,255,0.3);
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--accent);
+    padding: 8px;
+  }
+
+  /* LOGO UPLOAD */
+  .logo-upload-area {
+    border: 2px dashed var(--border2);
+    border-radius: var(--radius);
+    padding: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface2);
+    position: relative;
+  }
+  .logo-upload-area:hover, .logo-upload-area.drag { border-color: var(--accent); background: var(--accent-light); }
+  .logo-upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .upload-icon { font-size: 32px; margin-bottom: 8px; }
+  .upload-label { font-size: 14px; color: var(--text2); }
+  .upload-label strong { color: var(--accent); }
+  .logo-preview {
+    display: none;
+    align-items: center;
+    gap: 16px;
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: var(--success-light);
+    border: 1px solid rgba(26,122,74,0.2);
+    border-radius: var(--radius);
+  }
+  .logo-preview img { max-height: 52px; max-width: 120px; object-fit: contain; border-radius: 4px; }
+  .logo-preview .logo-info { font-size: 13px; color: var(--success); font-weight: 500; }
+
+  /* EXCEL UPLOAD */
+  .excel-upload-area {
+    border: 2px dashed var(--border2);
+    border-radius: var(--radius);
+    padding: 36px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface2);
+    position: relative;
+  }
+  .excel-upload-area:hover, .excel-upload-area.drag { border-color: #1A7A4A; background: var(--success-light); }
+  .excel-upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+  /* TABLE */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    margin-top: 20px;
+    display: none;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { background: var(--surface2); }
+  th { padding: 10px 14px; text-align: left; font-weight: 600; color: var(--text2); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+  .cf-cell { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text2); }
+  .badge-prof {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+    display: none;
+  }
+  .stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .stat-num { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; color: var(--text); }
+  .stat-label { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* ALERTS */
+  .alert {
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    margin-top: 14px;
+    display: none;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .alert-success { background: var(--success-light); color: var(--success); border: 1px solid rgba(26,122,74,0.25); }
+  .alert-warn { background: var(--warn-light); color: var(--warn); border: 1px solid rgba(176,122,16,0.25); }
+  .alert-error { background: var(--danger-light); color: var(--danger); border: 1px solid rgba(193,59,42,0.25); }
+  .alert.show { display: flex; }
+
+  /* COLUMN MAP */
+  .col-map {
+    display: none;
+    background: var(--warn-light);
+    border: 1px solid rgba(176,122,16,0.25);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-top: 14px;
+  }
+  .col-map.show { display: block; }
+  .col-map h4 { font-size: 13px; font-weight: 600; color: var(--warn); margin-bottom: 12px; }
+  .col-map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .col-map-row { display: flex; flex-direction: column; gap: 4px; }
+  .col-map-row label { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; }
+  .col-map-row select { font-size: 13px; padding: 7px 10px; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    border: none;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover { background: #1a3ce0; transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { background: var(--border); }
+  .btn-danger {
+    background: var(--danger-light);
+    color: var(--danger);
+    border: 1px solid rgba(193,59,42,0.2);
+  }
+  .btn-success {
+    background: var(--success);
+    color: white;
+  }
+  .btn-success:hover { background: #145e38; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+  .actions-row {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  /* SAVED BANNER */
+  .saved-banner {
+    display: none;
+    background: var(--success-light);
+    border: 1px solid rgba(26,122,74,0.3);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    margin-bottom: 24px;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--success);
+    font-weight: 500;
+  }
+  .saved-banner.show { display: flex; }
+
+  /* COLONNA MAP CONFIRM */
+  .mapping-confirm-btn { margin-top: 12px; }
+
+  /* FOOTER */
+  footer {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 50;
+  }
+  .footer-info { font-size: 13px; color: var(--text3); }
+  .footer-info strong { color: var(--text2); }
+
+  /* SEARCH */
+  .search-bar {
+    display: none;
+    margin-bottom: 14px;
+  }
+  .search-bar.show { display: flex; gap: 10px; }
+  .search-bar input { flex: 1; }
+
+  /* PAGINATION */
+  .pagination {
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    font-size: 13px;
+    color: var(--text2);
+  }
+  .pagination.show { display: flex; }
+  .page-btns { display: flex; gap: 6px; }
+  .page-btn {
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    color: var(--text);
+  }
+  .page-btn:hover { background: var(--surface2); }
+  .page-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .chip-blue { background: var(--accent-light); color: var(--accent); }
+  .chip-green { background: var(--success-light); color: var(--success); }
+  .chip-orange { background: #FFF0E8; color: var(--accent2); }
+
+  @media (max-width: 640px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .form-group.span2 { grid-column: span 1; }
+    .crediti-row { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .col-map-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-dot"></span>
+    ECM Access Control
+  </div>
+  <div class="nav-pills">
+    <div class="nav-pill active">① Setup</div>
+    <div class="nav-pill">② Badge</div>
+    <div class="nav-pill">③ Accesso</div>
+    <div class="nav-pill">④ Report</div>
+  </div>
+</header>
+
+<main>
+
+  <div class="saved-banner" id="savedBanner">
+    ✓ Evento caricato dalla sessione precedente — puoi continuare da dove avevi lasciato.
+    <button class="btn btn-danger" style="margin-left:auto;padding:6px 14px;font-size:12px" onclick="resetAll()">Nuovo evento</button>
+  </div>
+
+  <div class="page-title">Setup evento</div>
+  <div class="page-sub">Configura l'evento ECM e importa l'elenco dei partecipanti</div>
+
+  <!-- CARD 1: Dati evento -->
+  <div class="card">
+    <div class="card-title">
+      <span class="step-badge">1</span>
+      Dati evento
+    </div>
+    <div class="form-grid">
+      <div class="form-group span2">
+        <label for="evNome">Nome dell'evento *</label>
+        <input type="text" id="evNome" placeholder="Es. Congresso Nazionale di Medicina Interna 2025">
+      </div>
+      <div class="form-group">
+        <label for="evData">Data inizio *</label>
+        <input type="date" id="evData">
+      </div>
+      <div class="form-group">
+        <label for="evDataFine">Data fine</label>
+        <input type="date" id="evDataFine">
+      </div>
+      <div class="form-group span2">
+        <label for="evLuogo">Luogo *</label>
+        <input type="text" id="evLuogo" placeholder="Es. Centro Congressi Torino, Via Roma 1">
+      </div>
+      <div class="form-group span2">
+        <label for="evDesc">Descrizione / note</label>
+        <textarea id="evDesc" placeholder="Note aggiuntive sull'evento..."></textarea>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;margin-bottom:12px">
+      <div class="card-title" style="margin-bottom:14px">
+        <span class="step-badge" style="background:var(--accent)">2</span>
+        Crediti ECM
+      </div>
+      <div class="crediti-row">
+        <div class="credito-box">
+          <label>Crediti totali</label>
+          <input type="number" id="creditiTot" value="4" min="0" step="0.5">
+        </div>
+        <div class="credito-box">
+          <label>Ore minime *</label>
+          <input type="number" id="oreMin" value="6" min="0" step="0.5">
+        </div>
+        <div class="credito-box">
+          <label>% presenza min.</label>
+          <input type="number" id="percMin" value="90" min="0" max="100">
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-top:8px">* Il partecipante ottiene i crediti ECM se supera la percentuale minima di presenza</div>
+    </div>
+
+    <!-- Logo upload -->
+    <div style="margin-top:24px">
+      <div class="card-title" style="margin-bottom:12px">
+        <span class="step-badge" style="background:var(--accent2)">3</span>
+        Logo evento
+      </div>
+      <div class="logo-upload-area" id="logoArea">
+        <input type="file" id="logoInput" accept="image/*" onchange="handleLogo(this)">
+        <div class="upload-icon">🖼️</div>
+        <div class="upload-label">Trascina il logo qui oppure <strong>sfoglia</strong></div>
+        <div style="font-size:12px;color:var(--text3);margin-top:4px">PNG, JPG, SVG — max 2MB</div>
+      </div>
+      <div class="logo-preview" id="logoPreview">
+        <img id="logoImg" src="" alt="logo evento">
+        <div>
+          <div class="logo-info" id="logoName"></div>
+          <button class="btn btn-danger" style="margin-top:6px;padding:5px 12px;font-size:12px" onclick="removeLogo()">Rimuovi logo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 2: Import Excel -->
+  <div class="card">
+    <div class="card-title">
+      <span class="step-badge" style="background:#1A7A4A">4</span>
+      Importa partecipanti (Excel)
+    </div>
+    <div class="excel-upload-area" id="excelArea">
+      <input type="file" id="excelInput" accept=".xlsx,.xls,.csv" onchange="handleExcel(this)">
+      <div style="font-size:36px;margin-bottom:8px">📊</div>
+      <div style="font-size:15px;font-weight:500;color:var(--text2)">Carica il file Excel Co.Ge.A.P.S. / Agenas</div>
+      <div style="font-size:13px;color:var(--text3);margin-top:4px">Trascina o clicca · .xlsx · .xls · .csv</div>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <span class="chip chip-blue">Codice Fiscale</span>
+        <span class="chip chip-blue">Cognome</span>
+        <span class="chip chip-blue">Nome</span>
+        <span class="chip chip-blue">Professione</span>
+        <span class="chip chip-orange">+ colonne extra supportate</span>
+      </div>
+    </div>
+
+    <!-- Allineamento colonne manuale -->
+    <div class="col-map" id="colMap">
+      <h4>⚠️ Abbina le colonne del tuo file</h4>
+      <p style="font-size:12px;color:var(--warn);margin-bottom:12px">Non abbiamo trovato automaticamente tutte le colonne richieste. Seleziona manualmente quale colonna del file corrisponde a ogni campo.</p>
+      <div class="col-map-grid" id="colMapGrid"></div>
+      <button class="btn btn-primary mapping-confirm-btn" onclick="applyMapping()">✓ Conferma mapping</button>
+    </div>
+
+    <div class="alert alert-error" id="alertError"></div>
+    <div class="alert alert-warn" id="alertWarn"></div>
+    <div class="alert alert-success" id="alertSuccess"></div>
+
+    <!-- STATS -->
+    <div class="stats-row" id="statsRow">
+      <div class="stat-box"><div class="stat-num" id="statTot">0</div><div class="stat-label">Partecipanti</div></div>
+      <div class="stat-box"><div class="stat-num" id="statProf">0</div><div class="stat-label">Professioni</div></div>
+      <div class="stat-box"><div class="stat-num" id="statOk">0</div><div class="stat-label">CF validi</div></div>
+      <div class="stat-box"><div class="stat-num" id="statDup">0</div><div class="stat-label">Duplicati</div></div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="search-bar" id="searchBar">
+      <input type="text" id="searchInput" placeholder="Cerca per nome, cognome o codice fiscale..." oninput="renderTable()">
+      <button class="btn btn-secondary" onclick="document.getElementById('searchInput').value='';renderTable()">✕ Pulisci</button>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap" id="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Codice Fiscale</th>
+            <th>Cognome</th>
+            <th>Nome</th>
+            <th>Professione</th>
+            <th>Stato</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination" id="pagination">
+      <div id="pageInfo">0 di 0</div>
+      <div class="page-btns" id="pageBtns"></div>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions-row">
+    <button class="btn btn-secondary" onclick="downloadTemplate()">⬇ Scarica template Excel</button>
+    <button class="btn btn-success" id="btnSalva" onclick="salvaEvento()" disabled>
+      Salva e vai ai badge →
+    </button>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-info">Evento: <strong id="footerEvento">—</strong></div>
+  <div class="footer-info">Partecipanti: <strong id="footerPart">0</strong></div>
+</footer>
+
+<script>
+// ─── STATE ───────────────────────────────────────────
+let partecipanti = [];
+let logoData = null;
+let rawHeaders = [];
+let rawRows = [];
+let colMapping = {};
+const PER_PAGE = 20;
+let currentPage = 0;
+
+const REQUIRED_FIELDS = ['cf','cognome','nome','professione'];
+const FIELD_LABELS = { cf: 'Codice Fiscale', cognome: 'Cognome', nome: 'Nome', professione: 'Professione' };
+
+// Auto-detect colonne
+const COL_ALIASES = {
+  cf: ['codice fiscale','cf','codicefiscale','codice_fiscale','fiscal code','tax code'],
+  cognome: ['cognome','surname','last name','lastname','last_name'],
+  nome: ['nome','name','first name','firstname','first_name'],
+  professione: ['professione','profession','categoria','disciplina','qualifica','ruolo']
+};
+
+// ─── LOAD ─────────────────────────────────────────────
+window.onload = () => {
+  const saved = localStorage.getItem('ecm_evento');
+  if (saved) {
+    const ev = JSON.parse(saved);
+    if (ev.nome) {
+      document.getElementById('savedBanner').classList.add('show');
+      loadFromStorage(ev);
+    }
+  }
+  // Drag & drop
+  setupDragDrop('logoArea', handleLogoFile);
+  setupDragDrop('excelArea', handleExcelFile);
+
+  // Live footer
+  document.getElementById('evNome').addEventListener('input', updateFooter);
+};
+
+function setupDragDrop(areaId, handler) {
+  const area = document.getElementById(areaId);
+  area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('drag'); });
+  area.addEventListener('dragleave', () => area.classList.remove('drag'));
+  area.addEventListener('drop', e => {
+    e.preventDefault();
+    area.classList.remove('drag');
+    const file = e.dataTransfer.files[0];
+    if (file) handler(file);
+  });
+}
+
+function loadFromStorage(ev) {
+  document.getElementById('evNome').value = ev.nome || '';
+  document.getElementById('evData').value = ev.data || '';
+  document.getElementById('evDataFine').value = ev.dataFine || '';
+  document.getElementById('evLuogo').value = ev.luogo || '';
+  document.getElementById('evDesc').value = ev.desc || '';
+  document.getElementById('creditiTot').value = ev.creditiTot || 4;
+  document.getElementById('oreMin').value = ev.oreMin || 6;
+  document.getElementById('percMin').value = ev.percMin || 90;
+  if (ev.logo) {
+    logoData = ev.logo;
+    showLogoPreview(ev.logoName || 'logo', ev.logo);
+  }
+  if (ev.partecipanti && ev.partecipanti.length > 0) {
+    partecipanti = ev.partecipanti;
+    showTableAndStats();
+  }
+  updateFooter();
+}
+
+// ─── LOGO ─────────────────────────────────────────────
+function handleLogo(input) { if (input.files[0]) handleLogoFile(input.files[0]); }
+function handleLogoFile(file) {
+  if (file.size > 2 * 1024 * 1024) { alert('Logo troppo grande (max 2MB)'); return; }
+  const reader = new FileReader();
+  reader.onload = e => { logoData = e.target.result; showLogoPreview(file.name, logoData); };
+  reader.readAsDataURL(file);
+}
+function showLogoPreview(name, src) {
+  document.getElementById('logoImg').src = src;
+  document.getElementById('logoName').textContent = '✓ ' + name;
+  document.getElementById('logoPreview').style.display = 'flex';
+  document.getElementById('logoArea').style.display = 'none';
+}
+function removeLogo() {
+  logoData = null;
+  document.getElementById('logoImg').src = '';
+  document.getElementById('logoPreview').style.display = 'none';
+  document.getElementById('logoArea').style.display = 'block';
+  document.getElementById('logoInput').value = '';
+}
+
+// ─── EXCEL ────────────────────────────────────────────
+function handleExcel(input) { if (input.files[0]) handleExcelFile(input.files[0]); }
+function handleExcelFile(file) {
+  hideAlerts();
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'binary' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      if (data.length < 2) { showAlert('error', 'Il file sembra vuoto o non ha righe di dati.'); return; }
+      rawHeaders = data[0].map(h => String(h || '').trim());
+      rawRows = data.slice(1).filter(r => r.some(c => c !== undefined && c !== ''));
+      colMapping = autoDetect(rawHeaders);
+      const missing = REQUIRED_FIELDS.filter(f => !colMapping[f]);
+      if (missing.length > 0) {
+        showColMap(missing);
+      } else {
+        buildParticipants();
+      }
+    } catch(err) {
+      showAlert('error', 'Errore nella lettura del file: ' + err.message);
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+function autoDetect(headers) {
+  const map = {};
+  headers.forEach((h, i) => {
+    const norm = h.toLowerCase().replace(/[\s_\-]/g,'');
+    for (const [field, aliases] of Object.entries(COL_ALIASES)) {
+      if (!map[field]) {
+        if (aliases.some(a => norm.includes(a.replace(/[\s_\-]/g,'')))) {
+          map[field] = i;
+        }
+      }
+    }
+  });
+  return map;
+}
+
+function showColMap(missing) {
+  const grid = document.getElementById('colMapGrid');
+  grid.innerHTML = '';
+  missing.forEach(field => {
+    const div = document.createElement('div');
+    div.className = 'col-map-row';
+    div.innerHTML = `<label>${FIELD_LABELS[field]}</label>
+      <select id="map_${field}">
+        <option value="">— seleziona colonna —</option>
+        ${rawHeaders.map((h,i) => `<option value="${i}">${h}</option>`).join('')}
+      </select>`;
+    grid.appendChild(div);
+  });
+  document.getElementById('colMap').classList.add('show');
+}
+
+function applyMapping() {
+  const missing = REQUIRED_FIELDS.filter(f => !colMapping[f]);
+  for (const field of missing) {
+    const sel = document.getElementById('map_' + field);
+    if (!sel.value) { showAlert('warn', 'Seleziona tutte le colonne richieste.'); return; }
+    colMapping[field] = parseInt(sel.value);
+  }
+  document.getElementById('colMap').classList.remove('show');
+  buildParticipants();
+}
+
+function buildParticipants() {
+  const cfSet = new Set();
+  let duplicati = 0;
+  partecipanti = [];
+
+  rawRows.forEach((row, idx) => {
+    const get = field => String(row[colMapping[field]] || '').trim();
+    const cf = get('cf').toUpperCase();
+    const cognome = get('cognome');
+    const nome = get('nome');
+    const professione = get('professione');
+    if (!cf && !cognome && !nome) return;
+
+    const isDup = cfSet.has(cf) && cf.length > 0;
+    if (isDup) duplicati++;
+    else cfSet.add(cf);
+
+    const cfValido = /^[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]$/.test(cf);
+
+    partecipanti.push({
+      id: 'P' + String(idx + 1).padStart(4, '0'),
+      cf, cognome, nome, professione,
+      cfValido, duplicato: isDup,
+      qr: null,
+      log: []
+    });
+  });
+
+  showTableAndStats(duplicati);
+  document.getElementById('btnSalva').disabled = partecipanti.length === 0;
+  updateFooter();
+
+  const warns = partecipanti.filter(p => !p.cfValido && p.cf).length;
+  if (warns > 0) showAlert('warn', `⚠️ ${warns} codici fiscali non sembrano validi (formato non corretto). Controlla prima di procedere.`);
+  else showAlert('success', `✓ ${partecipanti.length} partecipanti importati correttamente.`);
+}
+
+function showTableAndStats(dup = 0) {
+  const prof = new Set(partecipanti.map(p => p.professione).filter(Boolean));
+  const cfOk = partecipanti.filter(p => p.cfValido).length;
+  const dupCount = dup || partecipanti.filter(p => p.duplicato).length;
+
+  document.getElementById('statTot').textContent = partecipanti.length;
+  document.getElementById('statProf').textContent = prof.size;
+  document.getElementById('statOk').textContent = cfOk;
+  document.getElementById('statDup').textContent = dupCount;
+  document.getElementById('statsRow').style.display = 'grid';
+  document.getElementById('tableWrap').style.display = 'block';
+  document.getElementById('searchBar').classList.add('show');
+  currentPage = 0;
+  renderTable();
+}
+
+function renderTable() {
+  const q = (document.getElementById('searchInput').value || '').toLowerCase();
+  const filtered = partecipanti.filter(p =>
+    !q || p.cf.toLowerCase().includes(q) || p.cognome.toLowerCase().includes(q) || p.nome.toLowerCase().includes(q)
+  );
+  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  if (currentPage >= totalPages) currentPage = Math.max(0, totalPages - 1);
+  const slice = filtered.slice(currentPage * PER_PAGE, (currentPage + 1) * PER_PAGE);
+
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = slice.map((p, i) => {
+    const status = p.duplicato
+      ? `<span class="chip" style="background:#FDE8E8;color:#C13B2A">⚠ Duplicato</span>`
+      : p.cfValido
+        ? `<span class="chip chip-green">✓ OK</span>`
+        : p.cf ? `<span class="chip" style="background:#FFF0E8;color:#B07A10">⚠ CF formato</span>`
+               : `<span class="chip" style="background:var(--surface2);color:var(--text3)">— no CF</span>`;
+    return `<tr>
+      <td style="color:var(--text3);font-size:12px">${currentPage * PER_PAGE + i + 1}</td>
+      <td class="cf-cell">${p.cf || '—'}</td>
+      <td>${p.cognome}</td>
+      <td>${p.nome}</td>
+      <td><span class="badge-prof">${p.professione || '—'}</span></td>
+      <td>${status}</td>
+    </tr>`;
+  }).join('');
+
+  // Pagination
+  const pag = document.getElementById('pagination');
+  if (totalPages > 1) {
+    pag.classList.add('show');
+    document.getElementById('pageInfo').textContent = `${filtered.length} partecipanti · pagina ${currentPage+1} di ${totalPages}`;
+    const btns = document.getElementById('pageBtns');
+    btns.innerHTML = '';
+    const addBtn = (label, pg, cls='') => {
+      const b = document.createElement('button');
+      b.className = 'page-btn' + (cls ? ' ' + cls : '');
+      b.textContent = label;
+      b.onclick = () => { currentPage = pg; renderTable(); };
+      btns.appendChild(b);
+    };
+    if (currentPage > 0) addBtn('‹', currentPage - 1);
+    const start = Math.max(0, currentPage - 2);
+    const end = Math.min(totalPages, start + 5);
+    for (let i = start; i < end; i++) addBtn(i + 1, i, i === currentPage ? 'active' : '');
+    if (currentPage < totalPages - 1) addBtn('›', currentPage + 1);
+  } else {
+    pag.classList.remove('show');
+  }
+}
+
+// ─── ALERTS ───────────────────────────────────────────
+function hideAlerts() {
+  ['alertError','alertWarn','alertSuccess'].forEach(id => {
+    document.getElementById(id).classList.remove('show');
+    document.getElementById(id).textContent = '';
+  });
+}
+function showAlert(type, msg) {
+  const id = type === 'error' ? 'alertError' : type === 'warn' ? 'alertWarn' : 'alertSuccess';
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+// ─── SALVA ────────────────────────────────────────────
+function salvaEvento() {
+  const nome = document.getElementById('evNome').value.trim();
+  if (!nome) { alert('Inserisci il nome dell\'evento.'); return; }
+  if (!document.getElementById('evData').value) { alert('Inserisci la data dell\'evento.'); return; }
+  if (partecipanti.length === 0) { alert('Importa almeno un partecipante.'); return; }
+
+  const ev = {
+    nome,
+    data: document.getElementById('evData').value,
+    dataFine: document.getElementById('evDataFine').value,
+    luogo: document.getElementById('evLuogo').value,
+    desc: document.getElementById('evDesc').value,
+    creditiTot: parseFloat(document.getElementById('creditiTot').value) || 4,
+    oreMin: parseFloat(document.getElementById('oreMin').value) || 6,
+    percMin: parseFloat(document.getElementById('percMin').value) || 90,
+    logo: logoData,
+    logoName: document.getElementById('logoName').textContent.replace('✓ ',''),
+    partecipanti,
+    createdAt: new Date().toISOString()
+  };
+
+  localStorage.setItem('ecm_evento', JSON.stringify(ev));
+
+  const btn = document.getElementById('btnSalva');
+  btn.innerHTML = '<span class="spinner"></span> Salvataggio...';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.innerHTML = '✓ Salvato! Vai ai badge →';
+    btn.style.background = 'var(--success)';
+    showAlert('success', `✓ Evento "${nome}" salvato con ${partecipanti.length} partecipanti. Puoi ora passare al blocco Badge.`);
+  }, 600);
+}
+
+function resetAll() {
+  if (!confirm('Sei sicuro? Tutti i dati dell\'evento corrente verranno cancellati.')) return;
+  localStorage.removeItem('ecm_evento');
+  location.reload();
+}
+
+// ─── TEMPLATE EXCEL ───────────────────────────────────
+function downloadTemplate() {
+  const ws_data = [
+    ['Codice Fiscale','Cognome','Nome','Professione'],
+    ['RSSMRA80A01H501Z','Rossi','Mario','Medico Chirurgo'],
+    ['VRDLGI75B02F205X','Verdi','Luigi','Infermiere'],
+  ];
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+  ws['!cols'] = [{wch:20},{wch:20},{wch:20},{wch:25}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Partecipanti');
+  XLSX.writeFile(wb, 'template_partecipanti_ecm.xlsx');
+}
+
+// ─── FOOTER ───────────────────────────────────────────
+function updateFooter() {
+  const nome = document.getElementById('evNome').value.trim();
+  document.getElementById('footerEvento').textContent = nome || '—';
+  document.getElementById('footerPart').textContent = partecipanti.length;
+}
+</script>
+</body>
+</html>
