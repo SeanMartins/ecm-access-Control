@@ -1,0 +1,43 @@
+// ═══════════════════════════════════════════════════════
+//  FIRESTORE SECURITY RULES — ECM Access Control
+//  Incolla queste regole in:
+//  Firebase Console → Firestore Database → Regole
+// ═══════════════════════════════════════════════════════
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Solo utenti autenticati con Google possono accedere
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // ── Eventi ──────────────────────────────────────────
+    match /eventi/{eventId} {
+      allow read:  if isAuth();
+      allow write: if isAuth() && eventId.matches('evt_[0-9]+');
+
+      // ── Partecipanti ──────────────────────────────────
+      match /partecipanti/{partId} {
+        allow read:   if isAuth();
+        allow create: if isAuth() && partId.matches('P[0-9]+');
+        allow update: if isAuth() && partId.matches('P[0-9]+');
+        allow delete: if false; // mai cancellabili
+      }
+
+      // ── Log accessi ───────────────────────────────────
+      match /logs/{logId} {
+        allow read: if isAuth();
+        // Scrittura solo con i campi obbligatori e tipo valido
+        allow create: if isAuth()
+          && request.resource.data.keys().hasAll([
+               'partecipanteId','tipo','ora','tsISO','nome'
+             ])
+          && request.resource.data.tipo in ['entrata','uscita'];
+        allow update: if false; // i log non si modificano
+        allow delete: if false; // i log non si cancellano
+      }
+    }
+  }
+}
