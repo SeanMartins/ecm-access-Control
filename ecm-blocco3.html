@@ -144,6 +144,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
           <button class="btn btn-success" id="btnStart">▶ Avvia camera</button>
           <button class="btn btn-outline" id="btnStop" disabled>⏹ Ferma</button>
         </div>
+        <div id="scanMethod" style="display:none;font-size:11px;color:var(--text3);text-align:center;margin-top:6px;padding:4px"></div>
         <div class="result-card" id="resultCard">
           <div style="display:flex;justify-content:space-between;align-items:flex-start">
             <div>
@@ -257,31 +258,90 @@ function setMode(m){
   document.getElementById('footerModo').style.color=m==='in'?'var(--success)':'var(--danger)';
   hideResult();
 }
+// Rilevamento metodo scanner migliore per iOS/Android
+const hasBarcodeDetector = 'BarcodeDetector' in window;
+let barcodeDetector = null;
+if(hasBarcodeDetector){
+  try{ barcodeDetector = new BarcodeDetector({formats:['qr_code']}); }catch(e){ barcodeDetector=null; }
+}
+
 async function startCamera(){
   try{
-    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280}}});
+    // Su iOS serve width/height espliciti e facingMode exact
+    const constraints = {
+      video:{
+        facingMode:{ideal:'environment'},
+        width:{ideal:1920},
+        height:{ideal:1080},
+        aspectRatio:{ideal:1.777}
+      }
+    };
+    stream=await navigator.mediaDevices.getUserMedia(constraints);
     video.srcObject=stream;
+    await new Promise(r=>video.onloadedmetadata=r);
+    await video.play();
     document.getElementById('scanPH').style.display='none';
-    document.getElementById('btnStart').disabled=true; document.getElementById('btnStop').disabled=false;
-    scanning=true; requestAnimationFrame(scanLoop);
-  }catch(e){alert('Camera non disponibile: '+e.message+'\n\nRichiede HTTPS. Usa la ricerca manuale.');}
-}
-function stopCamera(){
-  scanning=false; if(animFrame)cancelAnimationFrame(animFrame);
-  if(stream)stream.getTracks().forEach(t=>t.stop()); stream=null; video.srcObject=null;
-  document.getElementById('scanPH').style.display='flex';
-  document.getElementById('btnStart').disabled=false; document.getElementById('btnStop').disabled=true;
-}
-function scanLoop(){
-  if(!scanning)return;
-  if(video.readyState===video.HAVE_ENOUGH_DATA){
-    canvas.width=video.videoWidth; canvas.height=video.videoHeight;
-    ctx.drawImage(video,0,0);
-    const img=ctx.getImageData(0,0,canvas.width,canvas.height);
-    const code=jsQR(img.data,img.width,img.height,{inversionAttempts:'dontInvert'});
-    if(code&&!cooldown){handleQR(code.data);cooldown=true;setTimeout(()=>cooldown=false,2500);}
+    document.getElementById('btnStart').disabled=true;
+    document.getElementById('btnStop').disabled=false;
+    scanning=true;
+    // Mostra quale metodo viene usato
+    const methodEl=document.getElementById('scanMethod');
+    methodEl.style.display='block';
+    if(barcodeDetector){
+      methodEl.textContent='🟢 Scanner nativo attivo (BarcodeDetector)';
+      scanLoopNative();
+    } else {
+      methodEl.textContent='🟡 Scanner jsQR attivo — avvicina bene il QR';
+      scanLoopJsQR();
+    }
+  }catch(e){
+    alert('Camera non disponibile: '+e.message+'\n\nAssicurati di usare Safari su iPhone e di aver dato il permesso fotocamera.');
   }
-  animFrame=requestAnimationFrame(scanLoop);
+}
+
+function stopCamera(){
+  scanning=false;
+  if(animFrame)cancelAnimationFrame(animFrame);
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  stream=null; video.srcObject=null;
+  document.getElementById('scanPH').style.display='flex';
+  document.getElementById('btnStart').disabled=false;
+  document.getElementById('btnStop').disabled=true;
+}
+
+// Metodo 1: BarcodeDetector API nativa (iOS 17+, Chrome Android)
+async function scanLoopNative(){
+  if(!scanning) return;
+  try{
+    const codes = await barcodeDetector.detect(video);
+    if(codes.length>0 && !cooldown){
+      handleQR(codes[0].rawValue);
+      cooldown=true; setTimeout(()=>cooldown=false,2500);
+    }
+  }catch(e){}
+  animFrame = setTimeout(scanLoopNative, 200);
+}
+
+// Metodo 2: jsQR canvas (fallback universale)
+function scanLoopJsQR(){
+  if(!scanning) return;
+  try{
+    if(video.readyState===video.HAVE_ENOUGH_DATA && video.videoWidth>0){
+      // Ridimensiona per performance su mobile
+      const scale = Math.min(1, 640/video.videoWidth);
+      canvas.width  = Math.round(video.videoWidth  * scale);
+      canvas.height = Math.round(video.videoHeight * scale);
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      // Prova tutte le modalità di inversione per massima compatibilità
+      const code = jsQR(img.data, img.width, img.height, {inversionAttempts:'both'});
+      if(code && !cooldown){
+        handleQR(code.data);
+        cooldown=true; setTimeout(()=>cooldown=false,2500);
+      }
+    }
+  }catch(e){}
+  animFrame = requestAnimationFrame(scanLoopJsQR);
 }
 async function handleQR(raw){
   const pts=raw.split('|');
