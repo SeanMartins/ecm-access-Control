@@ -92,7 +92,10 @@ header{border-bottom:1px solid var(--border);background:rgba(13,15,20,0.85);back
 <header>
   <div class="header-inner">
     <div class="logo"><div class="logo-mark">E</div>ECM Access Control</div>
-    <div class="fb-status"><div class="fb-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="fb-status"><div class="fb-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
+      <div id="userBarSlot"></div>
+    </div>
   </div>
 </header>
 <div class="wrap">
@@ -204,6 +207,8 @@ const fmt = d => d ? new Date(d).toLocaleDateString('it-IT', {day:'2-digit', mon
 document.getElementById('fbDot').className = 'fb-dot ok';
 document.getElementById('fbStatus').textContent = 'Firebase connesso';
 
+import { requireAuth, injectUserBar, signOut } from './ecm-auth.js';
+
 // Se arriva dal QR di connessione, salva l'ID e ricarica pulito
 (function(){
   const p=new URLSearchParams(window.location.search);
@@ -214,6 +219,9 @@ document.getElementById('fbStatus').textContent = 'Firebase connesso';
     window.location.reload();
   }
 })();
+
+await requireAuth();
+injectUserBar('userBarSlot');
 
 const evId = localStorage.getItem('ecm_eventId');
 
