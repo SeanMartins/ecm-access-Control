@@ -178,7 +178,10 @@ header{border-bottom:1px solid var(--border);background:rgba(13,15,20,0.85);back
   </div>
   <div class="site-footer">
     <div>ECM Access Control · Firebase Firestore · <span id="evIdLabel" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)"></span></div>
-    <button class="reset-btn" id="resetBtn">🔄 Cambia evento</button>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <a href="ecm-connetti.html" style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:8px;border:1px solid var(--border2);color:var(--success);font-size:12px;text-decoration:none;transition:all .2s" onmouseover="this.style.borderColor='var(--success)'" onmouseout="this.style.borderColor='var(--border2)'">📲 Connetti tablet</a>
+      <button class="reset-btn" id="resetBtn">🔄 Cambia evento</button>
+    </div>
   </div>
 </div>
 <script type="module">
@@ -200,6 +203,17 @@ const fmt = d => d ? new Date(d).toLocaleDateString('it-IT', {day:'2-digit', mon
 
 document.getElementById('fbDot').className = 'fb-dot ok';
 document.getElementById('fbStatus').textContent = 'Firebase connesso';
+
+// Se arriva dal QR di connessione, salva l'ID e ricarica pulito
+(function(){
+  const p=new URLSearchParams(window.location.search);
+  const id=p.get('evId');
+  if(id && localStorage.getItem('ecm_eventId')!==id){
+    localStorage.setItem('ecm_eventId',id);
+    window.history.replaceState({},document.title,window.location.pathname);
+    window.location.reload();
+  }
+})();
 
 const evId = localStorage.getItem('ecm_eventId');
 
