@@ -404,6 +404,15 @@ function switchTab(tab){
 }
 function updateTicker(msg){document.getElementById('tickerText').textContent=msg;}
 function playBeep(type){
+  // Vibrazione: entrata = 1 impulso lungo, uscita = 2 impulsi brevi, warn = 3 rapidissimi
+  try{
+    if(navigator.vibrate){
+      if(type==='success') navigator.vibrate(200);
+      else if(type==='exit') navigator.vibrate([100,80,100]);
+      else if(type==='warn') navigator.vibrate([60,40,60,40,60]);
+    }
+  }catch(e){}
+  // Beep audio
   try{const ac=new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator();const g=ac.createGain();o.connect(g);g.connect(ac.destination);o.frequency.value=type==='success'?880:type==='exit'?440:220;g.gain.value=0.1;o.start();g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.3);o.stop(ac.currentTime+0.3);}catch(e){}
 }
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
