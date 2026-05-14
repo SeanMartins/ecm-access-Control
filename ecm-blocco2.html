@@ -30,22 +30,22 @@ main{max-width:960px;margin:0 auto;padding:32px 20px 20px}
 label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase}
 input[type=color],select{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;width:100%}
 input[type=color]{padding:4px 8px;height:40px;cursor:pointer}
-.badge-card{width:330px;background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.12);overflow:hidden;border:1px solid var(--border);font-family:'DM Sans',sans-serif}
-.badge-accent{height:4px}
-.badge-header{padding:14px 18px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
-.badge-logo{max-height:42px;max-width:100px;object-fit:contain}
-.badge-logo-ph{height:42px;width:72px;background:var(--surface2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3);border:1px dashed var(--border2)}
-.badge-ev-name{font-size:11px;font-weight:600;color:var(--text2);flex:1;line-height:1.3}
-.badge-body{padding:18px;display:flex;gap:14px;align-items:center}
-.badge-qr{flex:0 0 96px;width:96px;height:96px;display:flex;align-items:center;justify-content:center}
-.badge-qr canvas,.badge-qr img{width:96px!important;height:96px!important}
-.badge-info{flex:1}
-.badge-name{font-size:17px;font-weight:600;line-height:1.2;margin-bottom:2px}
-.badge-surname{font-size:21px;font-weight:600;letter-spacing:-.01em}
-.badge-cf{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:5px}
-.badge-prof{font-size:10px;color:var(--text2);margin-top:2px;font-weight:500}
-.badge-id{font-family:'DM Mono',monospace;font-size:8px;color:var(--text3);margin-top:6px}
-.badge-footer{padding:7px 18px;font-size:9px;color:var(--text3);border-top:1px solid var(--border);display:flex;justify-content:space-between;background:var(--surface2)}
+.badge-card{width:330px;background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.12);overflow:hidden;border:1px solid var(--border);font-family:'DM Sans',sans-serif;display:flex;flex-direction:column}
+.badge-banner{width:100%;height:90px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.badge-banner img{width:100%;height:100%;object-fit:cover}
+.badge-banner-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;letter-spacing:.04em;color:white;text-align:center;padding:0 12px;line-height:1.3}
+.badge-body{padding:18px 20px 14px;display:flex;flex-direction:column;align-items:center;gap:10px;flex:1}
+.badge-qr{width:120px;height:120px;display:flex;align-items:center;justify-content:center;border-radius:8px;padding:4px;background:white;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.badge-qr canvas,.badge-qr img{width:120px!important;height:120px!important}
+.badge-info{text-align:center;width:100%}
+.badge-name{font-size:15px;font-weight:400;color:var(--text2);line-height:1.2}
+.badge-surname{font-size:22px;font-weight:700;letter-spacing:-.01em;margin-bottom:2px}
+.badge-prof{font-size:11px;color:var(--text2);font-weight:500;margin-top:3px}
+.badge-cf{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:4px}
+.badge-id{font-family:'DM Mono',monospace;font-size:8px;color:var(--text3);margin-top:3px}
+.badge-footer{padding:10px 16px;border-top:1px solid var(--border);text-align:center;background:var(--surface2)}
+.badge-footer-title{font-size:11px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:2px}
+.badge-footer-meta{font-size:9px;color:var(--text3)}
 .preview-wrap{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
 .preview-actions{flex:1;min-width:200px;display:flex;flex-direction:column;gap:10px}
 .badge-grid{display:grid;grid-template-columns:repeat(auto-fill,330px);gap:18px;margin-top:18px}
@@ -122,23 +122,24 @@ input[type=color]{padding:4px 8px;height:40px;cursor:pointer}
         <div class="card-title" style="margin-bottom:14px"><span class="step-badge" style="background:var(--accent2)">2</span>Anteprima</div>
         <div class="preview-wrap">
           <div class="badge-card" id="prevBadge">
-            <div class="badge-accent" id="prevBar"></div>
-            <div class="badge-header">
-              <div class="badge-logo-ph" id="prevLogoPH">Logo</div>
-              <img class="badge-logo" id="prevLogo" src="" style="display:none" alt="">
-              <div class="badge-ev-name" id="prevEvName">Nome evento</div>
+            <div class="badge-banner" id="prevBanner">
+              <div class="badge-banner-ph" id="prevLogoPH" style="background:#2B4EFF">Logo / Immagine evento</div>
+              <img id="prevLogo" src="" style="display:none;width:100%;height:100%;object-fit:cover" alt="">
             </div>
             <div class="badge-body">
               <div class="badge-qr" id="prevQR"></div>
               <div class="badge-info">
                 <div class="badge-name" id="prevNome">Mario</div>
-                <div class="badge-surname" id="prevCognome">ROSSI</div>
+                <div class="badge-surname" id="prevCognome" style="color:#2B4EFF">ROSSI</div>
                 <div class="badge-prof" id="prevProf">Medico Chirurgo</div>
                 <div class="badge-cf" id="prevCF">RSSMRA80A01H501Z</div>
                 <div class="badge-id">ID: P0001</div>
               </div>
             </div>
-            <div class="badge-footer"><span id="prevData">—</span><span id="prevLuogo">—</span></div>
+            <div class="badge-footer">
+              <div class="badge-footer-title" id="prevEvName">Nome evento ECM</div>
+              <div class="badge-footer-meta" id="prevMeta">—</div>
+            </div>
           </div>
           <div class="preview-actions">
             <p style="font-size:13px;color:var(--text2);line-height:1.5">Il QR è univoco per ogni partecipante e viene salvato su Firebase, accessibile da qualsiasi dispositivo.</p>
@@ -230,10 +231,13 @@ if(!evId){
 function initPreview(){
   const fmt=d=>d?new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}):'—';
   document.getElementById('prevEvName').textContent=evento.nome||'—';
-  document.getElementById('prevData').textContent=fmt(evento.data);
-  document.getElementById('prevLuogo').textContent=evento.luogo||'—';
-  if(evento.logo){document.getElementById('prevLogo').src=evento.logo;document.getElementById('prevLogo').style.display='block';document.getElementById('prevLogoPH').style.display='none';}
-  if(!prevQRInit){prevQRInit=true;const el=document.getElementById('prevQR');el.innerHTML='';new QRCode(el,{text:'ECM-PREVIEW',width:96,height:96,correctLevel:QRCode.CorrectLevel.M});}
+  document.getElementById('prevMeta').textContent=(evento.data?fmt(evento.data):'')+(evento.luogo?' · '+evento.luogo:'');
+  if(evento.logo){
+    document.getElementById('prevLogo').src=evento.logo;
+    document.getElementById('prevLogo').style.display='block';
+    document.getElementById('prevLogoPH').style.display='none';
+  }
+  if(!prevQRInit){prevQRInit=true;const el=document.getElementById('prevQR');el.innerHTML='';new QRCode(el,{text:'ECM-PREVIEW',width:120,height:120,correctLevel:QRCode.CorrectLevel.M});}
 }
 function updatePreview(){
   const c=document.getElementById('badgeColor').value;
@@ -241,12 +245,14 @@ function updatePreview(){
   const cf=document.getElementById('showCF').value==='yes';
   const pr=document.getElementById('showProf').value==='yes';
   settings={color:c,size:sz,showCF:cf,showProf:pr};
-  document.getElementById('prevBar').style.background=c;
+  // Aggiorna colore banner placeholder
+  const ph=document.getElementById('prevLogoPH');
+  if(ph&&ph.style.display!=='none') ph.style.background=c;
   document.getElementById('prevCognome').style.color=c;
   document.getElementById('prevCF').style.display=cf?'block':'none';
   document.getElementById('prevProf').style.display=pr?'block':'none';
-  const ns=sz==='large'?'21px':sz==='small'?'14px':'17px';
-  const ss=sz==='large'?'25px':sz==='small'?'17px':'21px';
+  const ns=sz==='large'?'17px':sz==='small'?'13px':'15px';
+  const ss=sz==='large'?'26px':sz==='small'?'18px':'22px';
   document.getElementById('prevNome').style.fontSize=ns;
   document.getElementById('prevCognome').style.fontSize=ss;
 }
@@ -301,16 +307,19 @@ function genQRUrl(text){
 function renderGrid(list){
   const ev=evento;const c=settings.color;
   const fmt=d=>d?new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}):'—';
-  const ns=settings.size==='large'?'21px':settings.size==='small'?'14px':'17px';
-  const ss=settings.size==='large'?'25px':settings.size==='small'?'17px':'21px';
-  const logoH=ev.logo?`<img class="badge-logo" src="${ev.logo}" style="max-height:42px;max-width:100px;object-fit:contain" alt="">`:`<div class="badge-logo-ph">Logo</div>`;
+  const ns=settings.size==='large'?'17px':settings.size==='small'?'13px':'15px';
+  const ss=settings.size==='large'?'26px':settings.size==='small'?'18px':'22px';
   document.getElementById('badgeGrid').innerHTML=list.map(p=>`
     <div class="badge-item">
       <div class="badge-card">
-        <div class="badge-accent" style="background:${c}"></div>
-        <div class="badge-header">${logoH}<div class="badge-ev-name">${esc(ev.nome||'')}</div></div>
+        <div class="badge-banner">
+          ${ev.logo
+            ? `<img src="${ev.logo}" style="width:100%;height:100%;object-fit:cover" alt="banner">`
+            : `<div class="badge-banner-ph" style="background:${c}">${esc(ev.nome||'Evento ECM')}</div>`
+          }
+        </div>
         <div class="badge-body">
-          <div class="badge-qr"><img src="${p.qr||''}" width="96" height="96" alt="QR"></div>
+          <div class="badge-qr"><img src="${p.qr||''}" width="120" height="120" alt="QR"></div>
           <div class="badge-info">
             <div class="badge-name" style="font-size:${ns}">${esc(p.nome)}</div>
             <div class="badge-surname" style="font-size:${ss};color:${c}">${esc(p.cognome)}</div>
@@ -319,7 +328,10 @@ function renderGrid(list){
             <div class="badge-id">ID: ${p.id}</div>
           </div>
         </div>
-        <div class="badge-footer"><span>${fmt(ev.data)}</span><span>${esc(ev.luogo||'')}</span></div>
+        <div class="badge-footer">
+          <div class="badge-footer-title">${esc(ev.nome||'')}</div>
+          <div class="badge-footer-meta">${fmt(ev.data)}${ev.luogo?' · '+esc(ev.luogo):''}</div>
+        </div>
       </div>
       <div class="badge-item-overlay"><button class="ov-btn" data-pid="${p.id}">🖨️ Stampa</button></div>
     </div>`).join('');
@@ -331,21 +343,31 @@ function printSingle(id){
   const fmt=d=>d?new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}):'—';
   const logoH=ev.logo?`<img src="${ev.logo}" style="max-height:42px;max-width:100px;object-fit:contain" alt="">`:'';
   const w=window.open('','_blank');
+  const bannerHTML=ev.logo
+    ? `<img src="${ev.logo}" style="width:100%;height:90px;object-fit:cover;display:block" alt="">`
+    : `<div style="width:100%;height:90px;background:${c};display:flex;align-items:center;justify-content:center;font-family:sans-serif;font-size:13px;font-weight:600;color:white;text-align:center;padding:0 12px">${esc(ev.nome||'Evento ECM')}</div>`;
   w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Badge</title>
   <style>body{margin:20px;font-family:'DM Sans',sans-serif;background:white}
-  .bc{width:330px;background:white;border-radius:12px;border:1px solid #E0DAD0;overflow:hidden}
-  .ba{height:4px;background:${c}}.bh{padding:14px 18px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #E0DAD0}
-  .bb{padding:18px;display:flex;gap:14px;align-items:center}.bf{padding:7px 18px;font-size:9px;color:#9B948C;border-top:1px solid #E0DAD0;display:flex;justify-content:space-between;background:#F0EDE6}
+  .bc{width:330px;background:white;border-radius:12px;border:1px solid #E0DAD0;overflow:hidden;display:flex;flex-direction:column}
+  .bb{padding:16px 18px 12px;display:flex;flex-direction:column;align-items:center;gap:10px}
+  .bf{padding:10px 16px;border-top:1px solid #E0DAD0;text-align:center;background:#F0EDE6}
   @media print{body{margin:0}}</style></head><body>
-  <div class="bc"><div class="ba"></div>
-  <div class="bh">${logoH}<div style="font-size:11px;font-weight:600;color:#6B6560;flex:1">${esc(ev.nome||'')}</div></div>
-  <div class="bb"><div><img src="${p.qr}" width="96" height="96"></div>
-  <div><div style="font-size:17px;font-weight:600">${esc(p.nome)}</div>
-  <div style="font-size:21px;font-weight:600;color:${c}">${esc(p.cognome)}</div>
-  <div style="font-size:10px;color:#6B6560;margin-top:2px">${esc(p.professione||'')}</div>
-  <div style="font-family:monospace;font-size:9px;color:#9B948C;margin-top:5px">${esc(p.cf||'')}</div>
-  <div style="font-family:monospace;font-size:8px;color:#9B948C;margin-top:5px">ID: ${p.id}</div></div></div>
-  <div class="bf"><span>${fmt(ev.data)}</span><span>${esc(ev.luogo||'')}</span></div></div>
+  <div class="bc">
+  ${bannerHTML}
+  <div class="bb">
+    <img src="${p.qr}" width="120" height="120">
+    <div style="text-align:center">
+      <div style="font-size:15px;font-weight:400;color:#6B6560">${esc(p.nome)}</div>
+      <div style="font-size:22px;font-weight:700;color:${c}">${esc(p.cognome)}</div>
+      <div style="font-size:11px;color:#6B6560;margin-top:3px">${esc(p.professione||'')}</div>
+      <div style="font-family:monospace;font-size:9px;color:#9B948C;margin-top:4px">${esc(p.cf||'')}</div>
+      <div style="font-family:monospace;font-size:8px;color:#9B948C;margin-top:3px">ID: ${p.id}</div>
+    </div>
+  </div>
+  <div class="bf">
+    <div style="font-size:11px;font-weight:600;color:#1A1714;line-height:1.3">${esc(ev.nome||'')}</div>
+    <div style="font-size:9px;color:#9B948C;margin-top:2px">${fmt(ev.data)}${ev.luogo?' · '+esc(ev.luogo):''}</div>
+  </div></div>
   <script>window.onload=()=>window.print();<\/script></body></html>`);
   w.document.close();
 }
