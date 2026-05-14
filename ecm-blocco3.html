@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ECM — Controllo Accessi</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -103,6 +103,10 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
 .live-clock{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent)}
 .bottom-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 @media(max-width:600px){.stats-bar{grid-template-columns:1fr 1fr}}
+/* Html5Qrcode overrides */
+#html5qr-scanner video{width:100%!important;height:100%!important;object-fit:cover!important;border-radius:0!important;position:absolute!important;inset:0!important}
+#html5qr-anchor,#html5qr-scanner__dashboard_section_csr,#html5qr-scanner__status_span,#html5qr-scanner__header_message{display:none!important}
+#html5qr-scanner>div:first-child{display:none!important}
 </style>
 </head>
 <body>
@@ -131,10 +135,10 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
           <button class="mode-btn in" id="modeIn">▶ ENTRATA</button>
           <button class="mode-btn" id="modeOut">◀ USCITA</button>
         </div>
-        <div class="scanner-wrap">
-          <video id="camVideo" autoplay playsinline muted></video>
-          <div class="scan-overlay"><div class="scan-frame"><div class="scan-bl"></div><div class="scan-br"></div><div class="scan-line" id="scanLine"></div></div></div>
-          <div class="scan-placeholder" id="scanPH">
+        <div class="scanner-wrap" style="position:relative;overflow:hidden;border-radius:var(--radius);background:#000;aspect-ratio:1;width:100%">
+          <video id="camVideo" style="display:none"></video>
+          <div id="html5qr-scanner" style="display:none;width:100%;height:100%"></div>
+          <div class="scan-placeholder" id="scanPH" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:var(--surface2)">
             <div style="font-size:44px;opacity:.35">📷</div>
             <div style="font-size:13px;color:var(--text2)">Camera non attiva</div>
             <div style="font-size:11px;color:var(--text3)">Premi Avvia per iniziare</div>
@@ -197,7 +201,6 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
   <div class="footer-info">Evento: <strong id="footerEvento">—</strong> · Modo: <strong id="footerModo" style="color:var(--success)">ENTRATA</strong></div>
   <div class="live-clock" id="liveClock">--:--:--</div>
 </footer>
-<canvas id="qrCanvas" style="display:none"></canvas>
 <script type="module">
 import { requireAuth, injectUserBar, requireRole } from './ecm-auth.js';
 await requireAuth();
@@ -210,8 +213,6 @@ const app=initializeApp(FB); const db=getFirestore(app);
 
 let evento=null, parts=[], mode='in', stream=null, scanning=false, cooldown=false, animFrame=null;
 const video=document.getElementById('camVideo');
-const canvas=document.getElementById('qrCanvas');
-const ctx=canvas.getContext('2d');
 
 document.getElementById('fbDot').className='fb-dot ok';
 document.getElementById('fbStatus').textContent='Firebase connesso';
@@ -259,90 +260,68 @@ function setMode(m){
   document.getElementById('footerModo').style.color=m==='in'?'var(--success)':'var(--danger)';
   hideResult();
 }
-// Rilevamento metodo scanner migliore per iOS/Android
-const hasBarcodeDetector = 'BarcodeDetector' in window;
-let barcodeDetector = null;
-if(hasBarcodeDetector){
-  try{ barcodeDetector = new BarcodeDetector({formats:['qr_code']}); }catch(e){ barcodeDetector=null; }
-}
+// ── SCANNER con Html5Qrcode (massima compatibilità iOS/Android) ──
+let html5QrCode = null;
 
 async function startCamera(){
   try{
-    // Su iOS serve width/height espliciti e facingMode exact
-    const constraints = {
-      video:{
-        facingMode:{ideal:'environment'},
-        width:{ideal:1920},
-        height:{ideal:1080},
-        aspectRatio:{ideal:1.777}
-      }
+    // Crea istanza html5QrCode sul div video
+    const scanDiv = document.getElementById('camVideo');
+    scanDiv.removeAttribute('autoplay');
+    scanDiv.removeAttribute('playsinline');
+    scanDiv.removeAttribute('muted');
+    scanDiv.style.display = 'none';
+
+    const scannerDiv = document.getElementById('html5qr-scanner');
+    scannerDiv.style.display = 'block';
+
+    html5QrCode = new Html5Qrcode('html5qr-scanner');
+
+    const config = {
+      fps: 10,
+      qrbox: { width: 220, height: 220 },
+      aspectRatio: 1.0,
+      supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
     };
-    stream=await navigator.mediaDevices.getUserMedia(constraints);
-    video.srcObject=stream;
-    await new Promise(r=>video.onloadedmetadata=r);
-    await video.play();
+
+    await html5QrCode.start(
+      { facingMode: 'environment' },
+      config,
+      (decodedText) => {
+        if(!cooldown){
+          handleQR(decodedText);
+          cooldown = true;
+          setTimeout(()=>cooldown=false, 2500);
+        }
+      },
+      (errorMsg) => { /* ignora errori frame */ }
+    );
+
     document.getElementById('scanPH').style.display='none';
     document.getElementById('btnStart').disabled=true;
     document.getElementById('btnStop').disabled=false;
     scanning=true;
-    // Mostra quale metodo viene usato
     const methodEl=document.getElementById('scanMethod');
     methodEl.style.display='block';
-    if(barcodeDetector){
-      methodEl.textContent='🟢 Scanner nativo attivo (BarcodeDetector)';
-      scanLoopNative();
-    } else {
-      methodEl.textContent='🟡 Scanner jsQR attivo — avvicina bene il QR';
-      scanLoopJsQR();
-    }
+    methodEl.textContent='🟢 Scanner attivo — punta il QR al centro';
+
   }catch(e){
-    alert('Camera non disponibile: '+e.message+'\n\nAssicurati di usare Safari su iPhone e di aver dato il permesso fotocamera.');
+    alert('Camera non disponibile.\n\n' + e.message + '\n\nSu iPhone usa Safari e assicurati di aver dato il permesso fotocamera in Impostazioni → Safari → Fotocamera.');
   }
 }
 
-function stopCamera(){
+async function stopCamera(){
   scanning=false;
-  if(animFrame)cancelAnimationFrame(animFrame);
-  if(stream)stream.getTracks().forEach(t=>t.stop());
-  stream=null; video.srcObject=null;
+  if(html5QrCode){
+    try{ await html5QrCode.stop(); html5QrCode.clear(); }catch(e){}
+    html5QrCode=null;
+  }
   document.getElementById('scanPH').style.display='flex';
+  document.getElementById('html5qr-scanner').style.display='none';
+  document.getElementById('camVideo').style.display='block';
   document.getElementById('btnStart').disabled=false;
   document.getElementById('btnStop').disabled=true;
-}
-
-// Metodo 1: BarcodeDetector API nativa (iOS 17+, Chrome Android)
-async function scanLoopNative(){
-  if(!scanning) return;
-  try{
-    const codes = await barcodeDetector.detect(video);
-    if(codes.length>0 && !cooldown){
-      handleQR(codes[0].rawValue);
-      cooldown=true; setTimeout(()=>cooldown=false,2500);
-    }
-  }catch(e){}
-  animFrame = setTimeout(scanLoopNative, 200);
-}
-
-// Metodo 2: jsQR canvas (fallback universale)
-function scanLoopJsQR(){
-  if(!scanning) return;
-  try{
-    if(video.readyState===video.HAVE_ENOUGH_DATA && video.videoWidth>0){
-      // Ridimensiona per performance su mobile
-      const scale = Math.min(1, 640/video.videoWidth);
-      canvas.width  = Math.round(video.videoWidth  * scale);
-      canvas.height = Math.round(video.videoHeight * scale);
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      // Prova tutte le modalità di inversione per massima compatibilità
-      const code = jsQR(img.data, img.width, img.height, {inversionAttempts:'both'});
-      if(code && !cooldown){
-        handleQR(code.data);
-        cooldown=true; setTimeout(()=>cooldown=false,2500);
-      }
-    }
-  }catch(e){}
-  animFrame = requestAnimationFrame(scanLoopJsQR);
+  document.getElementById('scanMethod').style.display='none';
 }
 async function handleQR(raw){
   const pts=raw.split('|');
