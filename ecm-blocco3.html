@@ -107,6 +107,26 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
 #html5qr-scanner video{width:100%!important;height:100%!important;object-fit:cover!important;border-radius:0!important;position:absolute!important;inset:0!important}
 #html5qr-anchor,#html5qr-scanner__dashboard_section_csr,#html5qr-scanner__status_span,#html5qr-scanner__header_message{display:none!important}
 #html5qr-scanner>div:first-child{display:none!important}
+
+/* RESPONSIVE AUTO-SIZING */
+
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr!important}
+  .stats-bar{grid-template-columns:repeat(4,1fr)}
+}
+@media(max-width:600px){
+  .stats-bar{grid-template-columns:1fr 1fr!important}
+  .cam-btns{grid-template-columns:1fr 1fr}
+  .bottom-btns{flex-direction:column}
+  .bottom-btns .btn{width:100%;justify-content:center}
+  header{padding:0 14px}
+  main{padding:16px 14px 80px}
+  .mode-toggle button{font-size:12px;padding:8px 4px}
+}
+@media(max-width:380px){
+  .stats-bar{grid-template-columns:1fr 1fr!important}
+  .stat-num{font-size:22px}
+}
 </style>
 </head>
 <body>

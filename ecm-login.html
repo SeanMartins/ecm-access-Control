@@ -28,6 +28,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .status-msg.err{color:var(--danger)}
 .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* RESPONSIVE AUTO-SIZING */
+
+@media(max-width:480px){
+  .login-card{padding:32px 22px}
+  .login-title{font-size:20px}
+}
 </style>
 </head>
 <body>

@@ -81,6 +81,30 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
 .footer-info{font-size:13px;color:var(--text3)}.footer-info strong{color:var(--text2)}
 @media print{header,footer,.toolbar,.export-grid,.tabs,#tabAnalisi,#tabExport,.btn,.page-title,.page-sub,#toolsRow{display:none!important}body{background:white}main{padding:0;max-width:100%}.card{box-shadow:none;border:none;padding:0}.summary-grid{grid-template-columns:repeat(5,1fr)}}
 @media(max-width:700px){.summary-grid{grid-template-columns:1fr 1fr}.ev-grid{grid-template-columns:1fr}.export-grid{grid-template-columns:1fr}}
+
+/* RESPONSIVE AUTO-SIZING */
+
+@media(max-width:900px){
+  .summary-grid{grid-template-columns:repeat(3,1fr)!important}
+  .ev-grid{grid-template-columns:1fr 1fr!important}
+  .export-grid{grid-template-columns:1fr!important}
+}
+@media(max-width:600px){
+  .summary-grid{grid-template-columns:1fr 1fr!important}
+  .ev-grid{grid-template-columns:1fr!important}
+  .toolbar{flex-direction:column}
+  .toolbar input,.toolbar select{width:100%}
+  .tabs{overflow-x:auto;flex-wrap:nowrap}
+  .tab{white-space:nowrap;flex-shrink:0}
+  header{padding:0 14px}
+  main{padding:24px 14px 80px}
+  .page-title{font-size:22px}
+  table{font-size:11px}
+  th,td{padding:7px 8px}
+}
+@media(max-width:480px){
+  .summary-grid{grid-template-columns:1fr 1fr!important}
+}
 </style>
 </head>
 <body>
