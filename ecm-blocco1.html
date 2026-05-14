@@ -401,7 +401,7 @@ body{padding-bottom:70px!important}
 <script type="module">
 import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-const ADMIN_EMAIL = "seanmartins@gmail.com";
+const ADMIN_EMAIL = "martinsosem@gmail.com";
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
 const app2=getApps().length?getApps()[0]:initializeApp(FB);
 onAuthStateChanged(getAuth(app2), user=>{
