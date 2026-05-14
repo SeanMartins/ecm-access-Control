@@ -73,7 +73,7 @@ input[type=color]{padding:4px 8px;height:40px;cursor:pointer}
 @keyframes spin{to{transform:rotate(360deg)}}
 .alert-no{padding:12px 16px;border-radius:var(--radius);background:var(--danger-light);color:var(--danger);border:1px solid rgba(193,59,42,.25);font-size:13px;margin-bottom:16px}
 .actions-row{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;padding-top:18px;border-top:1px solid var(--border)}
-footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:12px 28px;display:flex;align-items:center;justify-content:space-between;z-index:50}
+footer{display:none}
 .footer-info{font-size:13px;color:var(--text3)}.footer-info strong{color:var(--text2)}
 @media print{
   header,footer,.card:not(.print-card),.actions-row,.search-bar,.preview-actions,.btn,.stats-row,.page-title,.page-sub,#settingsCard{display:none!important}
@@ -90,7 +90,8 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
   <div class="logo"><span class="logo-dot"></span>ECM Access Control</div>
   <div style="display:flex;align-items:center;gap:10px">
     <div class="fb-badge"><div class="fb-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
-    <div class="nav-pills"><div class="nav-pill done">① Setup</div><div class="nav-pill active">② Badge</div><div class="nav-pill">③ Accesso</div><div class="nav-pill">④ Report</div></div>
+    <span style="font-size:12px;color:rgba(255,255,255,.5)">Badge: <strong style="color:rgba(255,255,255,.8)" id="footerGen">0</strong>/<strong style="color:rgba(255,255,255,.8)" id="footerTot">0</strong></span>
+    <div id="userBarSlot"></div>
   </div>
 </header>
 <main>
