@@ -199,8 +199,9 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
 </footer>
 <canvas id="qrCanvas" style="display:none"></canvas>
 <script type="module">
-import { requireAuth, injectUserBar } from './ecm-auth.js';
+import { requireAuth, injectUserBar, requireRole } from './ecm-auth.js';
 await requireAuth();
+requireRole(['scanner','operatore','report','admin']);
 injectUserBar('userBarSlot');
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, collection, getDocs, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -457,6 +458,22 @@ body{padding-bottom:70px!important}
   <a href="ecm-connetti.html" class="bn-item">
     <div class="bn-icon">📲</div><div class="bn-label">Tablet</div>
   </a>
+  <a href="ecm-admin.html" class="bn-item" id="adminNavItem" style="display:none">
+    <div class="bn-icon">👑</div><div class="bn-label">Admin</div>
+  </a>
 </nav>
+<script type="module">
+import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+const ADMIN_EMAIL = "seanmartins@gmail.com";
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+const app2=getApps().length?getApps()[0]:initializeApp(FB);
+onAuthStateChanged(getAuth(app2), user=>{
+  if(user && user.email===ADMIN_EMAIL){
+    const el=document.getElementById("adminNavItem");
+    if(el){ el.style.display="flex"; }
+  }
+});
+</script>
 </body>
 </html>
