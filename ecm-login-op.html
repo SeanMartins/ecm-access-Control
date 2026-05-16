@@ -147,8 +147,10 @@ window.doLogin = async function(){
 
     // Reindirizza in base al ruolo
     setTimeout(()=>{
-      if(found.ruolo==='scanner') window.location.href='ecm-eventi.html';
-      else window.location.href='ecm-eventi.html';
+      // Scanner e operatori vanno alla lista eventi per scegliere l'evento
+      const redirect=sessionStorage.getItem('ecm_redirect_after_login')||'ecm-eventi.html';
+      sessionStorage.removeItem('ecm_redirect_after_login');
+      window.location.href=redirect;
     },800);
 
   }catch(err){
@@ -161,7 +163,10 @@ window.doLogin = async function(){
 window.doGoogleLogin = async function(){
   try{
     await signInWithPopup(auth, new GoogleAuthProvider());
-    window.location.href='ecm-home.html';
+    // Torna alla pagina da cui veniva, o agli eventi
+    const redirect = sessionStorage.getItem('ecm_redirect_after_login') || 'ecm-eventi.html';
+    sessionStorage.removeItem('ecm_redirect_after_login');
+    window.location.href = redirect;
   }catch(e){
     if(e.code!=='auth/popup-closed-by-user'){
       document.getElementById('statusMsg').textContent='Errore Google: '+e.message;
