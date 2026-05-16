@@ -10,7 +10,7 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0D0F14;--surface:#13161F;--surface2:#1C2030;--surface3:#242840;--border:#2A2E45;--border2:#363C58;--text:#F0F2FF;--text2:#8B93B8;--text3:#4A5070;--accent:#4D6EFF;--accent2:#FF6B35;--success:#22C97A;--danger:#FF4D4D;--warn:#FFB547;--radius:12px;--radius-lg:20px}
+:root{--bg:#F5F3EE;--surface:#FFFFFF;--surface2:#F0EDE6;--surface3:#E8E4DC;--border:#E0DAD0;--border2:#C8C0B4;--text:#1A1714;--text2:#6B6560;--text3:#9B948C;--accent:#2B4EFF;--accent-light:#EEF1FF;--accent2:#FF6B35;--success:#1A7A4A;--success-light:#E8F5EE;--danger:#C13B2A;--danger-light:#FDEEE9;--warn:#B07A10;--warn-light:#FDF5E0;--radius:10px;--radius-lg:16px;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06)}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6;overflow-x:hidden}
 .bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(77,110,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(77,110,255,0.04) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
 .bg-glow{position:fixed;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(77,110,255,0.08) 0%,transparent 70%);top:-200px;left:-100px;pointer-events:none;z-index:0}
@@ -308,7 +308,7 @@ document.getElementById('resetBtn').addEventListener('click', () => {
 });
 </script>
 <style>
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#13161F;border-top:1px solid #2A2E45;display:flex;align-items:stretch;z-index:200;padding-bottom:env(safe-area-inset-bottom)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid #2A2E45;display:flex;align-items:stretch;z-index:200;padding-bottom:env(safe-area-inset-bottom)}
 .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 4px;text-decoration:none;color:#4A5070;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;letter-spacing:.02em;transition:all .2s;cursor:pointer;border:none;background:none;-webkit-tap-highlight-color:transparent}
 .bn-item:hover{color:#8B93B8;background:rgba(255,255,255,.03)}
 .bn-item.active{color:#4D6EFF}
