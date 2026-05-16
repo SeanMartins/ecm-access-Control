@@ -156,6 +156,22 @@ header{border-bottom:1px solid var(--border);background:rgba(13,15,20,.9);backdr
   </div>
 </div>
 
+<!-- Modal assegna scanner (per operatori) -->
+<div class="modal-overlay" id="scannerModal">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-size:17px;font-weight:600" id="scannerModalTitle">Assegna scanner</div>
+      <button onclick="closeScannerModal()" style="background:transparent;border:none;color:var(--text3);font-size:20px;cursor:pointer">×</button>
+    </div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Seleziona quali scanner possono accedere a questo evento.</p>
+    <div id="scannerModalList"><div style="color:var(--text3);font-size:13px;padding:20px;text-align:center">Caricamento...</div></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+      <button class="btn btn-outline" onclick="closeScannerModal()">Annulla</button>
+      <button class="btn btn-success" id="saveScannerBtn" onclick="salvaScannerAssegnati()">✓ Salva</button>
+    </div>
+  </div>
+</div>
+
 <!-- Navbar -->
 <nav class="bottom-nav">
   <a href="ecm-eventi.html" class="bn-item active"><div class="bn-icon">📋</div><div class="bn-label">Eventi</div></a>
@@ -201,20 +217,103 @@ if(currentEvId){
   }catch(e){}
 }
 
-// Carica tutti gli eventi
+// Carica eventi — filtrati per ruolo utente
+// ─── ASSEGNA SCANNER (per operatori completi) ────────────────
+let scannerModalEvId=null, scannerModalEvNome='', tuttiScanner=[];
+
+window.openAssegnaScanner = async function(evId, evNome){
+  scannerModalEvId=evId; scannerModalEvNome=evNome;
+  document.getElementById('scannerModalTitle').textContent=`👥 Scanner per: ${evNome}`;
+  document.getElementById('scannerModalList').innerHTML='<div style="color:var(--text3);font-size:13px;padding:20px;text-align:center">Caricamento scanner...</div>';
+  document.getElementById('scannerModal').classList.add('show');
+  try{
+    // Carica tutti gli utenti scanner
+    const snap=await getDocs(collection(db,'utenti'));
+    tuttiScanner=[];
+    snap.forEach(d=>{const u={id:d.id,...d.data()};if(u.ruolo==='scanner'&&u.attivo!==false)tuttiScanner.push(u);});
+    if(!tuttiScanner.length){
+      document.getElementById('scannerModalList').innerHTML='<div style="color:var(--text3);font-size:13px;padding:20px;text-align:center">Nessuno scanner creato.<br>Creane uno dalla pagina Admin.</div>';
+      return;
+    }
+    const now=new Date();
+    document.getElementById('scannerModalList').innerHTML=tuttiScanner.map(u=>{
+      const evAssegnati=(u.eventiAssegnati||[]).map(e=>e.id);
+      const checked=evAssegnati.includes(evId);
+      const scad=new Date(u.scadenza);
+      const scaduto=scad<now;
+      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid ${checked?'var(--accent)':'var(--border)'};border-radius:10px;margin-bottom:8px;background:${checked?'rgba(77,110,255,.06)':'transparent'};cursor:pointer;transition:all .2s" onclick="toggleScanner('${u.id}',this)">
+        <input type="checkbox" id="sck_${u.id}" ${checked?'checked':''} ${scaduto?'disabled':''} onclick="event.stopPropagation()" style="width:16px;height:16px;accent-color:var(--accent)">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:500;${scaduto?'color:var(--danger)':''}">${esc(u.nome||u.username)} ${scaduto?'<span style="font-size:10px">(scaduto)</span>':''}</div>
+          <div style="font-size:11px;color:var(--text3);font-family:monospace">${u.username} · scade ${scad.toLocaleDateString('it-IT')}</div>
+        </div>
+        <span style="font-size:20px">📷</span>
+      </div>`;
+    }).join('');
+  }catch(err){
+    document.getElementById('scannerModalList').innerHTML=`<div style="color:var(--danger);font-size:13px;padding:20px">Errore: ${err.message}</div>`;
+  }
+};
+
+window.toggleScanner=function(uid,row){
+  const cb=document.getElementById('sck_'+uid);
+  if(cb&&!cb.disabled){
+    cb.checked=!cb.checked;
+    row.style.borderColor=cb.checked?'var(--accent)':'var(--border)';
+    row.style.background=cb.checked?'rgba(77,110,255,.06)':'transparent';
+  }
+};
+
+window.salvaScannerAssegnati=async function(){
+  if(!scannerModalEvId)return;
+  const btn=document.getElementById('saveScannerBtn');
+  btn.disabled=true;btn.textContent='Salvataggio...';
+  try{
+    // Per ogni scanner aggiorna i suoi eventiAssegnati
+    for(const u of tuttiScanner){
+      const cb=document.getElementById('sck_'+u.id);
+      if(!cb)continue;
+      const evAssegnati=(u.eventiAssegnati||[]);
+      let nuovi;
+      if(cb.checked){
+        // Aggiungi evento se non già presente
+        if(!evAssegnati.find(e=>e.id===scannerModalEvId)){
+          nuovi=[...evAssegnati,{id:scannerModalEvId,nome:scannerModalEvNome}];
+        }else nuovi=evAssegnati;
+      }else{
+        // Rimuovi evento
+        nuovi=evAssegnati.filter(e=>e.id!==scannerModalEvId);
+      }
+      if(JSON.stringify(nuovi)!==JSON.stringify(evAssegnati)){
+        await updateDoc(doc(db,'utenti',u.id),{eventiAssegnati:nuovi});
+      }
+    }
+    closeScannerModal();
+    alert('✓ Scanner aggiornati per questo evento!');
+  }catch(err){alert('Errore: '+err.message);}
+  finally{btn.disabled=false;btn.textContent='✓ Salva';}
+};
+
+window.closeScannerModal=()=>document.getElementById('scannerModal').classList.remove('show');
+
 async function loadEvents(){
   document.getElementById('loadingState').style.display='flex';
   document.getElementById('eventsGrid').style.display='none';
   document.getElementById('emptyState').style.display='none';
   try{
     const snap=await getDocs(collection(db,'eventi'));
-    allEvents=[];
-    snap.forEach(d=>allEvents.push({id:d.id,...d.data()}));
-    // Ordina per data decrescente
-    allEvents.sort((a,b)=>{
-      const da=new Date(a.data||0), db2=new Date(b.data||0);
-      return db2-da;
-    });
+    let allEventsRaw=[];
+    snap.forEach(d=>allEventsRaw.push({id:d.id,...d.data()}));
+    allEventsRaw.sort((a,b)=>new Date(b.data||0)-new Date(a.data||0));
+
+    // Se operatore con eventi assegnati → filtra
+    const op=JSON.parse(localStorage.getItem('ecm_op_user')||'null');
+    if(op && op.eventiAssegnati && op.eventiAssegnati.length>0){
+      const ids=op.eventiAssegnati.map(e=>e.id);
+      allEvents=allEventsRaw.filter(ev=>ids.includes(ev.id));
+    } else {
+      allEvents=allEventsRaw;
+    }
     renderEvents();
   }catch(err){
     document.getElementById('loadingState').innerHTML=`<div style="color:var(--danger)">Errore: ${err.message}</div>`;
@@ -240,6 +339,12 @@ function renderEvents(){
 
   document.getElementById('emptyState').style.display='none';
   document.getElementById('eventsGrid').style.display='grid';
+
+  // Determina ruolo utente corrente
+  const opSession=JSON.parse(localStorage.getItem('ecm_op_user')||'null');
+  const isAdminMode=!opSession; // admin Google non ha sessione operatore
+  const isOperatoreMode=opSession&&opSession.ruolo==='operatore';
+  const isScannerMode=opSession&&opSession.ruolo==='scanner';
 
   const colors=['#4D6EFF','#22C97A','#FF6B35','#FFB547','#FF4D4D','#9B59B6'];
 
@@ -273,8 +378,10 @@ function renderEvents(){
         </div>
         <div class="event-actions">
           ${!isSelected?`<button class="btn btn-primary btn-sm" onclick="selectEvent('${ev.id}','${esc(ev.nome||'')}')">✓ Seleziona</button>`:'<button class="btn btn-success btn-sm" disabled>✓ Attivo</button>'}
-          <a href="ecm-blocco1.html?evId=${ev.id}" class="btn btn-outline btn-sm">⚙️ Modifica</a>
-          ${!isArchiviato?`<button class="btn btn-warn btn-sm" onclick="openModal('${ev.id}','archivio')">📦 Archivia</button>`:'<button class="btn btn-outline btn-sm" onclick="openModal(\''+ev.id+'\',\'ripristina\')">↩ Ripristina</button>'}
+          ${(isAdminMode||isOperatoreMode)?`<a href="ecm-blocco1.html?evId=${ev.id}" class="btn btn-outline btn-sm">⚙️ Modifica</a>`:''}
+          ${isOperatoreMode?`<button class="btn btn-primary btn-sm" onclick="openAssegnaScanner('${ev.id}','${esc(ev.nome||'')}')">👥 Scanner</button>`:''}
+          ${isAdminMode&&!isArchiviato?`<button class="btn btn-warn btn-sm" onclick="openModal('${ev.id}','archivio')">📦 Archivia</button>`:''}
+          ${isAdminMode&&isArchiviato?`<button class="btn btn-outline btn-sm" onclick="openModal('${ev.id}','ripristina')">↩ Ripristina</button>`:''}
         </div>
       </div>
     </div>`;

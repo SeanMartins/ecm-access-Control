@@ -137,10 +137,11 @@ window.doLogin = async function(){
       btn.disabled=false;btn.textContent='Accedi';return;
     }
 
-    // Salva sessione operatore in localStorage
+    // Salva sessione operatore in localStorage (inclusi eventi assegnati)
     localStorage.setItem('ecm_op_user', JSON.stringify({
       uid:found.id, username:found.username, nome:found.nome,
-      ruolo:found.ruolo, scadenza:found.scadenza, loginAt:new Date().toISOString()
+      ruolo:found.ruolo, scadenza:found.scadenza, loginAt:new Date().toISOString(),
+      eventiAssegnati:found.eventiAssegnati||[]
     }));
 
     msg.textContent='✓ Accesso effettuato!';msg.className='status-msg ok';
