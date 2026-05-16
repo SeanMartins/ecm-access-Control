@@ -83,7 +83,7 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(77,110,255,.12)
 <script type="module">
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
 const app=getApps().length?getApps()[0]:initializeApp(FB);
@@ -143,6 +143,9 @@ window.doLogin = async function(){
       ruolo:found.ruolo, scadenza:found.scadenza, loginAt:new Date().toISOString(),
       eventiAssegnati:found.eventiAssegnati||[]
     }));
+
+    // Login anonimo Firebase per avere auth token (necessario per Firestore rules)
+    try{ await signInAnonymously(auth); }catch(e){ console.warn('Anonymous auth:', e.message); }
 
     msg.textContent='✓ Accesso effettuato!';msg.className='status-msg ok';
 
