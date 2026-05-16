@@ -274,18 +274,24 @@ const db=getFirestore(app);
 const auth=getAuth(app);
 
 // ADMIN EMAIL — cambia con la tua email Google
-const ADMIN_EMAIL = 'martinsosem@gmail.com'; // ← SOSTITUISCI con la tua email
+const ADMIN_EMAIL = 'martinsosem@gmail.com';
 
-const user = await requireAuth();
+// requireAuth restituisce {googleUser, opUser}
+const { googleUser, opUser } = await requireAuth();
 injectUserBar('userBarSlot');
 
-// Verifica che sia admin
-if(user.email !== ADMIN_EMAIL){
-  document.body.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;color:#FF4D4D;font-size:16px;text-align:center;padding:20px">
-    ⛔ Accesso negato.<br><br>Questa pagina è riservata all'amministratore.<br><br>
-    <a href="ecm-home.html" style="color:#4D6EFF">← Torna alla home</a></div>`;
+// Solo admin Google può accedere — operatori con username/pw non entrano
+if(!googleUser || googleUser.email !== ADMIN_EMAIL){
+  document.body.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'DM Sans',sans-serif;color:#FF4D4D;font-size:16px;text-align:center;padding:20px;background:#0D0F14">
+    ⛔ Accesso negato.<br><br>
+    <span style="font-size:13px;color:#8B93B8">Questa pagina è riservata all'amministratore.<br>
+    ${googleUser?'Email: <strong style="color:#F0F2FF">'+googleUser.email+'</strong><br>Non corrisponde all'account admin.':''}</span><br><br>
+    <a href="ecm-home.html" style="color:#4D6EFF;font-size:14px">← Torna alla home</a></div>`;
   throw new Error('Non admin');
 }
+
+// Riferimento all'utente Google per uso successivo
+const user = googleUser;
 
 const BASE_URL = window.location.origin + window.location.pathname.replace('ecm-admin.html','');
 let selectedRole = null;
