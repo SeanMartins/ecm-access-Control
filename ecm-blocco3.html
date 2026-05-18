@@ -337,30 +337,32 @@ document.getElementById('tuttiSearch').addEventListener('input',renderTutti);
 document.getElementById('resetBtn').addEventListener('click',()=>alert('Per resettare i log:\nFirebase Console → Firestore → eventi/'+evId+'/logs\nSeleziona tutti i documenti e cancellali manualmente.'));
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 
-// Pannello nuovo partecipante
-document.getElementById('btnToggleNP').addEventListener('click',()=>{
-  const panel=document.getElementById('nuovoPPanel');
-  const btn=document.getElementById('btnToggleNP');
-  const open=panel.style.display==='none';
-  panel.style.display=open?'block':'none';
-  btn.textContent=open?'Chiudi':'Apri';
-});
-
-document.querySelectorAll('[data-nptab]').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const tab=btn.dataset.nptab;
-    document.querySelectorAll('.nuovop-tab').forEach(t=>t.classList.remove('active'));
-    document.querySelectorAll('.nuovop-panel').forEach(p=>p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('np-tab-'+tab).classList.add('active');
+// Pannello nuovo partecipante - listener registrati con delay per sicurezza
+setTimeout(()=>{
+  const btnToggle=document.getElementById('btnToggleNP');
+  if(btnToggle) btnToggle.addEventListener('click',()=>{
+    const panel=document.getElementById('nuovoPPanel');
+    const open=panel.style.display==='none';
+    panel.style.display=open?'block':'none';
+    btnToggle.textContent=open?'Chiudi':'Apri';
   });
-});
 
-const btnSalvaNP=document.getElementById('btnSalvaNuovoP');
-if(btnSalvaNP) btnSalvaNP.addEventListener('click',salvaPartecipanteNuovo);
+  document.querySelectorAll('[data-nptab]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const tab=btn.dataset.nptab;
+      document.querySelectorAll('.nuovop-tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.nuovop-panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('np-tab-'+tab).classList.add('active');
+    });
+  });
 
-const btnResetNP=document.getElementById('btnResetNuovoP');
-if(btnResetNP) btnResetNP.addEventListener('click',resetNuovoP);
+  const btnSalvaNP=document.getElementById('btnSalvaNuovoP');
+  if(btnSalvaNP) btnSalvaNP.addEventListener('click',()=>salvaPartecipanteNuovo());
+
+  const btnResetNP=document.getElementById('btnResetNuovoP');
+  if(btnResetNP) btnResetNP.addEventListener('click',()=>resetNuovoP());
+}, 500);
 setInterval(()=>document.getElementById('liveClock').textContent=new Date().toLocaleTimeString('it-IT'),1000);
 
 function setMode(m){
@@ -851,6 +853,49 @@ onAuthStateChanged(getAuth(app2), user=>{
     const el=document.getElementById("adminNavItem");
     if(el){ el.style.display="flex"; }
   }
+});
+</script>
+<script>
+// Bridge sicuro per bottoni pannello nuovo partecipante
+document.addEventListener('DOMContentLoaded', function(){
+  // Retry ogni 200ms finché i bottoni non sono pronti
+  let attempts = 0;
+  const init = setInterval(()=>{
+    attempts++;
+    const btnToggle = document.getElementById('btnToggleNP');
+    if(btnToggle && !btnToggle._init){
+      btnToggle._init = true;
+      btnToggle.addEventListener('click', function(){
+        const panel = document.getElementById('nuovoPPanel');
+        const open = panel.style.display === 'none';
+        panel.style.display = open ? 'block' : 'none';
+        btnToggle.textContent = open ? 'Chiudi' : 'Apri';
+      });
+      // Tab OCR/Manuale
+      document.querySelectorAll('[data-nptab]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          const tab = btn.dataset.nptab;
+          document.querySelectorAll('.nuovop-tab').forEach(t=>t.classList.remove('active'));
+          document.querySelectorAll('.nuovop-panel').forEach(p=>p.classList.remove('active'));
+          btn.classList.add('active');
+          const panel = document.getElementById('np-tab-'+tab);
+          if(panel) panel.classList.add('active');
+        });
+      });
+      // Salva
+      const btnSalva = document.getElementById('btnSalvaNuovoP');
+      if(btnSalva) btnSalva.addEventListener('click', function(){
+        if(window.salvaPartecipanteNuovo) window.salvaPartecipanteNuovo();
+      });
+      // Reset
+      const btnReset = document.getElementById('btnResetNuovoP');
+      if(btnReset) btnReset.addEventListener('click', function(){
+        if(window.resetNuovoP) window.resetNuovoP();
+      });
+      clearInterval(init);
+    }
+    if(attempts > 50) clearInterval(init); // Max 10 secondi
+  }, 200);
 });
 </script>
 </body>
