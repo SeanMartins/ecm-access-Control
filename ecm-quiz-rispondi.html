@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Questionario ECM</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F5F3EE;--surface:#FFF;--surface2:#F0EDE6;--border:#E0DAD0;--text:#1A1714;--text2:#6B6560;--text3:#9B948C;--accent:#2B4EFF;--accent-light:#EEF1FF;--success:#1A7A4A;--success-light:#E8F5EE;--danger:#C13B2A;--danger-light:#FDEEE9;--warn:#B07A10;--warn-light:#FDF5E0;--radius:10px;--radius-lg:16px;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06)}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6;padding-bottom:40px}
+.quiz-header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 22px;box-shadow:var(--shadow)}
+.quiz-ev-nome{font-size:17px;font-weight:600;margin-bottom:2px}
+.quiz-ev-meta{font-size:12px;color:var(--text3)}
+.quiz-badge{display:inline-flex;align-items:center;gap:5px;background:var(--accent-light);color:var(--accent);border:1px solid rgba(43,78,255,.2);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;margin-top:4px}
+main{max-width:620px;margin:0 auto;padding:28px 20px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:16px;box-shadow:var(--shadow)}
+/* Progress */
+.progress-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.progress-label{font-size:12px;font-weight:500;color:var(--text2)}
+.progress-pct{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace}
+.progress-bar{height:6px;background:var(--border);border-radius:100px;margin-bottom:24px;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);border-radius:100px;transition:width .4s}
+/* CF step */
+.cf-input{width:100%;background:var(--surface2);border:2px solid var(--border);border-radius:var(--radius);padding:12px 16px;font-family:'DM Mono',monospace;font-size:18px;letter-spacing:.12em;text-transform:uppercase;color:var(--text);outline:none;transition:border-color .2s;text-align:center;margin-bottom:8px}
+.cf-input:focus{border-color:var(--accent);background:white}
+.cf-info{font-size:12px;color:var(--text3);text-align:center;min-height:18px}
+.cf-info.valid{color:var(--success)}
+.cf-info.invalid{color:var(--danger)}
+/* Domanda */
+.domanda-num{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.domanda-testo{font-size:17px;font-weight:600;margin-bottom:20px;line-height:1.4}
+/* Opzioni multipla */
+.opzioni-list{display:flex;flex-direction:column;gap:8px}
+.opzione-item{display:flex;align-items:center;gap:12px;padding:13px 16px;border:2px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .2s;background:var(--surface)}
+.opzione-item:hover{border-color:var(--accent);background:var(--accent-light)}
+.opzione-item.selected{border-color:var(--accent);background:var(--accent-light)}
+.opzione-lettera{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--text2);flex-shrink:0;transition:all .2s}
+.opzione-item.selected .opzione-lettera{border-color:var(--accent);background:var(--accent);color:white}
+.opzione-testo{font-size:14px;color:var(--text);flex:1}
+/* Domanda aperta */
+.risposta-aperta{width:100%;min-height:120px;background:var(--surface2);border:2px solid var(--border);border-radius:var(--radius);padding:13px 16px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;resize:vertical;transition:border-color .2s}
+.risposta-aperta:focus{border-color:var(--accent);background:white}
+/* Navigazione */
+.nav-row{display:flex;gap:10px;margin-top:20px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:13px 24px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .18s;border:none;flex:1}
+.btn-primary{background:var(--accent);color:white}.btn-primary:hover{background:#1a3ce0}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border);flex:0 0 auto;padding:13px 20px}.btn-outline:hover{background:var(--surface2)}
+.btn-success{background:var(--success);color:white}.btn-success:hover{background:#145e38}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Riepilogo */
+.riepilogo-item{display:flex;align-items:flex-start;gap:12px;padding:12px;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;background:var(--surface2)}
+.riepilogo-num{width:26px;height:26px;border-radius:50%;background:var(--accent);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.riepilogo-q{font-size:12px;color:var(--text2);margin-bottom:3px}
+.riepilogo-r{font-size:13px;font-weight:500;color:var(--text)}
+/* Successo */
+.success-wrap{text-align:center;padding:20px 0}
+.success-icon{font-size:60px;margin-bottom:14px}
+.success-title{font-size:22px;font-weight:700;margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--text2);margin-bottom:20px}
+.punteggio-display{padding:20px;border-radius:var(--radius-lg);margin-bottom:20px;text-align:center}
+.punteggio-num{font-size:48px;font-weight:700;margin-bottom:4px}
+.punteggio-label{font-size:14px;font-weight:500}
+/* Loading/Error */
+.loading{text-align:center;padding:60px 20px;color:var(--text3)}
+.spinner-dark{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px}
+</style>
+</head>
+<body>
+<div class="quiz-header">
+  <div class="quiz-ev-nome" id="evNome">Caricamento...</div>
+  <div class="quiz-ev-meta" id="evMeta"></div>
+  <div class="quiz-badge">📋 Questionario ECM</div>
+</div>
+
+<main>
+  <!-- LOADING -->
+  <div id="loadingState" class="loading"><div class="spinner-dark"></div>Caricamento questionario...</div>
+
+  <!-- ERRORE -->
+  <div id="errorState" style="display:none">
+    <div class="card" style="text-align:center;padding:36px">
+      <div style="font-size:44px;margin-bottom:12px">⚠️</div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:8px" id="errorMsg">Questionario non disponibile</div>
+      <div style="font-size:13px;color:var(--text2)">Contatta l'organizzatore dell'evento</div>
+    </div>
+  </div>
+
+  <!-- STEP 1: CF -->
+  <div id="cfState" style="display:none">
+    <div class="card">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:40px;margin-bottom:10px">📋</div>
+        <div style="font-size:18px;font-weight:600;margin-bottom:6px">Questionario ECM</div>
+        <div style="font-size:13px;color:var(--text2)">Inserisci il tuo codice fiscale per iniziare</div>
+      </div>
+      <input type="text" class="cf-input" id="cfInput" placeholder="RSSMRA80A01H501Z" maxlength="16" oninput="onCFInput(this)">
+      <div class="cf-info" id="cfInfo">Il CF collega le risposte al tuo profilo</div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-outline" onclick="startQuiz('')">Salta</button>
+      <button class="btn btn-primary" id="btnStartCF" onclick="startQuiz(document.getElementById('cfInput').value)" disabled>Inizia questionario →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: DOMANDE -->
+  <div id="quizState" style="display:none">
+    <div class="progress-header">
+      <span class="progress-label" id="progressLabel">Domanda 1 di 3</span>
+      <span class="progress-pct" id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="card" id="domandaCard">
+      <div class="domanda-num" id="domandaNum"></div>
+      <div class="domanda-testo" id="domandaTesto"></div>
+      <div id="domandaInputWrap"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="btnPrev" onclick="prevStep()" style="display:none">← Indietro</button>
+      <button class="btn btn-primary" id="btnNext" onclick="nextStep()">Avanti →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: RIEPILOGO -->
+  <div id="riepilogoState" style="display:none">
+    <div class="card">
+      <div style="font-size:16px;font-weight:600;margin-bottom:14px">📋 Riepilogo risposte</div>
+      <div id="riepilogoList"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-outline" onclick="goBackToQuiz()">← Modifica</button>
+      <button class="btn btn-success" id="btnConsegna" onclick="consegna()">✓ Consegna questionario</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: SUCCESSO -->
+  <div id="successState" style="display:none">
+    <div class="card">
+      <div class="success-wrap">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">Questionario consegnato!</div>
+        <div class="success-sub" id="successSub">Le tue risposte sono state registrate correttamente.</div>
+        <div class="punteggio-display" id="punteggioDisplay" style="display:none"></div>
+        <div style="font-size:13px;color:var(--text2);background:var(--surface2);border-radius:var(--radius);padding:12px 16px">
+          📄 L'organizzatore genererà il PDF con le tue risposte al termine dell'evento
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, collection, addDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+const app=getApps().length?getApps()[0]:initializeApp(FB);
+const db=getFirestore(app);
+
+const params=new URLSearchParams(window.location.search);
+const evId=params.get('evId');
+let domande=[], config={}, currentIdx=0, risposte={}, userCF='';
+
+function showError(msg){
+  document.getElementById('loadingState').style.display='none';
+  document.getElementById('errorState').style.display='block';
+  document.getElementById('errorMsg').textContent=msg;
+}
+
+if(!evId){showError('Nessun evento specificato.');}
+else{
+  try{
+    const [evSnap,configSnap]=await Promise.all([
+      getDoc(doc(db,'eventi',evId)),
+      getDoc(doc(db,'eventi',evId,'questionario','config'))
+    ]);
+    if(!evSnap.exists()){showError('Evento non trovato.');}
+    else if(!configSnap.exists()||!configSnap.data().domande?.length){showError('Questionario non ancora configurato per questo evento.');}
+    else{
+      const ev=evSnap.data();
+      config=configSnap.data();
+      domande=config.domande||[];
+      const fmt=d=>d?new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}):'—';
+      document.getElementById('evNome').textContent=ev.nome||'Evento ECM';
+      document.getElementById('evMeta').textContent=(ev.data?fmt(ev.data):'')+(ev.luogo?' · '+ev.luogo:'');
+      document.getElementById('loadingState').style.display='none';
+      document.getElementById('cfState').style.display='block';
+    }
+  }catch(err){showError('Errore: '+err.message);}
+}
+
+window.onCFInput=function(inp){
+  const cf=inp.value.toUpperCase(); inp.value=cf;
+  const valid=/^[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]$/.test(cf);
+  const info=document.getElementById('cfInfo');
+  const btn=document.getElementById('btnStartCF');
+  if(cf.length===16){
+    if(valid){info.textContent='✓ CF valido';info.className='cf-info valid';btn.disabled=false;}
+    else{info.textContent='⚠️ Formato non valido';info.className='cf-info invalid';btn.disabled=true;}
+  }else{
+    info.textContent='Il CF collega le risposte al tuo profilo';
+    info.className='cf-info';
+    btn.disabled=cf.length>0;
+  }
+};
+
+window.startQuiz=function(cf){
+  userCF=cf.toUpperCase().trim();
+  document.getElementById('cfState').style.display='none';
+  document.getElementById('quizState').style.display='block';
+  currentIdx=0; risposte={};
+  renderDomanda();
+};
+
+function renderDomanda(){
+  const d=domande[currentIdx];
+  const tot=domande.length;
+  const pct=Math.round((currentIdx)/tot*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressLabel').textContent=`Domanda ${currentIdx+1} di ${tot}`;
+  document.getElementById('progressPct').textContent=pct+'%';
+  document.getElementById('domandaNum').textContent=`Domanda ${currentIdx+1}${d.tipo==='aperta'?' — Risposta aperta':''}`;
+  document.getElementById('domandaTesto').textContent=d.testo;
+  document.getElementById('btnPrev').style.display=currentIdx>0?'flex':'none';
+  document.getElementById('btnNext').textContent=currentIdx===tot-1?'Vai al riepilogo →':'Avanti →';
+
+  const wrap=document.getElementById('domandaInputWrap');
+  wrap.innerHTML='';
+
+  if(d.tipo==='multipla'){
+    const lettere=['A','B','C','D'];
+    const div=document.createElement('div');div.className='opzioni-list';
+    (d.opzioni||[]).forEach((op,j)=>{
+      const item=document.createElement('div');
+      item.className='opzione-item'+(risposte[d.id]===j?' selected':'');
+      item.innerHTML=`<div class="opzione-lettera">${lettere[j]}</div><div class="opzione-testo">${esc(op)}</div>`;
+      item.onclick=()=>{
+        risposte[d.id]=j;
+        document.querySelectorAll('.opzione-item').forEach(el=>el.classList.remove('selected'));
+        item.classList.add('selected');
+        item.querySelector('.opzione-lettera').style.borderColor='var(--accent)';
+        item.querySelector('.opzione-lettera').style.background='var(--accent)';
+        item.querySelector('.opzione-lettera').style.color='white';
+      };
+      div.appendChild(item);
+    });
+    wrap.appendChild(div);
+  }else{
+    const ta=document.createElement('textarea');
+    ta.className='risposta-aperta';
+    ta.placeholder='Scrivi qui la tua risposta...';
+    ta.value=risposte[d.id]||'';
+    ta.oninput=()=>risposte[d.id]=ta.value;
+    wrap.appendChild(ta);
+  }
+}
+
+window.nextStep=function(){
+  if(currentIdx===domande.length-1){
+    showRiepilogo();
+  }else{
+    currentIdx++;renderDomanda();
+  }
+};
+window.prevStep=function(){if(currentIdx>0){currentIdx--;renderDomanda();}};
+window.goBackToQuiz=function(){
+  document.getElementById('riepilogoState').style.display='none';
+  document.getElementById('quizState').style.display='block';
+  renderDomanda();
+};
+
+function showRiepilogo(){
+  document.getElementById('quizState').style.display='none';
+  document.getElementById('riepilogoState').style.display='block';
+  const lettere=['A','B','C','D'];
+  document.getElementById('riepilogoList').innerHTML=domande.map((d,i)=>{
+    const v=risposte[d.id];
+    let rispDisplay='<span style="color:var(--text3);font-style:italic">Non risposto</span>';
+    if(d.tipo==='multipla'&&v!==undefined)rispDisplay=`${lettere[v]}. ${esc(d.opzioni[v]||'')}`;
+    else if(d.tipo==='aperta'&&v)rispDisplay=esc(String(v).slice(0,100))+(v.length>100?'...':'');
+    return `<div class="riepilogo-item">
+      <div class="riepilogo-num">${i+1}</div>
+      <div style="flex:1"><div class="riepilogo-q">${esc(d.testo)}</div><div class="riepilogo-r">${rispDisplay}</div></div>
+    </div>`;
+  }).join('');
+}
+
+window.consegna=async function(){
+  const btn=document.getElementById('btnConsegna');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Consegna in corso...';
+  try{
+    try{await signInAnonymously(getAuth(app));}catch(e){}
+    await addDoc(collection(db,'eventi',evId,'questionario','risposte','lista'),{
+      cf:userCF, risposte, tsISO:new Date().toISOString(), ts:serverTimestamp()
+    });
+    document.getElementById('riepilogoState').style.display='none';
+    document.getElementById('successState').style.display='block';
+    document.getElementById('progressFill').style.width='100%';
+    // Calcola punteggio se abilitato
+    if(config.conPunteggio){
+      const domMult=domande.filter(d=>d.tipo==='multipla'&&d.corretta!==null&&d.corretta!==undefined);
+      if(domMult.length>0){
+        let corrette=0;
+        domMult.forEach(d=>{if(risposte[d.id]===d.corretta)corrette++;});
+        const pct=Math.round(corrette/domMult.length*100);
+        const superato=pct>=60;
+        const pd=document.getElementById('punteggioDisplay');
+        pd.style.display='block';
+        pd.style.background=superato?'var(--success-light)':'var(--danger-light)';
+        pd.style.border=`1px solid ${superato?'rgba(26,122,74,.3)':'rgba(193,59,42,.3)'}`;
+        pd.innerHTML=`<div class="punteggio-num" style="color:${superato?'var(--success)':'var(--danger)'}">${corrette}/${domMult.length}</div>
+          <div class="punteggio-label" style="color:${superato?'var(--success)':'var(--danger)'}">${superato?'✓ Questionario superato':'✗ Questionario non superato'} (${pct}%)</div>`;
+        document.getElementById('successSub').textContent=`Le tue risposte sono state registrate. Punteggio: ${corrette}/${domMult.length}.`;
+      }
+    }
+  }catch(err){
+    btn.disabled=false;btn.innerHTML='✓ Consegna questionario';
+    alert('Errore durante la consegna: '+err.message);
+  }
+};
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>
