@@ -198,7 +198,7 @@ select.form-input{cursor:pointer}
 import { requireAuth, injectUserBar } from './ecm-auth.js';
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
 const app=getApps().length?getApps()[0]:initializeApp(FB);
 const db=getFirestore(app);
@@ -295,6 +295,7 @@ document.getElementById('btnSalva').addEventListener('click',async()=>{
   const btn=document.getElementById('btnSalva');
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Salvataggio...';
   try{
+    try{ await signInAnonymously(getAuth(app)); }catch(e){}
     await setDoc(doc(db,'eventi',currentEvId,'questionario','config'),{domande,conPunteggio,updatedAt:serverTimestamp(),eventId:currentEvId});
     showAlert('success','✓ Questionario salvato! Condividi il QR.');
   }catch(err){showAlert('error','Errore: '+err.message);}
