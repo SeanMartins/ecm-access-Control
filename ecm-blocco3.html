@@ -213,12 +213,12 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
         <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
             <div class="card-title" style="margin-bottom:0">➕ Nuovo partecipante</div>
-            <button class="btn btn-outline btn-sm" onclick="toggleNuovoP()" id="btnToggleNP">Apri</button>
+            <button class="btn btn-outline btn-sm" id="btnToggleNP">Apri</button>
           </div>
           <div id="nuovoPPanel" style="display:none">
             <div class="nuovop-tabs">
-              <button class="nuovop-tab active" onclick="switchNPTab('ocr',this)">📷 Foto documento</button>
-              <button class="nuovop-tab" onclick="switchNPTab('manual',this)">⌨️ Inserimento manuale</button>
+              <button class="nuovop-tab active" data-nptab="ocr">📷 Foto documento</button>
+              <button class="nuovop-tab" data-nptab="manual">⌨️ Inserimento manuale</button>
             </div>
 
             <!-- TAB OCR -->
@@ -248,8 +248,8 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
 
             <!-- BOTTONI SALVA -->
             <div style="display:flex;gap:8px;margin-top:12px">
-              <button class="btn btn-success" style="flex:1" onclick="salvaPartecipanteNuovo()">✓ Salva e registra entrata</button>
-              <button class="btn btn-outline btn-sm" onclick="resetNuovoP()">✕ Reset</button>
+              <button class="btn btn-success" style="flex:1" id="btnSalvaNuovoP">✓ Salva e registra entrata</button>
+              <button class="btn btn-outline btn-sm" id="btnResetNuovoP">✕ Reset</button>
             </div>
             <div id="npAlert" style="font-size:12px;margin-top:8px;display:none"></div>
           </div>
@@ -336,6 +336,31 @@ document.getElementById('manualSearch').addEventListener('input',searchManual);
 document.getElementById('tuttiSearch').addEventListener('input',renderTutti);
 document.getElementById('resetBtn').addEventListener('click',()=>alert('Per resettare i log:\nFirebase Console → Firestore → eventi/'+evId+'/logs\nSeleziona tutti i documenti e cancellali manualmente.'));
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
+
+// Pannello nuovo partecipante
+document.getElementById('btnToggleNP').addEventListener('click',()=>{
+  const panel=document.getElementById('nuovoPPanel');
+  const btn=document.getElementById('btnToggleNP');
+  const open=panel.style.display==='none';
+  panel.style.display=open?'block':'none';
+  btn.textContent=open?'Chiudi':'Apri';
+});
+
+document.querySelectorAll('[data-nptab]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const tab=btn.dataset.nptab;
+    document.querySelectorAll('.nuovop-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.nuovop-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('np-tab-'+tab).classList.add('active');
+  });
+});
+
+const btnSalvaNP=document.getElementById('btnSalvaNuovoP');
+if(btnSalvaNP) btnSalvaNP.addEventListener('click',salvaPartecipanteNuovo);
+
+const btnResetNP=document.getElementById('btnResetNuovoP');
+if(btnResetNP) btnResetNP.addEventListener('click',resetNuovoP);
 setInterval(()=>document.getElementById('liveClock').textContent=new Date().toLocaleTimeString('it-IT'),1000);
 
 function setMode(m){
@@ -673,7 +698,7 @@ window.salvaPartecipanteNuovo = async function(){
   if(!cognome){ showNPAlert('Inserisci il cognome.','error'); return; }
   if(!evId){ showNPAlert('Nessun evento selezionato.','error'); return; }
   
-  const btnSalva = document.querySelector('[onclick="salvaPartecipanteNuovo()"]');
+  const btnSalva = document.querySelector('[id="btnSalvaNuovoP"]');
   btnSalva.disabled = true;
   btnSalva.innerHTML = '<span class="spinner"></span> Salvataggio...';
   
@@ -810,6 +835,7 @@ body{padding-bottom:70px!important}
   </a>
   <a href="ecm-blocco5.html" class="bn-item"><div class="bn-icon">📝</div><div class="bn-label">Survey</div></a>
   <a href="ecm-blocco6.html" class="bn-item"><div class="bn-icon">✍️</div><div class="bn-label">Iscrizioni</div></a>
+  <a href="ecm-blocco7.html" class="bn-item"><div class="bn-icon">📋</div><div class="bn-label">Quiz ECM</div></a>
   <a href="ecm-admin.html" class="bn-item" id="adminNavItem" style="display:none">
     <div class="bn-icon">👑</div><div class="bn-label">Admin</div>
   </a>
