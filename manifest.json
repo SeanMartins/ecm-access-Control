@@ -1,0 +1,24 @@
+{
+  "name": "ECM Access Control",
+  "short_name": "ECM Access",
+  "description": "Multimedia Meeting Group \u2014 ECM Access Control System",
+  "start_url": "./ecm-login-op.html",
+  "display": "standalone",
+  "background_color": "#F4F6F9",
+  "theme_color": "#8B0000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
