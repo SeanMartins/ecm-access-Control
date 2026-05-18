@@ -2,10 +2,9 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
-<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
-<meta name="googlebot" content="noindex, nofollow">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ECM — Questionario ECM</title>
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ECM — Quiz ECM</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
@@ -21,37 +20,12 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .page-sub{color:var(--text2);font-size:14px;margin-bottom:24px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;margin-bottom:18px;box-shadow:var(--shadow)}
 .card-title{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.ev-select{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;width:100%}
+.ev-select:focus{border-color:var(--accent)}
 .tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px;overflow-x:auto}
 .tab{padding:9px 16px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;background:none;border-left:none;border-right:none;border-top:none;font-family:'DM Sans',sans-serif;white-space:nowrap}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 .tab-panel{display:none}.tab-panel.active{display:block}
-/* Select evento */
-.ev-select{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;width:100%}
-.ev-select:focus{border-color:var(--accent)}
-/* Domande */
-.domanda-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;position:relative}
-.domanda-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.domanda-num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.domanda-tipo{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
-.tipo-multipla{background:var(--accent-light);color:var(--accent)}
-.tipo-aperta{background:var(--success-light);color:var(--success)}
-.domanda-testo{font-size:14px;font-weight:500;flex:1}
-.opzioni-wrap{display:flex;flex-direction:column;gap:6px;margin-top:8px}
-.opzione-row{display:flex;align-items:center;gap:8px}
-.opzione-lettera{width:28px;height:28px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--text2);flex-shrink:0}
-.opzione-lettera.corretta{background:var(--success);color:white;border-color:var(--success)}
-.opzione-testo{font-size:13px;color:var(--text2)}
-/* Form crea domande */
-.field-label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase;margin-bottom:5px;display:block}
-.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;width:100%}
-.form-input:focus{border-color:var(--accent);background:white}
-select.form-input{cursor:pointer}
-.opzione-edit-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.opzione-edit-row input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none}
-.opzione-edit-row input:focus{border-color:var(--accent)}
-.correct-radio{width:18px;height:18px;cursor:pointer;accent-color:var(--success);flex-shrink:0}
-.correct-label{font-size:11px;color:var(--text3);white-space:nowrap}
-/* Punteggio toggle */
 .toggle-wrap{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px}
 .toggle{position:relative;width:40px;height:22px;flex-shrink:0}
 .toggle input{opacity:0;width:0;height:0}
@@ -59,20 +33,28 @@ select.form-input{cursor:pointer}
 .toggle-slider:before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.3s}
 .toggle input:checked+.toggle-slider{background:var(--success)}
 .toggle input:checked+.toggle-slider:before{transform:translateX(18px)}
-.toggle-text{font-size:13px;color:var(--text2)}
-/* Risposte partecipanti */
-.risposte-table{width:100%;border-collapse:collapse;font-size:13px}
-.risposte-table th{padding:9px 12px;text-align:left;font-weight:600;color:var(--text2);font-size:10px;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--surface2)}
-.risposte-table td{padding:9px 12px;border-bottom:1px solid var(--border)}
-.risposte-table tr:last-child td{border-bottom:none}
-.risposte-table tr:hover td{background:var(--surface2)}
-.punteggio-badge{display:inline-flex;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
-.p-superato{background:var(--success-light);color:var(--success)}
-.p-non-superato{background:var(--danger-light);color:var(--danger)}
-.p-nv{background:var(--surface2);color:var(--text3)}
-/* QR */
-.qr-wrap{background:white;padding:14px;border-radius:var(--radius);display:inline-block;border:1px solid var(--border)}
-/* Buttons */
+.d-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px}
+.d-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.d-num{width:24px;height:24px;border-radius:50%;background:var(--accent);color:white;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.d-tipo{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.tm{background:var(--accent-light);color:var(--accent)}.ta{background:var(--success-light);color:var(--success)}
+.d-testo{font-size:14px;font-weight:500;flex:1}
+.op-list{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+.op-row{display:flex;align-items:center;gap:8px}
+.op-let{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.op-let.normale{background:var(--surface);border:1px solid var(--border);color:var(--text2)}
+.op-let.corretta{background:var(--success);color:white}
+.op-testo{font-size:13px;color:var(--text2)}
+.field-label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase;margin-bottom:5px;display:block}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;width:100%}
+.form-input:focus{border-color:var(--accent);background:white}
+select.form-input{cursor:pointer}
+.op-edit-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.op-edit-row .op-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none}
+.op-edit-row .op-input:focus{border-color:var(--accent)}
+.correct-radio{width:18px;height:18px;cursor:pointer;accent-color:var(--success);flex-shrink:0}
+.correct-lbl{font-size:11px;color:var(--text3);white-space:nowrap}
+.add-form{background:var(--surface2);border:2px dashed var(--border2);border-radius:var(--radius);padding:18px;margin-top:14px}
 .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none}
 .btn-primary{background:var(--accent);color:white}.btn-primary:hover{background:#1a3ce0}
 .btn-success{background:var(--success);color:white}.btn-success:hover{background:#145e38}
@@ -80,154 +62,127 @@ select.form-input{cursor:pointer}
 .btn-danger{background:var(--danger-light);color:var(--danger);border:1px solid rgba(193,59,42,.2)}
 .btn-sm{padding:5px 12px;font-size:12px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
-.actions-row{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.actions-row{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .alert{padding:11px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:14px;display:none}
 .alert.show{display:block}
 .alert-success{background:var(--success-light);color:var(--success);border:1px solid rgba(26,122,74,.25)}
 .alert-error{background:var(--danger-light);color:var(--danger);border:1px solid rgba(193,59,42,.25)}
-.empty-state{text-align:center;padding:32px;color:var(--text3);font-size:13px}
-.loading{display:flex;align-items:center;justify-content:center;padding:32px;color:var(--text3);gap:10px}
-.spinner-dark{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
-/* NAVBAR */
+.empty-state{text-align:center;padding:28px;color:var(--text3);font-size:13px}
+.qr-wrap{background:white;padding:14px;border-radius:var(--radius);display:inline-block;border:1px solid var(--border)}
+.ris-table{width:100%;border-collapse:collapse;font-size:13px}
+.ris-table th{padding:9px 12px;text-align:left;font-weight:600;color:var(--text2);font-size:10px;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--surface2)}
+.ris-table td{padding:9px 12px;border-bottom:1px solid var(--border)}
+.ris-table tr:last-child td{border-bottom:none}
+.p-ok{background:var(--success-light);color:var(--success);padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;display:inline-block}
+.p-no{background:var(--danger-light);color:var(--danger);padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;display:inline-block}
+.p-nv{background:var(--surface2);color:var(--text3);padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;display:inline-block}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#1A1714;border-top:1px solid #2A2420;display:flex;align-items:stretch;z-index:200;padding-bottom:env(safe-area-inset-bottom)}
 .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 4px;text-decoration:none;color:#6B6560;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;transition:all .2s;border:none;background:none}
-.bn-item:hover{color:#9B948C}.bn-item.active{color:#4D6EFF}
-.bn-item.active .bn-icon{background:rgba(77,110,255,.15);border-radius:10px}
+.bn-item.active{color:#4D6EFF}.bn-item.active .bn-icon{background:rgba(77,110,255,.15);border-radius:10px}
 .bn-icon{width:36px;height:28px;display:flex;align-items:center;justify-content:center;font-size:18px}
 .bn-label{font-size:10px;line-height:1}
-@media(max-width:600px){.page-title{font-size:20px}}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo"><div class="logo-mark">E</div>ECM — Questionario</div>
-  <div style="display:flex;align-items:center;gap:10px"><div id="userBarSlot"></div></div>
+  <div class="logo"><div class="logo-mark">E</div>ECM — Quiz</div>
+  <div id="userBarSlot"></div>
 </header>
 <div class="wrap">
   <div class="page-title">Questionario ECM</div>
-  <div class="page-sub">Crea il questionario, condividilo in sala e scarica i PDF nominativi</div>
-
-  <!-- SELEZIONE EVENTO -->
+  <div class="page-sub">Crea il questionario ECM, condividilo in sala e scarica i PDF nominativi</div>
   <div class="card">
     <div class="card-title">Evento</div>
     <select class="ev-select" id="evSelect"><option value="">— Seleziona evento —</option></select>
   </div>
-
   <div id="mainContent" style="display:none">
     <div class="tabs">
-      <button class="tab active" data-tab="crea" onclick="switchTab('crea',this)">✏️ Crea questionario</button>
-      <button class="tab" data-tab="qr" onclick="switchTab('qr',this)">📱 Condividi QR</button>
-      <button class="tab" data-tab="risposte" onclick="switchTab('risposte',this)">📋 Risposte</button>
-      <button class="tab" data-tab="pdf" onclick="switchTab('pdf',this)">📄 Scarica PDF</button>
+      <button class="tab active" data-tab="crea">✏️ Crea questionario</button>
+      <button class="tab" data-tab="qr">📱 Condividi QR</button>
+      <button class="tab" data-tab="risposte">📋 Risposte</button>
+      <button class="tab" data-tab="pdf">📄 Scarica PDF</button>
     </div>
-
-    <!-- TAB CREA -->
+    <!-- CREA -->
     <div class="tab-panel active" id="tab-crea">
       <div class="card">
-        <div class="card-title">
-          <span>Domande del questionario</span>
-          <span id="domandeCount" style="font-size:12px;color:var(--text3);font-weight:400">0 domande</span>
-        </div>
+        <div class="card-title"><span>Domande</span><span id="domandeCount" style="font-size:12px;font-weight:400;color:var(--text3)">0 domande</span></div>
         <div class="alert alert-success" id="alertSuccess"></div>
         <div class="alert alert-error" id="alertError"></div>
-
-        <!-- Toggle punteggio -->
         <div class="toggle-wrap">
-          <label class="toggle"><input type="checkbox" id="togglePunteggio" onchange="onTogglePunteggio()"><span class="toggle-slider"></span></label>
-          <span class="toggle-text">Abilita punteggio — indica la risposta corretta per ogni domanda multipla</span>
+          <label class="toggle"><input type="checkbox" id="togglePunteggio"><span class="toggle-slider"></span></label>
+          <span style="font-size:13px;color:var(--text2)">Abilita punteggio — indica la risposta corretta per ogni domanda multipla</span>
         </div>
-
-        <div class="domande-list" id="domandeList">
-          <div class="empty-state">Nessuna domanda ancora. Aggiungine una qui sotto.</div>
-        </div>
-
-        <!-- FORM NUOVA DOMANDA -->
-        <div style="background:var(--surface2);border:2px dashed var(--border2);border-radius:var(--radius);padding:18px;margin-top:14px" id="addDomandaForm">
-          <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:12px">➕ Aggiungi domanda <span id="addNumLabel" style="color:var(--accent)">(domanda 1)</span></div>
+        <div id="domandeList"><div class="empty-state">Nessuna domanda ancora.</div></div>
+        <div class="add-form">
+          <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:12px">➕ Aggiungi domanda <span id="addNumLabel" style="color:var(--accent)"></span></div>
           <div style="margin-bottom:10px">
             <label class="field-label">Tipo domanda</label>
-            <select class="form-input" id="newTipo" onchange="onNewTipoChange()">
+            <select class="form-input" id="newTipo">
               <option value="multipla">✅ Scelta multipla (A/B/C/D)</option>
               <option value="aperta">📝 Domanda aperta</option>
             </select>
           </div>
           <div style="margin-bottom:10px">
             <label class="field-label">Testo domanda *</label>
-            <input type="text" class="form-input" id="newTesto" placeholder="Es. Qual è il principale fattore di rischio cardiovascolare?">
+            <input type="text" class="form-input" id="newTesto" placeholder="Es. Quale farmaco è indicato per...">
           </div>
-          <div id="opzioniEditSection">
+          <div id="opzioniSection">
             <label class="field-label">Opzioni di risposta *</label>
             <div id="opzioniEditList">
-              <div class="opzione-edit-row"><span style="font-size:12px;font-weight:600;width:20px;color:var(--accent)">A</span><input type="text" placeholder="Opzione A"><input type="radio" name="corretta" class="correct-radio" value="0" id="cor0"><label class="correct-label" for="cor0">✓ Corretta</label></div>
-              <div class="opzione-edit-row"><span style="font-size:12px;font-weight:600;width:20px;color:var(--accent)">B</span><input type="text" placeholder="Opzione B"><input type="radio" name="corretta" class="correct-radio" value="1" id="cor1"><label class="correct-label" for="cor1">✓ Corretta</label></div>
-              <div class="opzione-edit-row"><span style="font-size:12px;font-weight:600;width:20px;color:var(--accent)">C</span><input type="text" placeholder="Opzione C"><input type="radio" name="corretta" class="correct-radio" value="2" id="cor2"><label class="correct-label" for="cor2">✓ Corretta</label></div>
-              <div class="opzione-edit-row"><span style="font-size:12px;font-weight:600;width:20px;color:var(--accent)">D</span><input type="text" placeholder="Opzione D"><input type="radio" name="corretta" class="correct-radio" value="3" id="cor3"><label class="correct-label" for="cor3">✓ Corretta</label></div>
+              <div class="op-edit-row"><span style="font-size:12px;font-weight:700;width:20px;color:var(--accent)">A</span><input type="text" class="op-input" placeholder="Opzione A"><input type="radio" name="corretta" class="correct-radio" value="0"><label class="correct-lbl">✓ Corretta</label></div>
+              <div class="op-edit-row"><span style="font-size:12px;font-weight:700;width:20px;color:var(--accent)">B</span><input type="text" class="op-input" placeholder="Opzione B"><input type="radio" name="corretta" class="correct-radio" value="1"><label class="correct-lbl">✓ Corretta</label></div>
+              <div class="op-edit-row"><span style="font-size:12px;font-weight:700;width:20px;color:var(--accent)">C</span><input type="text" class="op-input" placeholder="Opzione C"><input type="radio" name="corretta" class="correct-radio" value="2"><label class="correct-lbl">✓ Corretta</label></div>
+              <div class="op-edit-row"><span style="font-size:12px;font-weight:700;width:20px;color:var(--accent)">D</span><input type="text" class="op-input" placeholder="Opzione D"><input type="radio" name="corretta" class="correct-radio" value="3"><label class="correct-lbl">✓ Corretta</label></div>
             </div>
-            <div id="correctHint" style="font-size:11px;color:var(--text3);margin-top:6px;display:none">💡 Seleziona la risposta corretta per abilitare il punteggio</div>
           </div>
-          <div class="actions-row" style="margin-top:12px">
-            <button type="button" class="btn btn-primary" onclick="aggiungiDomanda()">+ Aggiungi domanda</button>
-          </div>
+          <div class="actions-row"><button type="button" class="btn btn-primary" id="btnAggiungi">+ Aggiungi domanda</button></div>
         </div>
-
-        <div class="actions-row" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
-          <button type="button" class="btn btn-outline" onclick="loadDomande()">↻ Ricarica</button>
-          <button type="button" class="btn btn-success" id="btnSalva" onclick="salvaQuestionario()">💾 Salva questionario</button>
+        <div class="actions-row" style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
+          <button type="button" class="btn btn-outline" id="btnRicarica">↻ Ricarica</button>
+          <button type="button" class="btn btn-success" id="btnSalva">💾 Salva questionario</button>
         </div>
       </div>
     </div>
-
-    <!-- TAB QR -->
+    <!-- QR -->
     <div class="tab-panel" id="tab-qr">
       <div class="card" style="text-align:center">
         <div class="card-title" style="justify-content:center">📱 Condividi il questionario</div>
-        <p style="font-size:13px;color:var(--text2);margin-bottom:20px">Mostra questo QR ai partecipanti — lo scansionano, inseriscono il CF e compilano il questionario</p>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:20px">I partecipanti scansionano il QR, compilano le risposte e consegnano</p>
         <div class="qr-wrap" id="qrWrap" style="margin:0 auto 16px"></div>
         <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:16px;word-break:break-all" id="qrUrl"></div>
         <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-          <button class="btn btn-primary" onclick="copiaLink()">📋 Copia link</button>
-          <button class="btn btn-outline" onclick="scaricaQR()">⬇ Scarica QR</button>
+          <button class="btn btn-primary" id="btnCopiaLink">📋 Copia link</button>
+          <button class="btn btn-outline" id="btnScaricaQR">⬇ Scarica QR</button>
         </div>
       </div>
     </div>
-
-    <!-- TAB RISPOSTE -->
+    <!-- RISPOSTE -->
     <div class="tab-panel" id="tab-risposte">
       <div class="card">
-        <div class="card-title">
-          <span>Risposte ricevute</span>
+        <div class="card-title"><span>Risposte ricevute</span>
           <div style="display:flex;gap:8px">
-            <button type="button" class="btn btn-outline btn-sm" onclick="loadRisposte()">↻ Aggiorna</button>
-            <button type="button" class="btn btn-success btn-sm" onclick="exportExcel()">⬇ Excel</button>
+            <button type="button" class="btn btn-outline btn-sm" id="btnAggiorna">↻ Aggiorna</button>
+            <button type="button" class="btn btn-success btn-sm" id="btnExcel">⬇ Excel</button>
           </div>
         </div>
-        <div id="risposteCount" style="font-size:12px;color:var(--text2);margin-bottom:14px">—</div>
+        <div id="risCount" style="font-size:12px;color:var(--text2);margin-bottom:14px">—</div>
         <div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)">
-          <table class="risposte-table">
-            <thead><tr><th>CF</th><th>Nome</th><th>Data</th><th>Punteggio</th><th>Azioni</th></tr></thead>
-            <tbody id="risposteBody"></tbody>
-          </table>
+          <table class="ris-table"><thead><tr><th>CF</th><th>Nome</th><th>Data</th><th>Punteggio</th><th>PDF</th></tr></thead><tbody id="risposteBody"></tbody></table>
         </div>
       </div>
     </div>
-
-    <!-- TAB PDF -->
+    <!-- PDF -->
     <div class="tab-panel" id="tab-pdf">
       <div class="card">
-        <div class="card-title">
-          <span>Scarica PDF nominativi</span>
-          <button type="button" class="btn btn-primary btn-sm" onclick="scaricaTuttiPDF()">⬇ Scarica tutti i PDF</button>
-        </div>
-        <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Ogni PDF contiene i dati del partecipante, le domande, le risposte selezionate e il punteggio.</p>
-        <div id="pdfList" class="loading"><div class="spinner-dark"></div>Caricamento...</div>
+        <div class="card-title"><span>Scarica PDF nominativi</span><button type="button" class="btn btn-primary btn-sm" id="btnTuttiPDF">⬇ Tutti i PDF</button></div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Ogni PDF contiene dati partecipante, domande, risposte e punteggio.</p>
+        <div id="pdfList"><div class="empty-state">Nessuna risposta disponibile</div></div>
       </div>
     </div>
   </div>
 </div>
-
-<!-- NAVBAR -->
 <nav class="bottom-nav">
   <a href="ecm-eventi.html" class="bn-item"><div class="bn-icon">📋</div><div class="bn-label">Eventi</div></a>
   <a href="ecm-home.html" class="bn-item"><div class="bn-icon">🏠</div><div class="bn-label">Home</div></a>
@@ -239,124 +194,86 @@ select.form-input{cursor:pointer}
   <a href="ecm-blocco7.html" class="bn-item active"><div class="bn-icon">📋</div><div class="bn-label">Quiz ECM</div></a>
   <a href="ecm-admin.html" class="bn-item" id="adminNavItem" style="display:none"><div class="bn-icon">👑</div><div class="bn-label">Admin</div></a>
 </nav>
-
 <script type="module">
 import { requireAuth, injectUserBar } from './ecm-auth.js';
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
 const app=getApps().length?getApps()[0]:initializeApp(FB);
 const db=getFirestore(app);
 const ADMIN_EMAIL='martinsosem@gmail.com';
-const MAX_DOMANDE=Infinity;
-
 await requireAuth();
 injectUserBar('userBarSlot');
-onAuthStateChanged(getAuth(app),user=>{if(user&&user.email===ADMIN_EMAIL){const el=document.getElementById('adminNavItem');if(el)el.style.display='flex';}});
+onAuthStateChanged(getAuth(app),u=>{if(u&&u.email===ADMIN_EMAIL){const el=document.getElementById('adminNavItem');if(el)el.style.display='flex';}});
 
-let currentEvId=null, domande=[], conPunteggio=false, allRisposte=[], allParticipanti=[];
-
-// ── CARICA EVENTI ─────────────────────────────────────────
+let currentEvId=null, domande=[], conPunteggio=false, allRisposte=[], allParticipanti=[], allEventi=[], currentConfig={};
+const lettere=['A','B','C','D'];
 const opSession=JSON.parse(localStorage.getItem('ecm_op_user')||'null');
 const evSnap=await getDocs(collection(db,'eventi'));
-let allEventi=[];
+allEventi=[];
 evSnap.forEach(d=>allEventi.push({id:d.id,...d.data()}));
 allEventi=allEventi.filter(e=>e.stato!=='archiviato');
-if(opSession?.eventiAssegnati?.length>0){
-  const ids=opSession.eventiAssegnati.map(e=>e.id);
-  allEventi=allEventi.filter(e=>ids.includes(e.id));
-}
+if(opSession?.eventiAssegnati?.length>0){const ids=opSession.eventiAssegnati.map(e=>e.id);allEventi=allEventi.filter(e=>ids.includes(e.id));}
 allEventi.sort((a,b)=>new Date(b.data||0)-new Date(a.data||0));
-
 const sel=document.getElementById('evSelect');
-allEventi.forEach(ev=>{
-  const o=document.createElement('option');
-  o.value=ev.id; o.textContent=ev.nome+(ev.data?' ('+new Date(ev.data).toLocaleDateString('it-IT')+')':'');
-  sel.appendChild(o);
-});
+allEventi.forEach(ev=>{const o=document.createElement('option');o.value=ev.id;o.textContent=ev.nome+(ev.data?' ('+new Date(ev.data).toLocaleDateString('it-IT')+')':'');sel.appendChild(o);});
 
-window.onEvChange=async function(){
+// ── EVENTI ───────────────────────────────────────────────
+async function onEvChange(){
   currentEvId=sel.value;
   if(!currentEvId){document.getElementById('mainContent').style.display='none';return;}
   document.getElementById('mainContent').style.display='block';
   localStorage.setItem('ecm_eventId',currentEvId);
   await loadDomande();
   buildQR();
-};
-sel.addEventListener('change',()=>window.onEvChange());
+}
+sel.addEventListener('change',onEvChange);
 const savedId=localStorage.getItem('ecm_eventId');
-if(savedId&&allEventi.find(e=>e.id===savedId)){sel.value=savedId;await window.onEvChange();}
+if(savedId&&allEventi.find(e=>e.id===savedId)){sel.value=savedId;await onEvChange();}
 
-// ── DOMANDE ───────────────────────────────────────────────
-window.loadDomande=async function(){
-  try{
-    const s=await getDoc(doc(db,'eventi',currentEvId,'questionario','config'));
-    if(s.exists()){
-      domande=s.data().domande||[];
-      conPunteggio=s.data().conPunteggio||false;
-      document.getElementById('togglePunteggio').checked=conPunteggio;
-    }else{domande=[];conPunteggio=false;}
-    renderDomande();
-    updateAddForm();
-  }catch(e){domande=[];renderDomande();}
-};
+// ── TABS ─────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('tab-'+t.dataset.tab).classList.add('active');
+    if(t.dataset.tab==='risposte'||t.dataset.tab==='pdf')loadRisposte();
+    if(t.dataset.tab==='qr')buildQR();
+  });
+});
 
-function renderDomande(){
-  const list=document.getElementById('domandeList');
-  document.getElementById('domandeCount').textContent=`${domande.length} domande`;
-  if(!domande.length){list.innerHTML='<div class="empty-state">Nessuna domanda ancora.</div>';return;}
-  const lettere=['A','B','C','D'];
-  list.innerHTML=domande.map((d,i)=>`
-    <div class="domanda-card">
-      <div class="domanda-header">
-        <div class="domanda-num">${i+1}</div>
-        <span class="domanda-tipo ${d.tipo==='multipla'?'tipo-multipla':'tipo-aperta'}">${d.tipo==='multipla'?'✅ Multipla':'📝 Aperta'}</span>
-        <div class="domanda-testo">${esc(d.testo)}</div>
-        <button type="button" class="btn btn-danger btn-sm" onclick="eliminaDomanda(${i})">✕</button>
-      </div>
-      ${d.tipo==='multipla'&&d.opzioni?`
-        <div class="opzioni-wrap">
-          ${d.opzioni.map((op,j)=>`
-            <div class="opzione-row">
-              <div class="opzione-lettera${conPunteggio&&d.corretta===j?' corretta':''}">${lettere[j]}</div>
-              <div class="opzione-testo">${esc(op)}${conPunteggio&&d.corretta===j?' <span style="color:var(--success);font-size:11px">✓ corretta</span>':''}</div>
-            </div>`).join('')}
-        </div>`:''}
-    </div>`).join('');
-}
-
-function updateAddForm(){
-  const remaining=MAX_DOMANDE-domande.length;
-  const form=document.getElementById('addDomandaForm');
-  if(remaining<=0){form.style.display='none';}
-  else{form.style.display='block';document.getElementById('addNumLabel').textContent=`(domanda ${domande.length+1})`;}
-  // Mostra/nascondi hint risposta corretta
-  document.getElementById('correctHint').style.display=conPunteggio?'block':'none';
-  document.querySelectorAll('.correct-radio').forEach(r=>r.style.display=conPunteggio?'inline-block':'none');
-  document.querySelectorAll('.correct-label').forEach(l=>l.style.display=conPunteggio?'inline':'none');
-}
-
-window.onTogglePunteggio=function(){
+// ── TOGGLE PUNTEGGIO ─────────────────────────────────────
+document.getElementById('togglePunteggio').addEventListener('change',()=>{
   conPunteggio=document.getElementById('togglePunteggio').checked;
-  updateAddForm(); renderDomande();
-};
+  updateCorrectVisibility();
+  renderDomande();
+});
 
-window.onNewTipoChange=function(){
-  document.getElementById('opzioniEditSection').style.display=document.getElementById('newTipo').value==='multipla'?'block':'none';
-};
+function updateCorrectVisibility(){
+  document.querySelectorAll('.correct-radio,.correct-lbl').forEach(el=>{
+    el.style.display=conPunteggio?'inline-block':'none';
+  });
+}
+updateCorrectVisibility();
 
-window.aggiungiDomanda=function(){
-  
+// ── TIPO DOMANDA → mostra/nascondi opzioni ───────────────
+document.getElementById('newTipo').addEventListener('change',()=>{
+  const tipo=document.getElementById('newTipo').value;
+  document.getElementById('opzioniSection').style.display=tipo==='multipla'?'block':'none';
+});
+
+// ── AGGIUNGI DOMANDA ─────────────────────────────────────
+document.getElementById('btnAggiungi').addEventListener('click',()=>{
   const tipo=document.getElementById('newTipo').value;
   const testo=document.getElementById('newTesto').value.trim();
   if(!testo){showAlert('error','Inserisci il testo della domanda.');return;}
   const d={id:'q_'+Date.now(),tipo,testo};
   if(tipo==='multipla'){
-    const inputs=[...document.querySelectorAll('#opzioniEditList input[type=text]')];
+    const inputs=[...document.querySelectorAll('#opzioniEditList .op-input')];
     const opzioni=inputs.map(i=>i.value.trim()).filter(Boolean);
-    if(opzioni.length<2){showAlert('error','Inserisci almeno 2 opzioni.');return;}
+    if(opzioni.length<2){showAlert('error','Inserisci almeno 2 opzioni per le domande a scelta multipla.');return;}
     d.opzioni=opzioni;
     if(conPunteggio){
       const checked=document.querySelector('input[name="corretta"]:checked');
@@ -364,287 +281,230 @@ window.aggiungiDomanda=function(){
     }
   }
   domande.push(d);
-  renderDomande(); updateAddForm();
-  // Reset form
+  renderDomande();
+  // Reset
   document.getElementById('newTesto').value='';
-  document.querySelectorAll('#opzioniEditList input[type=text]').forEach(i=>i.value='');
+  document.querySelectorAll('#opzioniEditList .op-input').forEach(i=>i.value='');
   document.querySelectorAll('input[name="corretta"]').forEach(r=>r.checked=false);
-};
+});
 
-window.eliminaDomanda=function(i){domande.splice(i,1);renderDomande();updateAddForm();};
-
-window.salvaQuestionario=async function(){
+// ── SALVA ────────────────────────────────────────────────
+document.getElementById('btnSalva').addEventListener('click',async()=>{
   if(!currentEvId){showAlert('error','Seleziona un evento.');return;}
   if(!domande.length){showAlert('error','Aggiungi almeno una domanda.');return;}
   const btn=document.getElementById('btnSalva');
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Salvataggio...';
   try{
-    await setDoc(doc(db,'eventi',currentEvId,'questionario','config'),{
-      domande,conPunteggio,updatedAt:serverTimestamp(),eventId:currentEvId
-    });
-    showAlert('success','✓ Questionario salvato! Condividi il QR ai partecipanti.');
+    await setDoc(doc(db,'eventi',currentEvId,'questionario','config'),{domande,conPunteggio,updatedAt:serverTimestamp(),eventId:currentEvId});
+    showAlert('success','✓ Questionario salvato! Condividi il QR.');
   }catch(err){showAlert('error','Errore: '+err.message);}
   finally{btn.disabled=false;btn.innerHTML='💾 Salva questionario';}
-};
+});
+document.getElementById('btnRicarica').addEventListener('click',loadDomande);
 
-// ── QR ────────────────────────────────────────────────────
+// ── RENDER DOMANDE ────────────────────────────────────────
+function renderDomande(){
+  const list=document.getElementById('domandeList');
+  document.getElementById('domandeCount').textContent=domande.length+' domande';
+  document.getElementById('addNumLabel').textContent=`(domanda ${domande.length+1})`;
+  if(!domande.length){list.innerHTML='<div class="empty-state">Nessuna domanda ancora.</div>';return;}
+  list.innerHTML=domande.map((d,i)=>`
+    <div class="d-card">
+      <div class="d-header">
+        <div class="d-num">${i+1}</div>
+        <span class="d-tipo ${d.tipo==='multipla'?'tm':'ta'}">${d.tipo==='multipla'?'✅ Multipla':'📝 Aperta'}</span>
+        <div class="d-testo">${esc(d.testo)}</div>
+        <button class="btn btn-danger btn-sm" data-action="elimina" data-idx="${i}">✕</button>
+      </div>
+      ${d.tipo==='multipla'&&d.opzioni?`<div class="op-list">${d.opzioni.map((op,j)=>`
+        <div class="op-row">
+          <div class="op-let ${conPunteggio&&d.corretta===j?'corretta':'normale'}">${lettere[j]}</div>
+          <div class="op-testo">${esc(op)}${conPunteggio&&d.corretta===j?' <span style="color:var(--success);font-size:11px">✓</span>':''}</div>
+        </div>`).join('')}</div>`:'<div style="font-size:12px;color:var(--text3);margin-top:4px;font-style:italic">Risposta aperta</div>'}
+    </div>`).join('');
+  list.querySelectorAll('[data-action="elimina"]').forEach(btn=>{
+    btn.addEventListener('click',()=>{domande.splice(parseInt(btn.dataset.idx),1);renderDomande();});
+  });
+}
+
+async function loadDomande(){
+  try{
+    const s=await getDoc(doc(db,'eventi',currentEvId,'questionario','config'));
+    if(s.exists()){domande=s.data().domande||[];conPunteggio=s.data().conPunteggio||false;document.getElementById('togglePunteggio').checked=conPunteggio;}
+    else{domande=[];conPunteggio=false;}
+    updateCorrectVisibility();
+    renderDomande();
+  }catch(e){domande=[];renderDomande();}
+}
+
+// ── QR ───────────────────────────────────────────────────
 function buildQR(){
-  const wrap=document.getElementById('qrWrap');
-  wrap.innerHTML='';
+  const wrap=document.getElementById('qrWrap');wrap.innerHTML='';
   const base=window.location.origin+window.location.pathname.replace('ecm-blocco7.html','');
   const url=`${base}ecm-quiz-rispondi.html?evId=${currentEvId}`;
   document.getElementById('qrUrl').textContent=url;
   new QRCode(wrap,{text:url,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});
 }
-window.copiaLink=function(){
+document.getElementById('btnCopiaLink').addEventListener('click',()=>{
   navigator.clipboard.writeText(document.getElementById('qrUrl').textContent)
-    .then(()=>{const b=event.target;b.textContent='✓ Copiato!';setTimeout(()=>b.textContent='📋 Copia link',2000);});
-};
-window.scaricaQR=function(){
+    .then(()=>{const b=document.getElementById('btnCopiaLink');b.textContent='✓ Copiato!';setTimeout(()=>b.textContent='📋 Copia link',2000);});
+});
+document.getElementById('btnScaricaQR').addEventListener('click',()=>{
   const c=document.querySelector('#qrWrap canvas');
-  if(!c){alert('QR non pronto');return;}
-  const a=document.createElement('a');a.download='qr-quiz-ecm.png';a.href=c.toDataURL();a.click();
-};
+  if(c){const a=document.createElement('a');a.download='qr-quiz-ecm.png';a.href=c.toDataURL();a.click();}
+});
 
-// ── RISPOSTE ──────────────────────────────────────────────
-window.loadRisposte=async function(){
+// ── RISPOSTE ─────────────────────────────────────────────
+async function loadRisposte(){
   if(!currentEvId)return;
   try{
-    const [configSnap,risSnap,partsSnap]=await Promise.all([
+    const [cfgSnap,risSnap,partsSnap]=await Promise.all([
       getDoc(doc(db,'eventi',currentEvId,'questionario','config')),
       getDocs(query(collection(db,'eventi',currentEvId,'questionario','risposte','lista'),orderBy('ts','desc'))),
       getDocs(collection(db,'eventi',currentEvId,'partecipanti'))
     ]);
-    const config=configSnap.exists()?configSnap.data():{domande:[],conPunteggio:false};
+    currentConfig=cfgSnap.exists()?cfgSnap.data():{domande:[],conPunteggio:false};
     allRisposte=[]; risSnap.forEach(d=>allRisposte.push({id:d.id,...d.data()}));
     allParticipanti=[]; partsSnap.forEach(d=>allParticipanti.push(d.data()));
-    document.getElementById('risposteCount').textContent=`${allRisposte.length} risposte ricevute`;
-    renderRisposte(config);
-    renderPDFList(config);
-  }catch(err){
-    document.getElementById('risposteBody').innerHTML=`<tr><td colspan="5" style="color:var(--danger);padding:14px">Errore: ${err.message}</td></tr>`;
-  }
-};
+    document.getElementById('risCount').textContent=`${allRisposte.length} risposte ricevute`;
+    renderRisposte();
+    renderPDFList();
+  }catch(err){document.getElementById('risposteBody').innerHTML=`<tr><td colspan="5" style="color:var(--danger);padding:14px">Errore: ${err.message}</td></tr>`;}
+}
+document.getElementById('btnAggiorna').addEventListener('click',loadRisposte);
 
-function calcolaPunteggio(risposta,config){
-  if(!config.conPunteggio)return null;
-  const dom=config.domande.filter(d=>d.tipo==='multipla'&&d.corretta!==null&&d.corretta!==undefined);
+function calcolaPunteggio(r,cfg){
+  if(!cfg.conPunteggio)return null;
+  const dom=(cfg.domande||[]).filter(d=>d.tipo==='multipla'&&d.corretta!==null&&d.corretta!==undefined);
   if(!dom.length)return null;
   let corrette=0;
-  dom.forEach(d=>{if(risposta.risposte&&risposta.risposte[d.id]===d.corretta)corrette++;});
+  dom.forEach(d=>{if(r.risposte&&r.risposte[d.id]===d.corretta)corrette++;});
   return{corrette,totale:dom.length,pct:Math.round(corrette/dom.length*100)};
 }
 
-function renderRisposte(config){
+function renderRisposte(){
   const tbody=document.getElementById('risposteBody');
   if(!allRisposte.length){tbody.innerHTML='<tr><td colspan="5" class="empty-state">Nessuna risposta ancora</td></tr>';return;}
-  tbody.innerHTML=allRisposte.map(r=>{
-    const p=calcolaPunteggio(r,config);
+  tbody.innerHTML='';
+  allRisposte.forEach(r=>{
+    const p=calcolaPunteggio(r,currentConfig);
     const part=allParticipanti.find(x=>x.cf===r.cf);
     const nome=part?`${part.nome} ${part.cognome}`:r.cf||'—';
     const data=r.tsISO?new Date(r.tsISO).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
-    const pBadge=p===null?`<span class="punteggio-badge p-nv">N/V</span>`
-      :p.pct>=60?`<span class="punteggio-badge p-superato">${p.corrette}/${p.totale} ✓</span>`
-      :`<span class="punteggio-badge p-non-superato">${p.corrette}/${p.totale} ✗</span>`;
-    return `<tr>
-      <td style="font-family:'DM Mono',monospace;font-size:11px">${r.cf||'—'}</td>
-      <td>${esc(nome)}</td>
-      <td style="font-size:11px;color:var(--text2)">${data}</td>
-      <td>${pBadge}</td>
-      <td><button class="btn btn-outline btn-sm" onclick="scaricaPDFSingolo('${r.id}')">📄 PDF</button></td>
-    </tr>`;
-  }).join('');
+    const pBadge=p===null?`<span class="p-nv">N/V</span>`:p.pct>=60?`<span class="p-ok">${p.corrette}/${p.totale} ✓</span>`:`<span class="p-no">${p.corrette}/${p.totale} ✗</span>`;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-family:'DM Mono',monospace;font-size:11px">${r.cf||'—'}</td><td>${esc(nome)}</td><td style="font-size:11px;color:var(--text2)">${data}</td><td>${pBadge}</td><td></td>`;
+    const pdfBtn=document.createElement('button');
+    pdfBtn.className='btn btn-outline btn-sm';pdfBtn.textContent='📄 PDF';
+    pdfBtn.addEventListener('click',()=>generaPDF(r));
+    tr.lastElementChild.appendChild(pdfBtn);
+    tbody.appendChild(tr);
+  });
 }
 
-function renderPDFList(config){
+function renderPDFList(){
   const list=document.getElementById('pdfList');
   if(!allRisposte.length){list.innerHTML='<div class="empty-state">Nessuna risposta disponibile</div>';return;}
-  list.innerHTML=`<div style="display:flex;flex-direction:column;gap:8px">`+allRisposte.map(r=>{
-    const p=calcolaPunteggio(r,config);
+  list.innerHTML='';
+  allRisposte.forEach(r=>{
+    const p=calcolaPunteggio(r,currentConfig);
     const part=allParticipanti.find(x=>x.cf===r.cf);
     const nome=part?`${part.cognome} ${part.nome}`:r.cf||'—';
-    const pTxt=p===null?'':`· ${p.corrette}/${p.totale}`;
-    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius)">
-      <div><div style="font-size:13px;font-weight:500">${esc(nome)}</div><div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">${r.cf||'—'} ${pTxt}</div></div>
-      <button class="btn btn-outline btn-sm" onclick="scaricaPDFSingolo('${r.id}')">📄 Scarica PDF</button>
-    </div>`;
-  }).join('')+'</div>';
+    const pTxt=p?` · ${p.corrette}/${p.totale}`:'';
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px';
+    row.innerHTML=`<div><div style="font-size:13px;font-weight:500">${esc(nome)}</div><div style="font-size:11px;color:var(--text3);font-family:monospace">${r.cf||'—'}${pTxt}</div></div>`;
+    const btn=document.createElement('button');
+    btn.className='btn btn-outline btn-sm';btn.textContent='📄 Scarica PDF';
+    btn.addEventListener('click',()=>generaPDF(r));
+    row.appendChild(btn);
+    list.appendChild(row);
+  });
 }
 
-// ── PDF GENERATION ────────────────────────────────────────
-window.scaricaPDFSingolo=async function(rispostaId){
-  const r=allRisposte.find(x=>x.id===rispostaId);
-  if(!r){await loadRisposte();return;}
-  const configSnap=await getDoc(doc(db,'eventi',currentEvId,'questionario','config'));
-  const config=configSnap.exists()?configSnap.data():{domande:[],conPunteggio:false};
-  const ev=allEventi.find(e=>e.id===currentEvId)||{nome:'Evento ECM'};
-  const part=allParticipanti.find(x=>x.cf===r.cf);
-  generaPDF(r,config,ev,part);
-};
-
-window.scaricaTuttiPDF=async function(){
+document.getElementById('btnTuttiPDF').addEventListener('click',async()=>{
   if(!allRisposte.length){await loadRisposte();}
-  if(!allRisposte.length){alert('Nessuna risposta disponibile.');return;}
-  const configSnap=await getDoc(doc(db,'eventi',currentEvId,'questionario','config'));
-  const config=configSnap.exists()?configSnap.data():{domande:[],conPunteggio:false};
-  const ev=allEventi.find(e=>e.id===currentEvId)||{nome:'Evento ECM'};
-  for(const r of allRisposte){
+  for(const r of allRisposte){generaPDF(r);await new Promise(res=>setTimeout(res,400));}
+});
+
+document.getElementById('btnExcel').addEventListener('click',async()=>{
+  if(!currentEvId)return;
+  const cfg=currentConfig.domande?currentConfig:({domande:[],conPunteggio:false});
+  const header=['CF','Nome','Professione','Data',...cfg.domande.map((_,i)=>`D${i+1}`),'Punteggio'];
+  const rows=allRisposte.map(r=>{
     const part=allParticipanti.find(x=>x.cf===r.cf);
-    generaPDF(r,config,ev,part);
-    await new Promise(res=>setTimeout(res,300));
-  }
-};
+    const p=calcolaPunteggio(r,cfg);
+    const risRow=cfg.domande.map(d=>{const v=r.risposte?.[d.id];return d.tipo==='multipla'?lettere[v]||'':v||'';});
+    return[r.cf||'',part?`${part.cognome} ${part.nome}`:'',part?.professione||'',r.tsISO?new Date(r.tsISO).toLocaleDateString('it-IT'):'',...risRow,p?`${p.corrette}/${p.totale}`:'N/V'];
+  });
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([header,...rows]),'Quiz ECM');
+  XLSX.writeFile(wb,`quiz_ecm_${currentEvId}.xlsx`);
+});
 
-function generaPDF(risposta,config,evento,partecipante){
-  const lettere=['A','B','C','D'];
-  const p=calcolaPunteggio(risposta,config);
-  const nome=partecipante?`${partecipante.cognome} ${partecipante.nome}`:risposta.cf||'Partecipante';
-  const cf=risposta.cf||'—';
-  const prof=partecipante?.professione||'—';
-  const data=risposta.tsISO?new Date(risposta.tsISO).toLocaleDateString('it-IT'):'—';
+// ── PDF ──────────────────────────────────────────────────
+function generaPDF(risposta){
+  const p=calcolaPunteggio(risposta,currentConfig);
+  const part=allParticipanti.find(x=>x.cf===risposta.cf);
+  const ev=allEventi.find(e=>e.id===currentEvId)||{nome:'Evento ECM'};
+  const nome=part?`${part.cognome} ${part.nome}`:risposta.cf||'Partecipante';
   const fmt=d=>d?new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}):'—';
-
-  const punteggioHTML=p===null?'':`
-    <div style="background:${p.pct>=60?'#E8F5EE':'#FDEEE9'};border:1px solid ${p.pct>=60?'rgba(26,122,74,.3)':'rgba(193,59,42,.3)'};border-radius:8px;padding:14px;margin-top:20px;text-align:center">
-      <div style="font-size:22px;font-weight:700;color:${p.pct>=60?'#1A7A4A':'#C13B2A'}">${p.corrette} / ${p.totale}</div>
-      <div style="font-size:13px;color:${p.pct>=60?'#1A7A4A':'#C13B2A'};margin-top:4px">${p.pct>=60?'✓ Questionario superato':'✗ Questionario non superato'} (${p.pct}%)</div>
-    </div>`;
-
-  const domandeHTML=config.domande.map((d,i)=>{
-    const rispD=risposta.risposte?.[d.id];
+  const pHTML=p?`<div style="background:${p.pct>=60?'#E8F5EE':'#FDEEE9'};border:1px solid ${p.pct>=60?'rgba(26,122,74,.3)':'rgba(193,59,42,.3)'};border-radius:8px;padding:16px;margin-top:20px;text-align:center">
+    <div style="font-size:28px;font-weight:700;color:${p.pct>=60?'#1A7A4A':'#C13B2A'}">${p.corrette} / ${p.totale}</div>
+    <div style="font-size:14px;color:${p.pct>=60?'#1A7A4A':'#C13B2A'};margin-top:4px">${p.pct>=60?'✓ Questionario superato':'✗ Questionario non superato'} (${p.pct}%)</div>
+  </div>`:'';
+  const dHTML=(currentConfig.domande||[]).map((d,i)=>{
+    const v=risposta.risposte?.[d.id];
     if(d.tipo==='multipla'){
-      const opzioni=(d.opzioni||[]).map((op,j)=>{
-        const selezionata=rispD===j;
-        const corretta=config.conPunteggio&&d.corretta===j;
-        const bg=selezionata?(corretta?'#E8F5EE':'#FDEEE9'):'transparent';
-        const border=selezionata?(corretta?'#1A7A4A':'#C13B2A'):'#E0DAD0';
-        const icon=selezionata?(corretta?'✓':'✗'):'';
-        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid ${border};border-radius:7px;background:${bg};margin-bottom:5px">
-          <div style="width:26px;height:26px;border-radius:50%;background:${selezionata?(corretta?'#1A7A4A':'#C13B2A'):'#F0EDE6'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:${selezionata?'white':'#6B6560'};flex-shrink:0">${lettere[j]}</div>
-          <div style="font-size:13px;color:#1A1714;flex:1">${esc(op)}</div>
-          ${icon?`<div style="font-size:14px;font-weight:700;color:${corretta?'#1A7A4A':'#C13B2A'}">${icon}</div>`:''}
+      const ops=(d.opzioni||[]).map((op,j)=>{
+        const sel=v===j;const corr=currentConfig.conPunteggio&&d.corretta===j;
+        const bg=sel?(corr?'#E8F5EE':'#FDEEE9'):'transparent';
+        const bc=sel?(corr?'#1A7A4A':'#C13B2A'):'#E0DAD0';
+        return`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid ${bc};border-radius:7px;background:${bg};margin-bottom:5px">
+          <div style="width:26px;height:26px;border-radius:50%;background:${sel?(corr?'#1A7A4A':'#C13B2A'):'#F0EDE6'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:${sel?'white':'#6B6560'};flex-shrink:0">${lettere[j]}</div>
+          <div style="font-size:13px;flex:1">${esc(op)}</div>
+          ${sel?`<div style="font-weight:700;color:${corr?'#1A7A4A':'#C13B2A'}">${corr?'✓':'✗'}</div>`:''}
         </div>`;
       }).join('');
-      return `<div style="margin-bottom:20px">
-        <div style="font-size:13px;font-weight:600;color:#2B4EFF;margin-bottom:3px">Domanda ${i+1}</div>
-        <div style="font-size:15px;font-weight:500;margin-bottom:10px">${esc(d.testo)}</div>
-        ${opzioni}
-      </div>`;
+      return`<div style="margin-bottom:20px"><div style="font-size:12px;font-weight:600;color:#2B4EFF;margin-bottom:3px">Domanda ${i+1} — Scelta multipla</div><div style="font-size:15px;font-weight:500;margin-bottom:10px">${esc(d.testo)}</div>${ops}</div>`;
     }else{
-      return `<div style="margin-bottom:20px">
-        <div style="font-size:13px;font-weight:600;color:#1A7A4A;margin-bottom:3px">Domanda ${i+1} — Risposta aperta</div>
-        <div style="font-size:15px;font-weight:500;margin-bottom:10px">${esc(d.testo)}</div>
-        <div style="border:1px solid #E0DAD0;border-radius:8px;padding:12px 14px;background:#F0EDE6;font-size:13px;color:#1A1714;min-height:60px">${rispD?esc(String(rispD)):'<span style="color:#9B948C;font-style:italic">Nessuna risposta fornita</span>'}</div>
-      </div>`;
+      return`<div style="margin-bottom:20px"><div style="font-size:12px;font-weight:600;color:#1A7A4A;margin-bottom:3px">Domanda ${i+1} — Risposta aperta</div><div style="font-size:15px;font-weight:500;margin-bottom:10px">${esc(d.testo)}</div><div style="border:1px solid #E0DAD0;border-radius:8px;padding:12px 14px;background:#F0EDE6;font-size:13px;min-height:60px">${v?esc(String(v)):'<span style="color:#9B948C;font-style:italic">Nessuna risposta</span>'}</div></div>`;
     }
   }).join('');
-
-  const html=`<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8">
-  <title>Questionario ECM - ${esc(nome)}</title>
-  <style>
-    body{font-family:'Helvetica Neue',Arial,sans-serif;color:#1A1714;margin:0;padding:0;font-size:14px;line-height:1.6}
-    .page{max-width:700px;margin:0 auto;padding:40px}
-    .header{border-bottom:3px solid #2B4EFF;padding-bottom:20px;margin-bottom:24px}
-    .header-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
-    .event-title{font-size:20px;font-weight:700;color:#1A1714;margin-bottom:4px}
-    .event-meta{font-size:12px;color:#6B6560}
-    .ecm-badge{background:#EEF1FF;border:1px solid rgba(43,78,255,.2);border-radius:8px;padding:6px 14px;text-align:center}
-    .ecm-badge-title{font-size:10px;color:#2B4EFF;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
-    .ecm-badge-text{font-size:13px;font-weight:700;color:#2B4EFF}
-    .partecipante{background:#F0EDE6;border-radius:10px;padding:14px 18px;margin-bottom:24px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .part-item label{font-size:10px;color:#9B948C;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:2px}
-    .part-item value{font-size:14px;font-weight:500;color:#1A1714}
-    .domande-title{font-size:16px;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #E0DAD0}
-    .footer{margin-top:40px;padding-top:16px;border-top:1px solid #E0DAD0;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#9B948C}
-    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
-  </style></head>
-  <body><div class="page">
-    <div class="header">
-      <div class="header-top">
-        <div>
-          <div class="event-title">${esc(evento.nome||'Evento ECM')}</div>
-          <div class="event-meta">📅 ${fmt(evento.data)}${evento.dataFine&&evento.dataFine!==evento.data?' → '+fmt(evento.dataFine):''} · 📍 ${esc(evento.luogo||'—')}</div>
-        </div>
-        <div class="ecm-badge">
-          <div class="ecm-badge-title">Crediti ECM</div>
-          <div class="ecm-badge-text">${evento.creditiTot||0}</div>
-        </div>
-      </div>
-      <div style="font-size:18px;font-weight:700;color:#2B4EFF">Questionario ECM</div>
-    </div>
-    <div class="partecipante">
-      <div class="part-item"><label>Cognome e Nome</label><value style="font-size:15px;font-weight:700">${esc(nome)}</value></div>
-      <div class="part-item"><label>Codice Fiscale</label><value style="font-family:monospace">${esc(cf)}</value></div>
-      <div class="part-item"><label>Professione</label><value>${esc(prof)}</value></div>
-      <div class="part-item"><label>Data compilazione</label><value>${data}</value></div>
-    </div>
-    <div class="domande-title">📋 Risposte al questionario</div>
-    ${domandeHTML}
-    ${punteggioHTML}
-    <div class="footer">
-      <span>ECM Access Control — Documento generato automaticamente</span>
-      <span>${new Date().toLocaleDateString('it-IT')}</span>
-    </div>
-  </div>
-  <script>window.onload=()=>{window.print();}<\/script>
-  </body></html>`;
-
   const w=window.open('','_blank');
-  w.document.write(html);
+  w.document.write(`<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>Quiz ECM - ${esc(nome)}</title>
+  <style>body{font-family:'Helvetica Neue',Arial,sans-serif;color:#1A1714;margin:0;padding:0;font-size:14px;line-height:1.6}.page{max-width:700px;margin:0 auto;padding:40px}
+  .hdr{border-bottom:3px solid #2B4EFF;padding-bottom:18px;margin-bottom:22px}
+  .ev-title{font-size:20px;font-weight:700;margin-bottom:3px}.ev-meta{font-size:12px;color:#6B6560}
+  .part{background:#F0EDE6;border-radius:10px;padding:14px 18px;margin-bottom:22px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .pi label{font-size:10px;color:#9B948C;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:2px}
+  .pi value{font-size:14px;font-weight:500}
+  .ftitle{font-size:16px;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #E0DAD0}
+  .foot{margin-top:40px;padding-top:14px;border-top:1px solid #E0DAD0;display:flex;justify-content:space-between;font-size:11px;color:#9B948C}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>
+  </head><body><div class="page">
+  <div class="hdr">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+      <div><div class="ev-title">${esc(ev.nome||'Evento ECM')}</div><div class="ev-meta">📅 ${fmt(ev.data)} · 📍 ${esc(ev.luogo||'—')}</div></div>
+      <div style="background:#EEF1FF;border:1px solid rgba(43,78,255,.2);border-radius:8px;padding:6px 14px;text-align:center"><div style="font-size:10px;color:#2B4EFF;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Crediti ECM</div><div style="font-size:16px;font-weight:700;color:#2B4EFF">${ev.creditiTot||0}</div></div>
+    </div>
+    <div style="font-size:18px;font-weight:700;color:#2B4EFF">📋 Questionario ECM</div>
+  </div>
+  <div class="part">
+    <div class="pi"><label>Cognome e Nome</label><value style="font-size:15px;font-weight:700">${esc(nome)}</value></div>
+    <div class="pi"><label>Codice Fiscale</label><value style="font-family:monospace">${risposta.cf||'—'}</value></div>
+    <div class="pi"><label>Professione</label><value>${part?.professione||'—'}</value></div>
+    <div class="pi"><label>Data compilazione</label><value>${risposta.tsISO?new Date(risposta.tsISO).toLocaleDateString('it-IT'):'—'}</value></div>
+  </div>
+  <div class="ftitle">📋 Risposte al questionario</div>
+  ${dHTML}${pHTML}
+  <div class="foot"><span>ECM Access Control — Documento generato automaticamente</span><span>${new Date().toLocaleDateString('it-IT')}</span></div>
+  </div><script>window.onload=()=>window.print();<\/script></body></html>`);
   w.document.close();
 }
 
-// ── EXPORT EXCEL ──────────────────────────────────────────
-window.exportExcel=async function(){
-  if(!allRisposte.length){await loadRisposte();}
-  const configSnap=await getDoc(doc(db,'eventi',currentEvId,'questionario','config'));
-  const config=configSnap.exists()?configSnap.data():{domande:[],conPunteggio:false};
-  const lettere=['A','B','C','D'];
-  const header=['CF','Nome','Professione','Data',...config.domande.map((_,i)=>`D${i+1}`),'Punteggio'];
-  const rows=allRisposte.map(r=>{
-    const part=allParticipanti.find(x=>x.cf===r.cf);
-    const p=calcolaPunteggio(r,config);
-    const risposteRow=config.domande.map(d=>{
-      const v=r.risposte?.[d.id];
-      if(d.tipo==='multipla')return v!==undefined?lettere[v]||v:'';
-      return v||'';
-    });
-    return[r.cf||'',part?`${part.cognome} ${part.nome}`:'',part?.professione||'',r.tsISO?new Date(r.tsISO).toLocaleDateString('it-IT'):'', ...risposteRow, p?`${p.corrette}/${p.totale}`:'N/V'];
-  });
-  const wb=XLSX.utils.book_new();
-  const ws=XLSX.utils.aoa_to_sheet([header,...rows]);
-  XLSX.utils.book_append_sheet(wb,ws,'Risposte Quiz ECM');
-  XLSX.writeFile(wb,`quiz_ecm_${currentEvId}_${new Date().toISOString().slice(0,10)}.xlsx`);
-};
-
-function switchTab(tab,btn){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('tab-'+tab).classList.add('active');
-  if(tab==='risposte'||tab==='pdf')loadRisposte();
-}
-window.switchTab=switchTab;
-
 function showAlert(t,m){const id=t==='success'?'alertSuccess':'alertError';const e=document.getElementById(id);e.textContent=m;e.classList.add('show');e.style.display='block';setTimeout(()=>{e.classList.remove('show');e.style.display='none';},4000);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-</script>
-<script>
-// Bridge onclick → modulo ES6
-function onEvChange(){if(window.onEvChange)window.onEvChange();}
-function switchTab(t,el){if(window.switchTab)window.switchTab(t,el);}
-function onTogglePunteggio(){if(window.onTogglePunteggio)window.onTogglePunteggio();}
-function onNewTipoChange(){if(window.onNewTipoChange)window.onNewTipoChange();}
-function aggiungiDomanda(){if(window.aggiungiDomanda)window.aggiungiDomanda();}
-function eliminaDomanda(i){if(window.eliminaDomanda)window.eliminaDomanda(i);}
-function salvaQuestionario(){if(window.salvaQuestionario)window.salvaQuestionario();}
-function loadDomande(){if(window.loadDomande)window.loadDomande();}
-function loadRisposte(){if(window.loadRisposte)window.loadRisposte();}
-function exportExcel(){if(window.exportExcel)window.exportExcel();}
-function copiaLink(){if(window.copiaLink)window.copiaLink();}
-function scaricaQR(){if(window.scaricaQR)window.scaricaQR();}
-function scaricaPDFSingolo(id){if(window.scaricaPDFSingolo)window.scaricaPDFSingolo(id);}
-function scaricaTuttiPDF(){if(window.scaricaTuttiPDF)window.scaricaTuttiPDF();}
 </script>
 </body>
 </html>
