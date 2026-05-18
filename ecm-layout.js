@@ -111,7 +111,7 @@
         '<span id="langFlag" style="font-size:15px">' + currentFlag + '</span>' +
       '</div>' +
       '<div class="nav-label" style="width:100%;padding-left:28px">' +
-        '<select id="langSelector" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:6px;color:rgba(255,255,255,.85);font-size:12px;padding:5px 8px;cursor:pointer;width:100%;font-family:inherit;outline:none">' +
+        '<select id="langSelector" style="background:#2A2D3E;border:1px solid rgba(255,255,255,.2);border-radius:6px;color:#fff;font-size:12px;padding:5px 8px;cursor:pointer;width:100%;font-family:inherit;outline:none;-webkit-appearance:none;appearance:none">' +
           langOptions +
         '</select>' +
       '</div>' +

@@ -162,13 +162,18 @@
     return d[key] !== undefined ? d[key] : (LANGS['it'][key] || key);
   }
 
-  // Applica data-i18n e data-i18n-placeholder
+  // Applica data-i18n e data-i18n-placeholder — sempre, qualsiasi lingua
   function applyTranslations() {
+    var lang = getLang();
     document.querySelectorAll('[data-i18n]').forEach(function(el) {
-      el.textContent = t(el.getAttribute('data-i18n'));
+      var key = el.getAttribute('data-i18n');
+      var val = t(key);
+      if (val && val !== key) el.textContent = val;
     });
     document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
-      el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+      var key = el.getAttribute('data-i18n-placeholder');
+      var val = t(key);
+      if (val && val !== key) el.placeholder = val;
     });
   }
 
@@ -179,14 +184,17 @@
     if (flagEl) flagEl.textContent = (LANGS[lang] && LANGS[lang].flag) || '🌐';
     var sel = document.getElementById('langSelector');
     if (sel) sel.value = lang;
-    // Applica traduzioni
+    // Applica traduzioni a tutta la pagina
     applyTranslations();
-    // Ricostruisce sidebar
+    // Ricostruisce sidebar con nuova lingua
     if (typeof renderSidebar === 'function') {
       var sb = document.getElementById('ecmSidebar');
       var activeId = sb ? sb.dataset.activeId : '';
       renderSidebar(activeId);
     }
+    // Aggiorna topbar title se ha data-i18n
+    var topbarTitle = document.querySelector('.topbar-title[data-i18n]');
+    if (topbarTitle) topbarTitle.textContent = t(topbarTitle.getAttribute('data-i18n'));
   }
 
   function getLangMeta() { return LANGS; }
