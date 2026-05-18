@@ -5,32 +5,46 @@ service cloud.firestore {
     function isAuth() {
       return request.auth != null;
     }
+    function isGoogleAuth() {
+      return request.auth != null && request.auth.token.firebase.sign_in_provider == 'google.com';
+    }
 
-    // Utenti operatori — leggibili anche senza Google Auth
-    // (il login operatori avviene lato client con hash password)
+    // Utenti operatori
     match /utenti/{uid} {
-      allow read: if true;  // necessario per il login operatori
-      allow write: if isAuth(); // solo admin Google può creare/modificare
+      allow read: if true;
+      allow write: if isGoogleAuth();
     }
 
     match /eventi/{eventId} {
-      allow read:  if isAuth();
+      allow read: if isAuth() || true; // lettura pubblica per registrazione e survey
       allow write: if isAuth() && eventId.matches('evt_[0-9]+');
 
       match /partecipanti/{partId} {
-        allow read:   if isAuth();
-        allow create: if isAuth() && partId.matches('P[0-9]+');
-        allow update: if isAuth() && partId.matches('P[0-9]+');
+        allow read: if true;
+        allow create: if true; // registrazione autonoma pubblica
+        allow update: if isAuth() || partId.matches('P[0-9]+');
         allow delete: if false;
       }
 
       match /logs/{logId} {
         allow read: if isAuth();
         allow create: if isAuth()
-          && request.resource.data.keys().hasAll([
-               'partecipanteId','tipo','ora','tsISO','nome'
-             ])
+          && request.resource.data.keys().hasAll(['partecipanteId','tipo','ora','tsISO','nome'])
           && request.resource.data.tipo in ['entrata','uscita'];
+        allow update: if false;
+        allow delete: if false;
+      }
+
+      // Survey config (admin/operatori)
+      match /survey/config {
+        allow read: if true; // pubblico per la pagina risposta
+        allow write: if isAuth();
+      }
+
+      // Risposte survey (chiunque può rispondere)
+      match /survey/risposte/lista/{rispostaId} {
+        allow read: if isAuth();
+        allow create: if true; // pagina pubblica
         allow update: if false;
         allow delete: if false;
       }

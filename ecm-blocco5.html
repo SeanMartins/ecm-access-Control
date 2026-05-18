@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="bingbot" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ECM — Survey</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F5F3EE;--surface:#FFF;--surface2:#F0EDE6;--border:#E0DAD0;--border2:#C8C0B4;--text:#1A1714;--text2:#6B6560;--text3:#9B948C;--accent:#2B4EFF;--accent-light:#EEF1FF;--accent2:#FF6B35;--success:#1A7A4A;--success-light:#E8F5EE;--danger:#C13B2A;--danger-light:#FDEEE9;--warn:#B07A10;--warn-light:#FDF5E0;--radius:10px;--radius-lg:16px;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06)}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6;padding-bottom:80px}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 22px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.logo{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;color:var(--text)}
+.logo-mark{width:26px;height:26px;border-radius:7px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px}
+.page-title{font-size:24px;font-weight:600;letter-spacing:-.02em;margin-bottom:4px}
+.page-sub{color:var(--text2);font-size:14px;margin-bottom:24px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;margin-bottom:18px;box-shadow:var(--shadow)}
+.card-title{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px}
+.tab{padding:9px 18px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;background:none;border-left:none;border-right:none;border-top:none;font-family:'DM Sans',sans-serif}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+/* SURVEY SELECTOR */
+.survey-select{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;width:100%;margin-bottom:16px}
+.survey-select:focus{border-color:var(--accent)}
+/* DOMANDE */
+.domande-list{display:flex;flex-direction:column;gap:12px}
+.domanda-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;position:relative}
+.domanda-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.domanda-num{width:24px;height:24px;border-radius:50%;background:var(--accent);color:white;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.domanda-tipo-badge{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.tipo-stelle{background:var(--warn-light);color:var(--warn)}
+.tipo-multipla{background:var(--accent-light);color:var(--accent)}
+.tipo-testo{background:var(--success-light);color:var(--success)}
+.domanda-text{font-size:14px;font-weight:500;flex:1}
+.domanda-actions{display:flex;gap:6px;flex-shrink:0}
+/* AGGIUNGI DOMANDA */
+.add-domanda-card{border:2px dashed var(--border2);border-radius:var(--radius);padding:18px;background:var(--surface)}
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field-label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;width:100%}
+.form-input:focus{border-color:var(--accent);background:white}
+select.form-input{cursor:pointer}
+.opzioni-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.opzione-row{display:flex;gap:8px;align-items:center}
+.opzione-row input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 11px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none}
+.opzione-row input:focus{border-color:var(--accent)}
+/* RISULTATI */
+.risultati-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.risultato-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.ris-domanda{font-size:13px;font-weight:500;margin-bottom:10px}
+.ris-count{font-size:11px;color:var(--text3);margin-bottom:8px}
+/* Stelle */
+.stelle-display{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.stelle-valore{font-size:28px;font-weight:700;color:var(--warn)}
+.stelle-bar{flex:1;height:8px;background:var(--border);border-radius:100px;overflow:hidden}
+.stelle-fill{height:100%;background:var(--warn);border-radius:100px}
+/* Multipla */
+.opzione-ris{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.opzione-bar-bg{flex:1;height:16px;background:var(--border);border-radius:4px;overflow:hidden}
+.opzione-bar-fill{height:100%;background:var(--accent);border-radius:4px}
+.opzione-label{font-size:12px;color:var(--text2);min-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.opzione-pct{font-size:11px;color:var(--text3);min-width:36px;text-align:right;font-family:'DM Mono',monospace}
+/* Testo libero */
+.risposte-testo{max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:5px}
+.risposta-testo-item{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text2)}
+/* QR Survey */
+.qr-survey-wrap{background:white;padding:12px;border-radius:var(--radius);display:inline-block;border:1px solid var(--border)}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none}
+.btn-primary{background:var(--accent);color:white}.btn-primary:hover{background:#1a3ce0}
+.btn-success{background:var(--success);color:white}.btn-success:hover{background:#145e38}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{background:var(--surface2)}
+.btn-danger{background:var(--danger-light);color:var(--danger);border:1px solid rgba(193,59,42,.2)}
+.btn-warn{background:var(--warn-light);color:var(--warn);border:1px solid rgba(176,122,16,.2)}
+.btn-sm{padding:5px 11px;font-size:11px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.actions-row{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.alert{padding:11px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:14px;display:none}
+.alert.show{display:block}
+.alert-success{background:var(--success-light);color:var(--success);border:1px solid rgba(26,122,74,.25)}
+.alert-error{background:var(--danger-light);color:var(--danger);border:1px solid rgba(193,59,42,.25)}
+.empty-state{text-align:center;padding:32px;color:var(--text3);font-size:13px}
+/* NAVBAR */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#1A1714;border-top:1px solid #2A2420;display:flex;align-items:stretch;z-index:200;padding-bottom:env(safe-area-inset-bottom)}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 4px;text-decoration:none;color:#6B6560;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;transition:all .2s;border:none;background:none}
+.bn-item:hover{color:#9B948C}.bn-item.active{color:#4D6EFF}
+.bn-item.active .bn-icon{background:rgba(77,110,255,.15);border-radius:10px}
+.bn-icon{width:36px;height:28px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.bn-label{font-size:10px;line-height:1}
+@media(max-width:700px){.risultati-grid{grid-template-columns:1fr}}
+@media(max-width:480px){.page-title{font-size:20px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><div class="logo-mark">E</div>ECM — Survey</div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div id="userBarSlot"></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="page-title">Survey & Questionari</div>
+  <div class="page-sub">Crea questionari per i tuoi eventi e visualizza i risultati in tempo reale</div>
+
+  <!-- SELEZIONE EVENTO -->
+  <div class="card">
+    <div class="card-title">Evento</div>
+    <select class="survey-select" id="evSelect" onchange="onEvChange()">
+      <option value="">— Seleziona evento —</option>
+    </select>
+    <div id="evInfo" style="display:none;font-size:12px;color:var(--text2);margin-top:-8px;margin-bottom:4px" id="evInfoText"></div>
+  </div>
+
+  <div id="mainContent" style="display:none">
+    <div class="tabs">
+      <button class="tab active" data-tab="crea" onclick="switchTab('crea',this)">✏️ Crea survey</button>
+      <button class="tab" data-tab="qr" onclick="switchTab('qr',this)">📱 Condividi QR</button>
+      <button class="tab" data-tab="risultati" onclick="switchTab('risultati',this)">📊 Risultati</button>
+    </div>
+
+    <!-- TAB CREA -->
+    <div class="tab-panel active" id="tab-crea">
+      <div class="card">
+        <div class="card-title">
+          <span>Domande del questionario</span>
+          <span id="domandeCount" style="font-size:12px;color:var(--text3);font-weight:400">0 domande</span>
+        </div>
+        <div class="alert alert-success" id="alertSuccess"></div>
+        <div class="alert alert-error" id="alertError"></div>
+        <div class="domande-list" id="domandeList">
+          <div class="empty-state">Nessuna domanda ancora.<br>Aggiungi la prima domanda qui sotto.</div>
+        </div>
+
+        <!-- AGGIUNGI DOMANDA -->
+        <div class="add-domanda-card" style="margin-top:16px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--text2)">➕ Nuova domanda</div>
+          <div class="form-group">
+            <label class="field-label">Tipo domanda</label>
+            <select class="form-input" id="newTipo" onchange="onTipoChange()">
+              <option value="stelle">⭐ Valutazione (stelle 1-5)</option>
+              <option value="multipla">✅ Scelta multipla</option>
+              <option value="testo">📝 Testo libero</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="field-label">Testo domanda *</label>
+            <input type="text" class="form-input" id="newTesto" placeholder="es. Come valuti il corso?">
+          </div>
+          <div id="opzioniSection" style="display:none">
+            <div class="field-label" style="margin-bottom:8px">Opzioni di risposta *</div>
+            <div class="opzioni-list" id="opzioniList">
+              <div class="opzione-row"><input type="text" placeholder="Opzione 1"><button type="button" class="btn btn-danger btn-sm" onclick="rimuoviOpzione(this)">✕</button></div>
+              <div class="opzione-row"><input type="text" placeholder="Opzione 2"><button type="button" class="btn btn-danger btn-sm" onclick="rimuoviOpzione(this)">✕</button></div>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" onclick="aggiungiOpzione()">+ Aggiungi opzione</button>
+          </div>
+          <div class="actions-row" style="margin-top:12px">
+            <button type="button" class="btn btn-primary" onclick="aggiungiDomanda()">+ Aggiungi domanda</button>
+          </div>
+        </div>
+        <div class="actions-row" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+          <button type="button" class="btn btn-outline" onclick="loadDomande()">↻ Ricarica</button>
+          <button type="button" class="btn btn-success" id="btnSalvaSurvey" onclick="salvaSurvey()">💾 Salva survey</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB QR -->
+    <div class="tab-panel" id="tab-qr">
+      <div class="card" style="text-align:center">
+        <div class="card-title" style="justify-content:center">📱 Condividi il questionario</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:20px">Mostra questo QR ai partecipanti durante l'evento — lo scansionano e rispondono dal loro telefono</p>
+        <div id="surveyQRWrap" class="qr-survey-wrap" style="margin:0 auto 16px"></div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:16px;word-break:break-all" id="surveyUrl"></div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="copiaLinkSurvey()">📋 Copia link</button>
+          <button class="btn btn-outline" onclick="scaricaQRSurvey()">⬇ Scarica QR</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB RISULTATI -->
+    <div class="tab-panel" id="tab-risultati">
+      <div class="card">
+        <div class="card-title">
+          <span>Risultati in tempo reale</span>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn btn-outline btn-sm" onclick="loadRisultati()">↻ Aggiorna</button>
+            <button type="button" class="btn btn-success btn-sm" onclick="exportRisultati()">⬇ Excel</button>
+          </div>
+        </div>
+        <div id="risCount" style="font-size:12px;color:var(--text2);margin-bottom:16px">—</div>
+        <div class="risultati-grid" id="risultatiGrid">
+          <div class="empty-state" style="grid-column:span 2">Nessuna risposta ancora</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="bottom-nav">
+  <a href="ecm-eventi.html" class="bn-item"><div class="bn-icon">📋</div><div class="bn-label">Eventi</div></a>
+  <a href="ecm-home.html" class="bn-item"><div class="bn-icon">🏠</div><div class="bn-label">Home</div></a>
+  <a href="ecm-blocco1.html" class="bn-item"><div class="bn-icon">⚙️</div><div class="bn-label">Setup</div></a>
+  <a href="ecm-blocco2.html" class="bn-item"><div class="bn-icon">🪪</div><div class="bn-label">Badge</div></a>
+  <a href="ecm-blocco3.html" class="bn-item"><div class="bn-icon">📷</div><div class="bn-label">Accessi</div></a>
+  <a href="ecm-blocco4.html" class="bn-item"><div class="bn-icon">📊</div><div class="bn-label">Report</div></a>
+  <a href="ecm-blocco5.html" class="bn-item active"><div class="bn-icon">📝</div><div class="bn-label">Survey</div></a>
+  <a href="ecm-admin.html" class="bn-item" id="adminNavItem" style="display:none"><div class="bn-icon">👑</div><div class="bn-label">Admin</div></a>
+</nav>
+
+<script type="module">
+import { requireAuth, injectUserBar } from './ecm-auth.js';
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+const app=getApps().length?getApps()[0]:initializeApp(FB);
+const db=getFirestore(app);
+const ADMIN_EMAIL='martinsosem@gmail.com';
+
+await requireAuth();
+injectUserBar('userBarSlot');
+onAuthStateChanged(getAuth(app),user=>{if(user&&user.email===ADMIN_EMAIL){const el=document.getElementById('adminNavItem');if(el)el.style.display='flex';}});
+
+let currentEvId=null;
+let domande=[];
+let allEventi=[];
+
+// ── CARICA EVENTI ─────────────────────────────────────────
+const opSession=JSON.parse(localStorage.getItem('ecm_op_user')||'null');
+const snap=await getDocs(collection(db,'eventi'));
+allEventi=[];
+snap.forEach(d=>allEventi.push({id:d.id,...d.data()}));
+allEventi=allEventi.filter(e=>e.stato!=='archiviato');
+// Filtra per operatore
+if(opSession&&opSession.eventiAssegnati&&opSession.eventiAssegnati.length>0){
+  const ids=opSession.eventiAssegnati.map(e=>e.id);
+  allEventi=allEventi.filter(e=>ids.includes(e.id));
+}
+allEventi.sort((a,b)=>new Date(b.data||0)-new Date(a.data||0));
+
+const sel=document.getElementById('evSelect');
+allEventi.forEach(ev=>{
+  const opt=document.createElement('option');
+  opt.value=ev.id; opt.textContent=ev.nome+(ev.data?' ('+new Date(ev.data).toLocaleDateString('it-IT')+')':'');
+  sel.appendChild(opt);
+});
+
+// Auto-seleziona evento attivo
+const savedEvId=localStorage.getItem('ecm_eventId');
+if(savedEvId&&allEventi.find(e=>e.id===savedEvId)){
+  sel.value=savedEvId;
+  onEvChange();
+}
+
+window.onEvChange=async function(){
+  currentEvId=sel.value;
+  if(!currentEvId){document.getElementById('mainContent').style.display='none';return;}
+  document.getElementById('mainContent').style.display='block';
+  localStorage.setItem('ecm_eventId',currentEvId);
+  await loadDomande();
+  buildQR();
+};
+
+// ── DOMANDE ───────────────────────────────────────────────
+window.loadDomande=async function(){
+  try{
+    const s=await getDoc(doc(db,'eventi',currentEvId,'survey','config'));
+    domande=s.exists()?(s.data().domande||[]):[];
+    renderDomande();
+  }catch(e){domande=[];renderDomande();}
+};
+
+function renderDomande(){
+  const list=document.getElementById('domandeList');
+  document.getElementById('domandeCount').textContent=domande.length+' domande';
+  if(!domande.length){list.innerHTML='<div class="empty-state">Nessuna domanda. Aggiungine una qui sotto.</div>';return;}
+  const tipoLabel={stelle:'⭐ Stelle',multipla:'✅ Multipla',testo:'📝 Testo'};
+  const tipoClass={stelle:'tipo-stelle',multipla:'tipo-multipla',testo:'tipo-testo'};
+  list.innerHTML=domande.map((d,i)=>`
+    <div class="domanda-item">
+      <div class="domanda-header">
+        <div class="domanda-num">${i+1}</div>
+        <span class="domanda-tipo-badge ${tipoClass[d.tipo]||''}">${tipoLabel[d.tipo]||d.tipo}</span>
+        <div class="domanda-text">${esc(d.testo)}</div>
+        <div class="domanda-actions">
+          ${i>0?`<button type="button" class="btn btn-outline btn-sm" onclick="moveDomanda(${i},-1)">↑</button>`:''}
+          ${i<domande.length-1?`<button type="button" class="btn btn-outline btn-sm" onclick="moveDomanda(${i},1)">↓</button>`:''}
+          <button type="button" class="btn btn-danger btn-sm" onclick="eliminaDomanda(${i})">✕</button>
+        </div>
+      </div>
+      ${d.tipo==='multipla'&&d.opzioni?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:4px">${d.opzioni.map(o=>`<span style="padding:2px 8px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:11px">${esc(o)}</span>`).join('')}</div>`:''}
+      ${d.tipo==='stelle'?`<div style="font-size:11px;color:var(--text3);margin-top:4px">Scala da 1 a 5 stelle</div>`:''}
+    </div>`).join('');
+}
+
+window.onTipoChange=function(){
+  document.getElementById('opzioniSection').style.display=document.getElementById('newTipo').value==='multipla'?'block':'none';
+};
+
+window.aggiungiOpzione=function(){
+  const n=document.querySelectorAll('.opzione-row').length+1;
+  const row=document.createElement('div');row.className='opzione-row';
+  row.innerHTML=`<input type="text" placeholder="Opzione ${n}"><button type="button" class="btn btn-danger btn-sm" onclick="rimuoviOpzione(this)">✕</button>`;
+  document.getElementById('opzioniList').appendChild(row);
+};
+window.rimuoviOpzione=function(btn){btn.parentElement.remove();};
+
+window.aggiungiDomanda=function(){
+  const tipo=document.getElementById('newTipo').value;
+  const testo=document.getElementById('newTesto').value.trim();
+  if(!testo){alert('Inserisci il testo della domanda.');return;}
+  const d={id:'d_'+Date.now(),tipo,testo};
+  if(tipo==='multipla'){
+    const opzioni=[...document.querySelectorAll('.opzione-row input')].map(i=>i.value.trim()).filter(Boolean);
+    if(opzioni.length<2){alert('Aggiungi almeno 2 opzioni.');return;}
+    d.opzioni=opzioni;
+  }
+  domande.push(d);
+  renderDomande();
+  document.getElementById('newTesto').value='';
+  document.getElementById('opzioniList').innerHTML=`<div class="opzione-row"><input type="text" placeholder="Opzione 1"><button type="button" class="btn btn-danger btn-sm" onclick="rimuoviOpzione(this)">✕</button></div><div class="opzione-row"><input type="text" placeholder="Opzione 2"><button type="button" class="btn btn-danger btn-sm" onclick="rimuoviOpzione(this)">✕</button></div>`;
+};
+
+window.eliminaDomanda=function(i){domande.splice(i,1);renderDomande();};
+window.moveDomanda=function(i,dir){
+  const tmp=domande[i];domande[i]=domande[i+dir];domande[i+dir]=tmp;renderDomande();
+};
+
+window.salvaSurvey=async function(){
+  if(!currentEvId){alert('Seleziona un evento.');return;}
+  if(!domande.length){alert('Aggiungi almeno una domanda.');return;}
+  const btn=document.getElementById('btnSalvaSurvey');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Salvataggio...';
+  try{
+    await setDoc(doc(db,'eventi',currentEvId,'survey','config'),{
+      domande,updatedAt:serverTimestamp(),eventId:currentEvId
+    });
+    showAlert('success','✓ Survey salvato! Condividi il QR ai partecipanti.');
+  }catch(err){showAlert('error','Errore: '+err.message);}
+  finally{btn.disabled=false;btn.innerHTML='💾 Salva survey';}
+};
+
+// ── QR SURVEY ─────────────────────────────────────────────
+function buildQR(){
+  const wrap=document.getElementById('surveyQRWrap');
+  wrap.innerHTML='';
+  const base=window.location.origin+window.location.pathname.replace('ecm-blocco5.html','');
+  const url=`${base}ecm-survey-rispondi.html?evId=${currentEvId}`;
+  document.getElementById('surveyUrl').textContent=url;
+  new QRCode(wrap,{text:url,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});
+}
+window.copiaLinkSurvey=function(){
+  navigator.clipboard.writeText(document.getElementById('surveyUrl').textContent)
+    .then(()=>{const b=event.target;b.textContent='✓ Copiato!';setTimeout(()=>b.textContent='📋 Copia link',2000);});
+};
+window.scaricaQRSurvey=function(){
+  const canvas=document.querySelector('#surveyQRWrap canvas');
+  if(!canvas){alert('QR non pronto');return;}
+  const a=document.createElement('a');a.download='qr-survey.png';a.href=canvas.toDataURL();a.click();
+};
+
+// ── RISULTATI ─────────────────────────────────────────────
+window.loadRisultati=async function(){
+  if(!currentEvId)return;
+  try{
+    const [configSnap,risSnap]=await Promise.all([
+      getDoc(doc(db,'eventi',currentEvId,'survey','config')),
+      getDocs(query(collection(db,'eventi',currentEvId,'survey','risposte','lista'),orderBy('ts','desc')))
+    ]);
+    const dom=configSnap.exists()?(configSnap.data().domande||[]):[];
+    const risposte=[]; risSnap.forEach(d=>risposte.push(d.data()));
+    document.getElementById('risCount').textContent=`${risposte.length} risposte ricevute`;
+    if(!risposte.length||!dom.length){
+      document.getElementById('risultatiGrid').innerHTML='<div class="empty-state" style="grid-column:span 2">Nessuna risposta ancora.</div>';return;
+    }
+    renderRisultati(dom,risposte);
+  }catch(err){
+    document.getElementById('risultatiGrid').innerHTML=`<div style="color:var(--danger);font-size:13px">Errore: ${err.message}</div>`;
+  }
+};
+
+function renderRisultati(dom,risposte){
+  const grid=document.getElementById('risultatiGrid');
+  grid.innerHTML=dom.map((d,di)=>{
+    const risD=risposte.map(r=>r.risposte&&r.risposte[d.id]).filter(v=>v!==undefined&&v!=='');
+    let content='';
+    if(d.tipo==='stelle'){
+      const vals=risD.map(Number).filter(n=>n>=1&&n<=5);
+      const avg=vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*10)/10:0;
+      const pct=(avg/5)*100;
+      content=`<div class="stelle-display">
+        <div class="stelle-valore">${avg}</div>
+        <div style="flex:1"><div class="stelle-bar"><div class="stelle-fill" style="width:${pct}%"></div></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px">${vals.length} risposte · media ${avg}/5</div></div>
+        <div style="font-size:22px">${avg>=4?'⭐⭐⭐⭐⭐':avg>=3?'⭐⭐⭐⭐':avg>=2?'⭐⭐⭐':avg>=1?'⭐⭐':'⭐'}</div>
+      </div>
+      <div style="display:flex;gap:4px;margin-top:6px">${[1,2,3,4,5].map(v=>{const n=vals.filter(x=>x===v).length;const p=vals.length?Math.round(n/vals.length*100):0;return`<div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--text3)">${v}★</div><div style="height:40px;background:var(--border);border-radius:4px;overflow:hidden;position:relative"><div style="position:absolute;bottom:0;width:100%;background:var(--warn);height:${p}%"></div></div><div style="font-size:10px;color:var(--text3)">${n}</div></div>`;}).join('')}`;
+    }else if(d.tipo==='multipla'&&d.opzioni){
+      const tot=risD.length;
+      content=d.opzioni.map(op=>{
+        const n=risD.filter(r=>r===op).length;
+        const p=tot?Math.round(n/tot*100):0;
+        return`<div class="opzione-ris"><div class="opzione-label">${esc(op)}</div><div class="opzione-bar-bg"><div class="opzione-bar-fill" style="width:${p}%"></div></div><div class="opzione-pct">${p}%</div></div>`;
+      }).join('')+`<div style="font-size:11px;color:var(--text3);margin-top:6px">${tot} risposte</div>`;
+    }else{
+      content=`<div class="risposte-testo">${risD.slice(0,20).map(r=>`<div class="risposta-testo-item">${esc(String(r))}</div>`).join('')}</div><div style="font-size:11px;color:var(--text3);margin-top:6px">${risD.length} risposte${risD.length>20?' (ultime 20)':''}</div>`;
+    }
+    return`<div class="risultato-card"><div class="ris-domanda">${di+1}. ${esc(d.testo)}</div>${content}</div>`;
+  }).join('');
+}
+
+window.exportRisultati=async function(){
+  if(!currentEvId)return;
+  try{
+    const [configSnap,risSnap]=await Promise.all([
+      getDoc(doc(db,'eventi',currentEvId,'survey','config')),
+      getDocs(collection(db,'eventi',currentEvId,'survey','risposte','lista'))
+    ]);
+    const dom=configSnap.exists()?(configSnap.data().domande||[]):[];
+    const risposte=[]; risSnap.forEach(d=>risposte.push(d.data()));
+    const header=['Timestamp','CF Partecipante',...dom.map(d=>d.testo)];
+    const rows=risposte.map(r=>[r.ts?.toDate?.().toLocaleString('it-IT')||r.tsISO||'',r.cf||'',...dom.map(d=>r.risposte?.[d.id]||'')]);
+    const wb=XLSX.utils.book_new();
+    const ws=XLSX.utils.aoa_to_sheet([header,...rows]);
+    XLSX.utils.book_append_sheet(wb,ws,'Risposte');
+    XLSX.writeFile(wb,`survey_${currentEvId}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  }catch(err){alert('Errore export: '+err.message);}
+};
+
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(tab==='risultati')loadRisultati();
+  if(tab==='qr')buildQR();
+}
+window.switchTab=switchTab;
+
+function showAlert(t,m){const id=t==='success'?'alertSuccess':'alertError';const e=document.getElementById(id);e.textContent=m;e.classList.add('show');e.style.display='block';setTimeout(()=>{e.classList.remove('show');e.style.display='none';},4000);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+</script>
+</body>
+</html>

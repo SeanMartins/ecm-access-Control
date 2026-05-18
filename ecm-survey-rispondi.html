@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Questionario ECM</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F5F3EE;--surface:#FFF;--surface2:#F0EDE6;--border:#E0DAD0;--text:#1A1714;--text2:#6B6560;--text3:#9B948C;--accent:#2B4EFF;--accent-light:#EEF1FF;--success:#1A7A4A;--success-light:#E8F5EE;--danger:#C13B2A;--danger-light:#FDEEE9;--warn:#B07A10;--radius:10px;--radius-lg:16px;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06)}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6;padding-bottom:40px}
+.survey-header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 22px;box-shadow:var(--shadow)}
+.survey-ev-nome{font-size:18px;font-weight:600;margin-bottom:2px}
+.survey-ev-meta{font-size:12px;color:var(--text3)}
+main{max-width:600px;margin:0 auto;padding:28px 20px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:16px;box-shadow:var(--shadow)}
+.progress-bar{height:4px;background:var(--border);border-radius:100px;margin-bottom:28px;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);border-radius:100px;transition:width .3s}
+.domanda-label{font-size:16px;font-weight:500;margin-bottom:16px;line-height:1.5}
+.domanda-num{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+/* Stelle */
+.stelle-wrap{display:flex;gap:8px;justify-content:center;margin:8px 0}
+.stella-btn{font-size:36px;cursor:pointer;transition:transform .15s;border:none;background:none;opacity:.3;line-height:1}
+.stella-btn.active{opacity:1;transform:scale(1.15)}
+.stella-btn:hover{opacity:.8}
+.stella-valore{text-align:center;font-size:13px;color:var(--text2);margin-top:8px;min-height:20px}
+/* Multipla */
+.opzioni-grid{display:flex;flex-direction:column;gap:8px}
+.opzione-btn{padding:12px 16px;border:2px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .2s;text-align:left;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--surface);color:var(--text)}
+.opzione-btn:hover{border-color:var(--accent);background:var(--accent-light)}
+.opzione-btn.selected{border-color:var(--accent);background:var(--accent-light);color:var(--accent);font-weight:500}
+/* Testo */
+.testo-area{width:100%;min-height:100px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;resize:vertical;transition:border-color .2s}
+.testo-area:focus{border-color:var(--accent);background:white}
+/* Navigazione */
+.nav-btns{display:flex;gap:10px;margin-top:20px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 24px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .18s;border:none;flex:1}
+.btn-primary{background:var(--accent);color:white}.btn-primary:hover{background:#1a3ce0}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border);flex:0 0 auto;padding:12px 20px}.btn-outline:hover{background:var(--surface2)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Success */
+.success-card{text-align:center;padding:36px 24px}
+.success-icon{font-size:60px;margin-bottom:16px}
+.success-title{font-size:22px;font-weight:700;margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--text2)}
+/* Loading */
+.loading{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--text3);gap:12px;flex-direction:column}
+.spinner-dark{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+.cf-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;font-family:'DM Mono',monospace;font-size:16px;letter-spacing:.1em;text-transform:uppercase;color:var(--text);outline:none;transition:border-color .2s;margin-bottom:10px}
+.cf-input:focus{border-color:var(--accent);background:white}
+</style>
+</head>
+<body>
+<div class="survey-header">
+  <div class="survey-ev-nome" id="evNome">Caricamento...</div>
+  <div class="survey-ev-meta" id="evMeta"></div>
+</div>
+<main>
+  <div id="loadingState" class="loading"><div class="spinner-dark"></div><div>Caricamento questionario...</div></div>
+  <div id="errorState" style="display:none">
+    <div class="card" style="text-align:center;padding:32px">
+      <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+      <div style="font-size:16px;font-weight:500;margin-bottom:8px" id="errorMsg">Questionario non disponibile</div>
+      <div style="font-size:13px;color:var(--text2)">Contatta l'organizzatore dell'evento</div>
+    </div>
+  </div>
+
+  <!-- CF STEP -->
+  <div id="cfStep" style="display:none">
+    <div class="card">
+      <div class="domanda-num">Prima di iniziare</div>
+      <div class="domanda-label">Inserisci il tuo codice fiscale per collegare le risposte al tuo profilo</div>
+      <input type="text" class="cf-input" id="cfInput" placeholder="RSSMRA80A01H501Z" maxlength="16" oninput="this.value=this.value.toUpperCase()">
+      <div style="font-size:12px;color:var(--text3)">Opzionale — puoi saltare questo passaggio</div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn btn-outline" onclick="startSurvey('')">Salta</button>
+      <button class="btn btn-primary" onclick="startSurvey(document.getElementById('cfInput').value)">Inizia →</button>
+    </div>
+  </div>
+
+  <!-- SURVEY -->
+  <div id="surveyState" style="display:none">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="card" id="domandaCard">
+      <div class="domanda-num" id="domandaNum"></div>
+      <div class="domanda-label" id="domandaTesto"></div>
+      <div id="domandaInput"></div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn btn-outline" id="btnPrev" onclick="prevDomanda()">← Indietro</button>
+      <button class="btn btn-primary" id="btnNext" onclick="nextDomanda()">Avanti →</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div id="successState" style="display:none">
+    <div class="card success-card">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">Grazie per il feedback!</div>
+      <div class="success-sub">Le tue risposte sono state registrate.<br>Ci aiuteranno a migliorare i prossimi eventi.</div>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+const app=getApps().length?getApps()[0]:initializeApp(FB);
+const db=getFirestore(app);
+
+const params=new URLSearchParams(window.location.search);
+const evId=params.get('evId');
+let domande=[], currentIdx=0, risposte={}, userCF='';
+
+function showError(msg){
+  document.getElementById('loadingState').style.display='none';
+  document.getElementById('errorState').style.display='block';
+  document.getElementById('errorMsg').textContent=msg;
+}
+
+if(!evId){showError('Nessun evento specificato.');}
+else{
+  try{
+    const [evSnap,configSnap]=await Promise.all([
+      getDoc(doc(db,'eventi',evId)),
+      getDoc(doc(db,'eventi',evId,'survey','config'))
+    ]);
+    if(!evSnap.exists()){showError('Evento non trovato.');}
+    else if(!configSnap.exists()||!configSnap.data().domande?.length){showError('Questionario non ancora configurato per questo evento.');}
+    else{
+      const ev=evSnap.data();
+      domande=configSnap.data().domande||[];
+      const fmt=d=>d?new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}):'—';
+      document.getElementById('evNome').textContent=ev.nome||'Evento ECM';
+      document.getElementById('evMeta').textContent=(ev.data?fmt(ev.data):'')+(ev.luogo?' · '+ev.luogo:'');
+      document.getElementById('loadingState').style.display='none';
+      document.getElementById('cfStep').style.display='block';
+    }
+  }catch(err){showError('Errore: '+err.message);}
+}
+
+window.startSurvey=function(cf){
+  userCF=cf.toUpperCase().trim();
+  document.getElementById('cfStep').style.display='none';
+  document.getElementById('surveyState').style.display='block';
+  currentIdx=0; risposte={};
+  renderDomanda();
+};
+
+function renderDomanda(){
+  const d=domande[currentIdx];
+  const tot=domande.length;
+  document.getElementById('progressFill').style.width=((currentIdx+1)/tot*100)+'%';
+  document.getElementById('domandaNum').textContent=`Domanda ${currentIdx+1} di ${tot}`;
+  document.getElementById('domandaTesto').textContent=d.testo;
+  document.getElementById('btnPrev').style.display=currentIdx>0?'flex':'none';
+  document.getElementById('btnNext').textContent=currentIdx===tot-1?'Invia risposte ✓':'Avanti →';
+
+  const inp=document.getElementById('domandaInput');
+  inp.innerHTML='';
+
+  if(d.tipo==='stelle'){
+    const etichette=['','Pessimo','Scarso','Sufficiente','Buono','Ottimo'];
+    inp.innerHTML=`<div class="stelle-wrap">${[1,2,3,4,5].map(n=>`<button type="button" class="stella-btn${risposte[d.id]>=n?' active':''}" data-val="${n}" onclick="setStella(${n},'${d.id}')">⭐</button>`).join('')}</div><div class="stella-valore" id="stellaLabel">${risposte[d.id]?etichette[risposte[d.id]]||'':''}</div>`;
+  }else if(d.tipo==='multipla'){
+    inp.innerHTML=`<div class="opzioni-grid">${(d.opzioni||[]).map(op=>`<button type="button" class="opzione-btn${risposte[d.id]===op?' selected':''}" onclick="setOpzione('${d.id}','${op.replace(/'/g,"\\'")}',this)">${esc(op)}</button>`).join('')}</div>`;
+  }else{
+    inp.innerHTML=`<textarea class="testo-area" placeholder="Scrivi qui la tua risposta..." oninput="risposte['${d.id}']=this.value">${risposte[d.id]||''}</textarea>`;
+  }
+}
+
+window.setStella=function(n,id){
+  risposte[id]=n;
+  const etichette=['','Pessimo','Scarso','Sufficiente','Buono','Ottimo'];
+  document.querySelectorAll('.stella-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.val)<=n));
+  const lbl=document.getElementById('stellaLabel');
+  if(lbl)lbl.textContent=etichette[n]||'';
+};
+
+window.setOpzione=function(id,val,btn){
+  risposte[id]=val;
+  document.querySelectorAll('.opzione-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+};
+
+window.nextDomanda=async function(){
+  if(currentIdx===domande.length-1){
+    await inviaRisposte();
+  }else{
+    currentIdx++;renderDomanda();
+  }
+};
+window.prevDomanda=function(){if(currentIdx>0){currentIdx--;renderDomanda();}};
+
+async function inviaRisposte(){
+  const btn=document.getElementById('btnNext');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Invio...';
+  try{
+    await addDoc(collection(db,'eventi',evId,'survey','risposte','lista'),{
+      cf:userCF, risposte, tsISO:new Date().toISOString(), ts:serverTimestamp()
+    });
+    document.getElementById('surveyState').style.display='none';
+    document.getElementById('successState').style.display='block';
+  }catch(err){
+    btn.disabled=false;btn.innerHTML='Invia risposte ✓';
+    alert('Errore invio: '+err.message);
+  }
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>

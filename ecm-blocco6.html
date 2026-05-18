@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ECM — Registrazione Evento</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F5F3EE;--surface:#FFF;--surface2:#F0EDE6;--border:#E0DAD0;--border2:#C8C0B4;--text:#1A1714;--text2:#6B6560;--text3:#9B948C;--accent:#2B4EFF;--accent-light:#EEF1FF;--accent2:#FF6B35;--success:#1A7A4A;--success-light:#E8F5EE;--danger:#C13B2A;--danger-light:#FDEEE9;--warn:#B07A10;--warn-light:#FDF5E0;--radius:10px;--radius-lg:16px;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06)}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 22px;height:58px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);position:sticky;top:0;z-index:100}
+.logo{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;color:var(--text)}
+.logo-mark{width:26px;height:26px;border-radius:7px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white}
+main{max-width:680px;margin:0 auto;padding:32px 20px 60px}
+
+/* STEP INDICATOR */
+.steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:36px}
+.step-item{display:flex;flex-direction:column;align-items:center;gap:6px;position:relative}
+.step-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;border:2px solid var(--border2);background:var(--surface);color:var(--text3);transition:all .3s}
+.step-circle.active{border-color:var(--accent);background:var(--accent);color:white}
+.step-circle.done{border-color:var(--success);background:var(--success);color:white}
+.step-label{font-size:10px;color:var(--text3);font-weight:500;white-space:nowrap}
+.step-line{width:60px;height:2px;background:var(--border);margin-bottom:18px;transition:background .3s}
+.step-line.done{background:var(--success)}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:26px;margin-bottom:18px;box-shadow:var(--shadow)}
+.card-title{font-size:18px;font-weight:600;letter-spacing:-.01em;margin-bottom:6px}
+.card-sub{font-size:13px;color:var(--text2);margin-bottom:20px}
+
+/* EVENTI LIST */
+.events-list{display:flex;flex-direction:column;gap:10px}
+.event-item{border:2px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .2s;background:var(--surface)}
+.event-item:hover{border-color:var(--accent);background:var(--accent-light)}
+.event-item.selected{border-color:var(--accent);background:var(--accent-light)}
+.event-item-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.event-accent{width:4px;height:40px;border-radius:4px;flex-shrink:0;margin-top:2px}
+.event-name{font-size:15px;font-weight:600;margin-bottom:3px}
+.event-meta{font-size:12px;color:var(--text3);display:flex;flex-wrap:wrap;gap:8px}
+.event-meta span{display:flex;align-items:center;gap:3px}
+.event-badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600}
+.badge-oggi{background:var(--accent-light);color:var(--accent)}
+.badge-futuro{background:var(--success-light);color:var(--success)}
+.badge-passato{background:var(--surface2);color:var(--text3)}
+.selected-check{width:24px;height:24px;border-radius:50%;background:var(--accent);color:white;display:none;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.event-item.selected .selected-check{display:flex}
+
+/* FORM */
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.field-label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;width:100%}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(43,78,255,.1);background:white}
+.form-input.auto{border-color:var(--success);background:var(--success-light)}
+.form-input[style*="uppercase"]{font-family:'DM Mono',monospace}
+.cf-hint{font-size:11px;color:var(--text3);margin-top:4px;display:none}
+.cf-hint.show{display:block}
+.cf-valid{color:var(--success)}
+.cf-invalid{color:var(--danger)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.privacy-check{display:flex;align-items:flex-start;gap:10px;padding:12px;background:var(--surface2);border-radius:var(--radius);margin-bottom:16px}
+.privacy-check input{width:18px;height:18px;margin-top:2px;cursor:pointer;accent-color:var(--accent);flex-shrink:0}
+.privacy-text{font-size:12px;color:var(--text2);line-height:1.5}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:12px 24px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none;justify-content:center;width:100%}
+.btn-primary{background:var(--accent);color:white}.btn-primary:hover{background:#1a3ce0}
+.btn-success{background:var(--success);color:white}.btn-success:hover{background:#145e38}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{background:var(--surface2)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-back{background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;padding:0;margin-bottom:16px}
+.btn-back:hover{color:var(--text)}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* BADGE / QR SUCCESS */
+.success-wrap{text-align:center}
+.success-icon{font-size:56px;margin-bottom:12px}
+.success-title{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}
+.success-sub{font-size:14px;color:var(--text2);margin-bottom:28px}
+.badge-preview{background:white;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.12);overflow:hidden;max-width:320px;margin:0 auto 24px;border:1px solid var(--border)}
+.badge-banner{width:100%;height:80px;object-fit:cover;display:block}
+.badge-banner-ph{width:100%;height:80px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:white}
+.badge-content{padding:16px}
+.badge-qr-wrap{display:flex;justify-content:center;margin-bottom:12px}
+.badge-qr-wrap canvas,.badge-qr-wrap img{border-radius:6px}
+.badge-nome{font-size:15px;font-weight:400;color:var(--text2);text-align:center}
+.badge-cognome{font-size:22px;font-weight:700;text-align:center;margin-bottom:4px}
+.badge-prof{font-size:11px;color:var(--text2);text-align:center;margin-bottom:4px}
+.badge-cf{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);text-align:center}
+.badge-footer-strip{padding:8px 14px;background:var(--surface2);border-top:1px solid var(--border);text-align:center}
+.badge-footer-name{font-size:11px;font-weight:600;color:var(--text)}
+.badge-footer-meta{font-size:9px;color:var(--text3)}
+.download-btns{display:flex;flex-direction:column;gap:10px;max-width:320px;margin:0 auto}
+.alert{padding:11px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:14px;display:none}
+.alert.show{display:block}
+.alert-error{background:var(--danger-light);color:var(--danger);border:1px solid rgba(193,59,42,.25)}
+.alert-warn{background:var(--warn-light);color:var(--warn);border:1px solid rgba(176,122,16,.25)}
+.alert-info{background:var(--accent-light);color:var(--accent);border:1px solid rgba(43,78,255,.2)}
+.loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--text3);gap:10px}
+.spinner-dark{width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+
+@media(max-width:480px){.form-row{grid-template-columns:1fr}.step-line{width:32px}.step-label{font-size:9px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><div class="logo-mark">E</div>ECM — Registrazione</div>
+  <div style="font-size:12px;color:var(--text3)">Iscrizione evento</div>
+</header>
+
+<main>
+  <!-- STEP INDICATOR -->
+  <div class="steps">
+    <div class="step-item">
+      <div class="step-circle active" id="s1">1</div>
+      <div class="step-label">Evento</div>
+    </div>
+    <div class="step-line" id="l1"></div>
+    <div class="step-item">
+      <div class="step-circle" id="s2">2</div>
+      <div class="step-label">Dati</div>
+    </div>
+    <div class="step-line" id="l2"></div>
+    <div class="step-item">
+      <div class="step-circle" id="s3">✓</div>
+      <div class="step-label">Badge</div>
+    </div>
+  </div>
+
+  <!-- STEP 1: SCELTA EVENTO -->
+  <div id="step1">
+    <div class="card">
+      <div class="card-title">Scegli l'evento</div>
+      <div class="card-sub">Seleziona l'evento a cui vuoi iscriverti</div>
+      <div id="eventiLoading" class="loading"><div class="spinner-dark"></div>Caricamento eventi...</div>
+      <div class="events-list" id="eventiList" style="display:none"></div>
+      <div id="eventiEmpty" style="display:none;text-align:center;padding:30px;color:var(--text3)">
+        <div style="font-size:36px;margin-bottom:10px">📭</div>
+        <div style="font-size:14px">Nessun evento disponibile al momento</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="btnStep1" onclick="goStep2()" disabled>Continua →</button>
+  </div>
+
+  <!-- STEP 2: DATI PARTECIPANTE -->
+  <div id="step2" style="display:none">
+    <button class="btn-back" onclick="goStep1()">← Cambia evento</button>
+    <div class="card">
+      <div class="card-title">I tuoi dati</div>
+      <div class="card-sub" id="step2EventName">Inserisci i tuoi dati per l'iscrizione</div>
+      <div class="alert alert-error" id="formError"></div>
+      <div class="alert alert-warn" id="formWarn"></div>
+      <div class="form-group">
+        <label class="field-label">Codice Fiscale *</label>
+        <input type="text" class="form-input" id="regCF" placeholder="es. RSSMRA80A01H501Z" maxlength="16" style="text-transform:uppercase;font-family:'DM Mono',monospace;letter-spacing:.1em" oninput="onCFInput(this)">
+        <div class="cf-hint" id="cfHint"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="field-label">Nome *</label>
+          <input type="text" class="form-input" id="regNome" placeholder="Mario">
+        </div>
+        <div class="form-group">
+          <label class="field-label">Cognome *</label>
+          <input type="text" class="form-input" id="regCognome" placeholder="Rossi">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="field-label">Professione *</label>
+        <input type="text" class="form-input" id="regProfessione" placeholder="es. Medico Chirurgo, Infermiere...">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Email (opzionale)</label>
+        <input type="email" class="form-input" id="regEmail" placeholder="per ricevere conferma">
+      </div>
+      <div class="privacy-check">
+        <input type="checkbox" id="privacyCheck">
+        <div class="privacy-text">Acconsento al trattamento dei miei dati personali ai sensi del GDPR per la gestione dell'evento ECM e il calcolo dei crediti formativi. I dati saranno trattati esclusivamente per finalità ECM.</div>
+      </div>
+    </div>
+    <button class="btn btn-success" id="btnStep2" onclick="doRegistra()">Registrati e ottieni il badge →</button>
+  </div>
+
+  <!-- STEP 3: BADGE + QR -->
+  <div id="step3" style="display:none">
+    <div class="card success-wrap">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">Iscrizione completata!</div>
+      <div class="success-sub" id="successSub">Salva il tuo badge — ti servirà per l'accesso</div>
+      <div class="badge-preview" id="badgePreview">
+        <div id="badgeBanner"></div>
+        <div class="badge-content">
+          <div class="badge-qr-wrap" id="badgeQRWrap"></div>
+          <div class="badge-nome" id="badgeNomeDisplay"></div>
+          <div class="badge-cognome" id="badgeCognomeDisplay"></div>
+          <div class="badge-prof" id="badgeProfDisplay"></div>
+          <div class="badge-cf" id="badgeCFDisplay"></div>
+          <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--text3);text-align:center;margin-top:3px" id="badgeIDDisplay"></div>
+        </div>
+        <div class="badge-footer-strip">
+          <div class="badge-footer-name" id="badgeEvNome"></div>
+          <div class="badge-footer-meta" id="badgeEvMeta"></div>
+        </div>
+      </div>
+      <div class="download-btns">
+        <button class="btn btn-primary" onclick="scaricaBadge()">⬇ Salva badge come immagine</button>
+        <button class="btn btn-outline" onclick="location.reload()">← Registra un altro partecipante</button>
+      </div>
+      <div style="margin-top:16px;padding:12px;background:var(--accent-light);border-radius:var(--radius);font-size:12px;color:var(--accent);text-align:center">
+        📱 Mostra il QR all'ingresso per registrare la tua presenza
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+const app=getApps().length?getApps()[0]:initializeApp(FB);
+const db=getFirestore(app);
+
+let selectedEvent=null;
+let allEventi=[];
+const COLORS=['#2B4EFF','#1A7A4A','#FF6B35','#B07A10','#C13B2A','#9B59B6'];
+
+// ── CARICA EVENTI ──────────────────────────────────────
+async function loadEventi(){
+  try{
+    const snap=await getDocs(collection(db,'eventi'));
+    allEventi=[];
+    snap.forEach(d=>allEventi.push({id:d.id,...d.data()}));
+    allEventi=allEventi.filter(e=>e.stato!=='archiviato'&&e.nome);
+    allEventi.sort((a,b)=>new Date(a.data||0)-new Date(b.data||0));
+    document.getElementById('eventiLoading').style.display='none';
+    if(!allEventi.length){document.getElementById('eventiEmpty').style.display='block';return;}
+    document.getElementById('eventiList').style.display='flex';
+    renderEventi();
+  }catch(err){
+    document.getElementById('eventiLoading').innerHTML=`<div style="color:var(--danger)">Errore caricamento: ${err.message}</div>`;
+  }
+}
+
+function renderEventi(){
+  const today=new Date().toISOString().slice(0,10);
+  const fmt=d=>d?new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}):'—';
+  document.getElementById('eventiList').innerHTML=allEventi.map((ev,i)=>{
+    const color=COLORS[i%COLORS.length];
+    const isOggi=ev.data<=today&&(!ev.dataFine||ev.dataFine>=today);
+    const isFuturo=ev.data>today;
+    const badgeHTML=isOggi?`<span class="event-badge badge-oggi">● In corso</span>`:isFuturo?`<span class="event-badge badge-futuro">↑ Prossimo</span>`:`<span class="event-badge badge-passato">Passato</span>`;
+    const dateStr=ev.dataFine&&ev.dataFine!==ev.data?`${fmt(ev.data)} → ${fmt(ev.dataFine)}`:fmt(ev.data);
+    return `<div class="event-item" id="evitem_${ev.id}" onclick="selectEv('${ev.id}')">
+      <div class="event-item-header">
+        <div class="event-accent" style="background:${color}"></div>
+        <div style="flex:1">
+          <div class="event-name">${esc(ev.nome)}</div>
+          <div class="event-meta">
+            <span>📅 ${dateStr}</span>
+            <span>📍 ${esc(ev.luogo||'—')}</span>
+            <span>🎓 ${ev.creditiTot||0} crediti ECM</span>
+            <span>👥 ${ev.totPartecipanti||0} iscritti</span>
+          </div>
+        </div>
+        ${badgeHTML}
+        <div class="selected-check">✓</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.selectEv=function(evId){
+  selectedEvent=allEventi.find(e=>e.id===evId);
+  document.querySelectorAll('.event-item').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('evitem_'+evId).classList.add('selected');
+  document.getElementById('btnStep1').disabled=false;
+};
+
+window.goStep2=function(){
+  if(!selectedEvent)return;
+  document.getElementById('step1').style.display='none';
+  document.getElementById('step2').style.display='block';
+  document.getElementById('step2EventName').textContent=`Evento: ${selectedEvent.nome}`;
+  setStep(2);
+};
+
+window.goStep1=function(){
+  document.getElementById('step2').style.display='none';
+  document.getElementById('step1').style.display='block';
+  setStep(1);
+};
+
+// ── DECODIFICA CF ───────────────────────────────────────
+window.onCFInput=function(inp){
+  const cf=inp.value.toUpperCase(); inp.value=cf;
+  const hint=document.getElementById('cfHint');
+  if(cf.length<16){hint.className='cf-hint';hint.textContent='';inp.classList.remove('auto');return;}
+  const valid=/^[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]$/.test(cf);
+  if(valid){
+    inp.classList.add('auto');
+    hint.className='cf-hint show cf-valid';
+    // Decodifica sesso e anno
+    const anni={A:1,B:2,C:3,D:4,E:5,H:6,L:7,M:8,P:9,R:10,S:11,T:12};
+    const annoS=parseInt(cf.slice(6,8));
+    const anno=annoS<=(new Date().getFullYear()%100)?2000+annoS:1900+annoS;
+    const mese=anni[cf[8]]||0;
+    const giorno=parseInt(cf.slice(9,11));
+    const sesso=giorno>40?'F':'M';
+    const giornoR=sesso==='F'?giorno-40:giorno;
+    hint.textContent=`✓ CF valido · Nato/a il ${giornoR}/${mese}/${anno} · ${sesso==='M'?'♂ Maschio':'♀ Femmina'}`;
+  }else{
+    inp.classList.remove('auto');
+    hint.className='cf-hint show cf-invalid';
+    hint.textContent='⚠️ Formato CF non valido';
+  }
+};
+
+// ── REGISTRAZIONE ───────────────────────────────────────
+window.doRegistra=async function(){
+  const cf=document.getElementById('regCF').value.trim().toUpperCase();
+  const nome=document.getElementById('regNome').value.trim();
+  const cognome=document.getElementById('regCognome').value.trim();
+  const prof=document.getElementById('regProfessione').value.trim();
+  const privacy=document.getElementById('privacyCheck').checked;
+  const errEl=document.getElementById('formError');
+  const warnEl=document.getElementById('formWarn');
+  errEl.classList.remove('show'); warnEl.classList.remove('show');
+
+  if(!cf){errEl.textContent='Inserisci il codice fiscale.';errEl.classList.add('show');return;}
+  if(!nome){errEl.textContent='Inserisci il nome.';errEl.classList.add('show');return;}
+  if(!cognome){errEl.textContent='Inserisci il cognome.';errEl.classList.add('show');return;}
+  if(!prof){errEl.textContent='Inserisci la professione.';errEl.classList.add('show');return;}
+  if(!privacy){errEl.textContent='Devi accettare il trattamento dei dati per iscriverti.';errEl.classList.add('show');return;}
+
+  const btn=document.getElementById('btnStep2');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Registrazione...';
+
+  try{
+    const evId=selectedEvent.id;
+    // Controlla se già iscritto
+    const partsSnap=await getDocs(collection(db,'eventi',evId,'partecipanti'));
+    let existingId=null;
+    partsSnap.forEach(d=>{if(d.data().cf===cf)existingId=d.id;});
+
+    let partId, qrData;
+
+    if(existingId){
+      // Già iscritto — mostra badge esistente
+      const existSnap=await getDoc(doc(db,'eventi',evId,'partecipanti',existingId));
+      const ex=existSnap.data();
+      warnEl.textContent='Sei già iscritto a questo evento. Ecco il tuo badge.';
+      warnEl.classList.add('show');
+      partId=existingId;
+      qrData=ex.qr||await genQRUrl(`ECM|${existingId}|${cf}|${cognome}|${nome}`);
+    }else{
+      // Nuovo iscritto
+      const maxN=partsSnap.size;
+      partId='P'+String(maxN+1).padStart(4,'0');
+      // Controlla che ID non esista già
+      let finalId=partId;
+      let counter=maxN+1;
+      while(true){
+        const check=await getDoc(doc(db,'eventi',evId,'partecipanti',finalId));
+        if(!check.exists())break;
+        counter++;
+        finalId='P'+String(counter).padStart(4,'0');
+      }
+      partId=finalId;
+      qrData=await genQRUrl(`ECM|${partId}|${cf}|${cognome}|${nome}`);
+      await setDoc(doc(db,'eventi',evId,'partecipanti',partId),{
+        id:partId, cf, nome, cognome, professione:prof,
+        email:document.getElementById('regEmail').value.trim()||'',
+        cfValido:/^[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]$/.test(cf),
+        duplicato:false, qr:qrData, selfRegistered:true,
+        registratoAt:new Date().toISOString(), updatedAt:serverTimestamp(), eventId:evId
+      });
+      // Aggiorna contatore
+      await setDoc(doc(db,'eventi',evId),{totPartecipanti:(selectedEvent.totPartecipanti||0)+1},{merge:true});
+      selectedEvent.totPartecipanti=(selectedEvent.totPartecipanti||0)+1;
+    }
+
+    // Mostra badge
+    showBadge(partId,cf,nome,cognome,prof,qrData);
+  }catch(err){
+    console.error(err);
+    errEl.textContent='Errore: '+err.message;
+    errEl.classList.add('show');
+    btn.disabled=false; btn.innerHTML='Registrati e ottieni il badge →';
+  }
+};
+
+function showBadge(partId,cf,nome,cognome,prof,qrDataUrl){
+  document.getElementById('step2').style.display='none';
+  document.getElementById('step3').style.display='block';
+  setStep(3);
+
+  const ev=selectedEvent;
+  const fmt=d=>d?new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}):'—';
+  const color=COLORS[allEventi.findIndex(e=>e.id===ev.id)%COLORS.length]||'#2B4EFF';
+
+  // Banner
+  const bannerEl=document.getElementById('badgeBanner');
+  if(ev.logo){
+    bannerEl.innerHTML=`<img class="badge-banner" src="${ev.logo}" alt="banner">`;
+  }else{
+    bannerEl.innerHTML=`<div class="badge-banner-ph" style="background:${color}">${esc(ev.nome)}</div>`;
+  }
+
+  // QR
+  const qrWrap=document.getElementById('badgeQRWrap');
+  qrWrap.innerHTML='';
+  if(qrDataUrl){
+    const img=document.createElement('img');
+    img.src=qrDataUrl; img.width=130; img.height=130;
+    img.style.borderRadius='6px';
+    qrWrap.appendChild(img);
+  }else{
+    new QRCode(qrWrap,{text:`ECM|${partId}|${cf}|${cognome}|${nome}`,width:130,height:130,correctLevel:QRCode.CorrectLevel.M});
+  }
+
+  document.getElementById('badgeNomeDisplay').textContent=nome;
+  document.getElementById('badgeCognomeDisplay').textContent=cognome;
+  document.getElementById('badgeCognomeDisplay').style.color=color;
+  document.getElementById('badgeProfDisplay').textContent=prof;
+  document.getElementById('badgeCFDisplay').textContent=cf;
+  document.getElementById('badgeIDDisplay').textContent='ID: '+partId;
+  document.getElementById('badgeEvNome').textContent=ev.nome;
+  document.getElementById('badgeEvMeta').textContent=fmt(ev.data)+(ev.luogo?' · '+ev.luogo:'');
+  document.getElementById('successSub').textContent=`Benvenuto/a ${nome}! Salva il badge — ti servirà per l'accesso.`;
+}
+
+// ── SCARICA BADGE ───────────────────────────────────────
+window.scaricaBadge=async function(){
+  const badge=document.getElementById('badgePreview');
+  const btn=event.target;
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Preparazione...';
+  try{
+    // Usa html2canvas se disponibile, altrimenti composizione manuale
+    if(typeof html2canvas !== 'undefined'){
+      const canvas=await html2canvas(badge,{scale:2,useCORS:true,backgroundColor:'#ffffff'});
+      const link=document.createElement('a');
+      link.download=`badge_${document.getElementById('badgeCognomeDisplay').textContent}_${document.getElementById('badgeNomeDisplay').textContent}.png`.replace(/\s+/g,'_');
+      link.href=canvas.toDataURL('image/png');
+      link.click();
+    }else{
+      // Fallback: composizione manuale su canvas
+      await downloadBadgeManual();
+    }
+  }catch(err){
+    alert('Errore salvataggio: '+err.message);
+  }finally{
+    btn.disabled=false; btn.innerHTML='⬇ Salva badge come immagine';
+  }
+};
+
+async function downloadBadgeManual(){
+  const ev=selectedEvent;
+  const nome=document.getElementById('badgeNomeDisplay').textContent;
+  const cognome=document.getElementById('badgeCognomeDisplay').textContent;
+  const prof=document.getElementById('badgeProfDisplay').textContent;
+  const cf=document.getElementById('badgeCFDisplay').textContent;
+  const id=document.getElementById('badgeIDDisplay').textContent;
+  const evNome=document.getElementById('badgeEvNome').textContent;
+  const evMeta=document.getElementById('badgeEvMeta').textContent;
+  const color=COLORS[allEventi.findIndex(e=>e.id===ev.id)%COLORS.length]||'#2B4EFF';
+
+  const W=640, H=480;
+  const canvas=document.createElement('canvas');
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+
+  // Sfondo bianco
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
+
+  // Banner colorato
+  if(ev.logo){
+    try{
+      const img=await loadImg(ev.logo);
+      ctx.drawImage(img,0,0,W,140);
+    }catch{
+      ctx.fillStyle=color; ctx.fillRect(0,0,W,140);
+      ctx.fillStyle='white'; ctx.font='bold 18px DM Sans,sans-serif'; ctx.textAlign='center';
+      ctx.fillText(evNome,W/2,78);
+    }
+  }else{
+    ctx.fillStyle=color; ctx.fillRect(0,0,W,140);
+    ctx.fillStyle='white'; ctx.font='bold 18px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(evNome.slice(0,40),W/2,78);
+  }
+
+  // QR
+  const qrEl=document.querySelector('#badgeQRWrap img')||document.querySelector('#badgeQRWrap canvas');
+  if(qrEl){
+    try{
+      const qrImg=qrEl.tagName==='CANVAS'?qrEl:await loadImg(qrEl.src);
+      ctx.drawImage(qrImg,40,160,180,180);
+    }catch(e){}
+  }
+
+  // Testi
+  ctx.textAlign='left'; ctx.fillStyle='#6B6560';
+  ctx.font='400 22px sans-serif'; ctx.fillText(nome,250,190);
+  ctx.fillStyle=color; ctx.font='bold 32px sans-serif'; ctx.fillText(cognome,250,230);
+  ctx.fillStyle='#6B6560'; ctx.font='16px sans-serif'; ctx.fillText(prof,250,260);
+  ctx.font='13px monospace'; ctx.fillStyle='#9B948C'; ctx.fillText(cf,250,285);
+  ctx.font='11px monospace'; ctx.fillText(id,250,305);
+
+  // Footer
+  ctx.fillStyle='#F0EDE6'; ctx.fillRect(0,H-60,W,60);
+  ctx.strokeStyle='#E0DAD0'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,H-60); ctx.lineTo(W,H-60); ctx.stroke();
+  ctx.fillStyle='#1A1714'; ctx.font='bold 13px sans-serif'; ctx.textAlign='center'; ctx.fillText(evNome.slice(0,50),W/2,H-36);
+  ctx.fillStyle='#9B948C'; ctx.font='11px sans-serif'; ctx.fillText(evMeta,W/2,H-16);
+
+  // Bordo
+  ctx.strokeStyle='#E0DAD0'; ctx.lineWidth=2; ctx.strokeRect(1,1,W-2,H-2);
+
+  const link=document.createElement('a');
+  link.download=`badge_${cognome}_${nome}.png`.replace(/\s+/g,'_');
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+}
+
+function loadImg(src){
+  return new Promise((res,rej)=>{const i=new Image();i.crossOrigin='anonymous';i.onload=()=>res(i);i.onerror=rej;i.src=src;});
+}
+function genQRUrl(text){
+  return new Promise(resolve=>{
+    const div=document.createElement('div');div.style.cssText='position:absolute;left:-9999px;top:-9999px';document.body.appendChild(div);
+    new QRCode(div,{text,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});
+    setTimeout(()=>{const c=div.querySelector('canvas');resolve(c?c.toDataURL('image/png'):'');document.body.removeChild(div);},80);
+  });
+}
+function setStep(n){
+  for(let i=1;i<=3;i++){
+    const s=document.getElementById('s'+i);
+    if(!s)continue;
+    if(i<n){s.className='step-circle done';s.textContent='✓';}
+    else if(i===n){s.className='step-circle active';s.textContent=i==='3'?'✓':i;}
+    else{s.className='step-circle';s.textContent=i==='3'?'✓':i;}
+  }
+  for(let i=1;i<=2;i++){const l=document.getElementById('l'+i);if(l)l.className='step-line'+(i<n?' done':'');}
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+loadEventi();
+</script>
+</body>
+</html>
