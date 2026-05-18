@@ -259,16 +259,7 @@ allEventi.forEach(ev=>{
   sel.appendChild(opt);
 });
 
-// Auto-seleziona evento attivo
-const savedEvId=localStorage.getItem('ecm_eventId');
-if(savedEvId&&allEventi.find(e=>e.id===savedEvId)){
-  sel.value=savedEvId;
-  onEvChange();
-}
-
-// Aggiungi listener sul select
-document.getElementById('evSelect').addEventListener('change', () => window.onEvChange());
-
+// Definisci onEvChange PRIMA di usarla
 window.onEvChange=async function(){
   currentEvId=sel.value;
   if(!currentEvId){document.getElementById('mainContent').style.display='none';return;}
@@ -277,6 +268,16 @@ window.onEvChange=async function(){
   await loadDomande();
   buildQR();
 };
+
+// Aggiungi listener sul select
+document.getElementById('evSelect').addEventListener('change', () => window.onEvChange());
+
+// Auto-seleziona evento attivo
+const savedEvId=localStorage.getItem('ecm_eventId');
+if(savedEvId&&allEventi.find(e=>e.id===savedEvId)){
+  sel.value=savedEvId;
+  await window.onEvChange();
+}
 
 // ── DOMANDE ───────────────────────────────────────────────
 window.loadDomande=async function(){
