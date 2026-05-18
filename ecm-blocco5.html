@@ -83,6 +83,7 @@ select.form-input{cursor:pointer}
 @media(max-width:600px){.ris-grid{grid-template-columns:1fr}}
 </style>
 <link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
 <script src="ecm-layout.js"></script>
 </head>
 <body>
@@ -410,7 +411,7 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 <!-- Sidebar init -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  renderSidebar('survey');
+  applyTranslations(); renderSidebar('survey');
   renderVersionFooter();
 });
 </script>

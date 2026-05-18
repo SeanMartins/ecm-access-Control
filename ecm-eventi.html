@@ -130,6 +130,7 @@ header{border-bottom:1px solid var(--border);background:var(--surface);position:
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
 <script src="ecm-layout.js"></script>
 </head>
 <body>
@@ -696,7 +697,7 @@ loadEvents();
 <!-- Sidebar init -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  renderSidebar('eventi');
+  applyTranslations(); renderSidebar('eventi');
   renderVersionFooter();
 });
 </script>

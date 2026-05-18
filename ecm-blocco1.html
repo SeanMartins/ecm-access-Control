@@ -118,6 +118,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
 }
 </style>
 <link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
 <script src="ecm-layout.js"></script>
 </head>
 <body>
@@ -470,7 +471,7 @@ onAuthStateChanged(getAuth(app2), user=>{
 <!-- Sidebar init -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  renderSidebar('setup');
+  applyTranslations(); renderSidebar('setup');
   renderVersionFooter();
 });
 </script>

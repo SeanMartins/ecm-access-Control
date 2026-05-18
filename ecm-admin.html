@@ -132,6 +132,7 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(43
 @media(max-width:480px){.stats-row{grid-template-columns:1fr 1fr}.page-title{font-size:20px}}
 </style>
 <link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
 <script src="ecm-layout.js"></script>
 </head>
 <body>
@@ -605,7 +606,7 @@ loadUsers();
 <!-- Sidebar init -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  renderSidebar('admin');
+  applyTranslations(); renderSidebar('admin');
   renderVersionFooter();
 });
 </script>

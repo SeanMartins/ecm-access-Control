@@ -112,6 +112,7 @@ input[type=color]{padding:4px 8px;height:40px;cursor:pointer}
 }
 </style>
 <link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
 <script src="ecm-layout.js"></script>
 </head>
 <body>
@@ -414,7 +415,7 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 <!-- Sidebar init -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  renderSidebar('badge');
+  applyTranslations(); renderSidebar('badge');
   renderVersionFooter();
 });
 </script>

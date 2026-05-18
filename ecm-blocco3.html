@@ -123,6 +123,7 @@ footer{position:fixed;bottom:56px;left:0;right:0;background:var(--surface);borde
 .bn-icon{width:30px;height:24px;display:flex;align-items:center;justify-content:center;font-size:15px}
 </style>
 <link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
 <script src="ecm-layout.js"></script>
 </head>
 <body>
@@ -745,7 +746,7 @@ initFirebase();
 <!-- Sidebar init -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  renderSidebar('scanner');
+  applyTranslations(); renderSidebar('scanner');
   renderVersionFooter();
 });
 </script>

@@ -4,6 +4,9 @@
 
 const ECM_VERSION = 'v2.0.0';
 
+// Carica i18n (già incluso tramite ecm-i18n.js)
+function _t(key){ return typeof t === 'function' ? t(key) : key; }
+
 // ── ICONE SVG ────────────────────────────────────────
 const ICONS = {
   events: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
@@ -23,23 +26,25 @@ const ICONS = {
 };
 
 // ── NAV ITEMS ────────────────────────────────────────
-const NAV_ITEMS = [
-  { section: 'Principale' },
-  { id: 'eventi',   label: 'I miei eventi',    icon: 'events',   href: 'ecm-eventi.html' },
-  { id: 'home',     label: 'Dashboard',         icon: 'home',     href: 'ecm-home.html' },
-  { section: 'Gestione evento' },
-  { id: 'setup',    label: 'Setup evento',      icon: 'setup',    href: 'ecm-blocco1.html' },
-  { id: 'badge',    label: 'Generazione badge', icon: 'badge',    href: 'ecm-blocco2.html' },
-  { id: 'scanner',  label: 'Controllo accessi', icon: 'scanner',  href: 'ecm-blocco3.html' },
-  { id: 'report',   label: 'Report presenze',   icon: 'report',   href: 'ecm-blocco4.html' },
-  { section: 'Partecipanti' },
-  { id: 'register', label: 'Registrazione',     icon: 'register', href: 'ecm-blocco6.html' },
-  { id: 'survey',   label: 'Survey',            icon: 'survey',   href: 'ecm-blocco5.html' },
-  { id: 'quiz',     label: 'Questionario ECM',  icon: 'quiz',     href: 'ecm-blocco7.html' },
-  { section: 'Sistema' },
-  { id: 'tablet',   label: 'Connetti tablet',   icon: 'tablet',   href: 'ecm-connetti.html' },
-  { id: 'admin',    label: 'Amministrazione',   icon: 'admin',    href: 'ecm-admin.html', adminOnly: true },
-];
+function getNavItems() {
+  return [
+    { section: 'nav_main' },
+    { id: 'eventi',   labelKey: 'nav_events',   icon: 'events',   href: 'ecm-eventi.html' },
+    { id: 'home',     labelKey: 'nav_dashboard', icon: 'home',     href: 'ecm-home.html' },
+    { section: 'nav_event_mgmt' },
+    { id: 'setup',    labelKey: 'nav_setup',     icon: 'setup',    href: 'ecm-blocco1.html' },
+    { id: 'badge',    labelKey: 'nav_badge',     icon: 'badge',    href: 'ecm-blocco2.html' },
+    { id: 'scanner',  labelKey: 'nav_scanner',   icon: 'scanner',  href: 'ecm-blocco3.html' },
+    { id: 'report',   labelKey: 'nav_report',    icon: 'report',   href: 'ecm-blocco4.html' },
+    { section: 'nav_participants' },
+    { id: 'register', labelKey: 'nav_register',  icon: 'register', href: 'ecm-blocco6.html' },
+    { id: 'survey',   labelKey: 'nav_survey',    icon: 'survey',   href: 'ecm-blocco5.html' },
+    { id: 'quiz',     labelKey: 'nav_quiz',      icon: 'quiz',     href: 'ecm-blocco7.html' },
+    { section: 'nav_system' },
+    { id: 'tablet',   labelKey: 'nav_tablet',    icon: 'tablet',   href: 'ecm-connetti.html' },
+    { id: 'admin',    labelKey: 'nav_admin',     icon: 'admin',    href: 'ecm-admin.html', adminOnly: true },
+  ];
+}
 
 // ── RENDER SIDEBAR ───────────────────────────────────
 function renderSidebar(activeId) {
@@ -73,30 +78,72 @@ function renderSidebar(activeId) {
       </div>
     </div>`;
 
+  // Salva activeId sulla sidebar per poter ricostruire al cambio lingua
+  sidebar.dataset.activeId = activeId;
+
   // Nav items
   const nav = document.getElementById('sidebarNav');
   const op = JSON.parse(localStorage.getItem('ecm_op_user') || 'null');
   const isAdmin = !op;
 
-  NAV_ITEMS.forEach(item => {
+  getNavItems().forEach(item => {
     if (item.section) {
       const label = document.createElement('div');
       label.className = 'nav-section-label';
-      label.textContent = item.section;
+      label.textContent = _t(item.section);
       nav.appendChild(label);
       return;
     }
     if (item.adminOnly && !isAdmin) return;
-    // Scanner: solo se ha accesso
     if (item.id === 'scanner' && op && op.ruolo !== 'scanner' && op.ruolo !== 'operatore') return;
-
+    const itemLabel = _t(item.labelKey);
     const a = document.createElement('a');
     a.className = 'nav-item' + (activeId === item.id ? ' active' : '');
     a.href = item.href;
-    a.dataset.label = item.label;
-    a.innerHTML = `<span class="nav-icon">${ICONS[item.icon] || ''}</span><span class="nav-label">${item.label}</span>`;
+    a.dataset.label = itemLabel;
+    a.innerHTML = `<span class="nav-icon">${ICONS[item.icon] || ''}</span><span class="nav-label">${itemLabel}</span>`;
     nav.appendChild(a);
   });
+
+  // Divider + selettore lingua
+  const divLang = document.createElement('div');
+  divLang.className = 'nav-divider';
+  nav.appendChild(divLang);
+
+  // Selettore lingua
+  const langItem = document.createElement('div');
+  langItem.className = 'nav-item';
+  langItem.style.cursor = 'default';
+  langItem.style.flexDirection = 'column';
+  langItem.style.alignItems = 'flex-start';
+  langItem.style.gap = '6px';
+  langItem.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;width:100%">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+      </span>
+      <span class="nav-label" style="flex:1">${_t('nav_language')}</span>
+      <span id="langFlag" style="font-size:16px">${(typeof ECM_TRANSLATIONS !== 'undefined' && ECM_TRANSLATIONS[localStorage.getItem('ecm_lang')||'it']?.flag) || '🌐'}</span>
+    </div>
+    <div class="nav-label" style="width:100%;padding-left:28px">
+      <select id="langSelector" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:6px;color:rgba(255,255,255,.8);font-size:11px;padding:4px 8px;cursor:pointer;width:100%;font-family:inherit;outline:none">
+        ${typeof ECM_TRANSLATIONS !== 'undefined' ? Object.entries(ECM_TRANSLATIONS).map(([code, lng]) =>
+          `<option value="${code}" ${(localStorage.getItem('ecm_lang')||'it')===code?'selected':''}>${lng.flag} ${lng.name}</option>`
+        ).join('') : ''}
+      </select>
+    </div>`;
+  nav.appendChild(langItem);
+
+  // Listener cambio lingua
+  setTimeout(() => {
+    const sel = document.getElementById('langSelector');
+    if (sel) sel.addEventListener('change', e => {
+      if (typeof setLang === 'function') setLang(e.target.value);
+    });
+  }, 100);
 
   // Divider + logout
   const div = document.createElement('div');
@@ -105,8 +152,9 @@ function renderSidebar(activeId) {
 
   const logoutBtn = document.createElement('button');
   logoutBtn.className = 'nav-item';
-  logoutBtn.dataset.label = 'Esci';
-  logoutBtn.innerHTML = `<span class="nav-icon">${ICONS.logout}</span><span class="nav-label">Esci</span>`;
+  const logoutLabel = _t('nav_logout');
+  logoutBtn.dataset.label = logoutLabel;
+  logoutBtn.innerHTML = `<span class="nav-icon">${ICONS.logout}</span><span class="nav-label">${logoutLabel}</span>`;
   logoutBtn.style.color = 'rgba(239,68,68,.7)';
   logoutBtn.addEventListener('click', () => {
     if (window.__ecmSignOut) window.__ecmSignOut();

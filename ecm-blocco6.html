@@ -116,6 +116,7 @@ main{max-width:800px;margin:0;padding:0}
 @media(max-width:480px){.form-row{grid-template-columns:1fr}.step-line{width:32px}.step-label{font-size:9px}}
 </style>
 <link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
 <script src="ecm-layout.js"></script>
 </head>
 <body>
@@ -592,7 +593,7 @@ loadEventi();
 <!-- Sidebar init -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  renderSidebar('register');
+  applyTranslations(); renderSidebar('register');
   renderVersionFooter();
 });
 </script>
