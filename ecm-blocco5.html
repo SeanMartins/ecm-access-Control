@@ -217,6 +217,7 @@ select.form-input{cursor:pointer}
   <a href="ecm-blocco3.html" class="bn-item"><div class="bn-icon">📷</div><div class="bn-label">Accessi</div></a>
   <a href="ecm-blocco4.html" class="bn-item"><div class="bn-icon">📊</div><div class="bn-label">Report</div></a>
   <a href="ecm-blocco5.html" class="bn-item active"><div class="bn-icon">📝</div><div class="bn-label">Survey</div></a>
+  <a href="ecm-blocco7.html" class="bn-item"><div class="bn-icon">📋</div><div class="bn-label">Quiz ECM</div></a>
   <a href="ecm-admin.html" class="bn-item" id="adminNavItem" style="display:none"><div class="bn-icon">👑</div><div class="bn-label">Admin</div></a>
 </nav>
 
@@ -457,6 +458,22 @@ window.switchTab=switchTab;
 
 function showAlert(t,m){const id=t==='success'?'alertSuccess':'alertError';const e=document.getElementById(id);e.textContent=m;e.classList.add('show');e.style.display='block';setTimeout(()=>{e.classList.remove('show');e.style.display='none';},4000);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+</script>
+<script>
+// Bridge: collega onclick inline alle funzioni del modulo ES6
+function aggiungiDomanda(){if(window.aggiungiDomanda)window.aggiungiDomanda();}
+function salvaSurvey(){if(window.salvaSurvey)window.salvaSurvey();}
+function loadDomande(){if(window.loadDomande)window.loadDomande();}
+function aggiungiOpzione(){if(window.aggiungiOpzione)window.aggiungiOpzione();}
+function rimuoviOpzione(el){if(window.rimuoviOpzione)window.rimuoviOpzione(el);}
+function eliminaDomanda(i){if(window.eliminaDomanda)window.eliminaDomanda(i);}
+function moveDomanda(i,d){if(window.moveDomanda)window.moveDomanda(i,d);}
+function onTipoChange(){if(window.onTipoChange)window.onTipoChange();}
+function switchTab(t,el){if(window.switchTab)window.switchTab(t,el);}
+function copiaLinkSurvey(){if(window.copiaLinkSurvey)window.copiaLinkSurvey();}
+function scaricaQRSurvey(){if(window.scaricaQRSurvey)window.scaricaQRSurvey();}
+function loadRisultati(){if(window.loadRisultati)window.loadRisultati();}
+function exportRisultati(){if(window.exportRisultati)window.exportRisultati();}
 </script>
 </body>
 </html>

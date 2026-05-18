@@ -629,5 +629,22 @@ window.switchTab=switchTab;
 function showAlert(t,m){const id=t==='success'?'alertSuccess':'alertError';const e=document.getElementById(id);e.textContent=m;e.classList.add('show');e.style.display='block';setTimeout(()=>{e.classList.remove('show');e.style.display='none';},4000);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 </script>
+<script>
+// Bridge onclick → modulo ES6
+function onEvChange(){if(window.onEvChange)window.onEvChange();}
+function switchTab(t,el){if(window.switchTab)window.switchTab(t,el);}
+function onTogglePunteggio(){if(window.onTogglePunteggio)window.onTogglePunteggio();}
+function onNewTipoChange(){if(window.onNewTipoChange)window.onNewTipoChange();}
+function aggiungiDomanda(){if(window.aggiungiDomanda)window.aggiungiDomanda();}
+function eliminaDomanda(i){if(window.eliminaDomanda)window.eliminaDomanda(i);}
+function salvaQuestionario(){if(window.salvaQuestionario)window.salvaQuestionario();}
+function loadDomande(){if(window.loadDomande)window.loadDomande();}
+function loadRisposte(){if(window.loadRisposte)window.loadRisposte();}
+function exportExcel(){if(window.exportExcel)window.exportExcel();}
+function copiaLink(){if(window.copiaLink)window.copiaLink();}
+function scaricaQR(){if(window.scaricaQR)window.scaricaQR();}
+function scaricaPDFSingolo(id){if(window.scaricaPDFSingolo)window.scaricaPDFSingolo(id);}
+function scaricaTuttiPDF(){if(window.scaricaTuttiPDF)window.scaricaTuttiPDF();}
+</script>
 </body>
 </html>
