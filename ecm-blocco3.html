@@ -2,89 +2,84 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
-  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
-  <meta name="googlebot" content="noindex, nofollow">
-  <meta name="bingbot" content="noindex, nofollow"><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>ECM — Controllo Accessi</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#F5F3EE;--surface:#FFFFFF;--surface2:#F0EDE6;--surface3:#E8E4DC;--border:#E0DAD0;--border2:#C8C0B4;--text:#1A1714;--text2:#6B6560;--text3:#9B948C;--accent:#2B4EFF;--accent-light:#EEF1FF;--accent2:#FF6B35;--success:#1A7A4A;--success-light:#E8F5EE;--danger:#C13B2A;--danger-light:#FDEEE9;--warn:#B07A10;--warn-light:#FDF5E0;--radius:10px;--radius-lg:16px;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06)}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
-header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 22px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
-.logo{font-size:14px;font-weight:600;letter-spacing:.04em;display:flex;align-items:center;gap:8px;color:var(--text)}
+:root{--bg:#F5F3EE;--surface:#FFF;--surface2:#F0EDE6;--surface3:#E8E4DC;--border:#E0DAD0;--border2:#C8C0B4;--text:#1A1714;--text2:#6B6560;--text3:#9B948C;--accent:#2B4EFF;--accent-light:#EEF1FF;--success:#1A7A4A;--sl:rgba(26,122,74,.1);--danger:#C13B2A;--dl:rgba(193,59,42,.1);--warn:#B07A10;--wl:rgba(176,122,16,.1);--radius:10px;--radius-lg:16px;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06)}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6;padding-bottom:80px}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 18px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.logo{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;color:var(--text)}
 .logo-dot{width:8px;height:8px;border-radius:50%;background:#FF6B35}
-.nav-pills{display:flex;gap:4px}
-.nav-pill{padding:4px 13px;border-radius:20px;font-size:12px;font-weight:500;color:var(--text3)}
-.nav-pill.active{background:var(--accent);color:white}.nav-pill.done{color:var(--text2)}
 .fb-badge{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);padding:4px 12px;border-radius:20px}
 .fb-dot{width:7px;height:7px;border-radius:50%;background:#888}
 .fb-dot.ok{background:var(--success);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-main{max-width:1100px;margin:0 auto;padding:20px 18px 90px}
-.layout{display:grid;grid-template-columns:390px 1fr;gap:18px;align-items:start}
-@media(max-width:880px){.layout{grid-template-columns:1fr}}
-.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
-.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center}
-.stat-num{font-size:26px;font-weight:600;letter-spacing:-.02em}.stat-label{font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
-.stat-num.green{color:var(--success)}.stat-num.red{color:var(--danger)}.stat-num.yellow{color:var(--warn)}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:14px}
-.card-title{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px}
-.scanner-wrap{position:relative;border-radius:var(--radius);overflow:hidden;background:#000;aspect-ratio:1;width:100%}
-#camVideo{width:100%;height:100%;object-fit:cover;display:block}
-.scan-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
-.scan-frame{width:62%;aspect-ratio:1;position:relative}
-.scan-frame::before,.scan-frame::after{content:'';position:absolute;width:26px;height:26px;border-color:var(--accent);border-style:solid}
-.scan-frame::before{top:0;left:0;border-width:3px 0 0 3px;border-radius:4px 0 0 0}
-.scan-frame::after{top:0;right:0;border-width:3px 3px 0 0;border-radius:0 4px 0 0}
-.scan-bl{position:absolute;bottom:0;left:0;width:26px;height:26px;border:3px solid var(--accent);border-width:0 0 3px 3px;border-radius:0 0 0 4px}
-.scan-br{position:absolute;bottom:0;right:0;width:26px;height:26px;border:3px solid var(--accent);border-width:0 3px 3px 0;border-radius:0 0 4px 0}
-.scan-line{position:absolute;top:0;left:5%;right:5%;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:scanAnim 2s ease-in-out infinite;border-radius:2px}
-@keyframes scanAnim{0%,100%{top:5%}50%{top:95%}}
-.scan-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:var(--surface2)}
-.mode-toggle{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden;margin-bottom:12px}
+main{max-width:1100px;margin:0 auto;padding:18px 16px 90px}
+.layout{display:grid;grid-template-columns:380px 1fr;gap:16px;align-items:start}
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center;box-shadow:var(--shadow)}
+.stat-num{font-size:24px;font-weight:600}.stat-label{font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
+.green{color:var(--success)}.red{color:var(--danger)}.yellow{color:var(--warn)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.card-title{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.mode-toggle{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden;margin-bottom:10px}
 .mode-btn{padding:10px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;color:var(--text3);border:none;background:transparent;font-family:'DM Sans',sans-serif}
-.mode-btn.in{background:var(--sl);color:var(--success)}.mode-btn.out{background:var(--dl);color:var(--danger)}
-.cam-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.mode-btn.active-in{background:var(--sl);color:var(--success)}
+.mode-btn.active-out{background:var(--dl);color:var(--danger)}
+.scanner-wrap{position:relative;border-radius:var(--radius);overflow:hidden;background:#000;aspect-ratio:1;width:100%}
+.scan-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:var(--surface2)}
+.cam-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none;justify-content:center}
-.btn-success{background:var(--success);color:#061A0E}.btn-success:hover{background:#19a864}
-.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border2)}.btn-outline:hover{background:var(--surface2);color:var(--text)}
-.btn-primary{background:var(--accent);color:white}.btn-primary:hover{background:#3a58e0}
-.btn-sm{padding:6px 13px;font-size:12px}
+.btn-success{background:var(--success);color:white}.btn-success:hover{background:#145e38}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border2)}.btn-outline:hover{background:var(--surface2)}
+.btn-primary{background:var(--accent);color:white}.btn-primary:hover{background:#1a3ce0}
+.btn-danger{background:var(--dl);color:var(--danger);border:1px solid rgba(193,59,42,.2)}
+.btn-sm{padding:6px 12px;font-size:12px}
 .btn:disabled{opacity:.35;cursor:not-allowed}
 .result-card{border-radius:var(--radius);padding:13px;margin-top:10px;display:none;animation:slideUp .25s ease}
 .result-card.show{display:block}
-.result-card.ok-in{background:var(--sl);border:1px solid rgba(34,201,122,.3)}
-.result-card.ok-out{background:var(--dl);border:1px solid rgba(255,77,77,.3)}
-.result-card.warn{background:var(--wl);border:1px solid rgba(255,181,71,.3)}
-.result-card.err{background:rgba(255,77,77,.08);border:1px solid rgba(255,77,77,.2)}
+.rc-ok-in{background:var(--sl);border:1px solid rgba(26,122,74,.3)}
+.rc-ok-out{background:var(--dl);border:1px solid rgba(193,59,42,.3)}
+.rc-warn{background:var(--wl);border:1px solid rgba(176,122,16,.3)}
+.rc-err{background:rgba(193,59,42,.06);border:1px solid rgba(193,59,42,.2)}
 @keyframes slideUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.result-name{font-size:19px;font-weight:600;margin-bottom:2px}
-.result-status{font-size:13px;font-weight:500;margin-top:7px}
-.result-time{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);margin-top:3px}
-.manual-wrap{margin-top:12px;border-top:1px solid var(--border);padding-top:12px}
-.manual-search-row{display:flex;gap:7px}
-.manual-search-row input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none}
-.manual-search-row input:focus{border-color:var(--accent)}
-.manual-results{margin-top:7px;display:flex;flex-direction:column;gap:5px;max-height:190px;overflow-y:auto}
-.mr-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .15s}
+.result-name{font-size:18px;font-weight:600;margin-bottom:2px}
+.result-status{font-size:13px;font-weight:500;margin-top:6px}
+.manual-wrap{margin-top:10px;border-top:1px solid var(--border);padding-top:10px}
+.manual-row{display:flex;gap:7px}
+.manual-row input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none}
+.manual-row input:focus{border-color:var(--accent)}
+.manual-results{margin-top:7px;display:flex;flex-direction:column;gap:5px;max-height:180px;overflow-y:auto}
+.mr-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .15s}
 .mr-item:hover{border-color:var(--accent)}
-.mr-name{font-size:13px;font-weight:500}
-.mr-cf{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)}
 .chip{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
 .chip-g{background:var(--sl);color:var(--success)}.chip-r{background:var(--dl);color:var(--danger)}.chip-gray{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
-.ticker{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-size:12px;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:8px;min-height:34px}
+/* Nuovo partecipante */
+.np-section{margin-top:10px;border-top:1px solid var(--border);padding-top:10px}
+.np-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.np-panel{display:none}
+.np-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:10px}
+.np-tab{flex:1;padding:7px;text-align:center;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;border:none;background:none;font-family:'DM Sans',sans-serif;border-bottom:2px solid transparent}
+.np-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.np-content{display:none}.np-content.active{display:block}
+.np-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%;margin-bottom:8px}
+.np-input:focus{border-color:var(--accent);background:white}
+.ocr-area{border:2px dashed var(--border2);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;position:relative;background:var(--surface2)}
+.ocr-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+/* Right panel */
+.ticker{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-size:12px;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:8px}
 .ticker-dot{width:7px;height:7px;border-radius:50%;background:var(--success);flex-shrink:0;animation:pulse 2s infinite}
-.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:12px}
-.tab{padding:8px 15px;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;background:none;border-left:none;border-right:none;border-top:none;font-family:'DM Sans',sans-serif}
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:10px}
+.tab{padding:8px 14px;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;background:none;border-left:none;border-right:none;border-top:none;font-family:'DM Sans',sans-serif}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 .tab-panel{display:none}.tab-panel.active{display:block}
-.live-list{display:flex;flex-direction:column;gap:5px;max-height:400px;overflow-y:auto;padding-right:3px}
-.live-list::-webkit-scrollbar{width:3px}.live-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
-.live-item{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:9px 11px;display:flex;align-items:center;gap:9px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.live-list{display:flex;flex-direction:column;gap:5px;max-height:380px;overflow-y:auto}
+.live-item{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:8px 11px;display:flex;align-items:center;gap:9px}
 .live-item.inside{border-left:3px solid var(--success)}
 .live-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .ld-g{background:var(--success)}.ld-gray{background:var(--text3)}
@@ -93,171 +88,134 @@ main{max-width:1100px;margin:0 auto;padding:20px 18px 90px}
 .live-detail{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace}
 .live-badge{font-size:10px;font-weight:600;padding:2px 6px;border-radius:20px}
 .lb-in{background:var(--sl);color:var(--success)}.lb-out{background:var(--dl);color:var(--danger)}.lb-mai{background:var(--surface2);color:var(--text3)}
-.live-time{font-size:10px;color:var(--text3);white-space:nowrap}
-.log-wrap{max-height:280px;overflow-y:auto;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface)}
-.log-wrap::-webkit-scrollbar{width:3px}.log-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.log-wrap{max-height:300px;overflow-y:auto;border-radius:var(--radius);border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse;font-size:12px}
 thead{background:var(--surface2);position:sticky;top:0}
-th{padding:7px 11px;text-align:left;font-weight:600;color:var(--text3);font-size:10px;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border)}
-td{padding:7px 11px;border-bottom:1px solid var(--border);color:var(--text)}
+th{padding:7px 10px;text-align:left;font-weight:600;color:var(--text3);font-size:10px;text-transform:uppercase;border-bottom:1px solid var(--border)}
+td{padding:7px 10px;border-bottom:1px solid var(--border)}
 tr:last-child td{border-bottom:none}
 .td-in{color:var(--success);font-weight:600}.td-out{color:var(--danger);font-weight:600}
 .mono{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)}
-footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:11px 22px;display:flex;align-items:center;justify-content:space-between;z-index:50}
+footer{position:fixed;bottom:56px;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;z-index:50;box-shadow:var(--shadow)}
 .footer-info{font-size:13px;color:var(--text2)}.footer-info strong{color:var(--text)}
 .live-clock{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent)}
-.bottom-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-/* ── NUOVO PARTECIPANTE ── */
-.nuovop-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:12px}
-.nuovop-tab{flex:1;padding:8px;text-align:center;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;border:none;background:none;font-family:'DM Sans',sans-serif;border-bottom:2px solid transparent;transition:all .2s}
-.nuovop-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-.nuovop-panel{display:none}.nuovop-panel.active{display:block}
-.ocr-area{border:2px dashed var(--border2);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;position:relative;background:var(--surface2);transition:all .2s}
-.ocr-area:hover,.ocr-area.drag{border-color:var(--accent);background:var(--accent-light)}
-.ocr-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.ocr-preview{display:none;margin-top:10px;border-radius:var(--radius);overflow:hidden}
-.ocr-preview img{width:100%;object-fit:contain;max-height:140px;border-radius:var(--radius)}
-.cf-decoded{background:var(--success-light);border:1px solid rgba(26,122,74,.2);border-radius:var(--radius);padding:10px 12px;margin-top:8px;font-size:12px;display:none}
-.np-form{display:flex;flex-direction:column;gap:8px}
-.np-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%;transition:border-color .2s}
-.np-input:focus{border-color:var(--accent);background:white}
-.np-input.auto{border-color:var(--success)!important;background:var(--success-light)!important}
-@media(max-width:600px){.stats-bar{grid-template-columns:1fr 1fr}}
-/* Html5Qrcode overrides */
-#html5qr-scanner video{width:100%!important;height:100%!important;object-fit:cover!important;border-radius:0!important;position:absolute!important;inset:0!important}
+/* Html5Qrcode */
+#html5qr-scanner video{width:100%!important;height:100%!important;object-fit:cover!important;position:absolute!important;inset:0!important}
 #html5qr-anchor,#html5qr-scanner__dashboard_section_csr,#html5qr-scanner__status_span,#html5qr-scanner__header_message{display:none!important}
 #html5qr-scanner>div:first-child{display:none!important}
-
-/* RESPONSIVE AUTO-SIZING */
-
-@media(max-width:900px){
-  .layout{grid-template-columns:1fr!important}
-  .stats-bar{grid-template-columns:repeat(4,1fr)}
-}
-@media(max-width:600px){
-  .stats-bar{grid-template-columns:1fr 1fr!important}
-  .cam-btns{grid-template-columns:1fr 1fr}
-  .bottom-btns{flex-direction:column}
-  .bottom-btns .btn{width:100%;justify-content:center}
-  header{padding:0 14px}
-  main{padding:16px 14px 80px}
-  .mode-toggle button{font-size:12px;padding:8px 4px}
-}
-@media(max-width:380px){
-  .stats-bar{grid-template-columns:1fr 1fr!important}
-  .stat-num{font-size:22px}
-}
+/* Responsive */
+@media(max-width:880px){.layout{grid-template-columns:1fr}}
+@media(max-width:600px){.stats-bar{grid-template-columns:1fr 1fr}.cam-btns{grid-template-columns:1fr 1fr}}
+/* Navbar */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#1A1714;border-top:1px solid #2A2420;display:flex;align-items:stretch;z-index:200;padding-bottom:env(safe-area-inset-bottom)}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 2px;text-decoration:none;color:#6B6560;font-family:'DM Sans',sans-serif;font-size:9px;font-weight:500;transition:all .2s;border:none;background:none}
+.bn-item.active{color:#4D6EFF}.bn-item.active .bn-icon{background:rgba(77,110,255,.15);border-radius:10px}
+.bn-icon{width:32px;height:26px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.bn-label{font-size:9px;line-height:1}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo"><span class="logo-dot"></span>ECM Access Control</div>
+  <div class="logo"><span class="logo-dot"></span>ECM Accessi</div>
   <div style="display:flex;align-items:center;gap:10px">
-    <div class="fb-badge"><div class="fb-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
-    <div class="nav-pills"><div class="nav-pill done">① Setup</div><div class="nav-pill done">② Badge</div><div class="nav-pill active">③ Accesso</div><div class="nav-pill">④ Report</div></div>
+    <div class="fb-badge"><div class="fb-dot" id="fbDot"></div><span id="fbStatus">...</span></div>
+    <div id="userBarSlot"></div>
   </div>
 </header>
 <main>
-  <div id="alertNoData" style="display:none;padding:12px 16px;border-radius:var(--radius);font-size:13px;margin-bottom:14px;background:var(--dl);color:var(--danger);border:1px solid rgba(255,77,77,.3)">
-    ⚠️ Nessun evento trovato. <a href="ecm-blocco1.html" style="color:inherit;font-weight:600">Torna al Blocco 1</a>.
+  <div id="alertNoData" style="display:none;padding:12px 16px;border-radius:var(--radius);font-size:13px;margin-bottom:14px;background:var(--dl);color:var(--danger);border:1px solid rgba(193,59,42,.3)">
+    ⚠️ Nessun evento selezionato. <a href="ecm-eventi.html" style="color:inherit;font-weight:600">Scegli un evento</a>.
   </div>
   <div class="stats-bar">
     <div class="stat-box"><div class="stat-num" id="sTot">0</div><div class="stat-label">Totale</div></div>
     <div class="stat-box"><div class="stat-num green" id="sDentro">0</div><div class="stat-label">Dentro</div></div>
     <div class="stat-box"><div class="stat-num yellow" id="sUsciti">0</div><div class="stat-label">Usciti</div></div>
-    <div class="stat-box"><div class="stat-num red" id="sAssenti">0</div><div class="stat-label">Non arrivati</div></div>
+    <div class="stat-box"><div class="stat-num red" id="sAssenti">0</div><div class="stat-label">Non arr.</div></div>
   </div>
   <div class="layout">
+    <!-- COLONNA SINISTRA: SCANNER -->
     <div>
       <div class="card">
         <div class="card-title">📷 Scanner QR</div>
         <div class="mode-toggle">
-          <button class="mode-btn in" id="modeIn">▶ ENTRATA</button>
-          <button class="mode-btn" id="modeOut">◀ USCITA</button>
+          <button class="mode-btn" id="btnModeIn">▶ ENTRATA</button>
+          <button class="mode-btn" id="btnModeOut">◀ USCITA</button>
         </div>
-        <div class="scanner-wrap" style="position:relative;overflow:hidden;border-radius:var(--radius);background:#000;aspect-ratio:1;width:100%">
+        <div class="scanner-wrap">
           <video id="camVideo" style="display:none"></video>
           <div id="html5qr-scanner" style="display:none;width:100%;height:100%"></div>
-          <div class="scan-placeholder" id="scanPH" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:var(--surface2)">
-            <div style="font-size:44px;opacity:.35">📷</div>
+          <div class="scan-ph" id="scanPH">
+            <div style="font-size:40px;opacity:.3">📷</div>
             <div style="font-size:13px;color:var(--text2)">Camera non attiva</div>
-            <div style="font-size:11px;color:var(--text3)">Premi Avvia per iniziare</div>
+            <div style="font-size:11px;color:var(--text3)">Premi Avvia</div>
           </div>
         </div>
         <div class="cam-btns">
           <button class="btn btn-success" id="btnStart">▶ Avvia camera</button>
           <button class="btn btn-outline" id="btnStop" disabled>⏹ Ferma</button>
         </div>
-        <div id="scanMethod" style="display:none;font-size:11px;color:var(--text3);text-align:center;margin-top:6px;padding:4px"></div>
+        <div id="scanMethod" style="display:none;font-size:11px;color:var(--text3);text-align:center;margin-top:5px"></div>
         <div class="result-card" id="resultCard">
           <div style="display:flex;justify-content:space-between;align-items:flex-start">
             <div>
               <div class="result-name" id="resName">—</div>
               <div class="mono" id="resCF">—</div>
               <div class="result-status" id="resStatus">—</div>
-              <div class="result-time" id="resTime">—</div>
+              <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);margin-top:3px" id="resTime"></div>
             </div>
-            <div id="resEmoji" style="font-size:30px"></div>
+            <div id="resEmoji" style="font-size:28px"></div>
           </div>
         </div>
+        <!-- RICERCA MANUALE -->
         <div class="manual-wrap">
-          <div class="card-title" style="margin-bottom:8px">🔍 Registrazione manuale</div>
-          <div class="manual-search-row">
+          <div class="card-title" style="margin-bottom:8px">🔍 Ricerca manuale</div>
+          <div class="manual-row">
             <input type="text" id="manualSearch" placeholder="Nome, cognome o CF...">
-            <button class="btn btn-outline btn-sm" id="clearManual">✕</button>
+            <button class="btn btn-outline btn-sm" id="btnClearSearch">✕</button>
           </div>
           <div class="manual-results" id="manualResults"></div>
         </div>
-
-        <!-- NUOVO PARTECIPANTE LAST MINUTE -->
-        <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <!-- NUOVO PARTECIPANTE -->
+        <div class="np-section">
+          <div class="np-header">
             <div class="card-title" style="margin-bottom:0">➕ Nuovo partecipante</div>
-            <button class="btn btn-outline btn-sm" id="btnToggleNP">Apri</button>
+            <button class="btn btn-outline btn-sm" id="btnNP">Apri</button>
           </div>
-          <div id="nuovoPPanel" style="display:none">
-            <div class="nuovop-tabs">
-              <button class="nuovop-tab active" data-nptab="ocr">📷 Foto documento</button>
-              <button class="nuovop-tab" data-nptab="manual">⌨️ Inserimento manuale</button>
+          <div class="np-panel" id="npPanel">
+            <div class="np-tabs">
+              <button class="np-tab active" data-tab="manuale">⌨️ Manuale</button>
+              <button class="np-tab" data-tab="foto">📷 Foto CF</button>
             </div>
-
-            <!-- TAB OCR -->
-            <div class="nuovop-panel active" id="np-tab-ocr">
-              <div class="ocr-area" id="ocrArea">
-                <input type="file" id="ocrInput" accept="image/*" capture="environment">
+            <div class="np-content active" id="nptab-manuale">
+              <input type="text" class="np-input" id="npCF" placeholder="Codice Fiscale *" maxlength="16" style="text-transform:uppercase;font-family:'DM Mono',monospace">
+              <div id="npCFInfo" style="font-size:11px;color:var(--text3);margin:-4px 0 8px"></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <input type="text" class="np-input" id="npNome" placeholder="Nome *">
+                <input type="text" class="np-input" id="npCognome" placeholder="Cognome *">
+              </div>
+              <input type="text" class="np-input" id="npProf" placeholder="Professione">
+            </div>
+            <div class="np-content" id="nptab-foto">
+              <div class="ocr-area">
+                <input type="file" id="ocrFile" accept="image/*" capture="environment">
                 <div style="font-size:32px;margin-bottom:8px">📄</div>
-                <div style="font-size:13px;font-weight:500;color:var(--text2)">Fotografa tessera sanitaria o documento</div>
+                <div style="font-size:13px;font-weight:500;color:var(--text2)">Fotografa la tessera sanitaria</div>
                 <div style="font-size:11px;color:var(--text3);margin-top:4px">Tocca per aprire la fotocamera</div>
               </div>
-              <div class="ocr-preview" id="ocrPreview"><img id="ocrImg" src="" alt=""></div>
-              <div id="ocrStatus" style="font-size:12px;color:var(--text3);margin-top:6px;min-height:18px;text-align:center"></div>
-              <div class="cf-decoded" id="cfDecoded"></div>
+              <div id="ocrStatus" style="font-size:12px;color:var(--text3);margin-top:8px;text-align:center;min-height:16px"></div>
             </div>
-
-            <!-- TAB MANUALE -->
-            <div class="nuovop-panel" id="np-tab-manual">
-              <div class="np-form">
-                <input type="text" class="np-input" id="npCF" placeholder="Codice Fiscale *" maxlength="16" style="text-transform:uppercase;font-family:'DM Mono',monospace">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                  <input type="text" class="np-input" id="npNome" placeholder="Nome *">
-                  <input type="text" class="np-input" id="npCognome" placeholder="Cognome *">
-                </div>
-                <input type="text" class="np-input" id="npProfessione" placeholder="Professione">
-              </div>
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <button class="btn btn-success" style="flex:1" id="btnSalvaNP">✓ Salva e registra entrata</button>
+              <button class="btn btn-outline btn-sm" id="btnResetNP">✕</button>
             </div>
-
-            <!-- BOTTONI SALVA -->
-            <div style="display:flex;gap:8px;margin-top:12px">
-              <button class="btn btn-success" style="flex:1" id="btnSalvaNuovoP">✓ Salva e registra entrata</button>
-              <button class="btn btn-outline btn-sm" id="btnResetNuovoP">✕ Reset</button>
-            </div>
-            <div id="npAlert" style="font-size:12px;margin-top:8px;display:none"></div>
+            <div id="npMsg" style="font-size:12px;margin-top:8px;display:none;padding:8px 12px;border-radius:var(--radius)"></div>
           </div>
         </div>
       </div>
     </div>
+    <!-- COLONNA DESTRA: LISTA + LOG -->
     <div>
-      <div class="ticker"><div class="ticker-dot"></div><span id="tickerText">In attesa di scansioni...</span></div>
+      <div class="ticker"><div class="ticker-dot"></div><span id="tickerTxt">In attesa di scansioni...</span></div>
       <div class="card" style="padding:14px">
         <div class="tabs">
           <button class="tab active" data-tab="presenti">Dentro ora</button>
@@ -265,184 +223,145 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
           <button class="tab" data-tab="log">Log</button>
         </div>
         <div class="tab-panel active" id="tab-presenti">
-          <div class="live-list" id="listPresenti"><div style="color:var(--text3);font-size:13px;padding:18px;text-align:center">Nessuno in sala</div></div>
+          <div class="live-list" id="listPresenti"><div style="color:var(--text3);font-size:13px;padding:16px;text-align:center">Nessuno in sala</div></div>
         </div>
         <div class="tab-panel" id="tab-tutti">
-          <input type="text" id="tuttiSearch" placeholder="Filtra..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:7px 11px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;margin-bottom:9px">
+          <input type="text" id="filterTutti" placeholder="Filtra..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:7px 11px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;margin-bottom:8px">
           <div class="live-list" id="listTutti"></div>
         </div>
         <div class="tab-panel" id="tab-log">
-          <div class="log-wrap"><table><thead><tr><th>Ora</th><th>Nome</th><th>CF</th><th>Evento</th></tr></thead><tbody id="logBody"></tbody></table></div>
+          <div class="log-wrap">
+            <table><thead><tr><th>Ora</th><th>Nome</th><th>CF</th><th>Tipo</th></tr></thead>
+            <tbody id="logBody"></tbody></table>
+          </div>
         </div>
       </div>
-      <div class="bottom-btns">
-        <a href="ecm-blocco1.html" class="btn btn-outline btn-sm">← Setup</a>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+        <a href="ecm-eventi.html" class="btn btn-outline btn-sm">← Eventi</a>
         <a href="ecm-blocco4.html" class="btn btn-primary btn-sm">Report finale →</a>
-        <button class="btn btn-outline btn-sm" id="resetBtn" style="margin-left:auto">🗑 Info reset</button>
+        <button class="btn btn-outline btn-sm" id="btnInfoReset" style="margin-left:auto">🗑 Info reset</button>
       </div>
     </div>
   </div>
 </main>
 <footer>
-  <div class="footer-info">Evento: <strong id="footerEvento">—</strong> · Modo: <strong id="footerModo" style="color:var(--success)">ENTRATA</strong></div>
-  <div class="live-clock" id="liveClock">--:--:--</div>
+  <div class="footer-info">Evento: <strong id="footerEv">—</strong> · <strong id="footerMode" style="color:var(--success)">ENTRATA</strong></div>
+  <div class="live-clock" id="clock">--:--:--</div>
 </footer>
+<nav class="bottom-nav">
+  <a href="ecm-eventi.html" class="bn-item"><div class="bn-icon">📋</div><div class="bn-label">Eventi</div></a>
+  <a href="ecm-blocco1.html" class="bn-item"><div class="bn-icon">⚙️</div><div class="bn-label">Setup</div></a>
+  <a href="ecm-blocco2.html" class="bn-item"><div class="bn-icon">🪪</div><div class="bn-label">Badge</div></a>
+  <a href="ecm-blocco3.html" class="bn-item active"><div class="bn-icon">📷</div><div class="bn-label">Accessi</div></a>
+  <a href="ecm-blocco4.html" class="bn-item"><div class="bn-icon">📊</div><div class="bn-label">Report</div></a>
+  <a href="ecm-blocco5.html" class="bn-item"><div class="bn-icon">📝</div><div class="bn-label">Survey</div></a>
+  <a href="ecm-blocco7.html" class="bn-item"><div class="bn-icon">📋</div><div class="bn-label">Quiz</div></a>
+  <a href="ecm-admin.html" class="bn-item" id="adminNavItem" style="display:none"><div class="bn-icon">👑</div><div class="bn-label">Admin</div></a>
+</nav>
 <script type="module">
-import { requireAuth, injectUserBar, requireRole } from './ecm-auth.js';
-await requireAuth();
-requireRole(['scanner','operatore','report','admin']);
-injectUserBar('userBarSlot');
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { requireAuth, injectUserBar } from './ecm-auth.js';
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
-const app=initializeApp(FB); const db=getFirestore(app);
+const app=getApps().length?getApps()[0]:initializeApp(FB);
+const db=getFirestore(app);
+const auth=getAuth(app);
 
-let evento=null, parts=[], mode='in', stream=null, scanning=false, cooldown=false, animFrame=null;
-const video=document.getElementById('camVideo');
+// ── AUTH ───────────────────────────────────────────────
+await requireAuth();
+injectUserBar('userBarSlot');
+onAuthStateChanged(auth,u=>{
+  if(u&&u.email==='martinsosem@gmail.com'){const el=document.getElementById('adminNavItem');if(el)el.style.display='flex';}
+});
 
-document.getElementById('fbDot').className='fb-dot ok';
-document.getElementById('fbStatus').textContent='Firebase connesso';
-
+// ── STATO ─────────────────────────────────────────────
+let parts=[], mode='in', cooldown=false, html5QrCode=null;
 const evId=localStorage.getItem('ecm_eventId');
-if(!evId){document.getElementById('alertNoData').style.display='block';}
-else{
-  const evSnap=await getDoc(doc(db,'eventi',evId));
-  if(!evSnap.exists()){document.getElementById('alertNoData').style.display='block';}
-  else{
-    evento=evSnap.data();
-    document.getElementById('footerEvento').textContent=evento.nome||'—';
-    const snap=await getDocs(collection(db,'eventi',evId,'partecipanti'));
-    snap.forEach(d=>parts.push({id:d.id,...d.data(),log:[]}));
-    parts.sort((a,b)=>a.id.localeCompare(b.id));
-    document.getElementById('sTot').textContent=parts.length;
-    // Realtime listener su logs
-    onSnapshot(query(collection(db,'eventi',evId,'logs'),orderBy('ts','desc')),snap=>{
-      const logs=[]; snap.forEach(d=>logs.push({id:d.id,...d.data()}));
-      parts.forEach(p=>p.log=[]);
-      logs.forEach(l=>{const p=parts.find(x=>x.id===l.partecipanteId);if(p)p.log.push(l);});
-      parts.forEach(p=>p.log&&p.log.sort((a,b)=>new Date(a.tsISO||0)-new Date(b.tsISO||0)));
-      updateStats(); renderPresenti(); renderTutti(); renderLog(logs);
-    });
-  }
+document.getElementById('fbDot').className='fb-dot ok';
+document.getElementById('fbStatus').textContent='Firebase OK';
+
+// ── CARICA EVENTO ─────────────────────────────────────
+if(!evId){
+  document.getElementById('alertNoData').style.display='block';
+}else{
+  try{
+    const evSnap=await getDoc(doc(db,'eventi',evId));
+    if(!evSnap.exists()){document.getElementById('alertNoData').style.display='block';}
+    else{
+      document.getElementById('footerEv').textContent=evSnap.data().nome||'—';
+      const partsSnap=await getDocs(collection(db,'eventi',evId,'partecipanti'));
+      partsSnap.forEach(d=>parts.push({id:d.id,...d.data(),log:[]}));
+      document.getElementById('sTot').textContent=parts.length;
+      onSnapshot(query(collection(db,'eventi',evId,'logs'),orderBy('ts','desc')),snap=>{
+        const logs=[]; snap.forEach(d=>logs.push({id:d.id,...d.data()}));
+        parts.forEach(p=>p.log=[]);
+        logs.forEach(l=>{const p=parts.find(x=>x.id===l.partecipanteId);if(p)p.log.push(l);});
+        updateStats(); renderPresenti(); renderTutti(); renderLog(logs);
+      });
+    }
+  }catch(e){console.error(e);}
 }
 
-// UI events
-document.getElementById('modeIn').addEventListener('click',()=>setMode('in'));
-document.getElementById('modeOut').addEventListener('click',()=>setMode('out'));
-document.getElementById('btnStart').addEventListener('click',startCamera);
-document.getElementById('btnStop').addEventListener('click',stopCamera);
-document.getElementById('clearManual').addEventListener('click',()=>{document.getElementById('manualSearch').value='';document.getElementById('manualResults').innerHTML='';});
-document.getElementById('manualSearch').addEventListener('input',searchManual);
-document.getElementById('tuttiSearch').addEventListener('input',renderTutti);
-document.getElementById('resetBtn').addEventListener('click',()=>alert('Per resettare i log:\nFirebase Console → Firestore → eventi/'+evId+'/logs\nSeleziona tutti i documenti e cancellali manualmente.'));
-document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
+// ── CLOCK ─────────────────────────────────────────────
+setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleTimeString('it-IT'),1000);
 
-// Pannello nuovo partecipante - listener registrati con delay per sicurezza
-setTimeout(()=>{
-  const btnToggle=document.getElementById('btnToggleNP');
-  if(btnToggle) btnToggle.addEventListener('click',()=>{
-    const panel=document.getElementById('nuovoPPanel');
-    const open=panel.style.display==='none';
-    panel.style.display=open?'block':'none';
-    btnToggle.textContent=open?'Chiudi':'Apri';
-  });
-
-  document.querySelectorAll('[data-nptab]').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const tab=btn.dataset.nptab;
-      document.querySelectorAll('.nuovop-tab').forEach(t=>t.classList.remove('active'));
-      document.querySelectorAll('.nuovop-panel').forEach(p=>p.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('np-tab-'+tab).classList.add('active');
-    });
-  });
-
-  const btnSalvaNP=document.getElementById('btnSalvaNuovoP');
-  if(btnSalvaNP) btnSalvaNP.addEventListener('click',()=>salvaPartecipanteNuovo());
-
-  const btnResetNP=document.getElementById('btnResetNuovoP');
-  if(btnResetNP) btnResetNP.addEventListener('click',()=>resetNuovoP());
-}, 500);
-setInterval(()=>document.getElementById('liveClock').textContent=new Date().toLocaleTimeString('it-IT'),1000);
-
+// ── MODO ENTRATA/USCITA ───────────────────────────────
 function setMode(m){
   mode=m;
-  document.getElementById('modeIn').className='mode-btn'+(m==='in'?' in':'');
-  document.getElementById('modeOut').className='mode-btn'+(m==='out'?' out':'');
-  document.getElementById('footerModo').textContent=m==='in'?'ENTRATA':'USCITA';
-  document.getElementById('footerModo').style.color=m==='in'?'var(--success)':'var(--danger)';
-  hideResult();
+  document.getElementById('btnModeIn').className='mode-btn'+(m==='in'?' active-in':'');
+  document.getElementById('btnModeOut').className='mode-btn'+(m==='out'?' active-out':'');
+  document.getElementById('footerMode').textContent=m==='in'?'ENTRATA':'USCITA';
+  document.getElementById('footerMode').style.color=m==='in'?'var(--success)':'var(--danger)';
 }
-// ── SCANNER con Html5Qrcode (massima compatibilità iOS/Android) ──
-let html5QrCode = null;
+setMode('in');
+document.getElementById('btnModeIn').addEventListener('click',()=>setMode('in'));
+document.getElementById('btnModeOut').addEventListener('click',()=>setMode('out'));
 
-async function startCamera(){
+// ── SCANNER ───────────────────────────────────────────
+document.getElementById('btnStart').addEventListener('click',async()=>{
   try{
-    // Crea istanza html5QrCode sul div video
-    const scanDiv = document.getElementById('camVideo');
-    scanDiv.removeAttribute('autoplay');
-    scanDiv.removeAttribute('playsinline');
-    scanDiv.removeAttribute('muted');
-    scanDiv.style.display = 'none';
-
-    const scannerDiv = document.getElementById('html5qr-scanner');
-    scannerDiv.style.display = 'block';
-
-    html5QrCode = new Html5Qrcode('html5qr-scanner');
-
-    const config = {
-      fps: 10,
-      qrbox: { width: 220, height: 220 },
-      aspectRatio: 1.0,
-      supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
-    };
-
+    document.getElementById('camVideo').style.display='none';
+    const scanDiv=document.getElementById('html5qr-scanner');
+    scanDiv.style.display='block';
+    html5QrCode=new Html5Qrcode('html5qr-scanner');
     await html5QrCode.start(
-      { facingMode: 'environment' },
-      config,
-      (decodedText) => {
-        if(!cooldown){
-          handleQR(decodedText);
-          cooldown = true;
-          setTimeout(()=>cooldown=false, 2500);
-        }
+      {facingMode:'environment'},
+      {fps:10,qrbox:{width:220,height:220},aspectRatio:1.0},
+      decodedText=>{
+        if(!cooldown){handleQR(decodedText);cooldown=true;setTimeout(()=>cooldown=false,2500);}
       },
-      (errorMsg) => { /* ignora errori frame */ }
+      ()=>{}
     );
-
     document.getElementById('scanPH').style.display='none';
     document.getElementById('btnStart').disabled=true;
     document.getElementById('btnStop').disabled=false;
-    scanning=true;
-    const methodEl=document.getElementById('scanMethod');
-    methodEl.style.display='block';
-    methodEl.textContent='🟢 Scanner attivo — punta il QR al centro';
-
+    document.getElementById('scanMethod').style.display='block';
+    document.getElementById('scanMethod').textContent='🟢 Scanner attivo — punta il QR';
   }catch(e){
-    alert('Camera non disponibile.\n\n' + e.message + '\n\nSu iPhone usa Safari e assicurati di aver dato il permesso fotocamera in Impostazioni → Safari → Fotocamera.');
+    alert('Fotocamera non disponibile:\n'+e.message+'\n\nUsa Safari su iPhone e dai il permesso fotocamera.');
   }
-}
+});
 
-async function stopCamera(){
-  scanning=false;
-  if(html5QrCode){
-    try{ await html5QrCode.stop(); html5QrCode.clear(); }catch(e){}
-    html5QrCode=null;
-  }
+document.getElementById('btnStop').addEventListener('click',async()=>{
+  if(html5QrCode){try{await html5QrCode.stop();html5QrCode.clear();}catch(e){}html5QrCode=null;}
   document.getElementById('scanPH').style.display='flex';
   document.getElementById('html5qr-scanner').style.display='none';
-  document.getElementById('camVideo').style.display='block';
   document.getElementById('btnStart').disabled=false;
   document.getElementById('btnStop').disabled=true;
   document.getElementById('scanMethod').style.display='none';
-}
+});
+
+// ── QR HANDLER ────────────────────────────────────────
 async function handleQR(raw){
   const pts=raw.split('|');
   if(pts[0]!=='ECM'||pts.length<5){showResult('err','—',raw,'⚠️ QR non riconosciuto','');return;}
   const p=parts.find(x=>x.id===pts[1]);
-  if(!p){showResult('err','—',pts[1],'⚠️ Partecipante non trovato in questo evento','');return;}
+  if(!p){showResult('err','—',pts[1],'⚠️ Partecipante non trovato','');return;}
   await registerAccess(p);
 }
+
 async function registerAccess(p){
   const now=new Date();
   const timeStr=now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
@@ -450,20 +369,23 @@ async function registerAccess(p){
   const u=(p.log||[]).filter(l=>l.tipo==='uscita').length;
   const inside=e>u;
   if(mode==='in'){
-    if(inside){showResult('warn',p.nome+' '+p.cognome,p.cf,'⚠️ Già risulta in sala — verifica',timeStr);playBeep('warn');return;}
+    if(inside){showResult('warn',p.nome+' '+p.cognome,p.cf,'⚠️ Già in sala',timeStr);vibrate('warn');return;}
     await addDoc(collection(db,'eventi',evId,'logs'),{partecipanteId:p.id,tipo:'entrata',ora:timeStr,tsISO:now.toISOString(),ts:serverTimestamp(),nome:p.cognome+' '+p.nome,cf:p.cf||''});
     showResult('ok-in',p.nome+' '+p.cognome,p.cf,'✓ Entrata registrata',timeStr);
-    updateTicker(`${p.nome} ${p.cognome} — entrata ${timeStr}`); playBeep('success');
+    document.getElementById('tickerTxt').textContent=p.cognome+' '+p.nome+' — entrata '+timeStr;
+    vibrate('in');
   }else{
-    if(!inside){showResult('warn',p.nome+' '+p.cognome,p.cf,'⚠️ Non risulta in sala',timeStr);playBeep('warn');return;}
+    if(!inside){showResult('warn',p.nome+' '+p.cognome,p.cf,'⚠️ Non risulta in sala',timeStr);vibrate('warn');return;}
     await addDoc(collection(db,'eventi',evId,'logs'),{partecipanteId:p.id,tipo:'uscita',ora:timeStr,tsISO:now.toISOString(),ts:serverTimestamp(),nome:p.cognome+' '+p.nome,cf:p.cf||''});
     showResult('ok-out',p.nome+' '+p.cognome,p.cf,'✓ Uscita registrata',timeStr);
-    updateTicker(`${p.nome} ${p.cognome} — uscita ${timeStr}`); playBeep('exit');
+    document.getElementById('tickerTxt').textContent=p.cognome+' '+p.nome+' — uscita '+timeStr;
+    vibrate('out');
   }
 }
+
 function showResult(type,name,cf,status,time){
   const card=document.getElementById('resultCard');
-  card.className='result-card show '+type;
+  card.className='result-card show rc-'+type;
   document.getElementById('resName').textContent=name;
   document.getElementById('resCF').textContent=cf;
   document.getElementById('resStatus').textContent=status;
@@ -471,18 +393,48 @@ function showResult(type,name,cf,status,time){
   document.getElementById('resTime').textContent=time?'Ore '+time:'';
   document.getElementById('resEmoji').textContent={'ok-in':'✅','ok-out':'🚪','warn':'⚠️','err':'❌'}[type]||'';
 }
-function hideResult(){document.getElementById('resultCard').className='result-card';}
-function searchManual(){
-  const q=document.getElementById('manualSearch').value.toLowerCase().trim();
-  const c=document.getElementById('manualResults'); if(q.length<2){c.innerHTML='';return;}
-  const fil=parts.filter(p=>p.nome.toLowerCase().includes(q)||p.cognome.toLowerCase().includes(q)||(p.cf||'').toLowerCase().includes(q)).slice(0,8);
-  c.innerHTML=fil.map(p=>{
-    const e=(p.log||[]).filter(l=>l.tipo==='entrata').length; const u=(p.log||[]).filter(l=>l.tipo==='uscita').length; const inside=e>u;
-    const badge=e===0?`<span class="chip chip-gray">Non arrivato</span>`:inside?`<span class="chip chip-g">Dentro</span>`:`<span class="chip chip-r">Uscito</span>`;
-    return `<div class="mr-item" data-pid="${p.id}"><div><div class="mr-name">${esc(p.cognome)} ${esc(p.nome)}</div><div class="mr-cf">${p.cf||'—'}</div></div><div style="display:flex;align-items:center;gap:7px">${badge}<span style="font-size:15px">${mode==='in'?'▶':'◀'}</span></div></div>`;
-  }).join('');
-  c.querySelectorAll('[data-pid]').forEach(el=>el.addEventListener('click',()=>{const p=parts.find(x=>x.id===el.dataset.pid);if(p)registerAccess(p);}));
+
+function vibrate(t){
+  try{if(navigator.vibrate){if(t==='in')navigator.vibrate(200);else if(t==='out')navigator.vibrate([100,80,100]);else navigator.vibrate([60,40,60,40,60]);}}catch(e){}
+  try{const ac=new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator();const g=ac.createGain();o.connect(g);g.connect(ac.destination);o.frequency.value=t==='in'?880:t==='out'?440:220;g.gain.value=0.08;o.start();g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.3);o.stop(ac.currentTime+0.3);}catch(e){}
 }
+
+// ── RICERCA MANUALE ───────────────────────────────────
+document.getElementById('manualSearch').addEventListener('input',function(){
+  const q=this.value.toLowerCase().trim();
+  const c=document.getElementById('manualResults');
+  if(q.length<2){c.innerHTML='';return;}
+  const fil=parts.filter(p=>p.nome?.toLowerCase().includes(q)||p.cognome?.toLowerCase().includes(q)||(p.cf||'').toLowerCase().includes(q)).slice(0,8);
+  c.innerHTML='';
+  fil.forEach(p=>{
+    const e=(p.log||[]).filter(l=>l.tipo==='entrata').length;
+    const u=(p.log||[]).filter(l=>l.tipo==='uscita').length;
+    const inside=e>u;
+    const badge=e===0?'<span class="chip chip-gray">Non arr.</span>':inside?'<span class="chip chip-g">Dentro</span>':'<span class="chip chip-r">Uscito</span>';
+    const div=document.createElement('div');
+    div.className='mr-item';
+    div.innerHTML=`<div><div style="font-size:13px;font-weight:500">${esc(p.cognome)} ${esc(p.nome)}</div><div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)">${p.cf||'—'}</div></div><div style="display:flex;align-items:center;gap:7px">${badge}<span style="font-size:14px">${mode==='in'?'▶':'◀'}</span></div>`;
+    div.addEventListener('click',()=>registerAccess(p));
+    c.appendChild(div);
+  });
+});
+document.getElementById('btnClearSearch').addEventListener('click',()=>{
+  document.getElementById('manualSearch').value='';
+  document.getElementById('manualResults').innerHTML='';
+});
+
+// ── TABS ──────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('tab-'+t.dataset.tab).classList.add('active');
+    if(t.dataset.tab==='tutti')renderTutti();
+  });
+});
+
+// ── RENDER ────────────────────────────────────────────
 function updateStats(){
   let d=0,u=0,a=0;
   parts.forEach(p=>{const e=(p.log||[]).filter(l=>l.tipo==='entrata').length;const uu=(p.log||[]).filter(l=>l.tipo==='uscita').length;if(e===0)a++;else if(e>uu)d++;else u++;});
@@ -493,410 +445,158 @@ function updateStats(){
 function renderPresenti(){
   const inside=parts.filter(p=>{const e=(p.log||[]).filter(l=>l.tipo==='entrata').length;const u=(p.log||[]).filter(l=>l.tipo==='uscita').length;return e>u;});
   const c=document.getElementById('listPresenti');
-  if(!inside.length){c.innerHTML='<div style="color:var(--text3);font-size:13px;padding:18px;text-align:center">Nessuno in sala</div>';return;}
-  c.innerHTML=inside.map(p=>{const last=[...(p.log||[])].reverse().find(l=>l.tipo==='entrata');return `<div class="live-item inside"><div class="live-dot ld-g"></div><div class="live-info"><div class="live-name">${esc(p.cognome)} ${esc(p.nome)}</div><div class="live-detail">${p.cf||'—'}</div></div><div><span class="live-badge lb-in">DENTRO</span><div class="live-time">${last?last.ora:'—'}</div></div></div>`;}).join('');
+  if(!inside.length){c.innerHTML='<div style="color:var(--text3);font-size:13px;padding:16px;text-align:center">Nessuno in sala</div>';return;}
+  c.innerHTML=inside.map(p=>{const last=[...(p.log||[])].reverse().find(l=>l.tipo==='entrata');return`<div class="live-item inside"><div class="live-dot ld-g"></div><div class="live-info"><div class="live-name">${esc(p.cognome)} ${esc(p.nome)}</div><div class="live-detail">${p.cf||'—'}</div></div><div><span class="live-badge lb-in">DENTRO</span><div style="font-size:10px;color:var(--text3)">${last?last.ora:'—'}</div></div></div>`;}).join('');
 }
 function renderTutti(){
-  const q=(document.getElementById('tuttiSearch').value||'').toLowerCase();
-  const fil=q?parts.filter(p=>p.nome.toLowerCase().includes(q)||p.cognome.toLowerCase().includes(q)||(p.cf||'').toLowerCase().includes(q)):parts;
+  const q=(document.getElementById('filterTutti').value||'').toLowerCase();
+  const fil=q?parts.filter(p=>p.nome?.toLowerCase().includes(q)||p.cognome?.toLowerCase().includes(q)||(p.cf||'').toLowerCase().includes(q)):parts;
   document.getElementById('listTutti').innerHTML=fil.map(p=>{
-    const e=(p.log||[]).filter(l=>l.tipo==='entrata').length; const u=(p.log||[]).filter(l=>l.tipo==='uscita').length; const inside=e>u;
-    const badge=e===0?`<span class="live-badge lb-mai">Non arr.</span>`:inside?`<span class="live-badge lb-in">DENTRO</span>`:`<span class="live-badge lb-out">USCITO</span>`;
-    const last=p.log&&p.log.length?p.log[p.log.length-1]:null;
-    return `<div class="live-item ${inside?'inside':'outside'}"><div class="live-dot ${inside?'ld-g':'ld-gray'}"></div><div class="live-info"><div class="live-name">${esc(p.cognome)} ${esc(p.nome)}</div><div class="live-detail">${p.cf||'—'}</div></div><div style="text-align:right">${badge}<div class="live-time">${last?last.ora:'—'}</div></div></div>`;
+    const e=(p.log||[]).filter(l=>l.tipo==='entrata').length;const u=(p.log||[]).filter(l=>l.tipo==='uscita').length;const inside=e>u;
+    const badge=e===0?'<span class="live-badge lb-mai">Non arr.</span>':inside?'<span class="live-badge lb-in">DENTRO</span>':'<span class="live-badge lb-out">USCITO</span>';
+    return`<div class="live-item ${inside?'inside':''}"><div class="live-dot ${inside?'ld-g':'ld-gray'}"></div><div class="live-info"><div class="live-name">${esc(p.cognome)} ${esc(p.nome)}</div><div class="live-detail">${p.cf||'—'}</div></div><div style="text-align:right">${badge}</div></div>`;
   }).join('');
 }
+document.getElementById('filterTutti').addEventListener('input',renderTutti);
 function renderLog(logs){
   document.getElementById('logBody').innerHTML=logs.slice(0,200).map(l=>`<tr><td class="mono">${l.ora||'—'}</td><td style="font-size:12px">${esc(l.nome||'—')}</td><td class="mono">${l.cf||'—'}</td><td class="${l.tipo==='entrata'?'td-in':'td-out'}">${l.tipo==='entrata'?'▶ Entrata':'◀ Uscita'}</td></tr>`).join('');
 }
-function switchTab(tab){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('tab-'+tab).classList.add('active');
-  if(tab==='tutti')renderTutti();
-}
-function updateTicker(msg){document.getElementById('tickerText').textContent=msg;}
-function playBeep(type){
-  // Vibrazione: entrata = 1 impulso lungo, uscita = 2 impulsi brevi, warn = 3 rapidissimi
-  try{
-    if(navigator.vibrate){
-      if(type==='success') navigator.vibrate(200);
-      else if(type==='exit') navigator.vibrate([100,80,100]);
-      else if(type==='warn') navigator.vibrate([60,40,60,40,60]);
-    }
-  }catch(e){}
-  // Beep audio
-  try{const ac=new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator();const g=ac.createGain();o.connect(g);g.connect(ac.destination);o.frequency.value=type==='success'?880:type==='exit'?440:220;g.gain.value=0.1;o.start();g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.3);o.stop(ac.currentTime+0.3);}catch(e){}
-}
 
-// ═══════════════════════════════════════════════════════
-// NUOVO PARTECIPANTE LAST MINUTE
-// ═══════════════════════════════════════════════════════
-
-window.toggleNuovoP = function(){
-  const panel = document.getElementById('nuovoPPanel');
-  const btn = document.getElementById('btnToggleNP');
-  const open = panel.style.display === 'none';
-  panel.style.display = open ? 'block' : 'none';
-  btn.textContent = open ? 'Chiudi' : 'Apri';
-};
-
-window.switchNPTab = function(tab, el){
-  document.querySelectorAll('.nuovop-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.nuovop-panel').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('np-tab-'+tab).classList.add('active');
-};
-
-// ── DECODIFICA CODICE FISCALE ITALIANO ─────────────────
-function decodeCF(cf){
-  cf = cf.toUpperCase().trim();
-  if(!/^[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]$/.test(cf)) return null;
-  try{
-    // Cognome: prime 3 consonanti o lettere
-    const cogConsonanti = cf.slice(0,3);
-    // Nome: lettere 4-6
-    const nomeLetters = cf.slice(3,6);
-    // Anno nascita
-    const annoShort = cf.slice(6,8);
-    const anno = parseInt(annoShort) <= (new Date().getFullYear()%100) ? 2000+parseInt(annoShort) : 1900+parseInt(annoShort);
-    // Mese
-    const mesiMap = {A:1,B:2,C:3,D:4,E:5,H:6,L:7,M:8,P:9,R:10,S:11,T:12};
-    const mese = mesiMap[cf[8]] || 0;
-    // Giorno e sesso
-    const giorno = parseInt(cf.slice(9,11));
-    const sesso = giorno > 40 ? 'F' : 'M';
-    const giornoReale = sesso === 'F' ? giorno - 40 : giorno;
-    return { cf, anno, mese, giorno:giornoReale, sesso, valido:true };
-  }catch(e){ return null; }
-}
-
-// Auto-compila form da CF
-document.getElementById('npCF').addEventListener('input', function(){
-  const cf = this.value.toUpperCase();
-  this.value = cf;
-  const decoded = decodeCF(cf);
-  if(decoded && cf.length === 16){
-    // Evidenzia CF valido
-    this.classList.add('auto');
-    // Mostra info decodificate sotto (tab OCR)
-    showCFDecoded(decoded);
-  } else {
-    this.classList.remove('auto');
-    document.getElementById('cfDecoded').style.display = 'none';
-  }
+// ── INFO RESET ─────────────────────────────────────────
+document.getElementById('btnInfoReset').addEventListener('click',()=>{
+  alert('Per resettare i log:\nFirebase Console → Firestore → eventi/'+evId+'/logs\nSeleziona tutti i documenti e cancellali manualmente.');
 });
 
-function showCFDecoded(d){
-  const el = document.getElementById('cfDecoded');
-  if(!el) return;
-  el.style.display = 'block';
-  el.innerHTML = `<strong style="color:var(--success)">✓ CF valido</strong> · 
-    Nato/a il ${d.giorno}/${d.mese}/${d.anno} · 
-    Sesso: ${d.sesso === 'M' ? '♂ Maschio' : '♀ Femmina'}`;
-}
+// ── NUOVO PARTECIPANTE ────────────────────────────────
+const btnNP=document.getElementById('btnNP');
+const npPanel=document.getElementById('npPanel');
+btnNP.addEventListener('click',()=>{
+  const open=npPanel.style.display==='none'||npPanel.style.display==='';
+  npPanel.style.display=open?'block':'none';
+  btnNP.textContent=open?'Chiudi':'Apri';
+});
 
-// ── OCR FOTO DOCUMENTO ──────────────────────────────────
-document.getElementById('ocrInput').addEventListener('change', async function(){
-  const file = this.files[0];
-  if(!file) return;
-  
-  // Mostra anteprima
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    document.getElementById('ocrImg').src = e.target.result;
-    document.getElementById('ocrPreview').style.display = 'block';
-    document.getElementById('ocrStatus').textContent = '🔍 Analisi immagine in corso...';
-    
-    // Estrai CF con regex dall'immagine via canvas
-    const result = await extractCFFromImage(e.target.result);
-    if(result){
-      document.getElementById('ocrStatus').textContent = `✓ Codice fiscale trovato: ${result}`;
-      document.getElementById('ocrStatus').style.color = 'var(--success)';
-      // Compila automaticamente il campo CF
-      document.getElementById('npCF').value = result;
-      document.getElementById('npCF').classList.add('auto');
-      const decoded = decodeCF(result);
-      if(decoded) showCFDecoded(decoded);
-      // Vai al tab manuale per completare
-      document.querySelectorAll('.nuovop-tab').forEach(t=>t.classList.remove('active'));
-      document.querySelectorAll('.nuovop-panel').forEach(p=>p.classList.remove('active'));
-      document.querySelectorAll('.nuovop-tab')[1].classList.add('active');
-      document.getElementById('np-tab-manual').classList.add('active');
-      document.getElementById('npNome').focus();
-    } else {
-      document.getElementById('ocrStatus').textContent = '⚠️ CF non rilevato. Inseriscilo manualmente nel tab "Inserimento manuale".';
-      document.getElementById('ocrStatus').style.color = 'var(--warn)';
-      // Vai al tab manuale
-      document.querySelectorAll('.nuovop-tab').forEach(t=>t.classList.remove('active'));
-      document.querySelectorAll('.nuovop-panel').forEach(p=>p.classList.remove('active'));
-      document.querySelectorAll('.nuovop-tab')[1].classList.add('active');
-      document.getElementById('np-tab-manual').classList.add('active');
-    }
+// Tab nuovo partecipante
+document.querySelectorAll('.np-tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.np-tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.np-content').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('nptab-'+t.dataset.tab).classList.add('active');
+  });
+});
+
+// Auto-decodifica CF
+document.getElementById('npCF').addEventListener('input',function(){
+  this.value=this.value.toUpperCase();
+  const cf=this.value;
+  const info=document.getElementById('npCFInfo');
+  if(cf.length===16&&/^[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]$/.test(cf)){
+    const mesi={A:1,B:2,C:3,D:4,E:5,H:6,L:7,M:8,P:9,R:10,S:11,T:12};
+    const as=parseInt(cf.slice(6,8));
+    const anno=as<=(new Date().getFullYear()%100)?2000+as:1900+as;
+    const mese=mesi[cf[8]]||0;
+    const g=parseInt(cf.slice(9,11));
+    const sesso=g>40?'F':'M';
+    info.textContent=`✓ CF valido · ${sesso==='M'?'♂ M':'♀ F'} · ${g>40?g-40:g}/${mese}/${anno}`;
+    info.style.color='var(--success)';
+  }else if(cf.length>5){
+    info.textContent=cf.length<16?`${cf.length}/16 caratteri`:'⚠️ Formato non valido';
+    info.style.color='var(--text3)';
+  }else{info.textContent='';}
+});
+
+// OCR foto
+document.getElementById('ocrFile').addEventListener('change',async function(){
+  const file=this.files[0]; if(!file) return;
+  const status=document.getElementById('ocrStatus');
+  status.textContent='🔍 Analisi in corso...'; status.style.color='var(--text3)';
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    try{
+      const img=new Image(); img.src=e.target.result;
+      await new Promise(r=>img.onload=r);
+      const canvas=document.createElement('canvas');
+      const scale=Math.min(1,1200/img.width);
+      canvas.width=img.width*scale; canvas.height=img.height*scale;
+      const ctx=canvas.getContext('2d');
+      ctx.filter='contrast(1.5) brightness(1.1)';
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      if(typeof Tesseract!=='undefined'){
+        const {data:{text}}=await Tesseract.recognize(canvas.toDataURL(),'ita',{tessedit_char_whitelist:'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'});
+        const match=text.replace(/[\s\n]/g,'').match(/[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]/);
+        if(match){
+          document.getElementById('npCF').value=match[0];
+          document.getElementById('npCF').dispatchEvent(new Event('input'));
+          status.textContent='✓ CF trovato: '+match[0]; status.style.color='var(--success)';
+          document.querySelectorAll('.np-tab')[0].click();
+        }else{
+          status.textContent='⚠️ CF non trovato — inseriscilo manualmente'; status.style.color='var(--warn)';
+          document.querySelectorAll('.np-tab')[0].click();
+        }
+      }else{status.textContent='OCR non disponibile — inserisci il CF manualmente';document.querySelectorAll('.np-tab')[0].click();}
+    }catch(err){status.textContent='Errore OCR: '+err.message;}
   };
   reader.readAsDataURL(file);
 });
 
-async function extractCFFromImage(dataUrl){
-  return new Promise(resolve => {
-    const img = new Image();
-    img.onload = () => {
-      // Crea canvas e ottimizza per OCR
-      const canvas = document.createElement('canvas');
-      const maxW = 1200;
-      const scale = Math.min(1, maxW / img.width);
-      canvas.width = img.width * scale;
-      canvas.height = img.height * scale;
-      const ctx2 = canvas.getContext('2d');
-      
-      // Aumenta contrasto per OCR
-      ctx2.filter = 'contrast(1.5) brightness(1.1)';
-      ctx2.drawImage(img, 0, 0, canvas.width, canvas.height);
-      
-      // Converti in bianco/nero per OCR migliore
-      const imageData = ctx2.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-      for(let i=0; i<data.length; i+=4){
-        const avg = (data[i] + data[i+1] + data[i+2]) / 3;
-        const bw = avg > 128 ? 255 : 0;
-        data[i] = data[i+1] = data[i+2] = bw;
-      }
-      ctx2.putImageData(imageData, 0, 0);
-      
-      // Usa Tesseract.js se disponibile, altrimenti regex sul base64
-      // Prova prima con pattern regex sull'immagine convertita
-      const base64 = canvas.toDataURL('image/png');
-      
-      // Tenta OCR via Tesseract (caricato dinamicamente)
-      if(typeof Tesseract !== 'undefined'){
-        Tesseract.recognize(base64, 'ita', {
-          tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
-        }).then(({data:{text}}) => {
-          const cfMatch = text.replace(/[\s
-]/g,'').match(/[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]/);
-          resolve(cfMatch ? cfMatch[0] : null);
-        }).catch(() => resolve(null));
-      } else {
-        // Tesseract non disponibile — passa a inserimento manuale
-        resolve(null);
-      }
-    };
-    img.src = dataUrl;
-  });
-}
-
-// ── SALVA NUOVO PARTECIPANTE ────────────────────────────
-window.salvaPartecipanteNuovo = async function(){
-  const cf = document.getElementById('npCF').value.trim().toUpperCase();
-  const nome = document.getElementById('npNome').value.trim();
-  const cognome = document.getElementById('npCognome').value.trim();
-  const professione = document.getElementById('npProfessione').value.trim();
-  const alertEl = document.getElementById('npAlert');
-  
-  alertEl.style.display = 'none';
-  
-  if(!cf){ showNPAlert('Inserisci il codice fiscale.','error'); return; }
-  if(!nome){ showNPAlert('Inserisci il nome.','error'); return; }
-  if(!cognome){ showNPAlert('Inserisci il cognome.','error'); return; }
-  if(!evId){ showNPAlert('Nessun evento selezionato.','error'); return; }
-  
-  const btnSalva = document.querySelector('[id="btnSalvaNuovoP"]');
-  btnSalva.disabled = true;
-  btnSalva.innerHTML = '<span class="spinner"></span> Salvataggio...';
-  
+// Salva nuovo partecipante
+document.getElementById('btnSalvaNP').addEventListener('click',async()=>{
+  const cf=document.getElementById('npCF').value.trim().toUpperCase();
+  const nome=document.getElementById('npNome').value.trim();
+  const cognome=document.getElementById('npCognome').value.trim();
+  const prof=document.getElementById('npProf').value.trim();
+  const msg=document.getElementById('npMsg');
+  msg.style.display='none';
+  if(!cf){showNPMsg('Inserisci il codice fiscale','error');return;}
+  if(!nome){showNPMsg('Inserisci il nome','error');return;}
+  if(!cognome){showNPMsg('Inserisci il cognome','error');return;}
+  if(!evId){showNPMsg('Nessun evento selezionato','error');return;}
+  if(parts.find(p=>p.cf===cf)){showNPMsg('CF già presente — cercalo nella ricerca manuale','warn');return;}
+  const btn=document.getElementById('btnSalvaNP');
+  btn.disabled=true;btn.textContent='Salvataggio...';
   try{
-    // Controlla se CF già esiste
-    const existing = parts.find(p => p.cf === cf);
-    if(existing){
-      showNPAlert(`⚠️ CF già presente: ${existing.cognome} ${existing.nome}. Registra entrata dalla ricerca manuale.`,'warn');
-      btnSalva.disabled = false; btnSalva.innerHTML = '✓ Salva e registra entrata';
-      return;
-    }
-    
-    // Genera ID progressivo
-    const maxId = parts.reduce((max, p) => {
-      const n = parseInt((p.id||'P0000').slice(1));
-      return n > max ? n : max;
-    }, 0);
-    const newId = 'P' + String(maxId + 1).padStart(4,'0');
-    
-    // Genera QR code
-    const qr = await genQR(`ECM|${newId}|${cf}|${cognome}|${nome}`);
-    
-    // Salva su Firebase
-    const nuovoP = {
-      id: newId, cf, cognome, nome, professione: professione||'—',
-      cfValido: /^[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]$/.test(cf),
-      duplicato: false, qr, lastMinute: true,
-      aggiuntoAt: new Date().toISOString(), eventId: evId
-    };
-    
-    await setDoc(doc(db,'eventi',evId,'partecipanti',newId), {
-      ...nuovoP, updatedAt: serverTimestamp()
+    try{await signInAnonymously(auth);}catch(e){}
+    const maxId=parts.reduce((max,p)=>Math.max(max,parseInt((p.id||'P0000').slice(1))),0);
+    const newId='P'+String(maxId+1).padStart(4,'0');
+    const qr=await new Promise(res=>{
+      const div=document.createElement('div');div.style.cssText='position:absolute;left:-9999px';document.body.appendChild(div);
+      new QRCode(div,{text:`ECM|${newId}|${cf}|${cognome}|${nome}`,width:200,height:200});
+      setTimeout(()=>{const c=div.querySelector('canvas');res(c?c.toDataURL():'');document.body.removeChild(div);},80);
     });
-    
-    // Aggiorna contatore evento
-    const evSnap = await getDoc(doc(db,'eventi',evId));
-    if(evSnap.exists()){
-      await setDoc(doc(db,'eventi',evId), {
-        totPartecipanti: (evSnap.data().totPartecipanti||0) + 1
-      }, {merge:true});
-    }
-    
-    // Aggiunge alla lista locale
-    parts.push({...nuovoP, log:[]});
-    
-    // Registra entrata automaticamente
-    await registerAccess(nuovoP);
-    
-    showNPAlert(`✓ ${nome} ${cognome} aggiunto e registrato in entrata!`,'success');
-    
-    // Reset form dopo 2 secondi
-    setTimeout(resetNuovoP, 2000);
-    
-  }catch(err){
-    console.error(err);
-    showNPAlert('Errore: '+err.message,'error');
-  }finally{
-    btnSalva.disabled = false;
-    btnSalva.innerHTML = '✓ Salva e registra entrata';
-  }
-};
-
-function showNPAlert(msg, type){
-  const el = document.getElementById('npAlert');
-  el.textContent = msg;
-  el.style.display = 'block';
-  el.style.color = type==='success'?'var(--success)':type==='warn'?'var(--warn)':'var(--danger)';
-  el.style.background = type==='success'?'var(--success-light)':type==='warn'?'var(--warn-light)':'var(--danger-light)';
-  el.style.padding = '8px 12px';
-  el.style.borderRadius = 'var(--radius)';
-  el.style.border = `1px solid ${type==='success'?'rgba(26,122,74,.2)':type==='warn'?'rgba(176,122,16,.2)':'rgba(193,59,42,.2)'}`;
-}
-
-window.resetNuovoP = function(){
-  document.getElementById('npCF').value = '';
-  document.getElementById('npNome').value = '';
-  document.getElementById('npCognome').value = '';
-  document.getElementById('npProfessione').value = '';
-  document.getElementById('npCF').classList.remove('auto');
-  document.getElementById('cfDecoded').style.display = 'none';
-  document.getElementById('ocrPreview').style.display = 'none';
-  document.getElementById('ocrStatus').textContent = '';
-  document.getElementById('npAlert').style.display = 'none';
-  document.getElementById('ocrInput').value = '';
-};
-
-// Funzione helper per generare QR
-function genQR(text){
-  return new Promise(resolve=>{
-    const div=document.createElement('div');
-    div.style.cssText='position:absolute;left:-9999px;top:-9999px';
-    document.body.appendChild(div);
-    new QRCode(div,{text,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});
+    const nuovoP={id:newId,cf,nome,cognome,professione:prof||'—',cfValido:/^[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]$/.test(cf),duplicato:false,qr,lastMinute:true,aggiuntoAt:new Date().toISOString(),eventId:evId};
+    await setDoc(doc(db,'eventi',evId,'partecipanti',newId),{...nuovoP,updatedAt:serverTimestamp()});
+    const evSnap=await getDoc(doc(db,'eventi',evId));
+    if(evSnap.exists())await setDoc(doc(db,'eventi',evId),{totPartecipanti:(evSnap.data().totPartecipanti||0)+1},{merge:true});
+    parts.push({...nuovoP,log:[]});
+    document.getElementById('sTot').textContent=parts.length;
+    await registerAccess({...nuovoP,log:[]});
+    showNPMsg(`✓ ${nome} ${cognome} aggiunto e registrato!`,'success');
     setTimeout(()=>{
-      const c=div.querySelector('canvas');
-      const url=c?c.toDataURL('image/png'):'';
-      document.body.removeChild(div);
-      resolve(url);
-    },60);
-  });
+      document.getElementById('npCF').value='';document.getElementById('npNome').value='';
+      document.getElementById('npCognome').value='';document.getElementById('npProf').value='';
+      document.getElementById('npCFInfo').textContent='';msg.style.display='none';
+    },2000);
+  }catch(err){showNPMsg('Errore: '+err.message,'error');}
+  finally{btn.disabled=false;btn.textContent='✓ Salva e registra entrata';}
+});
+
+document.getElementById('btnResetNP').addEventListener('click',()=>{
+  document.getElementById('npCF').value='';document.getElementById('npNome').value='';
+  document.getElementById('npCognome').value='';document.getElementById('npProf').value='';
+  document.getElementById('npCFInfo').textContent='';document.getElementById('npMsg').style.display='none';
+  document.getElementById('ocrStatus').textContent='';
+});
+
+function showNPMsg(text,type){
+  const el=document.getElementById('npMsg');
+  el.textContent=text;el.style.display='block';
+  el.style.background=type==='success'?'var(--sl)':type==='warn'?'var(--wl)':'var(--dl)';
+  el.style.color=type==='success'?'var(--success)':type==='warn'?'var(--warn)':'var(--danger)';
+  el.style.border=`1px solid ${type==='success'?'rgba(26,122,74,.2)':type==='warn'?'rgba(176,122,16,.2)':'rgba(193,59,42,.2)'}`;
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-</script>
-<style>
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid #2A2E45;display:flex;align-items:stretch;z-index:200;padding-bottom:env(safe-area-inset-bottom)}
-.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 4px;text-decoration:none;color:#4A5070;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;letter-spacing:.02em;transition:all .2s;cursor:pointer;border:none;background:none;-webkit-tap-highlight-color:transparent}
-.bn-item:hover{color:#8B93B8;background:rgba(255,255,255,.03)}
-.bn-item.active{color:#4D6EFF}
-.bn-item.active .bn-icon{background:rgba(77,110,255,.15);border-radius:10px}
-.bn-icon{width:36px;height:28px;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .2s}
-.bn-label{font-size:10px;line-height:1}
-body{padding-bottom:70px!important}
-</style>
-<nav class="bottom-nav">
-  <a href="ecm-eventi.html" class="bn-item"><div class="bn-icon">📋</div><div class="bn-label">Eventi</div></a>
-  <a href="ecm-home.html" class="bn-item">
-    <div class="bn-icon">🏠</div><div class="bn-label">Home</div>
-  </a>
-  <a href="ecm-blocco1.html" class="bn-item">
-    <div class="bn-icon">⚙️</div><div class="bn-label">Setup</div>
-  </a>
-  <a href="ecm-blocco2.html" class="bn-item">
-    <div class="bn-icon">🪪</div><div class="bn-label">Badge</div>
-  </a>
-  <a href="ecm-blocco3.html" class="bn-item active">
-    <div class="bn-icon">📷</div><div class="bn-label">Accessi</div>
-  </a>
-  <a href="ecm-blocco4.html" class="bn-item">
-    <div class="bn-icon">📊</div><div class="bn-label">Report</div>
-  </a>
-  <a href="ecm-connetti.html" class="bn-item">
-    <div class="bn-icon">📲</div><div class="bn-label">Tablet</div>
-  </a>
-  <a href="ecm-blocco5.html" class="bn-item"><div class="bn-icon">📝</div><div class="bn-label">Survey</div></a>
-  <a href="ecm-blocco6.html" class="bn-item"><div class="bn-icon">✍️</div><div class="bn-label">Iscrizioni</div></a>
-  <a href="ecm-blocco7.html" class="bn-item"><div class="bn-icon">📋</div><div class="bn-label">Quiz ECM</div></a>
-  <a href="ecm-admin.html" class="bn-item" id="adminNavItem" style="display:none">
-    <div class="bn-icon">👑</div><div class="bn-label">Admin</div>
-  </a>
-</nav>
-<script type="module">
-import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-const ADMIN_EMAIL = "martinsosem@gmail.com";
-const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
-const app2=getApps().length?getApps()[0]:initializeApp(FB);
-onAuthStateChanged(getAuth(app2), user=>{
-  if(user && user.email===ADMIN_EMAIL){
-    const el=document.getElementById("adminNavItem");
-    if(el){ el.style.display="flex"; }
-  }
-});
-</script>
-<script>
-// Bridge sicuro per bottoni pannello nuovo partecipante
-document.addEventListener('DOMContentLoaded', function(){
-  // Retry ogni 200ms finché i bottoni non sono pronti
-  let attempts = 0;
-  const init = setInterval(()=>{
-    attempts++;
-    const btnToggle = document.getElementById('btnToggleNP');
-    if(btnToggle && !btnToggle._init){
-      btnToggle._init = true;
-      btnToggle.addEventListener('click', function(){
-        const panel = document.getElementById('nuovoPPanel');
-        const open = panel.style.display === 'none';
-        panel.style.display = open ? 'block' : 'none';
-        btnToggle.textContent = open ? 'Chiudi' : 'Apri';
-      });
-      // Tab OCR/Manuale
-      document.querySelectorAll('[data-nptab]').forEach(function(btn){
-        btn.addEventListener('click', function(){
-          const tab = btn.dataset.nptab;
-          document.querySelectorAll('.nuovop-tab').forEach(t=>t.classList.remove('active'));
-          document.querySelectorAll('.nuovop-panel').forEach(p=>p.classList.remove('active'));
-          btn.classList.add('active');
-          const panel = document.getElementById('np-tab-'+tab);
-          if(panel) panel.classList.add('active');
-        });
-      });
-      // Salva
-      const btnSalva = document.getElementById('btnSalvaNuovoP');
-      if(btnSalva) btnSalva.addEventListener('click', function(){
-        if(window.salvaPartecipanteNuovo) window.salvaPartecipanteNuovo();
-      });
-      // Reset
-      const btnReset = document.getElementById('btnResetNuovoP');
-      if(btnReset) btnReset.addEventListener('click', function(){
-        if(window.resetNuovoP) window.resetNuovoP();
-      });
-      clearInterval(init);
-    }
-    if(attempts > 50) clearInterval(init); // Max 10 secondi
-  }, 200);
-});
 </script>
 </body>
 </html>
