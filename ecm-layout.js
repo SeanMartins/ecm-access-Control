@@ -54,14 +54,12 @@ function renderSidebar(activeId) {
       ${ICONS.chevron}
     </div>
     <div class="sidebar-logo">
-      <div class="logo-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-        </svg>
+      <div class="logo-icon" style="background:transparent;padding:0;overflow:hidden">
+        <img src="logo.png" alt="ECM" style="width:36px;height:36px;object-fit:cover;border-radius:10px">
       </div>
       <div class="logo-text">
-        ECM Access
-        <span class="logo-sub">Control System</span>
+        Multimedia Meeting
+        <span class="logo-sub">ECM Access Control</span>
       </div>
     </div>
     <nav class="sidebar-nav" id="sidebarNav"></nav>
