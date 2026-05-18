@@ -411,8 +411,9 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 <!-- Sidebar init -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  applyPageTranslations(); renderSidebar('survey');
-  renderVersionFooter();
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof renderSidebar === 'function') renderSidebar('survey');
+  if (typeof renderVersionFooter === 'function') renderVersionFooter();
 });
 </script>
 

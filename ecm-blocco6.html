@@ -593,8 +593,9 @@ loadEventi();
 <!-- Sidebar init -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  applyPageTranslations(); renderSidebar('register');
-  renderVersionFooter();
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof renderSidebar === 'function') renderSidebar('register');
+  if (typeof renderVersionFooter === 'function') renderVersionFooter();
 });
 </script>
 

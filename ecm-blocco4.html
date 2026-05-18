@@ -411,8 +411,9 @@ onAuthStateChanged(getAuth(app2), user=>{
 <!-- Sidebar init -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  applyPageTranslations(); renderSidebar('report');
-  renderVersionFooter();
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof renderSidebar === 'function') renderSidebar('report');
+  if (typeof renderVersionFooter === 'function') renderVersionFooter();
 });
 </script>
 

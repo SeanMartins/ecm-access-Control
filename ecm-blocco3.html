@@ -746,8 +746,9 @@ initFirebase();
 <!-- Sidebar init -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  applyPageTranslations(); renderSidebar('scanner');
-  renderVersionFooter();
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof renderSidebar === 'function') renderSidebar('scanner');
+  if (typeof renderVersionFooter === 'function') renderVersionFooter();
 });
 </script>
 
