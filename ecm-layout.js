@@ -2,7 +2,7 @@
 //  ECM ACCESS CONTROL — Shared Sidebar v2.0
 // ═══════════════════════════════════════════════════════
 
-const ECM_VERSION = 'v2.0.0';
+const ECM_VERSION = 'v2.1.0';
 
 // Carica i18n (già incluso tramite ecm-i18n.js)
 function _t(key){ return typeof t === 'function' ? t(key) : key; }
