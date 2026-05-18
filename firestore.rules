@@ -9,19 +9,18 @@ service cloud.firestore {
       return request.auth != null && request.auth.token.firebase.sign_in_provider == 'google.com';
     }
 
-    // Utenti operatori
     match /utenti/{uid} {
       allow read: if true;
       allow write: if isGoogleAuth();
     }
 
     match /eventi/{eventId} {
-      allow read: if isAuth() || true; // lettura pubblica per registrazione e survey
+      allow read: if true;
       allow write: if isAuth() && eventId.matches('evt_[0-9]+');
 
       match /partecipanti/{partId} {
         allow read: if true;
-        allow create: if true; // registrazione autonoma pubblica
+        allow create: if true;
         allow update: if isAuth() || partId.matches('P[0-9]+');
         allow delete: if false;
       }
@@ -35,18 +34,32 @@ service cloud.firestore {
         allow delete: if false;
       }
 
-      // Survey config (admin/operatori)
       match /survey/config {
-        allow read: if true; // pubblico per la pagina risposta
+        allow read: if true;
         allow write: if isAuth();
       }
-
-      // Risposte survey (chiunque può rispondere)
-      match /survey/risposte/lista/{rispostaId} {
+      match /survey/risposte/lista/{rId} {
         allow read: if isAuth();
-        allow create: if true; // pagina pubblica
+        allow create: if true;
         allow update: if false;
         allow delete: if false;
+      }
+
+      match /questionario/config {
+        allow read: if true;
+        allow write: if isAuth();
+      }
+      match /questionario/risposte/lista/{rId} {
+        allow read: if isAuth();
+        allow create: if true;
+        allow update: if false;
+        allow delete: if false;
+      }
+
+      // Wildcard per qualsiasi altra sub-collection
+      match /{subCol}/{docId} {
+        allow read: if true;
+        allow write: if isAuth();
       }
     }
   }

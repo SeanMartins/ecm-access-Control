@@ -8,7 +8,7 @@
 <title>ECM — Setup Evento</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#F5F3EE;--surface:#FFF;--surface2:#F0EDE6;--border:#E0DAD0;--border2:#C8C0B4;--text:#1A1714;--text2:#6B6560;--text3:#9B948C;--accent:#2B4EFF;--accent-light:#EEF1FF;--accent2:#FF6B35;--success:#1A7A4A;--success-light:#E8F5EE;--danger:#C13B2A;--danger-light:#FDEEE9;--warn:#B07A10;--warn-light:#FDF5E0;--radius:10px;--radius-lg:16px;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06)}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
@@ -106,15 +106,34 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
   .page-title{font-size:22px}
 }
 </style>
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-layout.js"></script>
 </head>
 <body>
-<header>
-  <div class="logo"><span class="logo-dot"></span>ECM Access Control</div>
-  <div style="display:flex;align-items:center;gap:10px">
-    <div class="fb-badge"><div class="fb-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
-    <div class="nav-pills"><div class="nav-pill active">① Setup</div><div class="nav-pill">② Badge</div><div class="nav-pill">③ Accesso</div><div class="nav-pill">④ Report</div></div>
+
+<!-- OVERLAY MOBILE -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<!-- SIDEBAR -->
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+
+<!-- MAIN -->
+<div class="ecm-main">
+  
+<div class="ecm-topbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="mobile-menu-btn" id="mobileMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <div class="topbar-title">Setup evento</div>
   </div>
-</header>
+  <div class="topbar-right">
+    <div class="topbar-badge">
+      <div class="topbar-dot" id="fbDot"></div>
+      <span id="fbStatus">Connessione...</span>
+    </div>
+    <div id="userBarSlot"></div>
+  </div>
+</div>
+
+  <div class="ecm-content">
 <main>
   <div class="page-title">Setup evento</div>
   <div class="page-sub" id="page-sub-text">Configura l'evento ECM e importa i partecipanti — sincronizzato su tutti i dispositivi via Firebase</div>
@@ -417,34 +436,9 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 .bn-item.active .bn-icon{background:rgba(77,110,255,.15);border-radius:10px}
 .bn-icon{width:36px;height:28px;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .2s}
 .bn-label{font-size:10px;line-height:1}
-body{padding-bottom:70px!important}
+body{font-family:'Inter','DM Sans',system-ui,sans-serif}
 </style>
-<nav class="bottom-nav">
-  <a href="ecm-home.html" class="bn-item">
-    <div class="bn-icon">🏠</div><div class="bn-label">Home</div>
-  </a>
-  <a href="ecm-blocco1.html" class="bn-item active">
-    <div class="bn-icon">⚙️</div><div class="bn-label">Setup</div>
-  </a>
-  <a href="ecm-blocco2.html" class="bn-item">
-    <div class="bn-icon">🪪</div><div class="bn-label">Badge</div>
-  </a>
-  <a href="ecm-blocco3.html" class="bn-item">
-    <div class="bn-icon">📷</div><div class="bn-label">Accessi</div>
-  </a>
-  <a href="ecm-blocco4.html" class="bn-item">
-    <div class="bn-icon">📊</div><div class="bn-label">Report</div>
-  </a>
-  <a href="ecm-connetti.html" class="bn-item">
-    <div class="bn-icon">📲</div><div class="bn-label">Tablet</div>
-  </a>
-  <a href="ecm-blocco5.html" class="bn-item"><div class="bn-icon">📝</div><div class="bn-label">Survey</div></a>
-  <a href="ecm-blocco6.html" class="bn-item"><div class="bn-icon">✍️</div><div class="bn-label">Iscrizioni</div></a>
-  <a href="ecm-blocco7.html" class="bn-item"><div class="bn-icon">📋</div><div class="bn-label">Quiz ECM</div></a>
-  <a href="ecm-admin.html" class="bn-item" id="adminNavItem" style="display:none">
-    <div class="bn-icon">👑</div><div class="bn-label">Admin</div>
-  </a>
-</nav>
+
 <script type="module">
 import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -458,5 +452,18 @@ onAuthStateChanged(getAuth(app2), user=>{
   }
 });
 </script>
+  </div>
+  <div class="ecm-version-footer" id="ecmVersionFooter"></div>
+</div>
+
+<!-- Sidebar init -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  renderSidebar('setup');
+  renderVersionFooter();
+});
+</script>
+
+
 </body>
 </html>

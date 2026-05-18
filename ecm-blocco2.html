@@ -8,10 +8,10 @@
 <title>ECM — Generazione Badge</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#F5F3EE;--surface:#FFF;--surface2:#F0EDE6;--border:#E0DAD0;--border2:#C8C0B4;--text:#1A1714;--text2:#6B6560;--text3:#9B948C;--accent:#2B4EFF;--accent-light:#EEF1FF;--accent2:#FF6B35;--success:#1A7A4A;--success-light:#E8F5EE;--danger:#C13B2A;--danger-light:#FDEEE9;--warn:#B07A10;--radius:10px;--radius-lg:16px;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06)}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6;padding-bottom:80px}
+body{font-family:'Inter','DM Sans',system-ui,sans-serif}
 header{background:var(--text);color:white;padding:0 22px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .logo{font-size:14px;font-weight:600;letter-spacing:.04em;display:flex;align-items:center;gap:8px}
 .logo-dot{width:8px;height:8px;border-radius:50%;background:#FF6B35}
@@ -19,7 +19,7 @@ header{background:var(--text);color:white;padding:0 22px;height:56px;display:fle
 .fb-dot{width:7px;height:7px;border-radius:50%;background:#888}
 .fb-dot.ok{background:#22C97A;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-main{max-width:960px;margin:0 auto;padding:32px 20px 20px}
+main{max-width:1100px;margin:0;padding:32px 20px 20px}
 .page-title{font-size:26px;font-weight:600;letter-spacing:-.02em;margin-bottom:4px}
 .page-sub{color:var(--text2);font-size:14px;margin-bottom:24px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;margin-bottom:18px;box-shadow:var(--shadow)}
@@ -71,14 +71,7 @@ input[type=color]{padding:4px 8px;height:40px;cursor:pointer}
 .spinner{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .alert-no{padding:12px 16px;border-radius:var(--radius);background:var(--danger-light);color:var(--danger);border:1px solid rgba(193,59,42,.25);font-size:13px;margin-bottom:16px}
-/* NAVBAR */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#13161F;border-top:1px solid #2A2E45;display:flex;align-items:stretch;z-index:200;padding-bottom:env(safe-area-inset-bottom)}
-.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 4px;text-decoration:none;color:#4A5070;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;transition:all .2s;border:none;background:none;-webkit-tap-highlight-color:transparent}
-.bn-item:hover{color:#8B93B8;background:rgba(255,255,255,.03)}
-.bn-item.active{color:#4D6EFF}
-.bn-item.active .bn-icon{background:rgba(77,110,255,.15);border-radius:10px}
-.bn-icon{width:36px;height:28px;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .2s}
-.bn-label{font-size:10px;line-height:1}
+
 @media print{
   header,footer,.card:not(.print-card),.search-bar,.preview-actions,.btn,.stats-row,.page-title,.page-sub,#settingsCard,.bottom-nav{display:none!important}
   body{background:white!important;padding-bottom:0!important}
@@ -107,17 +100,34 @@ input[type=color]{padding:4px 8px;height:40px;cursor:pointer}
   .page-title{font-size:22px}
 }
 </style>
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-layout.js"></script>
 </head>
 <body>
-<header>
-  <div class="logo"><span class="logo-dot"></span>ECM Access Control</div>
-  <div style="display:flex;align-items:center;gap:10px">
-    <div class="fb-badge"><div class="fb-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
-    <span style="font-size:12px;color:rgba(255,255,255,.5)">Badge: <strong style="color:rgba(255,255,255,.8)" id="headerGen">0</strong>/<strong style="color:rgba(255,255,255,.8)" id="headerTot">0</strong></span>
+
+<!-- OVERLAY MOBILE -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<!-- SIDEBAR -->
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+
+<!-- MAIN -->
+<div class="ecm-main">
+  
+<div class="ecm-topbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="mobile-menu-btn" id="mobileMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <div class="topbar-title">Generazione badge</div>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-badge">
+      <div class="topbar-dot" id="fbDot"></div>
+      <span id="fbStatus">Connessione...</span>
+    </div>
     <div id="userBarSlot"></div>
   </div>
-</header>
+</div>
 
+  <div class="ecm-content">
 <main>
   <div class="page-title">Generazione badge</div>
   <div class="page-sub">QR code univoci salvati su Firebase — disponibili su tutti i dispositivi connessi</div>
@@ -188,18 +198,7 @@ input[type=color]{padding:4px 8px;height:40px;cursor:pointer}
 </main>
 
 <!-- NAVBAR -->
-<nav class="bottom-nav">
-  <a href="ecm-eventi.html" class="bn-item"><div class="bn-icon">📋</div><div class="bn-label">Eventi</div></a>
-  <a href="ecm-home.html" class="bn-item"><div class="bn-icon">🏠</div><div class="bn-label">Home</div></a>
-  <a href="ecm-blocco1.html" class="bn-item"><div class="bn-icon">⚙️</div><div class="bn-label">Setup</div></a>
-  <a href="ecm-blocco2.html" class="bn-item active"><div class="bn-icon">🪪</div><div class="bn-label">Badge</div></a>
-  <a href="ecm-blocco3.html" class="bn-item"><div class="bn-icon">📷</div><div class="bn-label">Accessi</div></a>
-  <a href="ecm-blocco4.html" class="bn-item"><div class="bn-icon">📊</div><div class="bn-label">Report</div></a>
-  <a href="ecm-connetti.html" class="bn-item"><div class="bn-icon">📲</div><div class="bn-label">Tablet</div></a>
-  <a href="ecm-blocco5.html" class="bn-item"><div class="bn-icon">📝</div><div class="bn-label">Survey</div></a>
-  <a href="ecm-blocco6.html" class="bn-item"><div class="bn-icon">✍️</div><div class="bn-label">Iscrizioni</div></a>
-  <a href="ecm-admin.html" class="bn-item" id="adminNavItem" style="display:none"><div class="bn-icon">👑</div><div class="bn-label">Admin</div></a>
-</nav>
+
 
 <script type="module">
 import { requireAuth, injectUserBar, requireRole } from './ecm-auth.js';
@@ -397,5 +396,18 @@ function printSingle(id){
 }
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 </script>
+  </div>
+  <div class="ecm-version-footer" id="ecmVersionFooter"></div>
+</div>
+
+<!-- Sidebar init -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  renderSidebar('badge');
+  renderVersionFooter();
+});
+</script>
+
+
 </body>
 </html>

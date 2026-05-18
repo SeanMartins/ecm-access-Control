@@ -9,10 +9,10 @@
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#F5F3EE;--surface:#FFF;--surface2:#F0EDE6;--border:#E0DAD0;--border2:#C8C0B4;--text:#1A1714;--text2:#6B6560;--text3:#9B948C;--accent:#2B4EFF;--accent-light:#EEF1FF;--success:#1A7A4A;--sl:rgba(26,122,74,.12);--danger:#C13B2A;--dl:rgba(193,59,42,.12);--warn:#B07A10;--wl:rgba(176,122,16,.12);--radius:10px;--radius-lg:16px;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06)}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;padding-bottom:80px}
+body{font-family:'Inter','DM Sans',system-ui,sans-serif}
 header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 18px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
 .logo{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
 .logo-dot{width:8px;height:8px;border-radius:50%;background:#FF6B35}
@@ -20,7 +20,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .fb-dot{width:7px;height:7px;border-radius:50%;background:#888}
 .fb-dot.ok{background:var(--success);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-main{max-width:1100px;margin:0 auto;padding:18px 16px 100px}
+main{max-width:1100px;margin:0 auto;padding:0}
 .layout{display:grid;grid-template-columns:380px 1fr;gap:16px;align-items:start}
 .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
 .stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center;box-shadow:var(--shadow)}
@@ -111,15 +111,34 @@ footer{position:fixed;bottom:56px;left:0;right:0;background:var(--surface);borde
 .bn-item.active{color:#4D6EFF}.bn-item.active .bn-icon{background:rgba(77,110,255,.15);border-radius:10px}
 .bn-icon{width:30px;height:24px;display:flex;align-items:center;justify-content:center;font-size:15px}
 </style>
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-layout.js"></script>
 </head>
 <body>
-<header>
-  <div class="logo"><span class="logo-dot"></span>ECM Accessi</div>
-  <div style="display:flex;align-items:center;gap:8px">
-    <div class="fb-badge"><div class="fb-dot" id="fbDot"></div><span id="fbTxt">...</span></div>
-    <div id="userBarSlot" style="font-size:12px;color:var(--text2)"></div>
+
+<!-- OVERLAY MOBILE -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<!-- SIDEBAR -->
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+
+<!-- MAIN -->
+<div class="ecm-main">
+  
+<div class="ecm-topbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="mobile-menu-btn" id="mobileMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <div class="topbar-title">Controllo accessi</div>
   </div>
-</header>
+  <div class="topbar-right">
+    <div class="topbar-badge">
+      <div class="topbar-dot" id="fbDot"></div>
+      <span id="fbStatus">Connessione...</span>
+    </div>
+    <div id="userBarSlot"></div>
+  </div>
+</div>
+
+  <div class="ecm-content">
 <main>
   <div id="noEvAlert" style="display:none;padding:12px 16px;border-radius:var(--radius);font-size:13px;margin-bottom:14px;background:var(--dl);color:var(--danger);border:1px solid rgba(193,59,42,.3)">
     ⚠️ Nessun evento selezionato. <a href="ecm-eventi.html" style="color:inherit;font-weight:600">Scegli un evento →</a>
@@ -257,16 +276,7 @@ footer{position:fixed;bottom:56px;left:0;right:0;background:var(--surface);borde
   <div class="footer-info">Evento: <strong id="footerEv">—</strong> · Modo: <strong id="footerMode" style="color:var(--success)">ENTRATA</strong></div>
   <div class="live-clock" id="clk">--:--:--</div>
 </footer>
-<nav class="bottom-nav">
-  <a href="ecm-eventi.html" class="bn-item"><div class="bn-icon">📋</div><div style="font-size:9px">Eventi</div></a>
-  <a href="ecm-blocco1.html" class="bn-item"><div class="bn-icon">⚙️</div><div style="font-size:9px">Setup</div></a>
-  <a href="ecm-blocco2.html" class="bn-item"><div class="bn-icon">🪪</div><div style="font-size:9px">Badge</div></a>
-  <a href="ecm-blocco3.html" class="bn-item active"><div class="bn-icon">📷</div><div style="font-size:9px">Accessi</div></a>
-  <a href="ecm-blocco4.html" class="bn-item"><div class="bn-icon">📊</div><div style="font-size:9px">Report</div></a>
-  <a href="ecm-blocco5.html" class="bn-item"><div class="bn-icon">📝</div><div style="font-size:9px">Survey</div></a>
-  <a href="ecm-blocco7.html" class="bn-item"><div class="bn-icon">📋</div><div style="font-size:9px">Quiz</div></a>
-  <a href="ecm-admin.html" class="bn-item" id="adminLink" style="display:none"><div class="bn-icon">👑</div><div style="font-size:9px">Admin</div></a>
-</nav>
+
 
 <!-- SCRIPT PRINCIPALE: NON usa top-level await, tutto dentro init() -->
 <script>
@@ -717,5 +727,18 @@ async function initFirebase() {
 
 initFirebase();
 </script>
+  </div>
+  <div class="ecm-version-footer" id="ecmVersionFooter"></div>
+</div>
+
+<!-- Sidebar init -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  renderSidebar('scanner');
+  renderVersionFooter();
+});
+</script>
+
+
 </body>
 </html>

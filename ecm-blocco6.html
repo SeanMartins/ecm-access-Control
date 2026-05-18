@@ -7,14 +7,14 @@
 <title>ECM — Registrazione Evento</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#F5F3EE;--surface:#FFF;--surface2:#F0EDE6;--border:#E0DAD0;--border2:#C8C0B4;--text:#1A1714;--text2:#6B6560;--text3:#9B948C;--accent:#2B4EFF;--accent-light:#EEF1FF;--accent2:#FF6B35;--success:#1A7A4A;--success-light:#E8F5EE;--danger:#C13B2A;--danger-light:#FDEEE9;--warn:#B07A10;--warn-light:#FDF5E0;--radius:10px;--radius-lg:16px;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06)}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
 header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 22px;height:58px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);position:sticky;top:0;z-index:100}
 .logo{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;color:var(--text)}
 .logo-mark{width:26px;height:26px;border-radius:7px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white}
-main{max-width:680px;margin:0 auto;padding:32px 20px 60px}
+main{max-width:800px;margin:0;padding:0}
 
 /* STEP INDICATOR */
 .steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:36px}
@@ -104,13 +104,34 @@ main{max-width:680px;margin:0 auto;padding:32px 20px 60px}
 
 @media(max-width:480px){.form-row{grid-template-columns:1fr}.step-line{width:32px}.step-label{font-size:9px}}
 </style>
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-layout.js"></script>
 </head>
 <body>
-<header>
-  <div class="logo"><div class="logo-mark">E</div>ECM — Registrazione</div>
-  <div style="font-size:12px;color:var(--text3)">Iscrizione evento</div>
-</header>
 
+<!-- OVERLAY MOBILE -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<!-- SIDEBAR -->
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+
+<!-- MAIN -->
+<div class="ecm-main">
+  
+<div class="ecm-topbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="mobile-menu-btn" id="mobileMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <div class="topbar-title">Registrazione autonoma</div>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-badge">
+      <div class="topbar-dot" id="fbDot"></div>
+      <span id="fbStatus">Connessione...</span>
+    </div>
+    <div id="userBarSlot"></div>
+  </div>
+</div>
+
+  <div class="ecm-content">
 <main>
   <!-- STEP INDICATOR -->
   <div class="steps">
@@ -553,5 +574,18 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 
 loadEventi();
 </script>
+  </div>
+  <div class="ecm-version-footer" id="ecmVersionFooter"></div>
+</div>
+
+<!-- Sidebar init -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  renderSidebar('register');
+  renderVersionFooter();
+});
+</script>
+
+
 </body>
 </html>
