@@ -199,13 +199,13 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(43
           <span class="role-icon">📷</span>
           <div class="role-name">Scanner accessi</div>
           <div class="role-desc">Solo Blocco 3 — scansione entrate e uscite</div>
-          <span class="role-limit lim-green">Max 5 utenti</span>
+          <span class="role-limit lim-green">Max 10 utenti</span>
         </button>
         <button type="button" class="role-btn" id="rb-report" onclick="selectRole('report')">
           <span class="role-icon">📊</span>
           <div class="role-name">Solo report</div>
           <div class="role-desc">Lettura Blocco 3 e Blocco 4</div>
-          <span class="role-limit lim-warn">Max 3 utenti</span>
+          <span class="role-limit lim-warn">Max 5 utenti</span>
         </button>
       </div>
     </div>
@@ -368,7 +368,7 @@ window.creaUtente=async function(){
     const snap=await getDocs(collection(db,'utenti'));
     const existing=[]; snap.forEach(d=>existing.push(d.data()));
     const countRole=existing.filter(u=>u.ruolo===selectedRole&&u.attivo!==false).length;
-    const limiti={operatore:3,scanner:5,report:3};
+    const limiti={operatore:20,scanner:10,report:5};
     if(countRole>=limiti[selectedRole]){
       showAlert('error',`Limite raggiunto: max ${limiti[selectedRole]} ${selectedRole}.`);
       btn.disabled=false; btn.innerHTML='Crea utente →'; return;
