@@ -288,19 +288,21 @@ body {
   position: fixed; inset: 0;
   background: rgba(0,0,0,.5);
   z-index: 199;
+  -webkit-tap-highlight-color: transparent;
 }
+.sidebar-overlay.show { display: block; }
 
 /* ── RESPONSIVE ─────────────────────────────────────── */
 @media (max-width: 768px) {
   .ecm-sidebar {
     transform: translateX(-100%);
     width: var(--sidebar-w) !important;
+    transition: transform .25s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .ecm-sidebar.mobile-open {
     transform: translateX(0);
   }
   .ecm-main { margin-left: 0 !important; }
-  .sidebar-overlay.show { display: block; }
   .ecm-topbar { padding: 0 16px; }
   .ecm-content { padding: 16px; }
   .sidebar-toggle { display: none; }

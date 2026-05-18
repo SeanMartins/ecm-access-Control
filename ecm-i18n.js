@@ -689,30 +689,17 @@ const PAGE_TRANSLATIONS = {
   ],
 };
 
-// Applica tutte le traduzioni per la pagina corrente
-function applyPageTranslations() {
-  const page = window.location.pathname.split('/').pop() || 'index.html';
-
-  // Applica traduzioni comuni
-  (PAGE_TRANSLATIONS.common || []).forEach(rule => applyRule(rule));
-
-  // Applica traduzioni specifiche per questa pagina
-  const pageRules = PAGE_TRANSLATIONS[page] || [];
-  pageRules.forEach(rule => applyRule(rule));
-
-  // Applica anche data-i18n standard
-  applyTranslations();
-}
+// ── MOTORE TRADUZIONI PAGINA ─────────────────────────
 
 function applyRule(rule) {
   try {
-    const els = document.querySelectorAll(rule.sel || 'NONEXISTENT_SELECTOR_XYZ');
-    if (!els.length) return;
+    if (!rule.sel && !rule.fn) return;
+    const els = rule.sel ? document.querySelectorAll(rule.sel) : [];
+    if (rule.fn && !rule.sel) { rule.fn(null); return; }
     els.forEach(el => {
       if (rule.fn) { rule.fn(el); return; }
       if (rule.onlyIfText) {
-        // Traduci solo se il testo corrente è uno dei valori attesi
-        const cur = el.textContent.trim();
+        const cur = (el.textContent || '').trim();
         if (!rule.onlyIfText.some(v => cur.includes(v))) return;
       }
       const val = t(rule.key);
@@ -722,19 +709,43 @@ function applyRule(rule) {
   } catch(e) {}
 }
 
-// Sovrascrive setLang per applicare anche le traduzioni di pagina
-const _origSetLang = setLang;
+function applyPageTranslations() {
+  if (getLang() === 'it') return; // Italiano è default, nessuna traduzione necessaria
+  const page = window.location.pathname.split('/').pop() || 'index.html';
+  (PAGE_TRANSLATIONS.common || []).forEach(applyRule);
+  (PAGE_TRANSLATIONS[page] || []).forEach(applyRule);
+  applyTranslations(); // applica anche data-i18n
+}
+
+// Applica traduzioni con retry — aspetta che il DOM sia pronto
+function applyPageTranslationsWithRetry(attempts) {
+  if (getLang() === 'it') return;
+  attempts = attempts || 0;
+  applyPageTranslations();
+  // Riprova fino a 5 volte con delay crescente per elementi caricati dinamicamente
+  if (attempts < 5) {
+    setTimeout(() => applyPageTranslationsWithRetry(attempts + 1), 300 * (attempts + 1));
+  }
+}
+
+// Sovrascrive setLang
 window.setLang = function(lang) {
   localStorage.setItem('ecm_lang', lang);
-  applyPageTranslations();
   updateLangSelector();
-  // Ricostruisce sidebar
+  // Ricostruisce sidebar con nuova lingua
   const sidebar = document.getElementById('ecmSidebar');
   if (sidebar) {
     const activeId = sidebar.dataset.activeId;
     if (typeof renderSidebar === 'function') renderSidebar(activeId);
   }
+  // Applica traduzioni (o rimuove se italiano)
+  if (lang === 'it') {
+    // Ricarica pagina per tornare all'italiano (testi originali)
+    window.location.reload();
+  } else {
+    applyPageTranslationsWithRetry(0);
+  }
 };
 
-window.applyPageTranslations = applyPageTranslations;
+window.applyPageTranslations = applyPageTranslationsWithRetry;
 

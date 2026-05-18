@@ -156,18 +156,18 @@ footer{position:fixed;bottom:56px;left:0;right:0;background:var(--surface);borde
     ⚠️ Nessun evento selezionato. <a href="ecm-eventi.html" style="color:inherit;font-weight:600">Scegli un evento →</a>
   </div>
   <div class="stats-bar">
-    <div class="stat-box"><div class="stat-num" id="sTot">0</div><div class="stat-label">Totale</div></div>
-    <div class="stat-box"><div class="stat-num green" id="sDentro">0</div><div class="stat-label">Dentro</div></div>
-    <div class="stat-box"><div class="stat-num yellow" id="sUsciti">0</div><div class="stat-label">Usciti</div></div>
-    <div class="stat-box"><div class="stat-num red" id="sAssenti">0</div><div class="stat-label">Non arr.</div></div>
+    <div class="stat-box"><div class="stat-num" id="sTot">0</div><div class="stat-label" data-i18n="total">Totale</div></div>
+    <div class="stat-box"><div class="stat-num green" id="sDentro">0</div><div class="stat-label" data-i18n="inside">Dentro</div></div>
+    <div class="stat-box"><div class="stat-num yellow" id="sUsciti">0</div><div class="stat-label" data-i18n="exited">Usciti</div></div>
+    <div class="stat-box"><div class="stat-num red" id="sAssenti">0</div><div class="stat-label" data-i18n="absent">Non arr.</div></div>
   </div>
   <div class="layout">
     <div>
       <div class="card">
         <div class="card-title">📷 Scanner QR</div>
         <div class="mode-toggle">
-          <button class="mode-btn sel-in" id="btnIn">▶ ENTRATA</button>
-          <button class="mode-btn" id="btnOut">◀ USCITA</button>
+          <button class="mode-btn sel-in" id="btnIn" data-i18n="entry">▶ ENTRATA</button>
+          <button class="mode-btn" id="btnOut" data-i18n="exit">◀ USCITA</button>
         </div>
         <div class="scanner-wrap">
           <video id="camVideo" style="display:none"></video>
@@ -179,8 +179,8 @@ footer{position:fixed;bottom:56px;left:0;right:0;background:var(--surface);borde
           </div>
         </div>
         <div class="cam-btns">
-          <button class="btn btn-success" id="btnAvvia">▶ Avvia camera</button>
-          <button class="btn btn-outline" id="btnFerma" disabled>⏹ Ferma</button>
+          <button class="btn btn-success" id="btnAvvia" data-i18n="start_camera">▶ Avvia camera</button>
+          <button class="btn btn-outline" id="btnFerma" data-i18n="stop_camera" disabled>⏹ Ferma</button>
         </div>
         <div id="scanInfo" style="display:none;font-size:11px;color:var(--success);text-align:center;margin-top:5px;font-weight:500"></div>
         <div class="result-card" id="resCard">
@@ -198,7 +198,7 @@ footer{position:fixed;bottom:56px;left:0;right:0;background:var(--surface);borde
         <div class="manual-wrap">
           <div class="card-title" style="margin-bottom:8px">🔍 Ricerca manuale</div>
           <div class="search-row">
-            <input type="text" id="searchInput" placeholder="Nome, cognome o CF...">
+            <input type="text" id="searchInput" data-i18n-placeholder="search_placeholder" placeholder="Nome, cognome o CF...">
             <button class="btn btn-outline btn-sm" id="btnClear">✕</button>
           </div>
           <div class="search-results" id="searchResults"></div>
@@ -207,7 +207,7 @@ footer{position:fixed;bottom:56px;left:0;right:0;background:var(--surface);borde
         <div class="np-section">
           <div class="np-header">
             <div class="card-title" style="margin-bottom:0">➕ Nuovo partecipante</div>
-            <button class="btn btn-outline btn-sm" id="btnToggleNP">Apri</button>
+            <button class="btn btn-outline btn-sm" id="btnToggleNP" data-i18n="open">Apri</button>
           </div>
           <div class="np-body" id="npBody">
             <div class="np-tabs">
@@ -248,7 +248,7 @@ footer{position:fixed;bottom:56px;left:0;right:0;background:var(--surface);borde
             </div>
 
             <div style="display:flex;gap:8px;margin-top:10px">
-              <button class="btn btn-success" style="flex:1;font-size:13px" id="btnSalvaNP">✓ Salva e registra entrata</button>
+              <button class="btn btn-success" style="flex:1;font-size:13px" id="btnSalvaNP" data-i18n="save_register">✓ Salva e registra entrata</button>
               <button class="btn btn-outline btn-sm" id="btnResetNP">✕</button>
             </div>
             <div class="np-msg" id="npMsg"></div>
@@ -261,9 +261,9 @@ footer{position:fixed;bottom:56px;left:0;right:0;background:var(--surface);borde
       <div class="ticker"><div class="ticker-dot"></div><span id="tickerTxt">In attesa di scansioni...</span></div>
       <div class="card" style="padding:14px">
         <div class="tabs">
-          <button class="tab active" data-t="presenti">Dentro ora</button>
-          <button class="tab" data-t="tutti">Tutti</button>
-          <button class="tab" data-t="log">Log</button>
+          <button class="tab active" data-t="presenti" data-i18n="present_now">Dentro ora</button>
+          <button class="tab" data-t="tutti" data-i18n="all_participants">Tutti</button>
+          <button class="tab" data-t="log" data-i18n="log">Log</button>
         </div>
         <div class="tab-pane active" id="pane-presenti">
           <div class="live-list" id="listPresenti"><div style="color:var(--text3);font-size:13px;padding:16px;text-align:center">Nessuno in sala</div></div>

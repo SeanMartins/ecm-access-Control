@@ -70,7 +70,7 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(77,110,255,.12)
 
   <div class="form-group">
     <label>Username</label>
-    <input type="text" id="username" placeholder="es. mario.rossi" autocomplete="username" autocapitalize="none">
+    <input type="text" id="username" data-i18n-placeholder="username" placeholder="es. mario.rossi" autocomplete="username" autocapitalize="none">
   </div>
   <div class="form-group">
     <label>Password</label>
@@ -80,7 +80,7 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(77,110,255,.12)
     </div>
   </div>
 
-  <button class="login-btn" id="loginBtn" onclick="doLogin()">Accedi</button>
+  <button class="login-btn" id="loginBtn" data-i18n="login_btn" onclick="doLogin()">Accedi</button>
   <div class="status-msg" id="statusMsg"></div>
 
   <div class="divider">oppure</div>

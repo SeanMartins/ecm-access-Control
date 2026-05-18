@@ -171,18 +171,36 @@ function renderSidebar(activeId) {
   // Mobile toggle
   const mobileBtn = document.getElementById('mobileMenuBtn');
   const overlay = document.getElementById('sidebarOverlay');
+
+  function closeMobileSidebar() {
+    sidebar.classList.remove('mobile-open');
+    if (overlay) overlay.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  function openMobileSidebar() {
+    sidebar.classList.add('mobile-open');
+    if (overlay) overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
   if (mobileBtn) {
-    mobileBtn.addEventListener('click', () => {
-      sidebar.classList.toggle('mobile-open');
-      if (overlay) overlay.classList.toggle('show');
+    mobileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (sidebar.classList.contains('mobile-open')) closeMobileSidebar();
+      else openMobileSidebar();
     });
   }
   if (overlay) {
-    overlay.addEventListener('click', () => {
-      sidebar.classList.remove('mobile-open');
-      overlay.classList.remove('show');
-    });
+    overlay.addEventListener('click', closeMobileSidebar);
+    overlay.addEventListener('touchend', closeMobileSidebar);
   }
+
+  // Chiudi sidebar quando si clicca un link (mobile)
+  nav.querySelectorAll('a.nav-item').forEach(a => {
+    a.addEventListener('click', () => {
+      if (window.innerWidth <= 768) closeMobileSidebar();
+    });
+  });
 
   // User info
   updateSidebarUser(op);

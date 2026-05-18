@@ -164,7 +164,7 @@ header{border-bottom:1px solid var(--border);background:var(--surface);position:
 <div class="wrap">
   <div class="page-header">
     <div>
-      <div class="page-title">I miei eventi ECM</div>
+      <div class="page-title" data-i18n="events_title">I miei eventi ECM</div>
       <div style="color:var(--text2);font-size:13px;margin-top:2px">Seleziona un evento per lavorarci o creane uno nuovo</div>
     </div>
     <a href="ecm-blocco1.html?nuovo=1" class="btn btn-primary">+ Nuovo evento</a>
@@ -184,10 +184,10 @@ header{border-bottom:1px solid var(--border);background:var(--surface);position:
 
   <!-- Filtri -->
   <div class="filter-tabs">
-    <button class="filter-tab active" data-filter="tutti" onclick="setFilter('tutti',this)">Tutti</button>
-    <button class="filter-tab" data-filter="oggi" onclick="setFilter('oggi',this)">Oggi</button>
-    <button class="filter-tab" data-filter="attivi" onclick="setFilter('attivi',this)">Attivi</button>
-    <button class="filter-tab" data-filter="archiviati" onclick="setFilter('archiviati',this)">Archivio</button>
+    <button class="filter-tab active" data-filter="tutti" data-i18n="all" onclick="setFilter('tutti',this)">Tutti</button>
+    <button class="filter-tab" data-filter="oggi" data-i18n="today" onclick="setFilter('oggi',this)">Oggi</button>
+    <button class="filter-tab" data-filter="attivi" data-i18n="active" onclick="setFilter('attivi',this)">Attivi</button>
+    <button class="filter-tab" data-filter="archiviati" data-i18n="archive" onclick="setFilter('archiviati',this)">Archivio</button>
   </div>
 
   <div id="loadingState" class="loading"><div class="spinner"></div>Caricamento eventi...</div>
