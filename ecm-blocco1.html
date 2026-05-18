@@ -347,6 +347,18 @@ async function salvaEvento(){
   try{
     let id=localStorage.getItem('ecm_eventId');
     if(!id){id='evt_'+Date.now(); localStorage.setItem('ecm_eventId',id);}
+    // Recupera chi sta salvando
+    try{ await signInAnonymously(getAuth(app)); }catch(e){}
+    const curUser = getCurrentUser();
+    const creatoDA = curUser?.email || curUser?.username || curUser?.uid || 'sconosciuto';
+    const creatoDAUid = curUser?.uid || '';
+    const creatoDARuolo = curUser?.tipo || 'admin';
+
+    // Leggi dati esistenti per preservare creatoDA originale
+    const evExist = await getDoc(doc(db,'eventi',id));
+    const creatoDAOriginale = evExist.exists() ? (evExist.data().creatoDA || creatoDA) : creatoDA;
+    const creatoDAUidOriginale = evExist.exists() ? (evExist.data().creatoDAUid || creatoDAUid) : creatoDAUid;
+
     await setDoc(doc(db,'eventi',id),{
       nome, data:document.getElementById('evData').value,
       dataFine:document.getElementById('evDataFine').value,
@@ -357,7 +369,10 @@ async function salvaEvento(){
       percMin:parseFloat(document.getElementById('percMin').value)||90,
       logo:logoData||null,
       logoName:document.getElementById('logoName').textContent.replace('✓ ',''),
-      totPartecipanti:parts.length, updatedAt:serverTimestamp()
+      totPartecipanti:parts.length, updatedAt:serverTimestamp(),
+      creatoDA: creatoDAOriginale,
+      creatoDAUid: creatoDAUidOriginale,
+      creatoDARuolo: creatoDARuolo
     });
     if(parts.length>0){
       document.getElementById('progressWrap').style.display='block';
@@ -425,13 +440,14 @@ body{padding-bottom:70px!important}
   </a>
   <a href="ecm-blocco5.html" class="bn-item"><div class="bn-icon">📝</div><div class="bn-label">Survey</div></a>
   <a href="ecm-blocco6.html" class="bn-item"><div class="bn-icon">✍️</div><div class="bn-label">Iscrizioni</div></a>
+  <a href="ecm-blocco7.html" class="bn-item"><div class="bn-icon">📋</div><div class="bn-label">Quiz ECM</div></a>
   <a href="ecm-admin.html" class="bn-item" id="adminNavItem" style="display:none">
     <div class="bn-icon">👑</div><div class="bn-label">Admin</div>
   </a>
 </nav>
 <script type="module">
 import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 const ADMIN_EMAIL = "martinsosem@gmail.com";
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
 const app2=getApps().length?getApps()[0]:initializeApp(FB);

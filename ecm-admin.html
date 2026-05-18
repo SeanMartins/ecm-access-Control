@@ -223,6 +223,15 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(43
     </div>
   </div>
 
+  <!-- SEZIONE EVENTI (visibile solo all'admin) -->
+  <div class="card" id="eventiAdminCard">
+    <div class="card-title">
+      <span>Tutti gli eventi</span>
+      <button type="button" class="btn btn-outline btn-sm" id="btnRicaricaEventi">↻ Aggiorna</button>
+    </div>
+    <div id="eventiAdminList"><div style="color:var(--text3);font-size:13px;padding:16px;text-align:center">Caricamento...</div></div>
+  </div>
+
   <div style="display:flex;gap:10px;flex-wrap:wrap">
     <a href="ecm-eventi.html" class="btn btn-outline">← Lista eventi</a>
   </div>
@@ -267,6 +276,7 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(43
   <a href="ecm-admin.html" class="bn-item active"><div class="bn-icon">👑</div><div class="bn-label">Admin</div></a>
   <a href="ecm-blocco5.html" class="bn-item"><div class="bn-icon">📝</div><div class="bn-label">Survey</div></a>
   <a href="ecm-blocco6.html" class="bn-item"><div class="bn-icon">✍️</div><div class="bn-label">Iscrizioni</div></a>
+  <a href="ecm-blocco7.html" class="bn-item"><div class="bn-icon">📋</div><div class="bn-label">Quiz ECM</div></a>
 </nav>
 
 <script type="module">
@@ -380,6 +390,49 @@ window.creaUtente=async function(){
     selectedRole=null;
     ['operatore','scanner','report'].forEach(r=>{const b=document.getElementById('rb-'+r);if(b)b.className='role-btn';});
     loadUsers();
+loadEventiAdmin();
+
+// ── TUTTI GLI EVENTI (admin) ─────────────────────────────
+async function loadEventiAdmin(){
+  const list=document.getElementById('eventiAdminList');
+  if(!list)return;
+  try{
+    const snap=await getDocs(collection(db,'eventi'));
+    const eventi=[];
+    snap.forEach(d=>eventi.push({id:d.id,...d.data()}));
+    eventi.sort((a,b)=>new Date(b.data||0)-new Date(a.data||0));
+    if(!eventi.length){list.innerHTML='<div style="color:var(--text3);font-size:13px;padding:16px;text-align:center">Nessun evento creato</div>';return;}
+    const fmt=d=>d?new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}):'—';
+    list.innerHTML=`<div style="display:flex;flex-direction:column;gap:8px">
+      ${eventi.map(ev=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);flex-wrap:wrap">
+          <div style="flex:1;min-width:200px">
+            <div style="font-size:14px;font-weight:500">${esc(ev.nome||'—')}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">📅 ${fmt(ev.data)} · 👥 ${ev.totPartecipanti||0} iscritti · 👤 ${esc(ev.creatoDA||'admin')}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+            <span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;${ev.stato==='archiviato'?'background:var(--surface3);color:var(--text3)':'background:var(--success-light);color:var(--success)'}">
+              ${ev.stato==='archiviato'?'Archiviato':'Attivo'}
+            </span>
+            <a href="ecm-blocco1.html?evId=${ev.id}" class="btn btn-outline btn-sm">⚙️ Modifica</a>
+            <button type="button" class="btn btn-${ev.stato==='archiviato'?'outline':'warn'} btn-sm" onclick="toggleArchivioAdmin('${ev.id}','${ev.stato||'attivo'}')">
+              ${ev.stato==='archiviato'?'↩ Ripristina':'📦 Archivia'}
+            </button>
+          </div>
+        </div>`).join('')}
+    </div>`;
+  }catch(err){list.innerHTML=`<div style="color:var(--danger);font-size:13px;padding:16px">Errore: ${err.message}</div>`;}
+}
+
+window.toggleArchivioAdmin=async function(evId,statoAttuale){
+  try{
+    const nuovoStato=statoAttuale==='archiviato'?'attivo':'archiviato';
+    await setDoc(doc(db,'eventi',evId),{stato:nuovoStato,updatedAt:serverTimestamp()},{merge:true});
+    loadEventiAdmin();
+  }catch(e){alert('Errore: '+e.message);}
+};
+
+document.getElementById('btnRicaricaEventi').addEventListener('click',loadEventiAdmin);
   }catch(err){
     console.error(err); showAlert('error','Errore Firebase: '+err.message);
   }finally{

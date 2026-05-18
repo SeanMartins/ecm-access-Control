@@ -182,6 +182,7 @@ header{border-bottom:1px solid var(--border);background:var(--surface);position:
   <a href="ecm-connetti.html" class="bn-item"><div class="bn-icon">📲</div><div class="bn-label">Tablet</div></a>
   <a href="ecm-blocco5.html" class="bn-item"><div class="bn-icon">📝</div><div class="bn-label">Survey</div></a>
   <a href="ecm-blocco6.html" class="bn-item"><div class="bn-icon">✍️</div><div class="bn-label">Iscrizioni</div></a>
+  <a href="ecm-blocco7.html" class="bn-item"><div class="bn-icon">📋</div><div class="bn-label">Quiz ECM</div></a>
   <a href="ecm-admin.html" class="bn-item" id="adminNavItem" style="display:none"><div class="bn-icon">👑</div><div class="bn-label">Admin</div></a>
 </nav>
 
@@ -221,35 +222,40 @@ if(currentEvId){
 
 // Carica eventi — filtrati per ruolo utente
 // ─── ASSEGNA SCANNER (per operatori completi) ────────────────
-let scannerModalEvId=null, scannerModalEvNome='', tuttiScanner=[];
+let assegnaModalEvId=null, assegnaModalEvNome='', tuttiUtenti=[];
 
-window.openAssegnaScanner = async function(evId, evNome){
-  scannerModalEvId=evId; scannerModalEvNome=evNome;
-  document.getElementById('scannerModalTitle').textContent=`👥 Scanner per: ${evNome}`;
-  document.getElementById('scannerModalList').innerHTML='<div style="color:var(--text3);font-size:13px;padding:20px;text-align:center">Caricamento scanner...</div>';
+window.openAssegnaUtenti = async function(evId, evNome){
+  assegnaModalEvId=evId; assegnaModalEvNome=evNome;
+  document.getElementById('scannerModalTitle').textContent=`👥 Assegna utenti a: ${evNome}`;
+  document.getElementById('scannerModalList').innerHTML='<div style="color:var(--text3);font-size:13px;padding:20px;text-align:center">Caricamento...</div>';
   document.getElementById('scannerModal').classList.add('show');
   try{
-    // Carica tutti gli utenti scanner
     const snap=await getDocs(collection(db,'utenti'));
-    tuttiScanner=[];
-    snap.forEach(d=>{const u={id:d.id,...d.data()};if(u.ruolo==='scanner'&&u.attivo!==false)tuttiScanner.push(u);});
-    if(!tuttiScanner.length){
-      document.getElementById('scannerModalList').innerHTML='<div style="color:var(--text3);font-size:13px;padding:20px;text-align:center">Nessuno scanner creato.<br>Creane uno dalla pagina Admin.</div>';
+    tuttiUtenti=[];
+    snap.forEach(d=>{const u={id:d.id,...d.data()};if(u.attivo!==false)tuttiUtenti.push(u);});
+    const op=JSON.parse(localStorage.getItem('ecm_op_user')||'null');
+    const isAdmin=!op;
+    // Admin vede tutti; operatore vede solo scanner
+    const visibili=isAdmin?tuttiUtenti:tuttiUtenti.filter(u=>u.ruolo==='scanner');
+    if(!visibili.length){
+      document.getElementById('scannerModalList').innerHTML='<div style="color:var(--text3);font-size:13px;padding:20px;text-align:center">Nessun utente disponibile.</div>';
       return;
     }
     const now=new Date();
-    document.getElementById('scannerModalList').innerHTML=tuttiScanner.map(u=>{
-      const evAssegnati=(u.eventiAssegnati||[]).map(e=>e.id);
-      const checked=evAssegnati.includes(evId);
+    const ruoloIcon={operatore:'🔧',scanner:'📷',report:'📊'};
+    const ruoloLabel={operatore:'Operatore completo',scanner:'Scanner',report:'Report'};
+    document.getElementById('scannerModalList').innerHTML=visibili.map(u=>{
+      const evAss=(u.eventiAssegnati||[]).map(e=>e.id);
+      const checked=evAss.includes(evId);
       const scad=new Date(u.scadenza);
       const scaduto=scad<now;
-      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid ${checked?'var(--accent)':'var(--border)'};border-radius:10px;margin-bottom:8px;background:${checked?'rgba(77,110,255,.06)':'transparent'};cursor:pointer;transition:all .2s" onclick="toggleScanner('${u.id}',this)">
-        <input type="checkbox" id="sck_${u.id}" ${checked?'checked':''} ${scaduto?'disabled':''} onclick="event.stopPropagation()" style="width:16px;height:16px;accent-color:var(--accent)">
+      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:2px solid ${checked?'var(--accent)':'var(--border)'};border-radius:10px;margin-bottom:8px;background:${checked?'var(--accent-light)':'var(--surface)'};cursor:pointer;transition:all .2s" onclick="toggleUtente('${u.id}',this)">
+        <input type="checkbox" id="uck_${u.id}" ${checked?'checked':''} ${scaduto?'disabled':''} onclick="event.stopPropagation()" style="width:16px;height:16px;accent-color:var(--accent)">
         <div style="flex:1">
-          <div style="font-size:13px;font-weight:500;${scaduto?'color:var(--danger)':''}">${esc(u.nome||u.username)} ${scaduto?'<span style="font-size:10px">(scaduto)</span>':''}</div>
-          <div style="font-size:11px;color:var(--text3);font-family:monospace">${u.username} · scade ${scad.toLocaleDateString('it-IT')}</div>
+          <div style="font-size:13px;font-weight:500;${scaduto?'color:var(--danger)':''}">${esc(u.nome||u.username)}${scaduto?' <span style="font-size:10px">(scaduto)</span>':''}</div>
+          <div style="font-size:11px;color:var(--text3);font-family:monospace">${u.username} · ${ruoloLabel[u.ruolo]||u.ruolo}</div>
         </div>
-        <span style="font-size:20px">📷</span>
+        <span style="font-size:18px">${ruoloIcon[u.ruolo]||'👤'}</span>
       </div>`;
     }).join('');
   }catch(err){
@@ -257,41 +263,40 @@ window.openAssegnaScanner = async function(evId, evNome){
   }
 };
 
-window.toggleScanner=function(uid,row){
-  const cb=document.getElementById('sck_'+uid);
+window.toggleUtente=function(uid,row){
+  const cb=document.getElementById('uck_'+uid);
   if(cb&&!cb.disabled){
     cb.checked=!cb.checked;
     row.style.borderColor=cb.checked?'var(--accent)':'var(--border)';
-    row.style.background=cb.checked?'rgba(77,110,255,.06)':'transparent';
+    row.style.background=cb.checked?'var(--accent-light)':'var(--surface)';
   }
 };
 
 window.salvaScannerAssegnati=async function(){
-  if(!scannerModalEvId)return;
+  if(!assegnaModalEvId)return;
   const btn=document.getElementById('saveScannerBtn');
   btn.disabled=true;btn.textContent='Salvataggio...';
   try{
-    // Per ogni scanner aggiorna i suoi eventiAssegnati
-    for(const u of tuttiScanner){
-      const cb=document.getElementById('sck_'+u.id);
+    const op=JSON.parse(localStorage.getItem('ecm_op_user')||'null');
+    const isAdmin=!op;
+    const visibili=isAdmin?tuttiUtenti:tuttiUtenti.filter(u=>u.ruolo==='scanner');
+    for(const u of visibili){
+      const cb=document.getElementById('uck_'+u.id);
       if(!cb)continue;
-      const evAssegnati=(u.eventiAssegnati||[]);
+      const evAss=(u.eventiAssegnati||[]);
       let nuovi;
       if(cb.checked){
-        // Aggiungi evento se non già presente
-        if(!evAssegnati.find(e=>e.id===scannerModalEvId)){
-          nuovi=[...evAssegnati,{id:scannerModalEvId,nome:scannerModalEvNome}];
-        }else nuovi=evAssegnati;
+        nuovi=evAss.find(e=>e.id===assegnaModalEvId)?evAss:[...evAss,{id:assegnaModalEvId,nome:assegnaModalEvNome}];
       }else{
-        // Rimuovi evento
-        nuovi=evAssegnati.filter(e=>e.id!==scannerModalEvId);
+        nuovi=evAss.filter(e=>e.id!==assegnaModalEvId);
       }
-      if(JSON.stringify(nuovi)!==JSON.stringify(evAssegnati)){
+      if(JSON.stringify(nuovi)!==JSON.stringify(evAss)){
         await updateDoc(doc(db,'utenti',u.id),{eventiAssegnati:nuovi});
       }
     }
     closeScannerModal();
-    alert('✓ Scanner aggiornati per questo evento!');
+    loadEvents();
+    alert('✓ Utenti aggiornati per questo evento!');
   }catch(err){alert('Errore: '+err.message);}
   finally{btn.disabled=false;btn.textContent='✓ Salva';}
 };
@@ -308,13 +313,20 @@ async function loadEvents(){
     snap.forEach(d=>allEventsRaw.push({id:d.id,...d.data()}));
     allEventsRaw.sort((a,b)=>new Date(b.data||0)-new Date(a.data||0));
 
-    // Se operatore con eventi assegnati → filtra
     const op=JSON.parse(localStorage.getItem('ecm_op_user')||'null');
-    if(op && op.eventiAssegnati && op.eventiAssegnati.length>0){
-      const ids=op.eventiAssegnati.map(e=>e.id);
-      allEvents=allEventsRaw.filter(ev=>ids.includes(ev.id));
-    } else {
+    if(!op){
+      // Admin Google → vede tutto
       allEvents=allEventsRaw;
+    } else if(op.ruolo==='operatore'){
+      // Operatore completo → eventi creati da lui + eventi assegnati
+      const assegnatiIds=(op.eventiAssegnati||[]).map(e=>e.id);
+      allEvents=allEventsRaw.filter(ev=>
+        ev.creatoDAUid===op.uid || assegnatiIds.includes(ev.id)
+      );
+    } else {
+      // Scanner/report → solo eventi assegnati
+      const assegnatiIds=(op.eventiAssegnati||[]).map(e=>e.id);
+      allEvents=allEventsRaw.filter(ev=>assegnatiIds.includes(ev.id));
     }
     renderEvents();
   }catch(err){
@@ -381,10 +393,11 @@ function renderEvents(){
         <div class="event-actions">
           ${!isSelected?`<button class="btn btn-primary btn-sm" onclick="selectEvent('${ev.id}','${esc(ev.nome||'')}')">✓ Seleziona</button>`:'<button class="btn btn-success btn-sm" disabled>✓ Attivo</button>'}
           ${(isAdminMode||isOperatoreMode)?`<a href="ecm-blocco1.html?evId=${ev.id}" class="btn btn-outline btn-sm">⚙️ Modifica</a>`:''}
-          ${isOperatoreMode?`<button class="btn btn-primary btn-sm" onclick="openAssegnaScanner('${ev.id}','${esc(ev.nome||'')}')">👥 Scanner</button>`:''}
+          ${(isAdminMode||isOperatoreMode)?`<button class="btn btn-primary btn-sm" onclick="openAssegnaUtenti('${ev.id}','${esc(ev.nome||'')}')">👥 Assegna</button>`:''}
           ${isAdminMode&&!isArchiviato?`<button class="btn btn-warn btn-sm" onclick="openModal('${ev.id}','archivio')">📦 Archivia</button>`:''}
           ${isAdminMode&&isArchiviato?`<button class="btn btn-outline btn-sm" onclick="openModal('${ev.id}','ripristina')">↩ Ripristina</button>`:''}
         </div>
+        ${ev.creatoDA?`<div style="font-size:10px;color:var(--text3);margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">👤 Creato da: ${esc(ev.creatoDA)}</div>`:''}`
       </div>
     </div>`;
   }).join('');
