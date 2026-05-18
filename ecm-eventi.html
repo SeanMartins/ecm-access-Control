@@ -512,7 +512,7 @@ function renderEvents(){
           ${isAdminMode&&!isArchiviato?`<button class="btn btn-warn btn-sm" onclick="openModal('${ev.id}','archivio')">📦</button>`:''}
           ${isAdminMode&&isArchiviato?`<button class="btn btn-outline btn-sm" onclick="openModal('${ev.id}','ripristina')">↩</button>`:''}
         </div>
-        ${ev.creatoDA?`<div style="font-size:10px;color:var(--text3);margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">👤 Creato da: ${esc(ev.creatoDA)}</div>`:''}`
+        ${ev.creatoDA?`<div style="font-size:10px;color:var(--text3);margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">👤 Creato da: ${esc(ev.creatoDA)}</div>`:''}
       </div>
     </div>`;
   }).join('');
