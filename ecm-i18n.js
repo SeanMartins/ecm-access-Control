@@ -621,3 +621,120 @@ window.t = t;
 window.setLang = setLang;
 window.getLang = getLang;
 window.applyTranslations = applyTranslations;
+
+// ── TRADUZIONE DINAMICA COMPLETA ──────────────────────
+// Mappa di selezione CSS → chiave traduzione per ogni pagina
+const PAGE_TRANSLATIONS = {
+
+  // ── TESTI COMUNI ──────────────────────────────────
+  common: [
+    // Firebase badge
+    { sel: '#fbStatus', key: 'fb_ok', onlyIfText: ['Firebase OK','Connected','Connecté','Verbunden','Conectado'] },
+    // Footer versione
+    { sel: '#ecmVersionFooter', fn: el => { el.innerHTML = t('version_label') + ' &nbsp;·&nbsp; <span>' + ECM_VERSION + '</span> &nbsp;·&nbsp; ' + new Date().getFullYear(); }},
+  ],
+
+  // ── LOGIN ──────────────────────────────────────────
+  'ecm-login-op.html': [
+    { sel: '.login-title, h1, h2', key: 'login_title' },
+    { sel: '.login-sub, .subtitle', key: 'login_sub' },
+    { sel: 'label[for="username"], .label-user', key: 'username' },
+    { sel: 'label[for="password"], .label-pass', key: 'password' },
+    { sel: '#loginBtn, button[type="submit"]', key: 'login_btn' },
+    { sel: '#btnGoogle, .google-btn', key: 'login_google' },
+    { sel: '#username', key: 'username', attr: 'placeholder' },
+    { sel: '#password', key: 'password', attr: 'placeholder' },
+  ],
+
+  // ── EVENTI ────────────────────────────────────────
+  'ecm-eventi.html': [
+    { sel: '.page-title', key: 'events_title' },
+    { sel: '.page-sub', key: 'events_sub' },
+    { sel: 'a[href*="blocco1"][href*="nuovo=1"], .btn-new-event', key: 'new_event' },
+    { sel: '[data-filter="tutti"]', key: 'all' },
+    { sel: '[data-filter="oggi"]', key: 'today' },
+    { sel: '[data-filter="attivi"]', key: 'active' },
+    { sel: '[data-filter="archiviati"]', key: 'archive' },
+    { sel: '#currentEventBar .ceb-label', fn: el => el.textContent = t('nav_events') },
+  ],
+
+  // ── SCANNER ───────────────────────────────────────
+  'ecm-blocco3.html': [
+    { sel: '.topbar-title', key: 'scanner_title' },
+    { sel: '#btnIn', key: 'entry' },
+    { sel: '#btnOut', key: 'exit' },
+    { sel: '#btnAvvia', key: 'start_camera' },
+    { sel: '#btnFerma', key: 'stop_camera' },
+    { sel: '#searchInput', key: 'search_placeholder', attr: 'placeholder' },
+    { sel: '#btnToggleNP', fn: el => { if(el.textContent.trim()==='Apri'||el.textContent.trim()==='Open'||el.textContent.trim()==='Ouvrir') el.textContent = t('open'); }},
+    { sel: '#btnSalvaNP', key: 'save_register' },
+    { sel: '#footerMode', fn: el => { const cur = el.textContent; if(cur.includes('ENTR')||cur.includes('EINGANG')||cur.includes('ENTR')) el.textContent = t('entry').replace('▶ ',''); else el.textContent = t('exit').replace('◀ ',''); }},
+    { sel: '#sTot + .stat-label', key: 'total' },
+    { sel: '#sDentro + .stat-label', key: 'inside' },
+    { sel: '#sUsciti + .stat-label', key: 'exited' },
+    { sel: '#sAssenti + .stat-label', key: 'absent' },
+    { sel: '[data-t="presenti"]', key: 'present_now' },
+    { sel: '[data-t="tutti"]', key: 'all_participants' },
+    { sel: '[data-t="log"]', key: 'log' },
+  ],
+
+  // ── ADMIN ─────────────────────────────────────────
+  'ecm-admin.html': [
+    { sel: '.page-title', key: 'admin_title' },
+    { sel: '.page-sub', key: 'admin_sub' },
+    { sel: '#btnCrea', key: 'create_user' },
+    { sel: '#rb-operatore .role-name', key: 'operatore' },
+    { sel: '#rb-scanner .role-name', key: 'scanner_role' },
+    { sel: '#rb-report .role-name', key: 'report_role' },
+  ],
+};
+
+// Applica tutte le traduzioni per la pagina corrente
+function applyPageTranslations() {
+  const page = window.location.pathname.split('/').pop() || 'index.html';
+
+  // Applica traduzioni comuni
+  (PAGE_TRANSLATIONS.common || []).forEach(rule => applyRule(rule));
+
+  // Applica traduzioni specifiche per questa pagina
+  const pageRules = PAGE_TRANSLATIONS[page] || [];
+  pageRules.forEach(rule => applyRule(rule));
+
+  // Applica anche data-i18n standard
+  applyTranslations();
+}
+
+function applyRule(rule) {
+  try {
+    const els = document.querySelectorAll(rule.sel || 'NONEXISTENT_SELECTOR_XYZ');
+    if (!els.length) return;
+    els.forEach(el => {
+      if (rule.fn) { rule.fn(el); return; }
+      if (rule.onlyIfText) {
+        // Traduci solo se il testo corrente è uno dei valori attesi
+        const cur = el.textContent.trim();
+        if (!rule.onlyIfText.some(v => cur.includes(v))) return;
+      }
+      const val = t(rule.key);
+      if (rule.attr) el.setAttribute(rule.attr, val);
+      else el.textContent = val;
+    });
+  } catch(e) {}
+}
+
+// Sovrascrive setLang per applicare anche le traduzioni di pagina
+const _origSetLang = setLang;
+window.setLang = function(lang) {
+  localStorage.setItem('ecm_lang', lang);
+  applyPageTranslations();
+  updateLangSelector();
+  // Ricostruisce sidebar
+  const sidebar = document.getElementById('ecmSidebar');
+  if (sidebar) {
+    const activeId = sidebar.dataset.activeId;
+    if (typeof renderSidebar === 'function') renderSidebar(activeId);
+  }
+};
+
+window.applyPageTranslations = applyPageTranslations;
+
