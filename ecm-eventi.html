@@ -91,7 +91,33 @@ header{border-bottom:1px solid var(--border);background:var(--surface);position:
   .event-actions{justify-content:stretch}
   .event-actions .btn{flex:1;justify-content:center}
 }
+/* PANNELLO EVENTO */
+.ev-panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;display:none;align-items:flex-end;justify-content:center}
+.ev-panel-overlay.show{display:flex}
+.ev-panel{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;padding:0 0 env(safe-area-inset-bottom)}
+.ev-panel-handle{width:36px;height:4px;background:var(--border2);border-radius:100px;margin:12px auto 0}
+.ev-panel-header{padding:16px 22px 14px;border-bottom:1px solid var(--border)}
+.ev-panel-nome{font-size:19px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
+.ev-panel-meta{font-size:12px;color:var(--text3);display:flex;flex-wrap:wrap;gap:8px}
+.ev-panel-body{padding:16px 22px}
+.ev-panel-section{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin:16px 0 8px}
+.ev-panel-section:first-child{margin-top:0}
+.ep-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ep-btn{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);text-decoration:none;color:var(--text);transition:all .2s;cursor:pointer}
+.ep-btn:hover{border-color:var(--border2);background:var(--surface3);transform:translateY(-1px)}
+.ep-btn.primary{background:var(--accent);border-color:var(--accent);color:white}
+.ep-btn.primary:hover{background:#1a3ce0}
+.ep-icon{font-size:22px;flex-shrink:0}
+.ep-info{flex:1;min-width:0}
+.ep-label{font-size:13px;font-weight:500;line-height:1.3}
+.ep-sub{font-size:10px;color:inherit;opacity:.6;margin-top:1px}
+.ep-stat{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius)}
+.ep-stat-num{font-size:22px;font-weight:700;color:var(--accent)}
+.ep-stat-label{font-size:11px;color:var(--text2)}
+.ep-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
+@media(max-width:400px){.ep-grid{grid-template-columns:1fr}.ep-stats{grid-template-columns:1fr 1fr}}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 <div class="bg-grid"></div>
@@ -152,6 +178,94 @@ header{border-bottom:1px solid var(--border);background:var(--surface);position:
     <div class="modal-btns">
       <button class="btn btn-outline" onclick="closeModal()">Annulla</button>
       <button class="btn btn-warn" id="archiveConfirmBtn">Archivia</button>
+    </div>
+  </div>
+</div>
+
+<!-- PANNELLO EVENTO -->
+<div class="ev-panel-overlay" id="evPanelOverlay" onclick="if(event.target===this)chiudiPannello()">
+  <div class="ev-panel" id="evPanel">
+    <div class="ev-panel-handle"></div>
+    <div class="ev-panel-header">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+        <div>
+          <div class="ev-panel-nome" id="epNome">—</div>
+          <div class="ev-panel-meta" id="epMeta"></div>
+        </div>
+        <button onclick="chiudiPannello()" style="background:var(--surface2);border:1px solid var(--border);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;color:var(--text2)">×</button>
+      </div>
+    </div>
+    <div class="ev-panel-body">
+      <!-- Stats live -->
+      <div class="ep-stats" id="epStats">
+        <div class="ep-stat"><div class="ep-stat-num" id="epIscritti">—</div><div class="ep-stat-label">Iscritti</div></div>
+        <div class="ep-stat"><div class="ep-stat-num" style="color:var(--success)" id="epDentro">—</div><div class="ep-stat-label">Presenti</div></div>
+        <div class="ep-stat"><div class="ep-stat-num" style="color:var(--warn)" id="epCrediti">—</div><div class="ep-stat-label">Crediti ECM</div></div>
+      </div>
+
+      <!-- OPERAZIONI PRINCIPALI -->
+      <div class="ev-panel-section">Gestione accessi</div>
+      <div class="ep-grid">
+        <a class="ep-btn primary" id="epScanner" href="ecm-blocco3.html">
+          <div class="ep-icon">📷</div>
+          <div class="ep-info"><div class="ep-label">Scanner accessi</div><div class="ep-sub">Scansiona entrate/uscite</div></div>
+        </a>
+        <a class="ep-btn" id="epIscrizione" href="ecm-blocco6.html">
+          <div class="ep-icon">✍️</div>
+          <div class="ep-info"><div class="ep-label">Registrazione</div><div class="ep-sub">Iscrizione autonoma</div></div>
+        </a>
+      </div>
+
+      <!-- QUESTIONARI -->
+      <div class="ev-panel-section">Questionari</div>
+      <div class="ep-grid">
+        <a class="ep-btn" id="epSurvey" href="ecm-blocco5.html">
+          <div class="ep-icon">📝</div>
+          <div class="ep-info"><div class="ep-label">Survey</div><div class="ep-sub">Soddisfazione partecipanti</div></div>
+        </a>
+        <a class="ep-btn" id="epQuiz" href="ecm-blocco7.html">
+          <div class="ep-icon">📋</div>
+          <div class="ep-info"><div class="ep-label">Quiz ECM</div><div class="ep-sub">Questionario nominativo</div></div>
+        </a>
+      </div>
+
+      <!-- GESTIONE -->
+      <div class="ev-panel-section" id="epGestioneSection">Gestione evento</div>
+      <div class="ep-grid" id="epGestioneGrid">
+        <a class="ep-btn" id="epBadge" href="ecm-blocco2.html">
+          <div class="ep-icon">🪪</div>
+          <div class="ep-info"><div class="ep-label">Badge QR</div><div class="ep-sub">Genera e stampa badge</div></div>
+        </a>
+        <a class="ep-btn" id="epReport" href="ecm-blocco4.html">
+          <div class="ep-icon">📊</div>
+          <div class="ep-info"><div class="ep-label">Report</div><div class="ep-sub">Presenze ed export</div></div>
+        </a>
+        <a class="ep-btn" id="epSetup" href="#">
+          <div class="ep-icon">⚙️</div>
+          <div class="ep-info"><div class="ep-label">Setup evento</div><div class="ep-sub">Modifica dati e partecipanti</div></div>
+        </a>
+        <a class="ep-btn" id="epConnetti" href="ecm-connetti.html">
+          <div class="ep-icon">📲</div>
+          <div class="ep-info"><div class="ep-label">Connetti tablet</div><div class="ep-sub">Collega dispositivi scanner</div></div>
+        </a>
+      </div>
+
+      <!-- QR RAPIDI -->
+      <div class="ev-panel-section">QR rapidi da condividere</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="flex:1;min-width:130px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center">
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">📝 Survey</div>
+          <div id="epQRSurvey" style="display:flex;justify-content:center"></div>
+        </div>
+        <div style="flex:1;min-width:130px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center">
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">📋 Quiz ECM</div>
+          <div id="epQRQuiz" style="display:flex;justify-content:center"></div>
+        </div>
+        <div style="flex:1;min-width:130px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center">
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">✍️ Iscrizioni</div>
+          <div id="epQRIscrizioni" style="display:flex;justify-content:center"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -391,11 +505,12 @@ function renderEvents(){
           <div class="ev-stat"><div class="ev-stat-num" style="color:var(--accent)" id="crediti_${ev.id}">${ev.creditiTot||0}</div><div class="ev-stat-label">Crediti</div></div>
         </div>
         <div class="event-actions">
-          ${!isSelected?`<button class="btn btn-primary btn-sm" onclick="selectEvent('${ev.id}','${esc(ev.nome||'')}')">✓ Seleziona</button>`:'<button class="btn btn-success btn-sm" disabled>✓ Attivo</button>'}
-          ${(isAdminMode||isOperatoreMode)?`<a href="ecm-blocco1.html?evId=${ev.id}" class="btn btn-outline btn-sm">⚙️ Modifica</a>`:''}
-          ${(isAdminMode||isOperatoreMode)?`<button class="btn btn-primary btn-sm" onclick="openAssegnaUtenti('${ev.id}','${esc(ev.nome||'')}')">👥 Assegna</button>`:''}
-          ${isAdminMode&&!isArchiviato?`<button class="btn btn-warn btn-sm" onclick="openModal('${ev.id}','archivio')">📦 Archivia</button>`:''}
-          ${isAdminMode&&isArchiviato?`<button class="btn btn-outline btn-sm" onclick="openModal('${ev.id}','ripristina')">↩ Ripristina</button>`:''}
+          <button class="btn btn-success btn-sm" style="gap:5px" onclick="apriPannelloEvento('${ev.id}')">▶ Inizia evento</button>
+          ${!isSelected?`<button class="btn btn-outline btn-sm" onclick="selectEvent('${ev.id}','${esc(ev.nome||'')}')">✓ Seleziona</button>`:''}
+          ${(isAdminMode||isOperatoreMode)?`<a href="ecm-blocco1.html?evId=${ev.id}" class="btn btn-outline btn-sm">⚙️</a>`:''}
+          ${(isAdminMode||isOperatoreMode)?`<button class="btn btn-outline btn-sm" onclick="openAssegnaUtenti('${ev.id}','${esc(ev.nome||'')}')">👥</button>`:''}
+          ${isAdminMode&&!isArchiviato?`<button class="btn btn-warn btn-sm" onclick="openModal('${ev.id}','archivio')">📦</button>`:''}
+          ${isAdminMode&&isArchiviato?`<button class="btn btn-outline btn-sm" onclick="openModal('${ev.id}','ripristina')">↩</button>`:''}
         </div>
         ${ev.creatoDA?`<div style="font-size:10px;color:var(--text3);margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">👤 Creato da: ${esc(ev.creatoDA)}</div>`:''}`
       </div>
@@ -473,6 +588,86 @@ async function doArchive(evId,stato){
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── PANNELLO EVENTO ───────────────────────────────────────
+window.apriPannelloEvento = async function(evId){
+  const ev = allEvents.find(e=>e.id===evId) || allEvents[0];
+  if(!ev) return;
+
+  // Seleziona l'evento
+  selectEvent(evId, ev.nome||'');
+
+  // Popola header
+  const fmt=d=>d?new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}):'—';
+  document.getElementById('epNome').textContent = ev.nome||'—';
+  const dateStr = ev.dataFine&&ev.dataFine!==ev.data ? `${fmt(ev.data)} → ${fmt(ev.dataFine)}` : fmt(ev.data);
+  document.getElementById('epMeta').innerHTML = `<span>📅 ${dateStr}</span><span>📍 ${esc(ev.luogo||'—')}</span><span>🎓 ${ev.creditiTot||0} crediti</span>`;
+
+  // Stats
+  document.getElementById('epIscritti').textContent = ev.totPartecipanti||0;
+  document.getElementById('epCrediti').textContent = ev.creditiTot||0;
+  document.getElementById('epDentro').textContent = '…';
+
+  // Aggiorna link con evId
+  document.getElementById('epSetup').href = `ecm-blocco1.html?evId=${evId}`;
+
+  // Mostra/nascondi sezione gestione per scanner
+  const op = JSON.parse(localStorage.getItem('ecm_op_user')||'null');
+  const isScannerOnly = op && op.ruolo === 'scanner';
+  document.getElementById('epGestioneSection').style.display = isScannerOnly ? 'none' : 'block';
+  document.getElementById('epGestioneGrid').style.display = isScannerOnly ? 'none' : 'grid';
+
+  // Mostra pannello
+  document.getElementById('evPanelOverlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+
+  // Genera QR rapidi
+  buildPanelQR(evId);
+
+  // Carica stats live
+  loadPanelStats(evId);
+};
+
+window.chiudiPannello = function(){
+  document.getElementById('evPanelOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+};
+
+function buildPanelQR(evId){
+  const base = window.location.protocol+'//'+window.location.host+window.location.pathname.split('/').slice(0,-1).join('/')+'/';
+  const qrSize = 90;
+
+  // Survey QR
+  const wS = document.getElementById('epQRSurvey');
+  wS.innerHTML = '';
+  new QRCode(wS,{text:`${base}ecm-survey-rispondi.html?evId=${evId}`,width:qrSize,height:qrSize,correctLevel:QRCode.CorrectLevel.M});
+
+  // Quiz QR
+  const wQ = document.getElementById('epQRQuiz');
+  wQ.innerHTML = '';
+  new QRCode(wQ,{text:`${base}ecm-quiz-rispondi.html?evId=${evId}`,width:qrSize,height:qrSize,correctLevel:QRCode.CorrectLevel.M});
+
+  // Iscrizioni QR
+  const wI = document.getElementById('epQRIscrizioni');
+  wI.innerHTML = '';
+  new QRCode(wI,{text:`${base}ecm-blocco6.html`,width:qrSize,height:qrSize,correctLevel:QRCode.CorrectLevel.M});
+}
+
+async function loadPanelStats(evId){
+  try{
+    const logsSnap = await getDocs(collection(db,'eventi',evId,'logs'));
+    const partsSnap = await getDocs(collection(db,'eventi',evId,'partecipanti'));
+    const parts = []; partsSnap.forEach(d=>parts.push({id:d.id,...d.data(),log:[]}));
+    logsSnap.forEach(l=>{const p=parts.find(x=>x.id===l.data().partecipanteId);if(p)p.log.push(l.data());});
+    const dentro = parts.filter(p=>{
+      const e=(p.log||[]).filter(l=>l.tipo==='entrata').length;
+      const u=(p.log||[]).filter(l=>l.tipo==='uscita').length;
+      return e>u;
+    }).length;
+    document.getElementById('epDentro').textContent = dentro;
+    document.getElementById('epIscritti').textContent = parts.length;
+  }catch(e){}
+}
 
 loadEvents();
 </script>
