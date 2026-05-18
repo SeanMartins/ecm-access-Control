@@ -7,6 +7,7 @@
 <title>ECM — Controllo Accessi</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -490,39 +491,109 @@ function renderLog(logs) {
   document.getElementById('logBody').innerHTML=logs.slice(0,200).map(l=>'<tr><td class="mono">'+(l.ora||'—')+'</td><td style="font-size:12px">'+esc(l.nome||'—')+'</td><td class="mono">'+(l.cf||'—')+'</td><td class="'+(l.tipo==='entrata'?'td-in':'td-out')+'">'+(l.tipo==='entrata'?'▶ Entrata':'◀ Uscita')+'</td></tr>').join('');
 }
 
-// OCR
+// OCR — estrae CF dalla foto
 async function doOCR() {
   const file = document.getElementById('ocrFile').files[0];
   if (!file) return;
   const status = document.getElementById('ocrStatus');
-  status.textContent = '🔍 Analisi...'; status.style.color = 'var(--text3)';
+  status.textContent = '🔍 Analisi immagine in corso...';
+  status.style.color = 'var(--text3)';
+
   try {
-    const dataUrl = await new Promise(res => { const r=new FileReader(); r.onload=e=>res(e.target.result); r.readAsDataURL(file); });
-    const img = new Image(); img.src = dataUrl; await new Promise(r=>img.onload=r);
+    // Leggi immagine
+    const dataUrl = await new Promise(res => {
+      const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(file);
+    });
+
+    // Prepara canvas ottimizzato per OCR
+    const img = new Image(); img.src = dataUrl;
+    await new Promise(r => img.onload = r);
     const canvas = document.createElement('canvas');
-    const scale = Math.min(1, 1200/img.width);
-    canvas.width = img.width*scale; canvas.height = img.height*scale;
+    // Scala a max 1600px mantenendo proporzioni
+    const maxW = 1600;
+    const scale = Math.min(1, maxW / img.width);
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
     const ctx = canvas.getContext('2d');
-    ctx.filter = 'contrast(1.5) brightness(1.1)';
+    // Migliora contrasto per OCR
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    if (typeof Tesseract !== 'undefined') {
-      const { data: { text } } = await Tesseract.recognize(canvas.toDataURL(), 'ita', { tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' });
-      const match = text.replace(/[\s\n]/g,'').match(/[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]/);
-      if (match) {
-        document.getElementById('npCF').value = match[0];
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const d = imgData.data;
+    for (let i = 0; i < d.length; i += 4) {
+      // Converti in scala di grigi con contrasto aumentato
+      let gray = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+      // Aumenta contrasto
+      gray = Math.min(255, Math.max(0, (gray - 128) * 1.5 + 128));
+      // Binarizzazione
+      const bw = gray > 140 ? 255 : 0;
+      d[i] = d[i+1] = d[i+2] = bw;
+    }
+    ctx.putImageData(imgData, 0, 0);
+
+    status.textContent = '🔍 Riconoscimento testo...';
+
+    if (typeof Tesseract === 'undefined') {
+      status.textContent = '⚠️ OCR non disponibile — inserisci il CF manualmente';
+      status.style.color = 'var(--warn)';
+      switchNPTab('manuale');
+      return;
+    }
+
+    // Esegui OCR con più lingue per compatibilità
+    const { data: { text } } = await Tesseract.recognize(
+      canvas.toDataURL('image/png'),
+      'eng',
+      { tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ' }
+    );
+
+    console.log('OCR text:', text); // Debug
+
+    // Cerca CF nel testo con pattern flessibile (ignora spazi e caratteri extra)
+    const cleanText = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const cfPattern = /[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]/;
+    const match = cleanText.match(cfPattern);
+
+    if (match) {
+      const cf = match[0];
+      document.getElementById('npCF').value = cf;
+      document.getElementById('npCF').dispatchEvent(new Event('input'));
+      status.textContent = '✓ Codice fiscale trovato: ' + cf;
+      status.style.color = 'var(--success)';
+      switchNPTab('manuale');
+      setTimeout(() => document.getElementById('npNome').focus(), 300);
+    } else {
+      // Prova anche con testo non pulito (potrebbe avere spazi nel CF)
+      const textSpaces = text.toUpperCase().replace(/[^A-Z0-9 ]/g, ' ').replace(/\s+/g,' ');
+      // Cerca 16 caratteri alfanumerici consecutivi
+      const chunks = textSpaces.split(' ');
+      let found = null;
+      for (const chunk of chunks) {
+        const clean = chunk.replace(/[^A-Z0-9]/g,'');
+        if (clean.length === 16 && cfPattern.test(clean)) { found = clean; break; }
+        if (clean.length > 10) {
+          const m = clean.match(cfPattern);
+          if (m) { found = m[0]; break; }
+        }
+      }
+      if (found) {
+        document.getElementById('npCF').value = found;
         document.getElementById('npCF').dispatchEvent(new Event('input'));
-        status.textContent = '✓ CF trovato: ' + match[0]; status.style.color = 'var(--success)';
+        status.textContent = '✓ Codice fiscale trovato: ' + found;
+        status.style.color = 'var(--success)';
         switchNPTab('manuale');
-        document.getElementById('npNome').focus();
+        setTimeout(() => document.getElementById('npNome').focus(), 300);
       } else {
-        status.textContent = '⚠️ CF non trovato — inseriscilo manualmente'; status.style.color = 'var(--warn)';
+        status.textContent = '⚠️ CF non rilevato — inseriscilo manualmente nella scheda Manuale';
+        status.style.color = 'var(--warn)';
         switchNPTab('manuale');
       }
-    } else {
-      status.textContent = 'OCR non disponibile — inserisci il CF manualmente';
-      switchNPTab('manuale');
     }
-  } catch(err) { status.textContent = 'Errore: '+err.message; }
+  } catch(err) {
+    console.error('OCR error:', err);
+    status.textContent = '⚠️ Errore OCR — inserisci il CF manualmente';
+    status.style.color = 'var(--warn)';
+    switchNPTab('manuale');
+  }
 }
 
 // Salva nuovo partecipante
