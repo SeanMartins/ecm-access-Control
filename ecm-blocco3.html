@@ -180,28 +180,43 @@ footer{position:fixed;bottom:56px;left:0;right:0;background:var(--surface);borde
           </div>
           <div class="np-body" id="npBody">
             <div class="np-tabs">
-              <button class="np-tab active" id="tabManuale">⌨️ Manuale</button>
-              <button class="np-tab" id="tabFoto">📷 Foto CF</button>
+              <button class="np-tab active" id="tabScan">📷 Scanner CF live</button>
+              <button class="np-tab" id="tabManuale">⌨️ Inserimento manuale</button>
             </div>
-            <div class="np-pane active" id="paneManuale">
-              <input type="text" class="np-input" id="npCF" placeholder="Codice Fiscale *" maxlength="16">
-              <div id="npCFHint" style="font-size:11px;color:var(--text3);margin:-4px 0 8px"></div>
+
+            <!-- TAB 1: SCANNER LIVE -->
+            <div class="np-pane active" id="paneScan">
+              <div style="position:relative;border-radius:var(--radius);overflow:hidden;background:#000;aspect-ratio:1.5;margin-bottom:8px">
+                <video id="cfVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:block"></video>
+                <div id="cfScanOverlay" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.6);gap:8px">
+                  <div style="font-size:32px">📷</div>
+                  <div style="font-size:12px;color:white;font-weight:500">Premi Avvia per scansionare</div>
+                </div>
+                <!-- Mirino -->
+                <div id="cfMirino" style="display:none;position:absolute;inset:0;pointer-events:none">
+                  <div style="position:absolute;top:50%;left:10%;right:10%;transform:translateY(-50%);height:40px;border:2px solid rgba(43,78,255,.8);border-radius:6px;background:rgba(43,78,255,.1)"></div>
+                  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;color:rgba(255,255,255,.7);margin-top:26px;white-space:nowrap">Allinea il CF nella casella blu</div>
+                </div>
+              </div>
+              <div id="cfScanStatus" style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:8px;min-height:16px"></div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-success btn-sm" style="flex:1" id="btnAvviaScan">📷 Avvia scanner CF</button>
+                <button class="btn btn-outline btn-sm" id="btnFermaScan" style="display:none">⏹ Ferma</button>
+              </div>
+            </div>
+
+            <!-- TAB 2: MANUALE -->
+            <div class="np-pane" id="paneManuale">
+              <input type="text" class="np-input" id="npCF" placeholder="Codice Fiscale *" maxlength="16" autocapitalize="characters" autocomplete="off" spellcheck="false">
+              <div id="npCFHint" style="font-size:11px;margin:-4px 0 8px;min-height:14px"></div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
                 <input type="text" class="np-input" id="npNome" placeholder="Nome *" style="margin-bottom:0">
                 <input type="text" class="np-input" id="npCognome" placeholder="Cognome *" style="margin-bottom:0">
               </div>
-              <input type="text" class="np-input" id="npProf" placeholder="Professione">
+              <input type="text" class="np-input" id="npProf" placeholder="Professione (opzionale)">
             </div>
-            <div class="np-pane" id="paneFoto">
-              <div class="ocr-zone">
-                <input type="file" id="ocrFile" accept="image/*" capture="environment">
-                <div style="font-size:32px;margin-bottom:8px">📄</div>
-                <div style="font-size:13px;font-weight:500;color:var(--text2)">Fotografa la tessera sanitaria</div>
-                <div style="font-size:11px;color:var(--text3);margin-top:4px">Tocca per aprire la fotocamera</div>
-              </div>
-              <div id="ocrStatus" style="font-size:12px;color:var(--text3);text-align:center;min-height:16px"></div>
-            </div>
-            <div style="display:flex;gap:8px;margin-top:8px">
+
+            <div style="display:flex;gap:8px;margin-top:10px">
               <button class="btn btn-success" style="flex:1;font-size:13px" id="btnSalvaNP">✓ Salva e registra entrata</button>
               <button class="btn btn-outline btn-sm" id="btnResetNP">✕</button>
             </div>
@@ -322,8 +337,12 @@ function initUI() {
   });
 
   // NP tabs
+  document.getElementById('tabScan').addEventListener('click', () => switchNPTab('scan'));
   document.getElementById('tabManuale').addEventListener('click', () => switchNPTab('manuale'));
-  document.getElementById('tabFoto').addEventListener('click', () => switchNPTab('foto'));
+
+  // Scanner CF live
+  document.getElementById('btnAvviaScan').addEventListener('click', avviaScannerCF);
+  document.getElementById('btnFermaScan').addEventListener('click', fermaScannerCF);
 
   // CF input
   document.getElementById('npCF').addEventListener('input', function() {
@@ -346,8 +365,6 @@ function initUI() {
     }
   });
 
-  // OCR
-  document.getElementById('ocrFile').addEventListener('change', doOCR);
 
   // Salva NP
   document.getElementById('btnSalvaNP').addEventListener('click', salvaNP);
@@ -359,10 +376,12 @@ function initUI() {
 }
 
 function switchNPTab(tab) {
+  // Ferma scanner se si cambia tab
+  if (tab !== 'scan') fermaScannerCF();
+  document.getElementById('tabScan').classList.toggle('active', tab === 'scan');
   document.getElementById('tabManuale').classList.toggle('active', tab === 'manuale');
-  document.getElementById('tabFoto').classList.toggle('active', tab === 'foto');
+  document.getElementById('paneScan').classList.toggle('active', tab === 'scan');
   document.getElementById('paneManuale').classList.toggle('active', tab === 'manuale');
-  document.getElementById('paneFoto').classList.toggle('active', tab === 'foto');
 }
 
 function setMode(m) {
@@ -491,111 +510,110 @@ function renderLog(logs) {
   document.getElementById('logBody').innerHTML=logs.slice(0,200).map(l=>'<tr><td class="mono">'+(l.ora||'—')+'</td><td style="font-size:12px">'+esc(l.nome||'—')+'</td><td class="mono">'+(l.cf||'—')+'</td><td class="'+(l.tipo==='entrata'?'td-in':'td-out')+'">'+(l.tipo==='entrata'?'▶ Entrata':'◀ Uscita')+'</td></tr>').join('');
 }
 
-// OCR — estrae CF dalla foto
-async function doOCR() {
-  const file = document.getElementById('ocrFile').files[0];
-  if (!file) return;
-  const status = document.getElementById('ocrStatus');
-  status.textContent = '🔍 Analisi immagine in corso...';
-  status.style.color = 'var(--text3)';
+// ── SCANNER CF LIVE ──────────────────────────────────
+let cfStream = null;
+let cfScanInterval = null;
+let cfScanning = false;
 
+async function avviaScannerCF() {
   try {
-    // Leggi immagine
-    const dataUrl = await new Promise(res => {
-      const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(file);
+    cfStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
     });
+    const video = document.getElementById('cfVideo');
+    video.srcObject = cfStream;
+    await video.play();
+    cfScanning = true;
+    document.getElementById('cfScanOverlay').style.display = 'none';
+    document.getElementById('cfMirino').style.display = 'block';
+    document.getElementById('btnAvviaScan').style.display = 'none';
+    document.getElementById('btnFermaScan').style.display = 'inline-flex';
+    document.getElementById('cfScanStatus').textContent = '🔍 Scansione in corso — avvicina il CF...';
+    document.getElementById('cfScanStatus').style.color = 'var(--accent)';
 
-    // Prepara canvas ottimizzato per OCR
-    const img = new Image(); img.src = dataUrl;
-    await new Promise(r => img.onload = r);
-    const canvas = document.createElement('canvas');
-    // Scala a max 1600px mantenendo proporzioni
-    const maxW = 1600;
-    const scale = Math.min(1, maxW / img.width);
-    canvas.width = Math.round(img.width * scale);
-    canvas.height = Math.round(img.height * scale);
-    const ctx = canvas.getContext('2d');
-    // Migliora contrasto per OCR
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const d = imgData.data;
-    for (let i = 0; i < d.length; i += 4) {
-      // Converti in scala di grigi con contrasto aumentato
-      let gray = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
-      // Aumenta contrasto
-      gray = Math.min(255, Math.max(0, (gray - 128) * 1.5 + 128));
-      // Binarizzazione
-      const bw = gray > 140 ? 255 : 0;
-      d[i] = d[i+1] = d[i+2] = bw;
-    }
-    ctx.putImageData(imgData, 0, 0);
-
-    status.textContent = '🔍 Riconoscimento testo...';
-
-    if (typeof Tesseract === 'undefined') {
-      status.textContent = '⚠️ OCR non disponibile — inserisci il CF manualmente';
-      status.style.color = 'var(--warn)';
-      switchNPTab('manuale');
-      return;
+    // Carica Tesseract worker una volta sola
+    let worker = null;
+    if (typeof Tesseract !== 'undefined') {
+      worker = await Tesseract.createWorker('eng');
+      await worker.setParameters({ tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' });
     }
 
-    // Esegui OCR con più lingue per compatibilità
-    const { data: { text } } = await Tesseract.recognize(
-      canvas.toDataURL('image/png'),
-      'eng',
-      { tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ' }
-    );
-
-    console.log('OCR text:', text); // Debug
-
-    // Cerca CF nel testo con pattern flessibile (ignora spazi e caratteri extra)
-    const cleanText = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    const cfPattern = /[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]/;
-    const match = cleanText.match(cfPattern);
-
-    if (match) {
-      const cf = match[0];
-      document.getElementById('npCF').value = cf;
-      document.getElementById('npCF').dispatchEvent(new Event('input'));
-      status.textContent = '✓ Codice fiscale trovato: ' + cf;
-      status.style.color = 'var(--success)';
-      switchNPTab('manuale');
-      setTimeout(() => document.getElementById('npNome').focus(), 300);
-    } else {
-      // Prova anche con testo non pulito (potrebbe avere spazi nel CF)
-      const textSpaces = text.toUpperCase().replace(/[^A-Z0-9 ]/g, ' ').replace(/\s+/g,' ');
-      // Cerca 16 caratteri alfanumerici consecutivi
-      const chunks = textSpaces.split(' ');
-      let found = null;
-      for (const chunk of chunks) {
-        const clean = chunk.replace(/[^A-Z0-9]/g,'');
-        if (clean.length === 16 && cfPattern.test(clean)) { found = clean; break; }
-        if (clean.length > 10) {
-          const m = clean.match(cfPattern);
-          if (m) { found = m[0]; break; }
+    cfScanInterval = setInterval(async () => {
+      if (!cfScanning) return;
+      try {
+        const vid = document.getElementById('cfVideo');
+        if (!vid.videoWidth) return;
+        // Cattura frame
+        const canvas = document.createElement('canvas');
+        canvas.width = vid.videoWidth;
+        canvas.height = vid.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(vid, 0, 0);
+        // Ritaglia zona centrale (dove si trova il CF)
+        const cropY = Math.floor(canvas.height * 0.35);
+        const cropH = Math.floor(canvas.height * 0.3);
+        const cropCanvas = document.createElement('canvas');
+        cropCanvas.width = canvas.width;
+        cropCanvas.height = cropH;
+        const cropCtx = cropCanvas.getContext('2d');
+        // Preprocessing: scala di grigi + contrasto
+        cropCtx.drawImage(canvas, 0, cropY, canvas.width, cropH, 0, 0, canvas.width, cropH);
+        const imgData = cropCtx.getImageData(0, 0, cropCanvas.width, cropCanvas.height);
+        const d = imgData.data;
+        for (let i = 0; i < d.length; i += 4) {
+          let g = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+          g = Math.min(255, Math.max(0, (g - 128) * 1.8 + 128));
+          d[i] = d[i+1] = d[i+2] = g > 130 ? 255 : 0;
         }
-      }
-      if (found) {
-        document.getElementById('npCF').value = found;
-        document.getElementById('npCF').dispatchEvent(new Event('input'));
-        status.textContent = '✓ Codice fiscale trovato: ' + found;
-        status.style.color = 'var(--success)';
-        switchNPTab('manuale');
-        setTimeout(() => document.getElementById('npNome').focus(), 300);
-      } else {
-        status.textContent = '⚠️ CF non rilevato — inseriscilo manualmente nella scheda Manuale';
-        status.style.color = 'var(--warn)';
-        switchNPTab('manuale');
-      }
-    }
-  } catch(err) {
-    console.error('OCR error:', err);
-    status.textContent = '⚠️ Errore OCR — inserisci il CF manualmente';
-    status.style.color = 'var(--warn)';
-    switchNPTab('manuale');
+        cropCtx.putImageData(imgData, 0, 0);
+
+        let text = '';
+        if (worker) {
+          const { data } = await worker.recognize(cropCanvas);
+          text = data.text;
+        }
+
+        // Cerca CF nel testo
+        const clean = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const match = clean.match(/[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]/);
+        if (match) {
+          // CF trovato!
+          fermaScannerCF();
+          if (worker) await worker.terminate();
+          const cf = match[0];
+          document.getElementById('npCF').value = cf;
+          document.getElementById('npCF').dispatchEvent(new Event('input'));
+          document.getElementById('cfScanStatus').textContent = '✓ CF trovato: ' + cf;
+          document.getElementById('cfScanStatus').style.color = 'var(--success)';
+          switchNPTab('manuale');
+          setTimeout(() => document.getElementById('npNome').focus(), 300);
+        }
+      } catch(e) {}
+    }, 1200); // Scansiona ogni 1.2 secondi
+
+  } catch(e) {
+    document.getElementById('cfScanStatus').textContent = '⚠️ Fotocamera non disponibile — usa inserimento manuale';
+    document.getElementById('cfScanStatus').style.color = 'var(--warn)';
   }
 }
 
+function fermaScannerCF() {
+  cfScanning = false;
+  if (cfScanInterval) { clearInterval(cfScanInterval); cfScanInterval = null; }
+  if (cfStream) { cfStream.getTracks().forEach(t => t.stop()); cfStream = null; }
+  const video = document.getElementById('cfVideo');
+  if (video) video.srcObject = null;
+  const overlay = document.getElementById('cfScanOverlay');
+  if (overlay) overlay.style.display = 'flex';
+  const mirino = document.getElementById('cfMirino');
+  if (mirino) mirino.style.display = 'none';
+  const btnA = document.getElementById('btnAvviaScan');
+  if (btnA) btnA.style.display = 'inline-flex';
+  const btnF = document.getElementById('btnFermaScan');
+  if (btnF) btnF.style.display = 'none';
+}
+
+// ── SALVA NUOVO PARTECIPANTE ──────────────────────────
 // Salva nuovo partecipante
 async function salvaNP() {
   const cf = document.getElementById('npCF').value.trim().toUpperCase();
