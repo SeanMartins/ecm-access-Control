@@ -115,7 +115,7 @@ select.form-input{cursor:pointer}
   <!-- SELEZIONE EVENTO -->
   <div class="card">
     <div class="card-title">Evento</div>
-    <select class="survey-select" id="evSelect" onchange="onEvChange()">
+    <select class="survey-select" id="evSelect">
       <option value="">— Seleziona evento —</option>
     </select>
     <div id="evInfo" style="display:none;font-size:12px;color:var(--text2);margin-top:-8px;margin-bottom:4px" id="evInfoText"></div>
@@ -265,6 +265,9 @@ if(savedEvId&&allEventi.find(e=>e.id===savedEvId)){
   sel.value=savedEvId;
   onEvChange();
 }
+
+// Aggiungi listener sul select
+document.getElementById('evSelect').addEventListener('change', () => window.onEvChange());
 
 window.onEvChange=async function(){
   currentEvId=sel.value;

@@ -220,6 +220,7 @@ main{max-width:680px;margin:0 auto;padding:32px 20px 60px}
 <script type="module">
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
 const app=getApps().length?getApps()[0]:initializeApp(FB);
@@ -341,6 +342,9 @@ window.doRegistra=async function(){
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Registrazione...';
 
   try{
+    // Login anonimo Firebase per permessi Firestore
+    try{ await signInAnonymously(getAuth(app)); }catch(e){ console.warn('anon auth:', e); }
+
     const evId=selectedEvent.id;
     // Controlla se già iscritto
     const partsSnap=await getDocs(collection(db,'eventi',evId,'partecipanti'));
