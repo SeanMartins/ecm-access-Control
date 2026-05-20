@@ -4,7 +4,7 @@
 
   const LANGS = {
     it: { name:'Italiano', flag:'🇮🇹',
-      nav_main:'Principale', nav_events:'I miei eventi', nav_dashboard:'Dashboard',
+      nav_main:'Principale', nav_events:'I miei eventi', nav_dashboard:'MMG — ECM Access Control',
       nav_event_mgmt:'Gestione evento', nav_setup:'Setup evento', nav_badge:'Generazione badge',
       nav_scanner:'Controllo accessi', nav_report:'Report presenze', nav_participants:'Partecipanti',
       nav_register:'Registrazione', nav_survey:'Survey', nav_quiz:'Questionario ECM',
@@ -32,7 +32,7 @@
       ver_label:'ECM Access Control'
     },
     en: { name:'English', flag:'🇬🇧',
-      nav_main:'Main', nav_events:'My events', nav_dashboard:'Dashboard',
+      nav_main:'Main', nav_events:'My events', nav_dashboard:'MMG — ECM Access Control',
       nav_event_mgmt:'Event management', nav_setup:'Event setup', nav_badge:'Badge generation',
       nav_scanner:'Access control', nav_report:'Attendance report', nav_participants:'Participants',
       nav_register:'Registration', nav_survey:'Survey', nav_quiz:'ECM Quiz',
@@ -116,7 +116,7 @@
       ver_label:'ECM Access Control'
     },
     de: { name:'Deutsch', flag:'🇩🇪',
-      nav_main:'Hauptmenü', nav_events:'Meine Veranstaltungen', nav_dashboard:'Dashboard',
+      nav_main:'Hauptmenü', nav_events:'Meine Veranstaltungen', nav_dashboard:'MMG — ECM Access Control',
       nav_event_mgmt:'Veranstaltungsverwaltung', nav_setup:'Einrichten', nav_badge:'Badge-Erstellung',
       nav_scanner:'Zugangskontrolle', nav_report:'Anwesenheitsbericht', nav_participants:'Teilnehmer',
       nav_register:'Registrierung', nav_survey:'Umfrage', nav_quiz:'ECM-Quiz',

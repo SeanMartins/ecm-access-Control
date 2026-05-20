@@ -2,7 +2,7 @@
 (function(window) {
   'use strict';
 
-  var VERSION = 'v2.2.0';
+  var VERSION = 'v2.3.0';
 
   // ── ICONE SVG ──────────────────────────────────────
   var IC = {
