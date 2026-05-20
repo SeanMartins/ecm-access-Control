@@ -74,8 +74,9 @@ select.form-input{cursor:pointer}
 .sess-meta{font-size:12px;color:var(--text2);display:flex;flex-wrap:wrap;gap:10px}
 /* Modo toggle */
 .mode-toggle{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px}
-.mode-btn{padding:9px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;border:none;background:var(--surface2);color:var(--text3);font-family:'Inter',sans-serif;transition:all .2s}
+.mode-btn{padding:12px 8px;text-align:center;cursor:pointer;border:none;background:var(--surface2);color:var(--text3);font-family:'Inter',sans-serif;transition:all .2s;line-height:1.3}
 .mode-btn.active{background:var(--congress);color:white}
+.mode-btn:hover:not(.active){background:var(--congress-light);color:var(--congress)}
 /* Spinner */
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -104,15 +105,35 @@ select.form-input{cursor:pointer}
   <div class="ecm-content">
     <!-- Selezione evento e sessione -->
     <div class="card" style="margin-bottom:16px">
+      <!-- Toggle modalità -->
+      <div style="margin-bottom:16px">
+        <label class="field-label" style="margin-bottom:8px">Modalità check-in</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+          <button class="mode-btn active" id="modeEvento" data-mode="evento">
+            <div style="font-size:18px;margin-bottom:2px">🎪</div>
+            <div style="font-weight:600;font-size:13px">Intero evento</div>
+            <div style="font-size:11px;opacity:.7">Registra entrata/uscita</div>
+          </button>
+          <button class="mode-btn" id="modeSessione" data-mode="sessione">
+            <div style="font-size:18px;margin-bottom:2px">📅</div>
+            <div style="font-weight:600;font-size:13px">Per sessione</div>
+            <div style="font-size:11px;opacity:.7">Check-in sessione specifica</div>
+          </button>
+        </div>
+      </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end">
         <div>
           <label class="field-label">Evento</label>
           <select class="form-input" id="evSelect"><option value="">— Seleziona evento —</option></select>
         </div>
-        <div>
+        <div id="sessSelectWrap">
           <label class="field-label">Sessione</label>
           <select class="form-input" id="sessSelect" disabled><option value="">— Prima seleziona evento —</option></select>
         </div>
+      </div>
+      <!-- Info modalità corrente -->
+      <div id="modeInfo" style="margin-top:10px;padding:8px 12px;border-radius:var(--radius);background:var(--congress-light);border:1px solid rgba(124,58,237,.15);font-size:12px;color:var(--congress)">
+        🎪 <strong>Intero evento:</strong> registra entrata e uscita dall'evento — uguale al Controllo Accessi standard
       </div>
     </div>
 
@@ -181,8 +202,9 @@ select.form-input{cursor:pointer}
         <div class="card">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
             <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)">Presenti alla sessione</div>
-            <div style="display:flex;gap:8px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
               <button class="btn btn-outline btn-sm" id="btnRefresh">↻ Aggiorna</button>
+              <a href="ecm-blocco3.html" class="btn btn-outline btn-sm" id="btnVaiAccessi" style="display:none">🔀 Accessi evento</a>
               <a href="congress-programma.html" class="btn btn-outline btn-sm">← Programma</a>
             </div>
           </div>
@@ -219,10 +241,49 @@ let html5QrCode=null, cooldown=false;
 let unsubscribePresenti=null;
 
 // ── INIT UI ────────────────────────────────────────────
+let currentMode = 'evento'; // 'evento' | 'sessione'
+
 document.getElementById('btnAvvia').addEventListener('click', avviaCamera);
 document.getElementById('btnFerma').addEventListener('click', fermaCamera);
 document.getElementById('searchInput').addEventListener('input', doSearch);
-document.getElementById('btnRefresh').addEventListener('click', () => { if(currentSessId) loadPresenti(currentSessId); });
+document.getElementById('btnRefresh').addEventListener('click', () => {
+  if (currentMode === 'sessione' && currentSessId) loadPresenti(currentSessId);
+  else if (currentMode === 'evento' && currentEvId) loadPresentiEvento();
+});
+
+// Toggle modalità
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentMode = btn.dataset.mode;
+
+    const sessWrap = document.getElementById('sessSelectWrap');
+    const modeInfo = document.getElementById('modeInfo');
+    const sessioneInfo = document.getElementById('sessioneInfo');
+    const btnVaiAccessi = document.getElementById('btnVaiAccessi');
+
+    if (currentMode === 'evento') {
+      sessWrap.style.opacity = '.4';
+      sessWrap.style.pointerEvents = 'none';
+      modeInfo.innerHTML = '🎪 <strong>Intero evento:</strong> registra entrata e uscita dall'evento — uguale al Controllo Accessi standard';
+      sessioneInfo.style.display = 'none';
+      if (btnVaiAccessi) btnVaiAccessi.style.display = 'inline-flex';
+      // Ricarica presenti evento
+      if (currentEvId) loadPresentiEvento();
+      document.getElementById('btnAvvia').disabled = !currentEvId;
+    } else {
+      sessWrap.style.opacity = '1';
+      sessWrap.style.pointerEvents = 'auto';
+      modeInfo.innerHTML = '📅 <strong>Per sessione:</strong> registra la presenza alla sessione specifica selezionata';
+      if (btnVaiAccessi) btnVaiAccessi.style.display = 'none';
+      document.getElementById('btnAvvia').disabled = !currentSessId;
+      if (currentSessId) loadPresenti(currentSessId);
+    }
+    // Resetta risultato scanner
+    document.getElementById('resCard').className = 'result-card';
+  });
+});
 
 // ── INIT FIREBASE ──────────────────────────────────────
 async function initApp() {
@@ -331,6 +392,26 @@ function onSessSelect(sessId) {
   loadPresenti(sessId);
 }
 
+async function loadPresentiEvento() {
+  if (unsubscribePresenti) unsubscribePresenti();
+  if (!currentEvId || !db) return;
+  try {
+    const q = collection(db,'eventi',currentEvId,'logs');
+    unsubscribePresenti = onSnapshot(q, snap => {
+      const logs = [];
+      snap.forEach(d => logs.push({id:d.id,...d.data()}));
+      // Calcola chi è dentro ora
+      const stato = {};
+      logs.sort((a,b)=>(a.ts?.seconds||0)-(b.ts?.seconds||0))
+          .forEach(l => { stato[l.partecipanteId] = l; });
+      presenti = Object.values(stato).filter(l => l.tipo === 'entrata')
+        .map(l => ({partecipanteId:l.partecipanteId, nome:l.nome?.split(' ').slice(1).join(' ')||'', cognome:l.nome?.split(' ')[0]||'', cf:l.cf||'', ora:l.ora||'—'}));
+      renderPresenti();
+      updateStats();
+    });
+  } catch(e) { console.error(e); }
+}
+
 async function loadPresenti(sessId) {
   if (unsubscribePresenti) unsubscribePresenti();
   if (!currentEvId || !db) return;
@@ -426,25 +507,48 @@ async function registraCheckin(p) {
   const now = new Date();
   const ora = now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 
-  // Controlla se già presente
-  const giaPres = presenti.find(x => x.partecipanteId === p.id);
-  if (giaPres) {
-    showResult('warn', p.nome+' '+p.cognome, p.cf, '⚠️ Già registrato alle '+giaPres.ora, ora);
-    vibra('warn');
-    return;
-  }
+  await signInAnonymously(auth);
 
-  try {
-    await signInAnonymously(auth);
-    await setDoc(
-      doc(db,'eventi',currentEvId,'sessioni',currentSessId,'checkin',p.id),
-      { partecipanteId: p.id, nome: p.nome, cognome: p.cognome, cf: p.cf||'',
-        ora, ts: serverTimestamp() }
-    );
-    showResult('ok', p.nome+' '+p.cognome, p.cf, '✓ Check-in registrato', ora);
-    vibra('in');
-  } catch(e) {
-    showResult('err', p.nome+' '+p.cognome, p.cf, '❌ Errore: '+e.message, ora);
+  if (currentMode === 'sessione') {
+    // CHECK-IN SESSIONE
+    const giaPres = presenti.find(x => x.partecipanteId === p.id);
+    if (giaPres) {
+      showResult('warn', p.nome+' '+p.cognome, p.cf, '⚠️ Già registrato alle '+giaPres.ora, ora);
+      vibra('warn'); return;
+    }
+    try {
+      await setDoc(
+        doc(db,'eventi',currentEvId,'sessioni',currentSessId,'checkin',p.id),
+        { partecipanteId:p.id, nome:p.nome, cognome:p.cognome, cf:p.cf||'', ora, ts:serverTimestamp() }
+      );
+      showResult('ok', p.nome+' '+p.cognome, p.cf, '✓ Check-in sessione registrato', ora);
+      vibra('in');
+    } catch(e) { showResult('err', p.nome+' '+p.cognome, p.cf, '❌ Errore: '+e.message, ora); }
+
+  } else {
+    // ENTRATA/USCITA EVENTO (come Blocco 3)
+    const logs = presenti; // qui presenti contiene tutti i log
+    const ultLog = [...(logs.filter(l=>l.partecipanteId===p.id))].pop();
+    const inside = ultLog?.tipo === 'entrata' || presenti.find(x=>x.partecipanteId===p.id);
+    try {
+      if (inside) {
+        // Uscita
+        await addDoc(collection(db,'eventi',currentEvId,'logs'), {
+          partecipanteId:p.id, tipo:'uscita', ora, tsISO:now.toISOString(),
+          ts:serverTimestamp(), nome:(p.cognome+' '+p.nome).trim(), cf:p.cf||''
+        });
+        showResult('warn', p.nome+' '+p.cognome, p.cf, '◀ Uscita registrata', ora);
+        vibra('out');
+      } else {
+        // Entrata
+        await addDoc(collection(db,'eventi',currentEvId,'logs'), {
+          partecipanteId:p.id, tipo:'entrata', ora, tsISO:now.toISOString(),
+          ts:serverTimestamp(), nome:(p.cognome+' '+p.nome).trim(), cf:p.cf||''
+        });
+        showResult('ok', p.nome+' '+p.cognome, p.cf, '▶ Entrata registrata', ora);
+        vibra('in');
+      }
+    } catch(e) { showResult('err', p.nome+' '+p.cognome, p.cf, '❌ Errore: '+e.message, ora); }
   }
 }
 
