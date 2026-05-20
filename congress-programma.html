@@ -4,27 +4,14 @@
 <meta charset="UTF-8"/>
 <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Congress — Programma</title>
+<title>Congress Manager</title>
 <link rel="icon" type="image/png" href="logo.png">
-<link rel="apple-touch-icon" href="logo.png">
-<meta name="theme-color" content="#8B0000">
 <link rel="stylesheet" href="ecm-layout.css">
 <script src="ecm-i18n.js"></script>
 <script src="ecm-layout.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#F4F6F9;--surface:#FFF;--surface2:#F0F2F5;--border:#DDE1E9;
-  --text:#1A1D2E;--text2:#5A5F7A;--text3:#9499B0;
-  --accent:#2563EB;--accent-light:#EEF3FE;
-  --congress:#7C3AED;--congress-light:#F5F3FF;--congress-dark:#5B21B6;
-  --success:#059669;--success-light:#ECFDF5;
-  --danger:#DC2626;--danger-light:#FEF2F2;
-  --warn:#D97706;--warn-light:#FFFBEB;
-  --radius:10px;--radius-lg:14px;
-  --shadow:0 1px 3px rgba(0,0,0,.1),0 4px 12px rgba(0,0,0,.07);
-}
+:root{--bg:#F4F6F9;--surface:#FFF;--surface2:#F0F2F5;--border:#DDE1E9;--text:#1A1D2E;--text2:#5A5F7A;--text3:#9499B0;--accent:#2563EB;--congress:#7C3AED;--congress-light:#F5F3FF;--congress-dark:#5B21B6;--success:#059669;--success-light:#ECFDF5;--danger:#DC2626;--danger-light:#FEF2F2;--warn:#D97706;--warn-light:#FFFBEB;--radius:10px;--radius-lg:14px;--shadow:0 1px 3px rgba(0,0,0,.1),0 4px 12px rgba(0,0,0,.07)}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
 .ecm-content{padding:24px}
@@ -32,32 +19,22 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .page-title{font-size:22px;font-weight:700;letter-spacing:-.02em}
 .page-sub{font-size:13px;color:var(--text3);margin-top:2px}
 .badge-congress{display:inline-flex;align-items:center;gap:6px;background:var(--congress-light);color:var(--congress);border:1px solid rgba(124,58,237,.2);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600}
-/* Bottoni */
 .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none}
-.btn-primary{background:var(--accent);color:white}.btn-primary:hover{background:#1D4ED8}
 .btn-congress{background:var(--congress);color:white}.btn-congress:hover{background:var(--congress-dark)}
 .btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{background:var(--surface2)}
 .btn-danger{background:var(--danger-light);color:var(--danger);border:1px solid rgba(220,38,38,.2)}
-.btn-success{background:var(--success);color:white}
 .btn-sm{padding:5px 12px;font-size:12px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
-/* Stats */
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow)}
 .stat-val{font-size:28px;font-weight:700;letter-spacing:-.02em}
 .stat-label{font-size:11px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
-/* Tabs */
 .main-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:20px}
 .main-tab{padding:10px 20px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;background:none;border-left:none;border-right:none;border-top:none;font-family:'Inter',sans-serif}
 .main-tab.active{color:var(--congress);border-bottom-color:var(--congress)}
-.main-tab:hover{color:var(--text)}
 .tab-pane{display:none}.tab-pane.active{display:block}
-/* Card */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
-.card-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
-/* Form */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 .form-group{display:flex;flex-direction:column;gap:5px}
 .form-group.span2{grid-column:span 2}
 .field-label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase}
@@ -65,75 +42,57 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .form-input:focus{border-color:var(--congress);box-shadow:0 0 0 3px rgba(124,58,237,.1);background:white}
 select.form-input{cursor:pointer}
 textarea.form-input{resize:vertical;min-height:80px}
-/* Programma timeline */
 .timeline-day{margin-bottom:28px}
 .day-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
 .day-badge{background:var(--congress);color:white;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600}
 .day-line{flex:1;height:1px;background:var(--border)}
 .sessions-list{display:flex;flex-direction:column;gap:8px}
-.session-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;display:flex;gap:14px;align-items:flex-start;transition:all .2s;cursor:pointer}
+.session-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;display:flex;gap:14px;align-items:flex-start;transition:all .2s}
 .session-item:hover{border-color:var(--congress);box-shadow:0 0 0 2px rgba(124,58,237,.1)}
 .session-time{font-family:'DM Mono',monospace;font-size:12px;color:var(--text3);min-width:100px;padding-top:2px}
 .session-accent{width:3px;border-radius:100px;align-self:stretch;flex-shrink:0}
 .session-body{flex:1;min-width:0}
 .session-title{font-size:14px;font-weight:600;margin-bottom:4px}
 .session-meta{display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--text3)}
-.session-meta span{display:flex;align-items:center;gap:4px}
 .session-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
 .tag{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
 .tag-sala{background:var(--congress-light);color:var(--congress)}
-.tag-type-keynote{background:#FEF3C7;color:#92400E}
-.tag-type-workshop{background:#D1FAE5;color:#065F46}
-.tag-type-panel{background:#E0E7FF;color:#3730A3}
-.tag-type-break{background:var(--surface2);color:var(--text3)}
-.session-posti{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px}
-.posti-ok{background:var(--success-light);color:var(--success)}
-.posti-warn{background:var(--warn-light);color:var(--warn)}
-.posti-full{background:var(--danger-light);color:var(--danger)}
-.session-actions{display:flex;gap:6px;flex-shrink:0;margin-top:2px}
-/* Relatori */
+.tag-keynote{background:#FEF3C7;color:#92400E}
+.tag-workshop{background:#D1FAE5;color:#065F46}
+.tag-panel{background:#E0E7FF;color:#3730A3}
+.tag-break{background:var(--surface2);color:var(--text3)}
 .relatori-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
 .relatore-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;box-shadow:var(--shadow);transition:all .2s}
 .relatore-card:hover{border-color:var(--congress);transform:translateY(-2px)}
 .rel-avatar{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--border)}
 .rel-avatar-ph{width:56px;height:56px;border-radius:50%;background:var(--congress);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:white;flex-shrink:0}
-.rel-nome{font-size:15px;font-weight:600;margin-bottom:2px}
-.rel-titolo{font-size:12px;color:var(--text3);margin-bottom:6px}
-.rel-sessioni{font-size:11px;color:var(--congress);font-weight:500}
-/* Sale */
-.sale-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.sale-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
 .sala-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow)}
-.sala-nome{font-size:15px;font-weight:600;margin-bottom:4px}
-.sala-capacita{font-size:12px;color:var(--text3)}
 .sala-bar{height:6px;background:var(--border);border-radius:100px;margin-top:8px;overflow:hidden}
-.sala-fill{height:100%;border-radius:100px;background:var(--congress);transition:width .3s}
-/* Modal */
+.sala-fill{height:100%;border-radius:100px;transition:width .3s}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.show{display:flex}
 .modal{background:var(--surface);border-radius:var(--radius-lg);padding:26px;max-width:580px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
 .modal-title{font-size:17px;font-weight:700;margin-bottom:4px}
 .modal-sub{font-size:13px;color:var(--text3);margin-bottom:20px}
 .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
-/* Alert */
 .alert{padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:12px;display:none}
 .alert.show{display:block}
-.alert-success{background:var(--success-light);color:var(--success);border:1px solid rgba(5,150,105,.2)}
 .alert-error{background:var(--danger-light);color:var(--danger);border:1px solid rgba(220,38,38,.2)}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty-state{text-align:center;padding:48px 20px;color:var(--text3)}
 .empty-icon{font-size:44px;margin-bottom:12px;opacity:.4}
 .empty-title{font-size:15px;font-weight:500;color:var(--text2);margin-bottom:6px}
-/* Responsive */
-@media(max-width:768px){.stats-grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.form-grid-3{grid-template-columns:1fr}.form-group.span2{grid-column:span 1}.relatori-grid{grid-template-columns:1fr}}
+.foto-opt-group{display:flex;gap:8px;margin-bottom:8px}
+.foto-opt-btn{flex:1;padding:8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);cursor:pointer;font-size:12px;font-family:'Inter',sans-serif;text-align:center;transition:all .2s}
+.foto-opt-btn.active{border-color:var(--congress);background:var(--congress-light);color:var(--congress);font-weight:600}
+@media(max-width:768px){.stats-grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.form-group.span2{grid-column:span 1}.relatori-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<!-- OVERLAY MOBILE -->
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
-<!-- SIDEBAR -->
 <aside class="ecm-sidebar" id="ecmSidebar"></aside>
-<!-- MAIN -->
 <div class="ecm-main">
   <div class="ecm-topbar">
     <div style="display:flex;align-items:center;gap:12px">
@@ -155,78 +114,56 @@ textarea.form-input{resize:vertical;min-height:80px}
         <div class="page-sub" id="eventoNomeDisplay">Seleziona un evento per iniziare</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <select class="form-input btn-sm" id="evSelect" style="min-width:200px">
-          <option value="">— Seleziona evento —</option>
-        </select>
+        <select class="form-input btn-sm" id="evSelect" style="min-width:200px"><option value="">— Seleziona evento —</option></select>
         <button class="btn btn-congress" id="btnNuovaSessione">+ Nuova sessione</button>
       </div>
     </div>
-
-    <!-- Stats -->
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-val" id="sTotSessioni">0</div><div class="stat-label">Sessioni</div></div>
       <div class="stat-card"><div class="stat-val" style="color:var(--congress)" id="sTotRelatori">0</div><div class="stat-label">Relatori</div></div>
       <div class="stat-card"><div class="stat-val" style="color:var(--success)" id="sTotIscritti">0</div><div class="stat-label">Iscritti</div></div>
       <div class="stat-card"><div class="stat-val" style="color:var(--warn)" id="sTotSale">0</div><div class="stat-label">Sale</div></div>
     </div>
-
-    <!-- Tabs -->
     <div class="main-tabs">
       <button class="main-tab active" data-tab="programma">📅 Programma</button>
       <button class="main-tab" data-tab="relatori">🎙️ Relatori</button>
       <button class="main-tab" data-tab="sale">🏛️ Sale</button>
       <button class="main-tab" data-tab="iscrizioni">👥 Iscrizioni</button>
     </div>
-
-    <!-- TAB PROGRAMMA -->
     <div class="tab-pane active" id="tab-programma">
-      <div id="programmaContent">
-        <div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">Seleziona un evento per vedere il programma</div></div>
-      </div>
+      <div id="programmaContent"><div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">Seleziona un evento per vedere il programma</div></div></div>
     </div>
-
-    <!-- TAB RELATORI -->
     <div class="tab-pane" id="tab-relatori">
       <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
         <button class="btn btn-congress" id="btnNuovoRelatore">+ Aggiungi relatore</button>
       </div>
-      <div class="relatori-grid" id="relatoriGrid">
-        <div class="empty-state" style="grid-column:span 3"><div class="empty-icon">🎙️</div><div class="empty-title">Nessun relatore aggiunto</div></div>
-      </div>
+      <div class="relatori-grid" id="relatoriGrid"><div class="empty-state" style="grid-column:span 3"><div class="empty-icon">🎙️</div><div class="empty-title">Nessun relatore aggiunto</div></div></div>
     </div>
-
-    <!-- TAB SALE -->
     <div class="tab-pane" id="tab-sale">
       <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
         <button class="btn btn-congress" id="btnNuovaSala">+ Aggiungi sala</button>
       </div>
-      <div class="sale-grid" id="saleGrid">
-        <div class="empty-state" style="grid-column:span 3"><div class="empty-icon">🏛️</div><div class="empty-title">Nessuna sala configurata</div></div>
-      </div>
+      <div class="sale-grid" id="saleGrid"><div class="empty-state" style="grid-column:span 3"><div class="empty-icon">🏛️</div><div class="empty-title">Nessuna sala configurata</div></div></div>
     </div>
-
-    <!-- TAB ISCRIZIONI -->
     <div class="tab-pane" id="tab-iscrizioni">
       <div class="card">
-        <div class="card-title">Partecipanti iscritti alle sessioni</div>
-        <div id="iscrizioniContent">
-          <div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Nessuna iscrizione ancora</div></div>
-        </div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:16px">Partecipanti per sessione</div>
+        <div id="iscrizioniContent"><div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Nessuna iscrizione ancora</div></div></div>
       </div>
     </div>
   </div>
   <div class="ecm-version-footer" id="ecmVersionFooter"></div>
 </div>
 
-<!-- MODAL NUOVA SESSIONE -->
+<!-- MODAL SESSIONE -->
 <div class="modal-overlay" id="modalSessione">
   <div class="modal">
-    <div class="modal-title" id="modalSessioneTitolo">Nuova sessione</div>
+    <div class="modal-title" id="msTitolo">Nuova sessione</div>
     <div class="modal-sub">Compila i dettagli della sessione</div>
-    <div class="alert alert-error" id="sessioneError"></div>
-    <div class="form-group span2" style="margin-bottom:12px">
-      <label class="field-label">Titolo sessione *</label>
-      <input type="text" class="form-input" id="sTitolo" placeholder="Es. Apertura lavori / Keynote principale">
+    <div class="alert alert-error" id="msErr"></div>
+    <div style="margin-bottom:12px">
+      <label class="field-label" style="display:block;margin-bottom:5px">Titolo *</label>
+      <input type="text" class="form-input" id="sTitolo" placeholder="Es. Apertura lavori / Keynote">
     </div>
     <div class="form-grid" style="margin-bottom:12px">
       <div class="form-group">
@@ -234,13 +171,13 @@ textarea.form-input{resize:vertical;min-height:80px}
         <input type="date" class="form-input" id="sData">
       </div>
       <div class="form-group">
-        <label class="field-label">Tipo sessione</label>
+        <label class="field-label">Tipo</label>
         <select class="form-input" id="sTipo">
           <option value="keynote">🌟 Keynote</option>
           <option value="workshop">🔧 Workshop</option>
-          <option value="panel">💬 Panel Discussion</option>
+          <option value="panel">💬 Panel</option>
           <option value="talk">🎤 Talk</option>
-          <option value="break">☕ Pausa / Break</option>
+          <option value="break">☕ Break</option>
           <option value="altro">📌 Altro</option>
         </select>
       </div>
@@ -254,31 +191,29 @@ textarea.form-input{resize:vertical;min-height:80px}
       </div>
       <div class="form-group">
         <label class="field-label">Sala</label>
-        <div style="display:flex;gap:6px">
-          <select class="form-input" id="sSala" style="flex:1" onchange="if(this.value==='__custom__'){document.getElementById('sSalaCustom').style.display='block';document.getElementById('sSalaCustom').focus();}else{document.getElementById('sSalaCustom').style.display='none';}">
-            <option value="">— Nessuna sala —</option>
-            <option value="__custom__">✏️ Scrivi nome sala...</option>
-          </select>
-        </div>
-        <input type="text" class="form-input" id="sSalaCustom" placeholder="Es. Sala Plenaria / Aula Magna" style="display:none;margin-top:6px">
+        <select class="form-input" id="sSala" style="margin-bottom:6px">
+          <option value="">— Nessuna sala —</option>
+          <option value="__custom__">✏️ Scrivi nome sala...</option>
+        </select>
+        <input type="text" class="form-input" id="sSalaCustom" placeholder="Es. Sala Plenaria" style="display:none">
       </div>
       <div class="form-group">
-        <label class="field-label">Posti max (0 = illimitati)</label>
+        <label class="field-label">Posti max (0=illimitati)</label>
         <input type="number" class="form-input" id="sMaxPosti" value="0" min="0">
       </div>
     </div>
-    <div class="form-group" style="margin-bottom:12px">
-      <label class="field-label">Relatori</label>
+    <div style="margin-bottom:12px">
+      <label class="field-label" style="display:block;margin-bottom:8px">Relatori</label>
       <div id="relatoriCheckList" style="display:flex;flex-wrap:wrap;gap:6px;padding:10px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);min-height:44px">
-        <span style="font-size:12px;color:var(--text3)">Aggiungi prima i relatori dal tab Relatori</span>
+        <span style="font-size:12px;color:var(--text3)">Aggiungi prima i relatori</span>
       </div>
     </div>
-    <div class="form-group" style="margin-bottom:12px">
-      <label class="field-label">Descrizione</label>
+    <div style="margin-bottom:12px">
+      <label class="field-label" style="display:block;margin-bottom:5px">Descrizione</label>
       <textarea class="form-input" id="sDescrizione" placeholder="Descrizione della sessione..."></textarea>
     </div>
-    <div class="form-group">
-      <label class="field-label">Lingua sessione</label>
+    <div>
+      <label class="field-label" style="display:block;margin-bottom:5px">Lingua</label>
       <select class="form-input" id="sLingua">
         <option value="it">🇮🇹 Italiano</option>
         <option value="en">🇬🇧 English</option>
@@ -288,8 +223,8 @@ textarea.form-input{resize:vertical;min-height:80px}
       </select>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modalSessione')">Annulla</button>
-      <button class="btn btn-congress" id="btnSalvaSessione">Salva sessione</button>
+      <button class="btn btn-outline" id="btnAnnullaSessione">Annulla</button>
+      <button class="btn btn-congress" id="btnSalvaSessione">💾 Salva sessione</button>
     </div>
   </div>
 </div>
@@ -297,9 +232,9 @@ textarea.form-input{resize:vertical;min-height:80px}
 <!-- MODAL RELATORE -->
 <div class="modal-overlay" id="modalRelatore">
   <div class="modal">
-    <div class="modal-title" id="modalRelatoreTitolo">Nuovo relatore</div>
+    <div class="modal-title" id="mrTitolo">Nuovo relatore</div>
     <div class="modal-sub">Scheda completa del relatore</div>
-    <div class="alert alert-error" id="relatoreError"></div>
+    <div class="alert alert-error" id="mrErr"></div>
     <div class="form-grid" style="margin-bottom:12px">
       <div class="form-group">
         <label class="field-label">Nome *</label>
@@ -311,7 +246,7 @@ textarea.form-input{resize:vertical;min-height:80px}
       </div>
       <div class="form-group">
         <label class="field-label">Titolo / Qualifica</label>
-        <input type="text" class="form-input" id="rTitolo" placeholder="Prof. / Dott. / Ing.">
+        <input type="text" class="form-input" id="rTitolo" placeholder="Prof. / Dott.">
       </div>
       <div class="form-group">
         <label class="field-label">Organizzazione</label>
@@ -319,44 +254,38 @@ textarea.form-input{resize:vertical;min-height:80px}
       </div>
       <div class="form-group">
         <label class="field-label">Email</label>
-        <input type="email" class="form-input" id="rEmail" placeholder="email@example.com">
+        <input type="email" class="form-input" id="rEmail" placeholder="email@esempio.com">
       </div>
       <div class="form-group">
         <label class="field-label">Telefono</label>
         <input type="text" class="form-input" id="rTel" placeholder="+39 000 000 0000">
       </div>
     </div>
-    <div class="form-group" style="margin-bottom:12px">
-      <label class="field-label">Bio / Presentazione</label>
-      <textarea class="form-input" id="rBio" placeholder="Breve biografia del relatore..."></textarea>
+    <div style="margin-bottom:12px">
+      <label class="field-label" style="display:block;margin-bottom:5px">Bio</label>
+      <textarea class="form-input" id="rBio" placeholder="Breve biografia..."></textarea>
     </div>
-    <div class="form-group">
-      <label class="field-label">Foto relatore</label>
-      <div style="display:flex;gap:10px;margin-bottom:8px">
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);flex:1;justify-content:center">
-          <input type="radio" name="fotoOpt" value="no" id="fotoNo" checked style="accent-color:var(--congress)"> Nessuna foto
-        </label>
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);flex:1;justify-content:center">
-          <input type="radio" name="fotoOpt" value="url" id="fotoUrl" style="accent-color:var(--congress)"> URL immagine
-        </label>
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);flex:1;justify-content:center">
-          <input type="radio" name="fotoOpt" value="upload" id="fotoUpload" style="accent-color:var(--congress)"> Carica foto
-        </label>
+    <div>
+      <label class="field-label" style="display:block;margin-bottom:8px">Foto relatore</label>
+      <div class="foto-opt-group">
+        <button type="button" class="foto-opt-btn active" data-foto="no">Nessuna foto</button>
+        <button type="button" class="foto-opt-btn" data-foto="url">URL immagine</button>
+        <button type="button" class="foto-opt-btn" data-foto="upload">Carica foto</button>
       </div>
       <div id="fotoUrlSection" style="display:none">
         <input type="url" class="form-input" id="rFoto" placeholder="https://esempio.com/foto.jpg">
       </div>
       <div id="fotoUploadSection" style="display:none">
         <input type="file" id="rFotoFile" accept="image/*" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-size:13px;width:100%;cursor:pointer">
-        <div id="fotoPreview" style="margin-top:8px;display:none">
-          <img id="fotoPreviewImg" src="" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--congress)">
-          <span style="font-size:11px;color:var(--success);margin-left:8px">✓ Foto caricata</span>
+        <div id="fotoPreview" style="display:none;align-items:center;gap:10px;margin-top:8px">
+          <img id="fotoPreviewImg" src="" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--congress)">
+          <span style="font-size:12px;color:var(--success)">✓ Foto caricata</span>
         </div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modalRelatore')">Annulla</button>
-      <button class="btn btn-congress" id="btnSalvaRelatore">Salva relatore</button>
+      <button class="btn btn-outline" id="btnAnnullaRelatore">Annulla</button>
+      <button class="btn btn-congress" id="btnSalvaRelatore">💾 Salva relatore</button>
     </div>
   </div>
 </div>
@@ -365,38 +294,37 @@ textarea.form-input{resize:vertical;min-height:80px}
 <div class="modal-overlay" id="modalSala">
   <div class="modal">
     <div class="modal-title">Configura sala</div>
-    <div class="modal-sub">Aggiungi una sala o spazio al congresso</div>
-    <div class="alert alert-error" id="salaError"></div>
+    <div class="modal-sub">Aggiungi una sala al congresso</div>
+    <div class="alert alert-error" id="slErr"></div>
     <div class="form-grid" style="margin-bottom:12px">
       <div class="form-group">
         <label class="field-label">Nome sala *</label>
-        <input type="text" class="form-input" id="slNome" placeholder="Es. Sala Plenaria / Sala A">
+        <input type="text" class="form-input" id="slNome" placeholder="Es. Sala Plenaria">
       </div>
       <div class="form-group">
-        <label class="field-label">Capacità massima *</label>
+        <label class="field-label">Capacità max *</label>
         <input type="number" class="form-input" id="slCapacita" value="100" min="1">
       </div>
       <div class="form-group">
         <label class="field-label">Piano / Posizione</label>
-        <input type="text" class="form-input" id="slPiano" placeholder="Es. Piano 1 / Padiglione B">
+        <input type="text" class="form-input" id="slPiano" placeholder="Es. Piano 1">
       </div>
       <div class="form-group">
-        <label class="field-label">Colore identificativo</label>
+        <label class="field-label">Colore</label>
         <input type="color" class="form-input" id="slColore" value="#7C3AED" style="height:42px;cursor:pointer;padding:4px">
       </div>
     </div>
-    <div class="form-group">
-      <label class="field-label">Note / Attrezzature</label>
-      <textarea class="form-input" id="slNote" placeholder="Es. Proiettore, microfoni, traduzione simultanea..."></textarea>
+    <div>
+      <label class="field-label" style="display:block;margin-bottom:5px">Note / Attrezzature</label>
+      <textarea class="form-input" id="slNote" placeholder="Proiettore, microfoni..."></textarea>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modalSala')">Annulla</button>
-      <button class="btn btn-congress" id="btnSalvaSala">Salva sala</button>
+      <button class="btn btn-outline" id="btnAnnullaSala">Annulla</button>
+      <button class="btn btn-congress" id="btnSalvaSala">💾 Salva sala</button>
     </div>
   </div>
 </div>
 
-<!-- Sidebar init -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof applyTranslations === 'function') applyTranslations();
@@ -408,578 +336,500 @@ document.addEventListener('DOMContentLoaded', function() {
 <script type="module">
 import { requireAuth, injectUserBar } from './ecm-auth.js';
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, deleteDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, collection, getDocs, addDoc, deleteDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
-const app=getApps().length?getApps()[0]:initializeApp(FB);
-const db=getFirestore(app);
-const auth=getAuth(app);
 
-await requireAuth();
-injectUserBar('userBarSlot');
+// ── INIT UI — prima di qualsiasi Firebase ────────────────
+let db, auth, currentEvId=null, sessioni=[], relatori=[], sale=[];
+let editSid=null, editRid=null;
+const TIPI={keynote:'🌟 Keynote',workshop:'🔧 Workshop',panel:'💬 Panel',talk:'🎤 Talk',break:'☕ Break',altro:'📌 Altro'};
+const TIPI_CLS={keynote:'tag-keynote',workshop:'tag-workshop',panel:'tag-panel',talk:'tag-panel',break:'tag-break',altro:'tag-break'};
 
-document.getElementById('fbDot').className='topbar-dot ok';
-document.getElementById('fbStatus').textContent='Firebase connesso';
-
-let currentEvId=null, sessioni=[], relatori=[], sale=[], editingSessioneId=null, editingRelatoreId=null;
-const TIPI_LABEL={keynote:'🌟 Keynote',workshop:'🔧 Workshop',panel:'💬 Panel',talk:'🎤 Talk',break:'☕ Break',altro:'📌 Altro'};
-const TIPI_CLASS={keynote:'tipo-keynote',workshop:'tipo-workshop',panel:'tipo-panel',break:'tipo-break',talk:'tipo-panel',altro:'tipo-break'};
-
-// ── CARICA EVENTI ─────────────────────────────────────
-const evSnap=await getDocs(collection(db,'eventi'));
-const allEventi=[];
-evSnap.forEach(d=>allEventi.push({id:d.id,...d.data()}));
-allEventi.filter(e=>e.stato!=='archiviato').sort((a,b)=>new Date(b.data||0)-new Date(a.data||0))
-  .forEach(ev=>{
-    const opt=document.createElement('option');
-    opt.value=ev.id; opt.textContent=ev.nome+(ev.data?' ('+new Date(ev.data).toLocaleDateString('it-IT')+')':'');
-    document.getElementById('evSelect').appendChild(opt);
+// TUTTI I LISTENER UI — registrati subito, non dipendono da Firebase
+// ── TABS ─────────────────────────────────────────────────
+document.querySelectorAll('.main-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.main-tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('tab-' + t.dataset.tab).classList.add('active');
+    if (t.dataset.tab === 'relatori') renderRelatori();
+    if (t.dataset.tab === 'sale') renderSale();
+    if (t.dataset.tab === 'programma') renderProgramma();
+    if (t.dataset.tab === 'iscrizioni') loadIscrizioni();
   });
-
-// Auto-seleziona evento salvato
-const savedId=localStorage.getItem('ecm_eventId');
-if(savedId&&allEventi.find(e=>e.id===savedId)){
-  document.getElementById('evSelect').value=savedId;
-  await loadEventoData(savedId);
-}
-
-document.getElementById('evSelect').addEventListener('change',async function(){
-  if(this.value) await loadEventoData(this.value);
 });
 
-async function loadEventoData(evId){
-  currentEvId=evId;
-  localStorage.setItem('ecm_eventId',evId);
-  const ev=allEventi.find(e=>e.id===evId);
-  if(ev) document.getElementById('eventoNomeDisplay').textContent=ev.nome||'—';
-  await Promise.all([loadSessioni(),loadRelatori(),loadSale()]);
-  updateStats();
-}
+// ── MODAL HELPERS ─────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+window.closeModal = closeModal;
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('show'); });
+});
+document.getElementById('btnAnnullaSessione').addEventListener('click', () => closeModal('modalSessione'));
+document.getElementById('btnAnnullaRelatore').addEventListener('click', () => closeModal('modalRelatore'));
+document.getElementById('btnAnnullaSala').addEventListener('click', () => closeModal('modalSala'));
 
-// ── SESSIONI ───────────────────────────────────────────
-async function loadSessioni(){
-  if(!currentEvId)return;
-  const snap=await getDocs(query(collection(db,'eventi',currentEvId,'sessioni'),orderBy('data'),orderBy('oraInizio')));
-  sessioni=[];
-  snap.forEach(d=>sessioni.push({id:d.id,...d.data()}));
-  renderProgramma();
-}
+// ── SALA SELECT CUSTOM ────────────────────────────────────
+document.getElementById('sSala').addEventListener('change', function() {
+  const custom = document.getElementById('sSalaCustom');
+  custom.style.display = this.value === '__custom__' ? 'block' : 'none';
+  if (this.value === '__custom__') custom.focus();
+});
 
-function renderProgramma(){
-  const container=document.getElementById('programmaContent');
-  if(!sessioni.length){
-    container.innerHTML='<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">Nessuna sessione ancora</div><div style="font-size:13px;color:var(--text3);margin-bottom:16px">Aggiungi la prima sessione del programma</div></div>';
-    return;
-  }
-  // Raggruppa per data
-  const byDay={};
-  sessioni.forEach(s=>{
-    const d=s.data||'senza-data';
-    if(!byDay[d])byDay[d]=[];
-    byDay[d].push(s);
+// ── FOTO OPTIONS ──────────────────────────────────────────
+document.querySelectorAll('.foto-opt-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.foto-opt-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('fotoUrlSection').style.display = btn.dataset.foto === 'url' ? 'block' : 'none';
+    document.getElementById('fotoUploadSection').style.display = btn.dataset.foto === 'upload' ? 'block' : 'none';
   });
-  const fmtDate=d=>d&&d!=='senza-data'?new Date(d).toLocaleDateString('it-IT',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}):'Senza data';
-  container.innerHTML=Object.keys(byDay).sort().map((day,di)=>{
-    const daySessions=byDay[day];
-    return `<div class="timeline-day">
-      <div class="day-header">
-        <span class="day-badge">Giorno ${di+1} — ${fmtDate(day)}</span>
-        <div class="day-line"></div>
-      </div>
+});
+document.getElementById('rFotoFile').addEventListener('change', function() {
+  const file = this.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('fotoPreviewImg').src = e.target.result;
+    document.getElementById('fotoPreview').style.cssText = 'display:flex;align-items:center;gap:10px;margin-top:8px';
+    window._fotoBase64 = e.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+// ── BOTTONI NUOVA SESSIONE / RELATORE / SALA ──────────────
+document.getElementById('btnNuovaSessione').addEventListener('click', () => {
+  if (!currentEvId) { alert('Seleziona prima un evento dal menu in alto.'); return; }
+  editSid = null;
+  document.getElementById('msTitolo').textContent = 'Nuova sessione';
+  ['sTitolo','sDescrizione'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('sData').value = '';
+  document.getElementById('sOraInizio').value = '';
+  document.getElementById('sOraFine').value = '';
+  document.getElementById('sTipo').value = 'keynote';
+  document.getElementById('sMaxPosti').value = '0';
+  document.getElementById('sLingua').value = 'it';
+  document.getElementById('sSalaCustom').style.display = 'none';
+  document.getElementById('sSalaCustom').value = '';
+  document.getElementById('msErr').style.display = 'none';
+  buildSaleSelect(null, null);
+  buildRelatoriCheck([]);
+  openModal('modalSessione');
+});
+
+document.getElementById('btnNuovoRelatore').addEventListener('click', () => {
+  if (!currentEvId) { alert('Seleziona prima un evento dal menu in alto.'); return; }
+  editRid = null;
+  document.getElementById('mrTitolo').textContent = 'Nuovo relatore';
+  ['rNome','rCognome','rTitolo','rOrg','rEmail','rTel','rBio','rFoto'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  resetFotoOpt();
+  document.getElementById('mrErr').style.display = 'none';
+  openModal('modalRelatore');
+  setTimeout(() => document.getElementById('rNome').focus(), 100);
+});
+
+document.getElementById('btnNuovaSala').addEventListener('click', () => {
+  if (!currentEvId) { alert('Seleziona prima un evento dal menu in alto.'); return; }
+  ['slNome','slPiano','slNote'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('slCapacita').value = '100';
+  document.getElementById('slColore').value = '#7C3AED';
+  document.getElementById('slErr').style.display = 'none';
+  openModal('modalSala');
+});
+
+// ── SALVA SESSIONE ────────────────────────────────────────
+document.getElementById('btnSalvaSessione').addEventListener('click', async () => {
+  const titolo = document.getElementById('sTitolo').value.trim();
+  const data = document.getElementById('sData').value;
+  const oraInizio = document.getElementById('sOraInizio').value;
+  const oraFine = document.getElementById('sOraFine').value;
+  if (!titolo) { showErr('msErr', 'Inserisci il titolo della sessione.'); return; }
+  if (!data) { showErr('msErr', 'Inserisci la data.'); return; }
+  if (!oraInizio || !oraFine) { showErr('msErr', 'Inserisci ora inizio e fine.'); return; }
+  const btn = document.getElementById('btnSalvaSessione');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Salvataggio...';
+  try {
+    if (!auth) throw new Error('Firebase non pronto, riprova');
+    await signInAnonymously(auth);
+    const salaVal = document.getElementById('sSala').value;
+    const salaCustom = document.getElementById('sSalaCustom').value.trim();
+    const relatoriSel = [...document.querySelectorAll('#relatoriCheckList input:checked')].map(i => i.value);
+    const payload = {
+      titolo, data, oraInizio, oraFine,
+      tipo: document.getElementById('sTipo').value,
+      salaId: (salaVal && salaVal !== '__custom__') ? salaVal : null,
+      salaNomeCustom: salaVal === '__custom__' ? salaCustom : null,
+      maxPosti: parseInt(document.getElementById('sMaxPosti').value) || 0,
+      descrizione: document.getElementById('sDescrizione').value.trim(),
+      lingua: document.getElementById('sLingua').value,
+      relatori: relatoriSel, iscritti: 0, updatedAt: serverTimestamp()
+    };
+    if (editSid) await setDoc(doc(db,'eventi',currentEvId,'sessioni',editSid), payload, {merge:true});
+    else { payload.createdAt = serverTimestamp(); await addDoc(collection(db,'eventi',currentEvId,'sessioni'), payload); }
+    closeModal('modalSessione');
+    await loadSessioni();
+  } catch(e) { showErr('msErr', 'Errore: ' + e.message); }
+  finally { btn.disabled = false; btn.innerHTML = '💾 Salva sessione'; }
+});
+
+// ── SALVA RELATORE ────────────────────────────────────────
+document.getElementById('btnSalvaRelatore').addEventListener('click', async () => {
+  const nome = document.getElementById('rNome').value.trim();
+  const cognome = document.getElementById('rCognome').value.trim();
+  if (!nome || !cognome) { showErr('mrErr', 'Inserisci nome e cognome.'); return; }
+  const btn = document.getElementById('btnSalvaRelatore');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Salvataggio...';
+  try {
+    if (!auth) throw new Error('Firebase non pronto, riprova');
+    await signInAnonymously(auth);
+    const fotoOpt = document.querySelector('.foto-opt-btn.active')?.dataset.foto || 'no';
+    let foto = '';
+    if (fotoOpt === 'url') foto = document.getElementById('rFoto').value.trim();
+    else if (fotoOpt === 'upload') foto = window._fotoBase64 || '';
+    const payload = {
+      nome, cognome, foto,
+      titolo: document.getElementById('rTitolo').value.trim(),
+      org: document.getElementById('rOrg').value.trim(),
+      email: document.getElementById('rEmail').value.trim(),
+      tel: document.getElementById('rTel').value.trim(),
+      bio: document.getElementById('rBio').value.trim(),
+      updatedAt: serverTimestamp()
+    };
+    if (editRid) await setDoc(doc(db,'eventi',currentEvId,'relatori',editRid), payload, {merge:true});
+    else { payload.createdAt = serverTimestamp(); await addDoc(collection(db,'eventi',currentEvId,'relatori'), payload); }
+    closeModal('modalRelatore');
+    await loadRelatori();
+  } catch(e) { showErr('mrErr', 'Errore: ' + e.message); }
+  finally { btn.disabled = false; btn.innerHTML = '💾 Salva relatore'; }
+});
+
+// ── SALVA SALA ────────────────────────────────────────────
+document.getElementById('btnSalvaSala').addEventListener('click', async () => {
+  const nome = document.getElementById('slNome').value.trim();
+  const capacita = parseInt(document.getElementById('slCapacita').value) || 0;
+  if (!nome) { showErr('slErr', 'Inserisci il nome della sala.'); return; }
+  if (!capacita) { showErr('slErr', 'Inserisci la capacità.'); return; }
+  const btn = document.getElementById('btnSalvaSala');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Salvataggio...';
+  try {
+    if (!auth) throw new Error('Firebase non pronto, riprova');
+    await signInAnonymously(auth);
+    await addDoc(collection(db,'eventi',currentEvId,'sale'), {
+      nome, capacita,
+      piano: document.getElementById('slPiano').value.trim(),
+      colore: document.getElementById('slColore').value,
+      note: document.getElementById('slNote').value.trim(),
+      iscritti: 0, createdAt: serverTimestamp()
+    });
+    closeModal('modalSala');
+    await loadSale();
+  } catch(e) { showErr('slErr', 'Errore: ' + e.message); }
+  finally { btn.disabled = false; btn.innerHTML = '💾 Salva sala'; }
+});
+
+// ── INIT FIREBASE IN BACKGROUND ────────────────────────────
+async function initApp() {
+  try {
+    const app = getApps().length ? getApps()[0] : initializeApp(FB);
+    db = getFirestore(app);
+    auth = getAuth(app);
+    await requireAuth();
+    injectUserBar('userBarSlot');
+    onAuthStateChanged(auth, u => {
+      if (u && u.email === 'martinsosem@gmail.com') {
+        const el = document.getElementById('adminNavItem'); if (el) el.style.display = 'flex';
+      }
+    });
+    document.getElementById('fbDot').className = 'topbar-dot ok';
+    document.getElementById('fbStatus').textContent = 'Firebase connesso';
+    // Carica eventi
+    const evSnap = await getDocs(collection(db,'eventi'));
+    const evList = [];
+    evSnap.forEach(d => evList.push({id:d.id,...d.data()}));
+    evList.filter(e => e.stato !== 'archiviato').sort((a,b) => new Date(b.data||0)-new Date(a.data||0))
+      .forEach(ev => {
+        const opt = document.createElement('option');
+        opt.value = ev.id;
+        opt.textContent = ev.nome + (ev.data ? ' (' + new Date(ev.data).toLocaleDateString('it-IT') + ')' : '');
+        document.getElementById('evSelect').appendChild(opt);
+      });
+    // Auto-seleziona
+    const savedId = localStorage.getItem('ecm_eventId');
+    if (savedId && evList.find(e => e.id === savedId)) {
+      document.getElementById('evSelect').value = savedId;
+      await loadEventoData(savedId, evList);
+    }
+    document.getElementById('evSelect').addEventListener('change', async function() {
+      if (this.value) await loadEventoData(this.value, evList);
+    });
+  } catch(e) {
+    document.getElementById('fbStatus').textContent = 'Errore connessione';
+    console.error(e);
+  }
+}
+
+async function loadEventoData(evId, evList) {
+  currentEvId = evId;
+  localStorage.setItem('ecm_eventId', evId);
+  const ev = (evList || []).find(e => e.id === evId);
+  if (ev) document.getElementById('eventoNomeDisplay').textContent = ev.nome || '—';
+  await Promise.all([loadSessioni(), loadRelatori(), loadSale()]);
+}
+
+// ── LOAD DATA ─────────────────────────────────────────────
+async function loadSessioni() {
+  if (!currentEvId || !db) return;
+  try {
+    const snap = await getDocs(query(collection(db,'eventi',currentEvId,'sessioni'), orderBy('data'), orderBy('oraInizio')));
+    sessioni = []; snap.forEach(d => sessioni.push({id:d.id,...d.data()}));
+    renderProgramma();
+  } catch(e) { sessioni = []; }
+}
+
+async function loadRelatori() {
+  if (!currentEvId || !db) return;
+  try {
+    const snap = await getDocs(query(collection(db,'eventi',currentEvId,'relatori'), orderBy('cognome')));
+    relatori = []; snap.forEach(d => relatori.push({id:d.id,...d.data()}));
+    renderRelatori();
+    document.getElementById('sTotRelatori').textContent = relatori.length;
+  } catch(e) { relatori = []; }
+}
+
+async function loadSale() {
+  if (!currentEvId || !db) return;
+  try {
+    const snap = await getDocs(collection(db,'eventi',currentEvId,'sale'));
+    sale = []; snap.forEach(d => sale.push({id:d.id,...d.data()}));
+    renderSale();
+    document.getElementById('sTotSale').textContent = sale.length;
+  } catch(e) { sale = []; }
+}
+
+async function loadIscrizioni() {
+  if (!currentEvId || !db) return;
+  try {
+    const snap = await getDocs(collection(db,'eventi',currentEvId,'partecipanti'));
+    const parts = []; snap.forEach(d => parts.push({id:d.id,...d.data()}));
+    document.getElementById('sTotIscritti').textContent = parts.length;
+    const c = document.getElementById('iscrizioniContent');
+    if (!parts.length) { c.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Nessun partecipante iscritto</div></div>'; return; }
+    c.innerHTML = `<div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead style="background:var(--surface2)"><tr><th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border)">Nome</th><th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border)">CF</th><th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border)">Sessioni</th></tr></thead><tbody>${parts.map(p=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:9px 12px;font-weight:500">${esc(p.cognome||'')} ${esc(p.nome||'')}</td><td style="padding:9px 12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)">${p.cf||'—'}</td><td style="padding:9px 12px"><span style="background:var(--congress-light);color:var(--congress);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">${(p.sessioniPrenotate||[]).length} sessioni</span></td></tr>`).join('')}</tbody></table></div>`;
+  } catch(e) { console.error(e); }
+}
+
+// ── RENDER ────────────────────────────────────────────────
+function renderProgramma() {
+  document.getElementById('sTotSessioni').textContent = sessioni.length;
+  const c = document.getElementById('programmaContent');
+  if (!sessioni.length) { c.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">Nessuna sessione ancora</div><div style="font-size:13px;color:var(--text3)">Clicca "+ Nuova sessione" per iniziare</div></div>'; return; }
+  const byDay = {};
+  sessioni.forEach(s => { const d = s.data || 'nd'; if (!byDay[d]) byDay[d] = []; byDay[d].push(s); });
+  const fmtDate = d => d && d !== 'nd' ? new Date(d).toLocaleDateString('it-IT',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}) : 'Senza data';
+  c.innerHTML = Object.keys(byDay).sort().map((day, di) => `
+    <div class="timeline-day">
+      <div class="day-header"><span class="day-badge">Giorno ${di+1} — ${fmtDate(day)}</span><div class="day-line"></div></div>
       <div class="sessions-list">
-        ${daySessions.map(s=>{
-          const relNomi=(s.relatori||[]).map(rid=>{const r=relatori.find(x=>x.id===rid);return r?r.titolo+' '+r.cognome+' '+r.nome:'';}).filter(Boolean).join(', ');
-          const sala=sale.find(x=>x.id===s.salaId);
-          const salaNome=sala?.nome||s.salaNomeCustom||null;
-          const maxP=parseInt(s.maxPosti)||0;
-          const iscrP=s.iscritti||0;
-          const pctP=maxP>0?Math.round(iscrP/maxP*100):0;
-          const postiClass=maxP===0?'':pctP>=100?'posti-full':pctP>=80?'posti-warn':'posti-ok';
-          const postiLabel=maxP===0?'Illimitati':iscrP+'/'+maxP+' iscritti';
-          return `<div class="session-item" onclick="openEditSessione('${s.id}')">
+        ${byDay[day].map(s => {
+          const sala = sale.find(x => x.id === s.salaId);
+          const salaNome = sala?.nome || s.salaNomeCustom || null;
+          const relNomi = (s.relatori||[]).map(rid => { const r = relatori.find(x => x.id === rid); return r ? (r.titolo?r.titolo+' ':'') + r.cognome + ' ' + r.nome : ''; }).filter(Boolean).join(', ');
+          const colore = sala?.colore || '#7C3AED';
+          return `<div class="session-item">
             <div class="session-time">${s.oraInizio||'--:--'} → ${s.oraFine||'--:--'}</div>
-            <div class="session-accent" style="background:${sala?.colore||'#7C3AED'}"></div>
+            <div class="session-accent" style="background:${colore}"></div>
             <div class="session-body">
               <div class="session-title">${esc(s.titolo||'—')}</div>
               <div class="session-meta">
-                ${salaNome?`<span>🏛️ ${esc(salaNome)}</span>`:''}
-                ${relNomi?`<span>🎙️ ${esc(relNomi)}</span>`:''}
-                ${s.lingua&&s.lingua!=='it'?`<span>🌐 ${s.lingua.toUpperCase()}</span>`:''}
+                ${salaNome ? `<span>🏛️ ${esc(salaNome)}</span>` : ''}
+                ${relNomi ? `<span>🎙️ ${esc(relNomi)}</span>` : ''}
               </div>
               <div class="session-tags">
-                <span class="tag ${TIPI_CLASS[s.tipo]||'tipo-break'}">${TIPI_LABEL[s.tipo]||s.tipo||'—'}</span>
-                ${salaNome?`<span class="tag tag-sala">${esc(salaNome)}</span>`:''}
-                ${maxP>0?`<span class="session-posti ${postiClass}">${postiLabel}</span>`:''}
+                <span class="tag ${TIPI_CLS[s.tipo]||'tag-break'}">${TIPI[s.tipo]||s.tipo||'—'}</span>
+                ${salaNome ? `<span class="tag tag-sala">${esc(salaNome)}</span>` : ''}
               </div>
             </div>
-            <div class="session-actions" onclick="event.stopPropagation()">
-              <button class="btn btn-outline btn-sm" onclick="openEditSessione('${s.id}')">✏️</button>
-              <button class="btn btn-danger btn-sm" onclick="eliminaSessione('${s.id}')">✕</button>
+            <div style="display:flex;gap:5px;flex-shrink:0;margin-top:2px">
+              <button class="btn btn-outline btn-sm" data-edit-s="${s.id}">✏️</button>
+              <button class="btn btn-danger btn-sm" data-del-s="${s.id}">✕</button>
             </div>
           </div>`;
         }).join('')}
       </div>
-    </div>`;
-  }).join('');
+    </div>`).join('');
+  // Delegazione eventi
+  c.querySelectorAll('[data-edit-s]').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); openEditSessione(btn.dataset.editS); }));
+  c.querySelectorAll('[data-del-s]').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); eliminaSessione(btn.dataset.delS); }));
 }
 
-// ── MODAL SESSIONE ──────────────────────────────────────
-// Esponi reset functions al bridge
-window._resetEditingSessione = function() {
-  editingSessioneId = null;
-  populateSaleSelect();
-  populateRelatoriCheck();
-};
-window._resetEditingRelatore = function() {
-  editingRelatoreId = null;
-};
-// Bottone nuova sessione — gestito dal bridge esterno
-// ma anche qui per sicurezza
-document.getElementById('btnNuovaSessione').addEventListener('click',()=>{
-  if(!currentEvId){alert('Seleziona prima un evento.');return;}
-  editingSessioneId=null;
-  document.getElementById('modalSessioneTitolo').textContent='Nuova sessione';
-  clearForm(['sTitolo','sData','sOraInizio','sOraFine','sDescrizione']);
-  document.getElementById('sTipo').value='keynote';
-  document.getElementById('sMaxPosti').value='0';
-  document.getElementById('sLingua').value='it';
-  populateSaleSelect(); populateRelatoriCheck();
-  openModal('modalSessione');
-});
-
-function openEditSessione(sid){
-  const s=sessioni.find(x=>x.id===sid); if(!s)return;
-  editingSessioneId=sid;
-  document.getElementById('modalSessioneTitolo').textContent='Modifica sessione';
-  document.getElementById('sTitolo').value=s.titolo||'';
-  document.getElementById('sData').value=s.data||'';
-  document.getElementById('sTipo').value=s.tipo||'keynote';
-  document.getElementById('sOraInizio').value=s.oraInizio||'';
-  document.getElementById('sOraFine').value=s.oraFine||'';
-  document.getElementById('sMaxPosti').value=s.maxPosti||0;
-  document.getElementById('sDescrizione').value=s.descrizione||'';
-  document.getElementById('sLingua').value=s.lingua||'it';
-  populateSaleSelect(s.salaId, s.salaNomeCustom||null); populateRelatoriCheck(s.relatori||[]);
-  openModal('modalSessione');
-}
-window.openEditSessione=openEditSessione;
-
-function populateSaleSelect(selectedId, customNome){
-  const sel=document.getElementById('sSala');
-  sel.innerHTML='<option value="">— Nessuna sala —</option>';
-  sale.forEach(s=>{
-    const opt=document.createElement('option');
-    opt.value=s.id;
-    opt.textContent=s.nome+(s.capacita?' ('+s.capacita+' posti)':'');
-    if(s.id===selectedId)opt.selected=true;
-    sel.appendChild(opt);
-  });
-  const customOpt=document.createElement('option');
-  customOpt.value='__custom__';
-  customOpt.textContent='✏️ Scrivi nome sala...';
-  if(customNome){customOpt.selected=true;}
-  sel.appendChild(customOpt);
-  // Mostra campo custom se necessario
-  const customInput=document.getElementById('sSalaCustom');
-  if(customNome){
-    customInput.style.display='block';
-    customInput.value=customNome;
-  }else{
-    customInput.style.display='none';
-    customInput.value='';
-  }
-}
-
-function populateRelatoriCheck(selected=[]){
-  const div=document.getElementById('relatoriCheckList');
-  if(!relatori.length){div.innerHTML='<span style="font-size:12px;color:var(--text3)">Aggiungi prima i relatori</span>';return;}
-  div.innerHTML=relatori.map(r=>`
-    <label style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:${selected.includes(r.id)?'var(--congress-light)':'var(--surface)'};border:1px solid ${selected.includes(r.id)?'var(--congress)':'var(--border)'};border-radius:20px;font-size:12px;cursor:pointer;transition:all .2s">
-      <input type="checkbox" value="${r.id}" ${selected.includes(r.id)?'checked':''} style="accent-color:var(--congress);width:14px;height:14px">
-      ${esc(r.titolo?r.titolo+' ':'')}${esc(r.cognome)} ${esc(r.nome)}
-    </label>`).join('');
-  // Stile dinamico al click
-  div.querySelectorAll('label').forEach(lbl=>{
-    lbl.querySelector('input').addEventListener('change',()=>{
-      lbl.style.background=lbl.querySelector('input').checked?'var(--congress-light)':'var(--surface)';
-      lbl.style.borderColor=lbl.querySelector('input').checked?'var(--congress)':'var(--border)';
-    });
-  });
-}
-
-document.getElementById('btnSalvaSessione').addEventListener('click',async()=>{
-  const titolo=document.getElementById('sTitolo').value.trim();
-  const data=document.getElementById('sData').value;
-  const oraInizio=document.getElementById('sOraInizio').value;
-  const oraFine=document.getElementById('sOraFine').value;
-  if(!titolo){showErr('sessioneError','Inserisci il titolo della sessione.');return;}
-  if(!data){showErr('sessioneError','Inserisci la data della sessione.');return;}
-  if(!oraInizio||!oraFine){showErr('sessioneError','Inserisci ora inizio e fine.');return;}
-  // Sala e relatori sono facoltativi
-  const btn=document.getElementById('btnSalvaSessione');
-  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
-  try{
-    await signInAnonymously(auth);
-    const relatoriSel=[...document.querySelectorAll('#relatoriCheckList input:checked')].map(i=>i.value);
-    const salaSelVal = document.getElementById('sSala').value;
-    const salaCustom = document.getElementById('sSalaCustom').value.trim();
-    const salaId = (salaSelVal && salaSelVal !== '__custom__') ? salaSelVal : null;
-    const salaNomeCustom = (salaSelVal === '__custom__' && salaCustom) ? salaCustom : null;
-    const payload={titolo,data,oraInizio,oraFine,tipo:document.getElementById('sTipo').value,salaId,salaNomeCustom,maxPosti:parseInt(document.getElementById('sMaxPosti').value)||0,descrizione:document.getElementById('sDescrizione').value.trim(),lingua:document.getElementById('sLingua').value,relatori:relatoriSel,updatedAt:serverTimestamp()};
-    if(editingSessioneId){await setDoc(doc(db,'eventi',currentEvId,'sessioni',editingSessioneId),payload,{merge:true});}
-    else{payload.iscritti=0;payload.createdAt=serverTimestamp();await addDoc(collection(db,'eventi',currentEvId,'sessioni'),payload);}
-    closeModal('modalSessione'); await loadSessioni(); updateStats();
-  }catch(e){showErr('sessioneError','Errore: '+e.message);}
-  finally{btn.disabled=false;btn.textContent='Salva sessione';}
-});
-
-window.eliminaSessione=async function(sid){
-  if(!confirm('Eliminare questa sessione?'))return;
-  try{await deleteDoc(doc(db,'eventi',currentEvId,'sessioni',sid));await loadSessioni();updateStats();}catch(e){alert('Errore: '+e.message);}
-};
-
-// ── RELATORI ────────────────────────────────────────────
-async function loadRelatori(){
-  if(!currentEvId)return;
-  const snap=await getDocs(query(collection(db,'eventi',currentEvId,'relatori'),orderBy('cognome')));
-  relatori=[];
-  snap.forEach(d=>relatori.push({id:d.id,...d.data()}));
-  renderRelatori();
-}
-
-function renderRelatori(){
-  const grid=document.getElementById('relatoriGrid');
-  document.getElementById('sTotRelatori').textContent=relatori.length;
-  if(!relatori.length){grid.innerHTML='<div class="empty-state" style="grid-column:span 3"><div class="empty-icon">🎙️</div><div class="empty-title">Nessun relatore aggiunto</div></div>';return;}
-  grid.innerHTML=relatori.map(r=>{
-    const sessRel=sessioni.filter(s=>(s.relatori||[]).includes(r.id)).length;
-    const initial=(r.cognome||r.nome||'?')[0].toUpperCase();
+function renderRelatori() {
+  const grid = document.getElementById('relatoriGrid');
+  document.getElementById('sTotRelatori').textContent = relatori.length;
+  if (!relatori.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:span 3"><div class="empty-icon">🎙️</div><div class="empty-title">Nessun relatore aggiunto</div></div>'; return; }
+  grid.innerHTML = relatori.map(r => {
+    const sessRel = sessioni.filter(s => (s.relatori||[]).includes(r.id)).length;
     return `<div class="relatore-card">
-      <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">
-        ${r.foto?`<img src="${esc(r.foto)}" class="rel-avatar" onerror="this.style.display='none'">`:`<div class="rel-avatar-ph">${initial}</div>`}
+      <div style="display:flex;gap:12px;margin-bottom:10px">
+        ${r.foto ? `<img src="${esc(r.foto)}" class="rel-avatar" onerror="this.outerHTML='<div class=rel-avatar-ph>${(r.cognome||'?')[0].toUpperCase()}</div>'">`
+                 : `<div class="rel-avatar-ph">${(r.cognome||'?')[0].toUpperCase()}</div>`}
         <div style="flex:1;min-width:0">
-          <div class="rel-nome">${esc(r.titolo?r.titolo+' ':'')}${esc(r.cognome)} ${esc(r.nome)}</div>
-          <div class="rel-titolo">${esc(r.org||'—')}</div>
-          <div class="rel-sessioni">${sessRel} sessioni assegnate</div>
+          <div style="font-size:15px;font-weight:600">${esc((r.titolo?r.titolo+' ':'') + r.cognome + ' ' + r.nome)}</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:4px">${esc(r.org||'—')}</div>
+          <div style="font-size:11px;color:var(--congress);font-weight:500">${sessRel} sessioni</div>
         </div>
       </div>
-      ${r.bio?`<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:10px;border-top:1px solid var(--border);padding-top:8px">${esc(r.bio.slice(0,120))}${r.bio.length>120?'...':''}</div>`:''}
+      ${r.bio ? `<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:10px;border-top:1px solid var(--border);padding-top:8px">${esc(r.bio.slice(0,120))}${r.bio.length>120?'...':''}</div>` : ''}
       <div style="display:flex;gap:6px;justify-content:flex-end">
-        <button class="btn btn-outline btn-sm" onclick="openEditRelatore('${r.id}')">✏️ Modifica</button>
-        <button class="btn btn-danger btn-sm" onclick="eliminaRelatore('${r.id}')">✕</button>
+        <button class="btn btn-outline btn-sm" data-edit-r="${r.id}">✏️ Modifica</button>
+        <button class="btn btn-danger btn-sm" data-del-r="${r.id}">✕</button>
       </div>
     </div>`;
   }).join('');
+  grid.querySelectorAll('[data-edit-r]').forEach(btn => btn.addEventListener('click', () => openEditRelatore(btn.dataset.editR)));
+  grid.querySelectorAll('[data-del-r]').forEach(btn => btn.addEventListener('click', () => eliminaRelatore(btn.dataset.delR)));
 }
 
-document.getElementById('btnNuovoRelatore').addEventListener('click',()=>{
-  if(!currentEvId){alert('Seleziona prima un evento.');return;}
-  editingRelatoreId=null;
-  document.getElementById('modalRelatoreTitolo').textContent='Nuovo relatore';
-  clearForm(['rNome','rCognome','rTitolo','rOrg','rEmail','rTel','rBio','rFoto']);
-  openModal('modalRelatore');
-});
-
-window.openEditRelatore=function(rid){
-  const r=relatori.find(x=>x.id===rid); if(!r)return;
-  editingRelatoreId=rid;
-  document.getElementById('modalRelatoreTitolo').textContent='Modifica relatore';
-  document.getElementById('rNome').value=r.nome||'';
-  document.getElementById('rCognome').value=r.cognome||'';
-  document.getElementById('rTitolo').value=r.titolo||'';
-  document.getElementById('rOrg').value=r.org||'';
-  document.getElementById('rEmail').value=r.email||'';
-  document.getElementById('rTel').value=r.tel||'';
-  document.getElementById('rBio').value=r.bio||'';
-  // Ripristina opzione foto
-  if(r.foto){
-    if(r.foto.startsWith('data:')){
-      document.getElementById('fotoUpload').checked=true;
-      document.getElementById('fotoUploadSection').style.display='block';
-      document.getElementById('fotoUrlSection').style.display='none';
-      document.getElementById('fotoPreviewImg').src=r.foto;
-      document.getElementById('fotoPreview').style.display='flex';
-      document.getElementById('fotoPreview').style.alignItems='center';
-      window._fotoBase64=r.foto;
-    }else{
-      document.getElementById('fotoUrl').checked=true;
-      document.getElementById('fotoUrlSection').style.display='block';
-      document.getElementById('fotoUploadSection').style.display='none';
-      document.getElementById('rFoto').value=r.foto;
-    }
-  }else{
-    document.getElementById('fotoNo').checked=true;
-    document.getElementById('fotoUrlSection').style.display='none';
-    document.getElementById('fotoUploadSection').style.display='none';
-    document.getElementById('rFoto').value='';
-    window._fotoBase64='';
-  }
-  openModal('modalRelatore');
-};
-
-document.getElementById('btnSalvaRelatore').addEventListener('click',async()=>{
-  const nome=document.getElementById('rNome').value.trim();
-  const cognome=document.getElementById('rCognome').value.trim();
-  if(!nome||!cognome){showErr('relatoreError','Inserisci nome e cognome.');return;}
-  const btn=document.getElementById('btnSalvaRelatore');
-  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
-  try{
-    await signInAnonymously(auth);
-    // Determina foto in base all'opzione selezionata
-    const fotoOpt = document.querySelector('input[name="fotoOpt"]:checked')?.value || 'no';
-    let fotoVal = '';
-    if (fotoOpt === 'url') fotoVal = document.getElementById('rFoto').value.trim();
-    else if (fotoOpt === 'upload') fotoVal = window._fotoBase64 || '';
-    const payload={nome,cognome,titolo:document.getElementById('rTitolo').value.trim(),org:document.getElementById('rOrg').value.trim(),email:document.getElementById('rEmail').value.trim(),tel:document.getElementById('rTel').value.trim(),bio:document.getElementById('rBio').value.trim(),foto:fotoVal,updatedAt:serverTimestamp()};
-    if(editingRelatoreId){await setDoc(doc(db,'eventi',currentEvId,'relatori',editingRelatoreId),payload,{merge:true});}
-    else{payload.createdAt=serverTimestamp();await addDoc(collection(db,'eventi',currentEvId,'relatori'),payload);}
-    closeModal('modalRelatore');await loadRelatori();updateStats();
-  }catch(e){showErr('relatoreError','Errore: '+e.message);}
-  finally{btn.disabled=false;btn.textContent='Salva relatore';}
-});
-
-window.eliminaRelatore=async function(rid){
-  if(!confirm('Eliminare questo relatore?'))return;
-  try{await deleteDoc(doc(db,'eventi',currentEvId,'relatori',rid));await loadRelatori();}catch(e){alert('Errore: '+e.message);}
-};
-
-// ── SALE ────────────────────────────────────────────────
-async function loadSale(){
-  if(!currentEvId)return;
-  const snap=await getDocs(collection(db,'eventi',currentEvId,'sale'));
-  sale=[];
-  snap.forEach(d=>sale.push({id:d.id,...d.data()}));
-  renderSale();
-}
-
-function renderSale(){
-  const grid=document.getElementById('saleGrid');
-  document.getElementById('sTotSale').textContent=sale.length;
-  if(!sale.length){grid.innerHTML='<div class="empty-state" style="grid-column:span 3"><div class="empty-icon">🏛️</div><div class="empty-title">Nessuna sala configurata</div></div>';return;}
-  grid.innerHTML=sale.map(s=>{
-    const sessSala=sessioni.filter(x=>x.salaId===s.id).length;
-    const cap=parseInt(s.capacita)||0;
-    const pct=cap>0?Math.min(100,Math.round((s.iscritti||0)/cap*100)):0;
+function renderSale() {
+  const grid = document.getElementById('saleGrid');
+  document.getElementById('sTotSale').textContent = sale.length;
+  if (!sale.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:span 3"><div class="empty-icon">🏛️</div><div class="empty-title">Nessuna sala configurata</div></div>'; return; }
+  grid.innerHTML = sale.map(s => {
+    const sessSala = sessioni.filter(x => x.salaId === s.id).length;
     return `<div class="sala-card">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
         <div style="width:12px;height:12px;border-radius:50%;background:${s.colore||'#7C3AED'};flex-shrink:0"></div>
-        <div class="sala-nome">${esc(s.nome)}</div>
+        <div style="font-size:15px;font-weight:600">${esc(s.nome)}</div>
       </div>
-      <div class="sala-capacita">📍 ${esc(s.piano||'—')} · ${cap} posti max</div>
-      <div class="sala-capacita" style="margin-top:2px">📅 ${sessSala} sessioni programmate</div>
-      ${s.note?`<div style="font-size:11px;color:var(--text3);margin-top:4px">${esc(s.note.slice(0,60))}</div>`:''}
-      <div class="sala-bar"><div class="sala-fill" style="width:${pct}%;background:${s.colore||'#7C3AED'}"></div></div>
-      <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
-        <button class="btn btn-danger btn-sm" onclick="eliminaSala('${s.id}')">✕</button>
+      <div style="font-size:12px;color:var(--text3)">📍 ${esc(s.piano||'—')} · ${s.capacita} posti</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:2px">📅 ${sessSala} sessioni</div>
+      ${s.note ? `<div style="font-size:11px;color:var(--text3);margin-top:4px">${esc(s.note.slice(0,60))}</div>` : ''}
+      <div class="sala-bar"><div class="sala-fill" style="width:${sessSala>0?Math.min(100,Math.round(sessSala/3*100)):0}%;background:${s.colore||'#7C3AED'}"></div></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:8px">
+        <button class="btn btn-danger btn-sm" data-del-sl="${s.id}">✕ Elimina</button>
       </div>
     </div>`;
   }).join('');
+  grid.querySelectorAll('[data-del-sl]').forEach(btn => btn.addEventListener('click', () => eliminaSala(btn.dataset.delSl)));
 }
 
-document.getElementById('btnNuovaSala').addEventListener('click',()=>{
-  if(!currentEvId){alert('Seleziona prima un evento.');return;}
-  clearForm(['slNome','slPiano','slNote']);
-  document.getElementById('slCapacita').value='100';
-  document.getElementById('slColore').value='#7C3AED';
-  openModal('modalSala');
-});
-
-document.getElementById('btnSalvaSala').addEventListener('click',async()=>{
-  const nome=document.getElementById('slNome').value.trim();
-  const capacita=parseInt(document.getElementById('slCapacita').value)||0;
-  if(!nome){showErr('salaError','Inserisci il nome della sala.');return;}
-  if(!capacita){showErr('salaError','Inserisci la capacità massima.');return;}
-  const btn=document.getElementById('btnSalvaSala');
-  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
-  try{
-    await signInAnonymously(auth);
-    await addDoc(collection(db,'eventi',currentEvId,'sale'),{nome,capacita,piano:document.getElementById('slPiano').value.trim(),colore:document.getElementById('slColore').value,note:document.getElementById('slNote').value.trim(),iscritti:0,createdAt:serverTimestamp()});
-    closeModal('modalSala');await loadSale();updateStats();
-  }catch(e){showErr('salaError','Errore: '+e.message);}
-  finally{btn.disabled=false;btn.textContent='Salva sala';}
-});
-
-window.eliminaSala=async function(sid){
-  if(!confirm('Eliminare questa sala?'))return;
-  try{await deleteDoc(doc(db,'eventi',currentEvId,'sale',sid));await loadSale();}catch(e){alert('Errore: '+e.message);}
-};
-
-// ── ISCRIZIONI ───────────────────────────────────────────
-async function loadIscrizioni(){
-  if(!currentEvId)return;
-  const partsSnap=await getDocs(collection(db,'eventi',currentEvId,'partecipanti'));
-  const parts=[];partsSnap.forEach(d=>parts.push({id:d.id,...d.data()}));
-  document.getElementById('sTotIscritti').textContent=parts.length;
-  const container=document.getElementById('iscrizioniContent');
-  if(!parts.length){container.innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Nessun partecipante iscritto</div></div>';return;}
-  // Mostra tabella partecipanti con sessioni prenotate
-  container.innerHTML=`<div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)">
-    <table style="width:100%;border-collapse:collapse;font-size:13px">
-      <thead style="background:var(--surface2)"><tr>
-        <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)">CF</th>
-        <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border)">Nome</th>
-        <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border)">Professione</th>
-        <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border)">Sessioni prenotate</th>
-      </tr></thead>
-      <tbody>${parts.map(p=>`<tr style="border-bottom:1px solid var(--border)">
-        <td style="padding:9px 12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)">${p.cf||'—'}</td>
-        <td style="padding:9px 12px;font-weight:500">${esc(p.cognome||'')} ${esc(p.nome||'')}</td>
-        <td style="padding:9px 12px;color:var(--text2)">${esc(p.professione||'—')}</td>
-        <td style="padding:9px 12px"><span style="background:var(--congress-light);color:var(--congress);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">${(p.sessioniPrenotate||[]).length} sessioni</span></td>
-      </tr>`).join('')}</tbody>
-    </table>
-  </div>`;
+// ── HELPERS FORM ──────────────────────────────────────────
+function buildSaleSelect(selectedId, customNome) {
+  const sel = document.getElementById('sSala');
+  sel.innerHTML = '<option value="">— Nessuna sala —</option>';
+  sale.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id; opt.textContent = s.nome + (s.capacita ? ' (' + s.capacita + ' posti)' : '');
+    if (s.id === selectedId) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  const custom = document.createElement('option');
+  custom.value = '__custom__'; custom.textContent = '✏️ Scrivi nome sala...';
+  if (customNome) custom.selected = true;
+  sel.appendChild(custom);
+  const ci = document.getElementById('sSalaCustom');
+  if (customNome) { ci.style.display = 'block'; ci.value = customNome; }
+  else { ci.style.display = 'none'; ci.value = ''; }
 }
 
-// ── TABS ─────────────────────────────────────────────────
-document.querySelectorAll('.main-tab').forEach(t=>{
-  t.addEventListener('click',()=>{
-    document.querySelectorAll('.main-tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tab-pane').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active');
-    document.getElementById('tab-'+t.dataset.tab).classList.add('active');
-    if(t.dataset.tab==='iscrizioni') loadIscrizioni();
-    if(t.dataset.tab==='relatori') { renderRelatori(); }
-    if(t.dataset.tab==='sale') { renderSale(); }
-    if(t.dataset.tab==='programma') { renderProgramma(); }
+function buildRelatoriCheck(selected) {
+  const div = document.getElementById('relatoriCheckList');
+  if (!relatori.length) { div.innerHTML = '<span style="font-size:12px;color:var(--text3)">Nessun relatore disponibile — aggiungili prima</span>'; return; }
+  div.innerHTML = relatori.map(r => `
+    <label style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:${selected.includes(r.id)?'var(--congress-light)':'var(--surface)'};border:1px solid ${selected.includes(r.id)?'var(--congress)':'var(--border)'};border-radius:20px;font-size:12px;cursor:pointer;transition:all .2s">
+      <input type="checkbox" value="${r.id}" ${selected.includes(r.id)?'checked':''} style="accent-color:var(--congress);width:14px;height:14px">
+      ${esc((r.titolo?r.titolo+' ':'')+r.cognome+' '+r.nome)}
+    </label>`).join('');
+  div.querySelectorAll('label').forEach(lbl => {
+    lbl.querySelector('input').addEventListener('change', () => {
+      const checked = lbl.querySelector('input').checked;
+      lbl.style.background = checked ? 'var(--congress-light)' : 'var(--surface)';
+      lbl.style.borderColor = checked ? 'var(--congress)' : 'var(--border)';
+    });
   });
-});
-
-// ── UTILS ─────────────────────────────────────────────────
-function updateStats(){
-  document.getElementById('sTotSessioni').textContent=sessioni.length;
-  document.getElementById('sTotRelatori').textContent=relatori.length;
-  document.getElementById('sTotSale').textContent=sale.length;
 }
-function openModal(id){document.getElementById(id).classList.add('show');}
-window.closeModal=function(id){document.getElementById(id).classList.remove('show');};
-// Chiudi modal cliccando overlay
-document.querySelectorAll('.modal-overlay').forEach(o=>{
-  o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show');});
-});
-function clearForm(ids){ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});}
-function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('show');e.style.display='block';setTimeout(()=>{e.classList.remove('show');e.style.display='none';},4000);}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-</script>
 
-<script>
-// Bridge: collega bottoni UI prima che Firebase sia pronto
-document.addEventListener('DOMContentLoaded', function() {
+function resetFotoOpt() {
+  document.querySelectorAll('.foto-opt-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.foto-opt-btn[data-foto="no"]').classList.add('active');
+  document.getElementById('fotoUrlSection').style.display = 'none';
+  document.getElementById('fotoUploadSection').style.display = 'none';
+  document.getElementById('fotoPreview').style.display = 'none';
+  window._fotoBase64 = '';
+}
 
-  // Bottone nuova sessione
-  var btnNS = document.getElementById('btnNuovaSessione');
-  if (btnNS) btnNS.addEventListener('click', function() {
-    var evId = document.getElementById('evSelect').value;
-    if (!evId) { alert('Seleziona prima un evento dal menu in alto.'); return; }
-    // Reset form
-    ['sTitolo','sOraInizio','sOraFine','sDescrizione'].forEach(function(id) {
-      var el = document.getElementById(id); if (el) el.value = '';
-    });
-    var sData = document.getElementById('sData');
-    if (sData) sData.value = '';
-    var sTipo = document.getElementById('sTipo');
-    if (sTipo) sTipo.value = 'keynote';
-    var sMax = document.getElementById('sMaxPosti');
-    if (sMax) sMax.value = '0';
-    var sLing = document.getElementById('sLingua');
-    if (sLing) sLing.value = 'it';
-    // Apri modal
-    var modal = document.getElementById('modalSessione');
-    if (modal) modal.classList.add('show');
-    var title = document.getElementById('modalSessioneTitolo');
-    if (title) title.textContent = 'Nuova sessione';
-    // editingSessioneId = null gestito dal modulo
-    if (window._resetEditingSessione) window._resetEditingSessione();
-  });
+// ── EDIT / ELIMINA ────────────────────────────────────────
+function openEditSessione(sid) {
+  const s = sessioni.find(x => x.id === sid); if (!s) return;
+  editSid = sid;
+  document.getElementById('msTitolo').textContent = 'Modifica sessione';
+  document.getElementById('sTitolo').value = s.titolo || '';
+  document.getElementById('sData').value = s.data || '';
+  document.getElementById('sTipo').value = s.tipo || 'keynote';
+  document.getElementById('sOraInizio').value = s.oraInizio || '';
+  document.getElementById('sOraFine').value = s.oraFine || '';
+  document.getElementById('sMaxPosti').value = s.maxPosti || 0;
+  document.getElementById('sDescrizione').value = s.descrizione || '';
+  document.getElementById('sLingua').value = s.lingua || 'it';
+  document.getElementById('msErr').style.display = 'none';
+  buildSaleSelect(s.salaId, s.salaNomeCustom || null);
+  buildRelatoriCheck(s.relatori || []);
+  openModal('modalSessione');
+}
 
-  // Bottone nuovo relatore
-  var btnNR = document.getElementById('btnNuovoRelatore');
-  if (btnNR) btnNR.addEventListener('click', function() {
-    var evId = document.getElementById('evSelect').value;
-    if (!evId) { alert('Seleziona prima un evento dal menu in alto.'); return; }
-    // Reset tutti i campi
-    ['rNome','rCognome','rTitolo','rOrg','rEmail','rTel','rBio','rFoto'].forEach(function(id) {
-      var el = document.getElementById(id); if (el) el.value = '';
-    });
-    // Reset foto option
-    var fotoNo = document.getElementById('fotoNo');
-    if (fotoNo) { fotoNo.checked = true; }
-    var fotoUrlSec = document.getElementById('fotoUrlSection');
-    if (fotoUrlSec) fotoUrlSec.style.display = 'none';
-    var fotoUpSec = document.getElementById('fotoUploadSection');
-    if (fotoUpSec) fotoUpSec.style.display = 'none';
-    var fotoPreview = document.getElementById('fotoPreview');
-    if (fotoPreview) fotoPreview.style.display = 'none';
-    window._fotoBase64 = '';
-    // Apri modal
-    var modal = document.getElementById('modalRelatore');
-    if (modal) modal.classList.add('show');
-    var title = document.getElementById('modalRelatoreTitolo');
-    if (title) title.textContent = 'Nuovo relatore';
-    if (window._resetEditingRelatore) window._resetEditingRelatore();
-    // Focus sul primo campo
-    setTimeout(function() {
-      var nome = document.getElementById('rNome');
-      if (nome) nome.focus();
-    }, 100);
-  });
-
-  // Bottone nuova sala
-  var btnNSl = document.getElementById('btnNuovaSala');
-  if (btnNSl) btnNSl.addEventListener('click', function() {
-    var evId = document.getElementById('evSelect').value;
-    if (!evId) { alert('Seleziona prima un evento.'); return; }
-    ['slNome','slPiano','slNote'].forEach(function(id) {
-      var el = document.getElementById(id); if (el) el.value = '';
-    });
-    var cap = document.getElementById('slCapacita');
-    if (cap) cap.value = '100';
-    var col = document.getElementById('slColore');
-    if (col) col.value = '#7C3AED';
-    var modal = document.getElementById('modalSala');
-    if (modal) modal.classList.add('show');
-  });
-
-  // Chiudi modal cliccando overlay
-  document.querySelectorAll('.modal-overlay').forEach(function(o) {
-    o.addEventListener('click', function(e) {
-      if (e.target === o) o.classList.remove('show');
-    });
-  });
-
-  // closeModal globale
-  window.closeModal = function(id) {
-    var el = document.getElementById(id);
-    if (el) el.classList.remove('show');
-  };
-
-  // Toggle opzioni foto relatore
-  document.querySelectorAll('input[name="fotoOpt"]').forEach(function(r) {
-    r.addEventListener('change', function() {
-      document.getElementById('fotoUrlSection').style.display = this.value === 'url' ? 'block' : 'none';
-      document.getElementById('fotoUploadSection').style.display = this.value === 'upload' ? 'block' : 'none';
-    });
-  });
-
-  // Preview foto caricata
-  var fotoFileInput = document.getElementById('rFotoFile');
-  if (fotoFileInput) {
-    fotoFileInput.addEventListener('change', function() {
-      var file = this.files[0];
-      if (!file) return;
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('fotoPreviewImg').src = e.target.result;
-        document.getElementById('fotoPreview').style.display = 'flex';
-        document.getElementById('fotoPreview').style.alignItems = 'center';
-        // Salva base64 in campo nascosto
-        window._fotoBase64 = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
+function openEditRelatore(rid) {
+  const r = relatori.find(x => x.id === rid); if (!r) return;
+  editRid = rid;
+  document.getElementById('mrTitolo').textContent = 'Modifica relatore';
+  document.getElementById('rNome').value = r.nome || '';
+  document.getElementById('rCognome').value = r.cognome || '';
+  document.getElementById('rTitolo').value = r.titolo || '';
+  document.getElementById('rOrg').value = r.org || '';
+  document.getElementById('rEmail').value = r.email || '';
+  document.getElementById('rTel').value = r.tel || '';
+  document.getElementById('rBio').value = r.bio || '';
+  document.getElementById('mrErr').style.display = 'none';
+  // Ripristina foto
+  resetFotoOpt();
+  if (r.foto) {
+    if (r.foto.startsWith('data:')) {
+      document.querySelector('.foto-opt-btn[data-foto="upload"]').click();
+      document.getElementById('fotoPreviewImg').src = r.foto;
+      document.getElementById('fotoPreview').style.cssText = 'display:flex;align-items:center;gap:10px;margin-top:8px';
+      window._fotoBase64 = r.foto;
+    } else {
+      document.querySelector('.foto-opt-btn[data-foto="url"]').click();
+      document.getElementById('rFoto').value = r.foto;
+    }
   }
-});
+  openModal('modalRelatore');
+}
+
+async function eliminaSessione(sid) {
+  if (!confirm('Eliminare questa sessione?')) return;
+  try { await deleteDoc(doc(db,'eventi',currentEvId,'sessioni',sid)); await loadSessioni(); } catch(e) { alert('Errore: ' + e.message); }
+}
+async function eliminaRelatore(rid) {
+  if (!confirm('Eliminare questo relatore?')) return;
+  try { await deleteDoc(doc(db,'eventi',currentEvId,'relatori',rid)); await loadRelatori(); } catch(e) { alert('Errore: ' + e.message); }
+}
+async function eliminaSala(sid) {
+  if (!confirm('Eliminare questa sala?')) return;
+  try { await deleteDoc(doc(db,'eventi',currentEvId,'sale',sid)); await loadSale(); } catch(e) { alert('Errore: ' + e.message); }
+}
+
+function showErr(id, msg) {
+  const e = document.getElementById(id);
+  e.textContent = msg; e.style.display = 'block';
+  setTimeout(() => e.style.display = 'none', 4000);
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+initApp();
 </script>
 </body>
 </html>
