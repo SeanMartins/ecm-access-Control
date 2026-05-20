@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Congress — Certificati Partecipazione</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
+<script src="ecm-layout.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F6F9;--surface:#FFF;--surface2:#F0F2F5;--border:#DDE1E9;--text:#1A1D2E;--text2:#5A5F7A;--text3:#9499B0;--congress:#7C3AED;--congress-light:#F5F3FF;--congress-dark:#5B21B6;--success:#059669;--success-light:#ECFDF5;--danger:#DC2626;--danger-light:#FEF2F2;--warn:#D97706;--radius:10px;--radius-lg:14px;--shadow:0 1px 3px rgba(0,0,0,.1),0 4px 12px rgba(0,0,0,.07)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+.ecm-content{padding:24px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none}
+.btn-congress{background:var(--congress);color:white}.btn-congress:hover{background:var(--congress-dark)}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{background:var(--surface2)}
+.btn-success{background:var(--success);color:white}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%}
+.form-input:focus{border-color:var(--congress)}
+select.form-input,textarea.form-input{cursor:pointer}
+textarea.form-input{resize:vertical;min-height:70px;cursor:text}
+.field-label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase;display:block;margin-bottom:5px}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.page-title{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.span2{grid-column:span 2}
+/* Lista partecipanti */
+.part-list{display:flex;flex-direction:column;gap:6px;max-height:400px;overflow-y:auto}
+.part-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);transition:all .2s}
+.part-item:hover{border-color:var(--congress)}
+.part-check{width:18px;height:18px;accent-color:var(--congress);cursor:pointer;flex-shrink:0}
+.part-info{flex:1;min-width:0}
+.part-nome{font-size:13px;font-weight:500}
+.part-cf{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace}
+.part-pct{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px}
+.pct-ok{background:var(--success-light);color:var(--success)}
+.pct-warn{background:var(--warn-light);color:var(--warn)}
+.pct-no{background:var(--danger-light);color:var(--danger)}
+/* Preview certificato */
+.preview-wrap{background:#f0ede6;border-radius:var(--radius-lg);padding:20px;margin-top:16px}
+.preview-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:12px}
+
+/* ═══ CERTIFICATO ═══ */
+.cert{background:white;width:100%;max-width:780px;margin:0 auto;padding:50px 60px;position:relative;font-family:'Inter',sans-serif;border:1px solid #e0e0e0}
+.cert-border{position:absolute;inset:12px;border:2px solid var(--congress);pointer-events:none;border-radius:2px}
+.cert-corner{position:absolute;width:24px;height:24px;border-color:var(--congress);border-style:solid}
+.cert-corner.tl{top:8px;left:8px;border-width:3px 0 0 3px}
+.cert-corner.tr{top:8px;right:8px;border-width:3px 3px 0 0}
+.cert-corner.bl{bottom:8px;left:8px;border-width:0 0 3px 3px}
+.cert-corner.br{bottom:8px;right:8px;border-width:0 3px 3px 0}
+.cert-header{text-align:center;margin-bottom:28px}
+.cert-logo{width:64px;height:64px;border-radius:50%;object-fit:cover;margin:0 auto 12px;display:block}
+.cert-org{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.cert-tipo{font-size:11px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase}
+.cert-divider{width:60px;height:2px;background:var(--congress);margin:16px auto}
+.cert-titolo{font-family:'Playfair Display',Georgia,serif;font-size:28px;font-style:italic;text-align:center;color:var(--text);margin-bottom:20px;line-height:1.3}
+.cert-body{text-align:center;margin-bottom:24px}
+.cert-intro{font-size:13px;color:var(--text2);margin-bottom:8px}
+.cert-nome{font-family:'Playfair Display',Georgia,serif;font-size:32px;font-weight:700;color:var(--congress);margin-bottom:6px;line-height:1.2}
+.cert-cf{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:16px}
+.cert-desc{font-size:13px;color:var(--text2);line-height:1.7;max-width:520px;margin:0 auto 16px}
+.cert-evento{font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px}
+.cert-date{font-size:12px;color:var(--text3)}
+.cert-sessioni{margin:20px 0;padding:14px 20px;background:#f9f7ff;border-radius:8px;border:1px solid rgba(124,58,237,.15)}
+.cert-sess-title{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--congress);margin-bottom:8px}
+.cert-sess-list{list-style:none;font-size:12px;color:var(--text2);display:flex;flex-direction:column;gap:4px;text-align:left}
+.cert-sess-list li{display:flex;align-items:center;gap:8px}
+.cert-sess-list li::before{content:'✓';color:var(--success);font-weight:700;flex-shrink:0}
+.cert-footer{display:flex;justify-content:space-between;align-items:flex-end;margin-top:28px;padding-top:20px;border-top:1px solid #e0e0e0}
+.cert-firma{text-align:center}
+.cert-firma-line{width:140px;height:1px;background:#999;margin:0 auto 6px}
+.cert-firma-nome{font-size:11px;color:var(--text3)}
+.cert-firma-ruolo{font-size:10px;color:var(--text3)}
+.cert-num{font-family:'DM Mono',monospace;font-size:10px;color:#bbb;text-align:right}
+.cert-stats{display:flex;justify-content:center;gap:32px;margin:16px 0;padding:12px;background:#f9f7ff;border-radius:8px}
+.cert-stat{text-align:center}
+.cert-stat-val{font-size:22px;font-weight:700;color:var(--congress)}
+.cert-stat-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+/* Spinner */
+.spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--congress);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Print */
+@media print{
+  .ecm-sidebar,.ecm-topbar,.ecm-version-footer,.no-print{display:none!important}
+  .ecm-main{margin:0!important}
+  .ecm-content{padding:0!important}
+  .cert{border:none;padding:30px 40px;page-break-inside:avoid}
+  .preview-wrap{background:none;padding:0}
+  body{background:white}
+}
+@media(max-width:768px){.form-grid{grid-template-columns:1fr}.span2{grid-column:span 1}.cert{padding:24px 20px}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+<div class="ecm-main">
+  <div class="ecm-topbar no-print">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="mobile-menu-btn" id="mobileMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar-title">Certificati Partecipazione</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-badge"><div class="topbar-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
+      <div id="userBarSlot"></div>
+    </div>
+  </div>
+  <div class="ecm-content">
+    <div class="page-header no-print">
+      <div>
+        <div class="page-title">Certificati Partecipazione</div>
+        <div class="page-sub">Genera e stampa i certificati nominativi per i partecipanti</div>
+      </div>
+    </div>
+
+    <!-- CONFIGURAZIONE -->
+    <div class="card no-print">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:16px">⚙️ Configurazione certificato</div>
+      <div class="form-grid">
+        <div>
+          <label class="field-label">Evento</label>
+          <select class="form-input" id="evSelect"><option value="">— Seleziona evento —</option></select>
+        </div>
+        <div>
+          <label class="field-label">Organizzatore / Ente</label>
+          <input type="text" class="form-input" id="cfgOrg" placeholder="Es. Multimedia Meeting Group" value="Multimedia Meeting Group">
+        </div>
+        <div>
+          <label class="field-label">Data / Luogo evento</label>
+          <input type="text" class="form-input" id="cfgDataLuogo" placeholder="Es. Torino, 20 Maggio 2026">
+        </div>
+        <div>
+          <label class="field-label">Responsabile scientifico / Firma</label>
+          <input type="text" class="form-input" id="cfgFirma" placeholder="Prof. Mario Rossi">
+        </div>
+        <div>
+          <label class="field-label">Ruolo responsabile</label>
+          <input type="text" class="form-input" id="cfgRuolo" placeholder="Presidente del Comitato Scientifico">
+        </div>
+        <div>
+          <label class="field-label">Testo personalizzato (opzionale)</label>
+          <textarea class="form-input" id="cfgTesto" placeholder="Ha partecipato attivamente a tutte le sessioni..."></textarea>
+        </div>
+        <div>
+          <label class="field-label">Mostra sessioni frequentate</label>
+          <select class="form-input" id="cfgShowSess">
+            <option value="si">Sì — elenca le sessioni</option>
+            <option value="no">No — solo totale ore</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Soglia presenza minima</label>
+          <select class="form-input" id="cfgSoglia">
+            <option value="0">Tutti i partecipanti</option>
+            <option value="50">≥ 50% presenze</option>
+            <option value="70" selected>≥ 70% presenze</option>
+            <option value="80">≥ 80% presenze</option>
+            <option value="100">100% presenze</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- SELEZIONE PARTECIPANTI -->
+    <div class="card no-print" id="partCard" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)">👥 Partecipanti idonei</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm" id="btnSelAll">Seleziona tutti</button>
+          <button class="btn btn-outline btn-sm" id="btnDesAll">Deseleziona tutti</button>
+          <button class="btn btn-congress" id="btnStampa" disabled>🖨️ Stampa selezionati</button>
+        </div>
+      </div>
+      <div id="partListWrap">
+        <div style="text-align:center;padding:24px"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- AREA STAMPA -->
+    <div id="printArea"></div>
+  </div>
+  <div class="ecm-version-footer no-print" id="ecmVersionFooter"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof renderSidebar === 'function') renderSidebar('congress-cert');
+  if (typeof renderVersionFooter === 'function') renderVersionFooter();
+});
+</script>
+
+<script type="module">
+import { requireAuth, injectUserBar } from './ecm-auth.js';
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+
+let db;
+let partecipanti=[], sessioni=[], sale=[], checkinMap={};
+let currentEvId=null, currentEv=null;
+
+// ── LISTENERS UI ──────────────────────────────────────
+document.getElementById('btnSelAll').addEventListener('click', () => {
+  document.querySelectorAll('.part-check').forEach(c => c.checked = true);
+  updateStampaBtn();
+});
+document.getElementById('btnDesAll').addEventListener('click', () => {
+  document.querySelectorAll('.part-check').forEach(c => c.checked = false);
+  updateStampaBtn();
+});
+document.getElementById('btnStampa').addEventListener('click', stampaSelezionati);
+
+// Aggiorna preview quando cambiano le config
+['cfgOrg','cfgDataLuogo','cfgFirma','cfgRuolo','cfgTesto','cfgShowSess','cfgSoglia'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    if (currentEvId) loadPartecipanti(currentEvId);
+  });
+  document.getElementById(id).addEventListener('change', () => {
+    if (currentEvId) loadPartecipanti(currentEvId);
+  });
+});
+
+// ── INIT FIREBASE ─────────────────────────────────────
+async function initApp() {
+  try {
+    const app = getApps().length ? getApps()[0] : initializeApp(FB);
+    db = getFirestore(app);
+    await requireAuth();
+    injectUserBar('userBarSlot');
+    document.getElementById('fbDot').className = 'topbar-dot ok';
+    document.getElementById('fbStatus').textContent = 'Firebase connesso';
+
+    const evSnap = await getDocs(collection(db,'eventi'));
+    const evList = [];
+    evSnap.forEach(d => evList.push({id:d.id,...d.data()}));
+    evList.filter(e => e.stato !== 'archiviato')
+      .sort((a,b) => new Date(b.data||0)-new Date(a.data||0))
+      .forEach(ev => {
+        const opt = document.createElement('option');
+        opt.value = ev.id;
+        opt.textContent = (ev.nome||ev.id) + (ev.data?' ('+new Date(ev.data).toLocaleDateString('it-IT')+')':'');
+        document.getElementById('evSelect').appendChild(opt);
+      });
+
+    const savedId = localStorage.getItem('ecm_eventId');
+    const autoId = (savedId && evList.find(e=>e.id===savedId)) ? savedId : evList.find(e=>e.stato!=='archiviato')?.id;
+    if (autoId) {
+      document.getElementById('evSelect').value = autoId;
+      currentEv = evList.find(e=>e.id===autoId);
+      // Pre-compila data/luogo
+      if (currentEv?.data) {
+        document.getElementById('cfgDataLuogo').value = currentEv.luogo
+          ? (currentEv.luogo + ', ' + new Date(currentEv.data).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}))
+          : new Date(currentEv.data).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+      }
+      await loadEvento(autoId, evList);
+    }
+
+    document.getElementById('evSelect').addEventListener('change', async function() {
+      if (this.value) {
+        currentEv = evList.find(e=>e.id===this.value);
+        if (currentEv?.data) {
+          document.getElementById('cfgDataLuogo').value = currentEv.luogo
+            ? (currentEv.luogo + ', ' + new Date(currentEv.data).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}))
+            : new Date(currentEv.data).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+        }
+        await loadEvento(this.value, evList);
+      }
+    });
+  } catch(e) { console.error(e); }
+}
+
+async function loadEvento(evId, evList) {
+  currentEvId = evId;
+  const [partsSnap, sessSnap, saleSnap] = await Promise.all([
+    getDocs(collection(db,'eventi',evId,'partecipanti')),
+    getDocs(collection(db,'eventi',evId,'sessioni')),
+    getDocs(collection(db,'eventi',evId,'sale'))
+  ]);
+  partecipanti=[]; partsSnap.forEach(d=>partecipanti.push({id:d.id,...d.data()}));
+  sessioni=[]; sessSnap.forEach(d=>sessioni.push({id:d.id,...d.data()}));
+  sessioni.sort((a,b)=>(a.data||'').localeCompare(b.data||'')||(a.oraInizio||'').localeCompare(b.oraInizio||''));
+  sale=[]; saleSnap.forEach(d=>sale.push({id:d.id,...d.data()}));
+
+  checkinMap={};
+  await Promise.all(sessioni.map(async s=>{
+    const ciSnap = await getDocs(collection(db,'eventi',evId,'sessioni',s.id,'checkin'));
+    checkinMap[s.id]=[];
+    ciSnap.forEach(d=>checkinMap[s.id].push({id:d.id,...d.data()}));
+  }));
+
+  document.getElementById('partCard').style.display = 'block';
+  loadPartecipanti(evId);
+}
+
+function calcPct(partId) {
+  const sessFiltrate = sessioni.filter(s=>s.tipo!=='break');
+  if (!sessFiltrate.length) return 0;
+  const pres = sessFiltrate.filter(s=>(checkinMap[s.id]||[]).some(c=>c.partecipanteId===partId||c.id===partId)).length;
+  return Math.round(pres/sessFiltrate.length*100);
+}
+
+function calcOre(partId) {
+  let minuti = 0;
+  sessioni.filter(s=>s.tipo!=='break').forEach(s=>{
+    const ci = (checkinMap[s.id]||[]).find(c=>c.partecipanteId===partId||c.id===partId);
+    if (!ci) return;
+    const [h1,m1]=(s.oraInizio||'00:00').split(':').map(Number);
+    const [h2,m2]=(s.oraFine||'00:00').split(':').map(Number);
+    minuti += Math.max(0,(h2*60+m2)-(h1*60+m1));
+  });
+  const h = Math.floor(minuti/60), m = minuti%60;
+  return {str: h+'h'+(m>0?m+'m':''), minuti};
+}
+
+function sessPresenti(partId) {
+  return sessioni.filter(s=>s.tipo!=='break'&&(checkinMap[s.id]||[]).some(c=>c.partecipanteId===partId||c.id===partId));
+}
+
+function loadPartecipanti() {
+  const soglia = parseInt(document.getElementById('cfgSoglia').value)||0;
+  const idonei = partecipanti.filter(p=>calcPct(p.id)>=soglia);
+
+  const wrap = document.getElementById('partListWrap');
+  if (!partecipanti.length) { wrap.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3)">Nessun partecipante</div>'; return; }
+
+  wrap.innerHTML = `<div class="part-list">${idonei.map(p=>{
+    const pct = calcPct(p.id);
+    const ore = calcOre(p.id);
+    const pctClass = pct>=80?'pct-ok':pct>=50?'pct-warn':'pct-no';
+    return `<div class="part-item">
+      <input type="checkbox" class="part-check" value="${p.id}" checked onchange="updateStampaBtn()">
+      <div class="part-info">
+        <div class="part-nome">${esc(p.cognome||'')} ${esc(p.nome||'')}</div>
+        <div class="part-cf">${p.cf||'—'} · ${p.professione||'—'}</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="part-pct ${pctClass}">${pct}% presenza</span>
+        <span style="font-size:11px;color:var(--text3)">${ore.str}</span>
+        <button class="btn btn-outline btn-sm" onclick="stampaSingolo('${p.id}')">👁️ Anteprima</button>
+      </div>
+    </div>`;
+  }).join('')}</div>
+  ${idonei.length===0?'<div style="text-align:center;padding:24px;color:var(--text3)">Nessun partecipante supera la soglia selezionata</div>':''}
+  <div style="margin-top:10px;font-size:12px;color:var(--text3)">
+    ${idonei.length} partecipanti idonei su ${partecipanti.length} totali (soglia: ${soglia}%)
+  </div>`;
+  updateStampaBtn();
+}
+
+window.updateStampaBtn = function() {
+  const sel = document.querySelectorAll('.part-check:checked').length;
+  const btn = document.getElementById('btnStampa');
+  btn.disabled = sel === 0;
+  btn.textContent = sel > 0 ? `🖨️ Stampa ${sel} certificati` : '🖨️ Stampa selezionati';
+};
+
+function buildCert(p) {
+  const pct = calcPct(p.id);
+  const ore = calcOre(p.id);
+  const sessPres = sessPresenti(p.id);
+  const showSess = document.getElementById('cfgShowSess').value === 'si';
+  const org = document.getElementById('cfgOrg').value || 'Multimedia Meeting Group';
+  const dataLuogo = document.getElementById('cfgDataLuogo').value || '—';
+  const firma = document.getElementById('cfgFirma').value || '—';
+  const ruolo = document.getElementById('cfgRuolo').value || 'Responsabile Scientifico';
+  const testoCustom = document.getElementById('cfgTesto').value;
+  const evNome = currentEv?.nome || '—';
+  const certNum = 'CERT-' + p.id + '-' + Date.now().toString(36).toUpperCase();
+
+  const defaultTesto = `ha partecipato al <strong>${esc(evNome)}</strong>, svoltosi il <strong>${esc(dataLuogo)}</strong>, con una presenza pari al <strong>${pct}%</strong> delle sessioni previste, per un totale di <strong>${ore.str}</strong> di formazione.`;
+
+  return `<div class="cert" style="page-break-after:always">
+    <div class="cert-border"></div>
+    <div class="cert-corner tl"></div><div class="cert-corner tr"></div>
+    <div class="cert-corner bl"></div><div class="cert-corner br"></div>
+    <div class="cert-header">
+      <img src="logo.png" class="cert-logo" onerror="this.style.display='none'">
+      <div class="cert-org">${esc(org)}</div>
+      <div class="cert-tipo">Congress Manager — Certificato di Partecipazione</div>
+      <div class="cert-divider"></div>
+    </div>
+    <div class="cert-titolo">Attestato di Partecipazione</div>
+    <div class="cert-body">
+      <div class="cert-intro">Si attesta che</div>
+      <div class="cert-nome">${esc(p.cognome||'')} ${esc(p.nome||'')}</div>
+      ${p.cf?`<div class="cert-cf">C.F. ${p.cf}</div>`:''}
+      ${p.professione&&p.professione!=='—'?`<div style="font-size:12px;color:var(--text3);margin-bottom:12px">${esc(p.professione)}</div>`:''}
+      <div class="cert-desc">${testoCustom || defaultTesto}</div>
+    </div>
+    <div class="cert-stats">
+      <div class="cert-stat"><div class="cert-stat-val">${pct}%</div><div class="cert-stat-lbl">Presenza</div></div>
+      <div class="cert-stat"><div class="cert-stat-val">${ore.str}</div><div class="cert-stat-lbl">Ore totali</div></div>
+      <div class="cert-stat"><div class="cert-stat-val">${sessPres.length}</div><div class="cert-stat-lbl">Sessioni</div></div>
+    </div>
+    ${showSess && sessPres.length > 0 ? `
+    <div class="cert-sessioni">
+      <div class="cert-sess-title">Sessioni frequentate</div>
+      <ul class="cert-sess-list">
+        ${sessPres.map(s=>`<li>${esc(s.titolo||'—')} ${s.oraInizio?'— '+s.oraInizio:''}</li>`).join('')}
+      </ul>
+    </div>` : ''}
+    <div class="cert-footer">
+      <div class="cert-firma">
+        <div class="cert-firma-line"></div>
+        <div class="cert-firma-nome">${esc(firma)}</div>
+        <div class="cert-firma-ruolo">${esc(ruolo)}</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:11px;color:var(--text3)">${esc(dataLuogo)}</div>
+      </div>
+      <div class="cert-num">
+        <div>${certNum}</div>
+        <div style="margin-top:2px">${new Date().toLocaleDateString('it-IT')}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+window.stampaSingolo = function(partId) {
+  const p = partecipanti.find(x=>x.id===partId);
+  if (!p) return;
+  document.getElementById('printArea').innerHTML = buildCert(p);
+  document.getElementById('printArea').scrollIntoView({behavior:'smooth'});
+  setTimeout(() => window.print(), 500);
+};
+
+function stampaSelezionati() {
+  const selIds = [...document.querySelectorAll('.part-check:checked')].map(c=>c.value);
+  if (!selIds.length) return;
+  const certs = selIds.map(id=>{
+    const p = partecipanti.find(x=>x.id===id);
+    return p ? buildCert(p) : '';
+  }).join('');
+  document.getElementById('printArea').innerHTML = certs;
+  setTimeout(() => window.print(), 500);
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+initApp();
+</script>
+</body>
+</html>
