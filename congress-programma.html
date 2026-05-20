@@ -573,11 +573,14 @@ async function initApp() {
         opt.textContent = ev.nome + (ev.data ? ' (' + new Date(ev.data).toLocaleDateString('it-IT') + ')' : '');
         document.getElementById('evSelect').appendChild(opt);
       });
-    // Auto-seleziona
+    // Auto-seleziona — prova prima savedId, poi primo evento disponibile
     const savedId = localStorage.getItem('ecm_eventId');
-    if (savedId && evList.find(e => e.id === savedId)) {
-      document.getElementById('evSelect').value = savedId;
-      await loadEventoData(savedId, evList);
+    const firstId = evList.find(e => e.stato !== 'archiviato')?.id;
+    const autoId = (savedId && evList.find(e => e.id === savedId)) ? savedId : firstId;
+    if (autoId) {
+      document.getElementById('evSelect').value = autoId;
+      // Non usare .value= perché non triggera 'change', chiama direttamente
+      await loadEventoData(autoId, evList);
     }
     document.getElementById('evSelect').addEventListener('change', async function() {
       if (this.value) await loadEventoData(this.value, evList);
@@ -588,11 +591,14 @@ async function initApp() {
   }
 }
 
+let _evListCache = [];
 async function loadEventoData(evId, evList) {
   currentEvId = evId;
+  if (evList) _evListCache = evList;
   localStorage.setItem('ecm_eventId', evId);
-  const ev = (evList || []).find(e => e.id === evId);
+  const ev = (_evListCache || []).find(e => e.id === evId);
   if (ev) document.getElementById('eventoNomeDisplay').textContent = ev.nome || '—';
+  console.log('loadEventoData:', evId, 'nome:', ev?.nome);
   await Promise.all([loadSessioni(), loadRelatori(), loadSale()]);
 }
 
