@@ -254,9 +254,13 @@ textarea.form-input{resize:vertical;min-height:80px}
       </div>
       <div class="form-group">
         <label class="field-label">Sala</label>
-        <select class="form-input" id="sSala">
-          <option value="">— Seleziona sala —</option>
-        </select>
+        <div style="display:flex;gap:6px">
+          <select class="form-input" id="sSala" style="flex:1" onchange="if(this.value==='__custom__'){document.getElementById('sSalaCustom').style.display='block';document.getElementById('sSalaCustom').focus();}else{document.getElementById('sSalaCustom').style.display='none';}">
+            <option value="">— Nessuna sala —</option>
+            <option value="__custom__">✏️ Scrivi nome sala...</option>
+          </select>
+        </div>
+        <input type="text" class="form-input" id="sSalaCustom" placeholder="Es. Sala Plenaria / Aula Magna" style="display:none;margin-top:6px">
       </div>
       <div class="form-group">
         <label class="field-label">Posti max (0 = illimitati)</label>
@@ -487,6 +491,7 @@ function renderProgramma(){
         ${daySessions.map(s=>{
           const relNomi=(s.relatori||[]).map(rid=>{const r=relatori.find(x=>x.id===rid);return r?r.titolo+' '+r.cognome+' '+r.nome:'';}).filter(Boolean).join(', ');
           const sala=sale.find(x=>x.id===s.salaId);
+          const salaNome=sala?.nome||s.salaNomeCustom||null;
           const maxP=parseInt(s.maxPosti)||0;
           const iscrP=s.iscritti||0;
           const pctP=maxP>0?Math.round(iscrP/maxP*100):0;
@@ -498,13 +503,13 @@ function renderProgramma(){
             <div class="session-body">
               <div class="session-title">${esc(s.titolo||'—')}</div>
               <div class="session-meta">
-                ${sala?`<span>🏛️ ${esc(sala.nome)}</span>`:''}
+                ${salaNome?`<span>🏛️ ${esc(salaNome)}</span>`:''}
                 ${relNomi?`<span>🎙️ ${esc(relNomi)}</span>`:''}
                 ${s.lingua&&s.lingua!=='it'?`<span>🌐 ${s.lingua.toUpperCase()}</span>`:''}
               </div>
               <div class="session-tags">
                 <span class="tag ${TIPI_CLASS[s.tipo]||'tipo-break'}">${TIPI_LABEL[s.tipo]||s.tipo||'—'}</span>
-                ${sala?`<span class="tag tag-sala">${esc(sala.nome)}</span>`:''}
+                ${salaNome?`<span class="tag tag-sala">${esc(salaNome)}</span>`:''}
                 ${maxP>0?`<span class="session-posti ${postiClass}">${postiLabel}</span>`:''}
               </div>
             </div>
@@ -555,15 +560,35 @@ function openEditSessione(sid){
   document.getElementById('sMaxPosti').value=s.maxPosti||0;
   document.getElementById('sDescrizione').value=s.descrizione||'';
   document.getElementById('sLingua').value=s.lingua||'it';
-  populateSaleSelect(s.salaId); populateRelatoriCheck(s.relatori||[]);
+  populateSaleSelect(s.salaId, s.salaNomeCustom||null); populateRelatoriCheck(s.relatori||[]);
   openModal('modalSessione');
 }
 window.openEditSessione=openEditSessione;
 
-function populateSaleSelect(selectedId){
+function populateSaleSelect(selectedId, customNome){
   const sel=document.getElementById('sSala');
   sel.innerHTML='<option value="">— Nessuna sala —</option>';
-  sale.forEach(s=>{const opt=document.createElement('option');opt.value=s.id;opt.textContent=s.nome+(s.capacita?' ('+s.capacita+' posti)':'');if(s.id===selectedId)opt.selected=true;sel.appendChild(opt);});
+  sale.forEach(s=>{
+    const opt=document.createElement('option');
+    opt.value=s.id;
+    opt.textContent=s.nome+(s.capacita?' ('+s.capacita+' posti)':'');
+    if(s.id===selectedId)opt.selected=true;
+    sel.appendChild(opt);
+  });
+  const customOpt=document.createElement('option');
+  customOpt.value='__custom__';
+  customOpt.textContent='✏️ Scrivi nome sala...';
+  if(customNome){customOpt.selected=true;}
+  sel.appendChild(customOpt);
+  // Mostra campo custom se necessario
+  const customInput=document.getElementById('sSalaCustom');
+  if(customNome){
+    customInput.style.display='block';
+    customInput.value=customNome;
+  }else{
+    customInput.style.display='none';
+    customInput.value='';
+  }
 }
 
 function populateRelatoriCheck(selected=[]){
@@ -589,14 +614,19 @@ document.getElementById('btnSalvaSessione').addEventListener('click',async()=>{
   const oraInizio=document.getElementById('sOraInizio').value;
   const oraFine=document.getElementById('sOraFine').value;
   if(!titolo){showErr('sessioneError','Inserisci il titolo della sessione.');return;}
-  if(!data){showErr('sessioneError','Inserisci la data.');return;}
+  if(!data){showErr('sessioneError','Inserisci la data della sessione.');return;}
   if(!oraInizio||!oraFine){showErr('sessioneError','Inserisci ora inizio e fine.');return;}
+  // Sala e relatori sono facoltativi
   const btn=document.getElementById('btnSalvaSessione');
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
   try{
     await signInAnonymously(auth);
     const relatoriSel=[...document.querySelectorAll('#relatoriCheckList input:checked')].map(i=>i.value);
-    const payload={titolo,data,oraInizio,oraFine,tipo:document.getElementById('sTipo').value,salaId:document.getElementById('sSala').value||null,maxPosti:parseInt(document.getElementById('sMaxPosti').value)||0,descrizione:document.getElementById('sDescrizione').value.trim(),lingua:document.getElementById('sLingua').value,relatori:relatoriSel,updatedAt:serverTimestamp()};
+    const salaSelVal = document.getElementById('sSala').value;
+    const salaCustom = document.getElementById('sSalaCustom').value.trim();
+    const salaId = (salaSelVal && salaSelVal !== '__custom__') ? salaSelVal : null;
+    const salaNomeCustom = (salaSelVal === '__custom__' && salaCustom) ? salaCustom : null;
+    const payload={titolo,data,oraInizio,oraFine,tipo:document.getElementById('sTipo').value,salaId,salaNomeCustom,maxPosti:parseInt(document.getElementById('sMaxPosti').value)||0,descrizione:document.getElementById('sDescrizione').value.trim(),lingua:document.getElementById('sLingua').value,relatori:relatoriSel,updatedAt:serverTimestamp()};
     if(editingSessioneId){await setDoc(doc(db,'eventi',currentEvId,'sessioni',editingSessioneId),payload,{merge:true});}
     else{payload.iscritti=0;payload.createdAt=serverTimestamp();await addDoc(collection(db,'eventi',currentEvId,'sessioni'),payload);}
     closeModal('modalSessione'); await loadSessioni(); updateStats();
@@ -810,6 +840,9 @@ document.querySelectorAll('.main-tab').forEach(t=>{
     t.classList.add('active');
     document.getElementById('tab-'+t.dataset.tab).classList.add('active');
     if(t.dataset.tab==='iscrizioni') loadIscrizioni();
+    if(t.dataset.tab==='relatori') { renderRelatori(); }
+    if(t.dataset.tab==='sale') { renderSale(); }
+    if(t.dataset.tab==='programma') { renderProgramma(); }
   });
 });
 
@@ -864,15 +897,32 @@ document.addEventListener('DOMContentLoaded', function() {
   var btnNR = document.getElementById('btnNuovoRelatore');
   if (btnNR) btnNR.addEventListener('click', function() {
     var evId = document.getElementById('evSelect').value;
-    if (!evId) { alert('Seleziona prima un evento.'); return; }
+    if (!evId) { alert('Seleziona prima un evento dal menu in alto.'); return; }
+    // Reset tutti i campi
     ['rNome','rCognome','rTitolo','rOrg','rEmail','rTel','rBio','rFoto'].forEach(function(id) {
       var el = document.getElementById(id); if (el) el.value = '';
     });
+    // Reset foto option
+    var fotoNo = document.getElementById('fotoNo');
+    if (fotoNo) { fotoNo.checked = true; }
+    var fotoUrlSec = document.getElementById('fotoUrlSection');
+    if (fotoUrlSec) fotoUrlSec.style.display = 'none';
+    var fotoUpSec = document.getElementById('fotoUploadSection');
+    if (fotoUpSec) fotoUpSec.style.display = 'none';
+    var fotoPreview = document.getElementById('fotoPreview');
+    if (fotoPreview) fotoPreview.style.display = 'none';
+    window._fotoBase64 = '';
+    // Apri modal
     var modal = document.getElementById('modalRelatore');
     if (modal) modal.classList.add('show');
     var title = document.getElementById('modalRelatoreTitolo');
     if (title) title.textContent = 'Nuovo relatore';
     if (window._resetEditingRelatore) window._resetEditingRelatore();
+    // Focus sul primo campo
+    setTimeout(function() {
+      var nome = document.getElementById('rNome');
+      if (nome) nome.focus();
+    }, 100);
   });
 
   // Bottone nuova sala
