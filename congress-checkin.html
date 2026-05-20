@@ -276,7 +276,7 @@ document.getElementById('btnTestAgenda').addEventListener('click', () => {
   });
   const wrap = document.createElement('div');
   wrap.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px';
-  wrap.innerHTML = '<div style="background:white;border-radius:14px;padding:24px;max-width:400px;width:100%"><div style="font-size:15px;font-weight:600;margin-bottom:14px">Seleziona partecipante</div><select id="partSel" style="width:100%;padding:9px 12px;border:1px solid #DDE1E9;border-radius:8px;font-size:13px;margin-bottom:14px"></select><div style="display:flex;gap:8px;justify-content:flex-end"><button id="btnAnnullaAgenda" style="padding:8px 16px;border:1px solid #DDE1E9;border-radius:8px;background:white;cursor:pointer;font-size:13px">Annulla</button><a id="btnApriAgenda" href="#" target="_blank" style="padding:8px 16px;background:#7C3AED;color:white;border-radius:8px;font-size:13px;text-decoration:none;font-weight:500">Apri agenda →</a></div></div>';
+  wrap.innerHTML = '<div style="background:white;border-radius:14px;padding:24px;max-width:440px;width:100%"><div style="font-size:15px;font-weight:600;margin-bottom:14px">📱 Agenda partecipante</div><select id="partSel" style="width:100%;padding:9px 12px;border:1px solid #DDE1E9;border-radius:8px;font-size:13px;margin-bottom:10px"></select><div id="urlDebug" style="font-size:10px;color:#9499B0;font-family:monospace;word-break:break-all;margin-bottom:12px;padding:6px 8px;background:#F4F6F9;border-radius:6px"></div><div style="display:flex;gap:8px;justify-content:flex-end"><button id="btnAnnullaAgenda" style="padding:8px 16px;border:1px solid #DDE1E9;border-radius:8px;background:white;cursor:pointer;font-size:13px">Annulla</button><a id="btnApriAgenda" href="#" target="_blank" style="padding:8px 16px;background:#7C3AED;color:white;border-radius:8px;font-size:13px;text-decoration:none;font-weight:500">Apri agenda →</a></div></div>';
   document.body.appendChild(wrap);
   // Popola select
   const partSel = wrap.querySelector('#partSel');
@@ -289,7 +289,12 @@ document.getElementById('btnTestAgenda').addEventListener('click', () => {
   // Aggiorna link
   function updateLink() {
     const base = window.location.protocol+'//'+window.location.host+window.location.pathname.split('/').slice(0,-1).join('/')+'/';
-    wrap.querySelector('#btnApriAgenda').href = base + 'congress-agenda.html?evId=' + currentEvId + '&partId=' + partSel.value;
+    const url = base + 'congress-agenda.html?evId=' + encodeURIComponent(currentEvId) + '&partId=' + encodeURIComponent(partSel.value);
+    console.log('Link agenda generato:', url);
+    wrap.querySelector('#btnApriAgenda').href = url;
+    // Mostra URL nel popup per debug
+    const urlDebug = wrap.querySelector('#urlDebug');
+    if (urlDebug) urlDebug.textContent = url;
   }
   partSel.addEventListener('change', updateLink);
   updateLink();
