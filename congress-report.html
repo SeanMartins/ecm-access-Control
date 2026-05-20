@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Congress — Report Presenze</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
+<script src="ecm-layout.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F6F9;--surface:#FFF;--surface2:#F0F2F5;--border:#DDE1E9;--text:#1A1D2E;--text2:#5A5F7A;--text3:#9499B0;--accent:#2563EB;--congress:#7C3AED;--congress-light:#F5F3FF;--congress-dark:#5B21B6;--success:#059669;--success-light:#ECFDF5;--danger:#DC2626;--danger-light:#FEF2F2;--warn:#D97706;--warn-light:#FFFBEB;--radius:10px;--radius-lg:14px;--shadow:0 1px 3px rgba(0,0,0,.1),0 4px 12px rgba(0,0,0,.07)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+.ecm-content{padding:24px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none}
+.btn-congress{background:var(--congress);color:white}.btn-congress:hover{background:var(--congress-dark)}
+.btn-success{background:var(--success);color:white}.btn-success:hover{background:#047857}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{background:var(--surface2)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%}
+.form-input:focus{border-color:var(--congress)}
+select.form-input{cursor:pointer}
+.field-label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase;display:block;margin-bottom:5px}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.page-title{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.page-sub{font-size:13px;color:var(--text3);margin-top:2px}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow)}
+.stat-val{font-size:28px;font-weight:700;letter-spacing:-.02em}
+.stat-label{font-size:11px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
+/* Tabs */
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:20px}
+.tab{padding:10px 20px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;background:none;border-left:none;border-right:none;border-top:none;font-family:'Inter',sans-serif}
+.tab.active{color:var(--congress);border-bottom-color:var(--congress)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+/* Tabelle */
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--surface2);position:sticky;top:0;z-index:1}
+th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.mono{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
+/* Badge presenza */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.badge-present{background:var(--success-light);color:var(--success)}
+.badge-absent{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+.badge-warn{background:var(--warn-light);color:var(--warn)}
+/* Sessione card nel report */
+.sess-report-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:16px;overflow:hidden;box-shadow:var(--shadow)}
+.sess-report-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;cursor:pointer;transition:background .15s}
+.sess-report-header:hover{background:var(--surface2)}
+.sess-report-title{font-size:14px;font-weight:600}
+.sess-report-meta{font-size:12px;color:var(--text3);margin-top:2px;display:flex;gap:10px;flex-wrap:wrap}
+.sess-report-stats{display:flex;gap:12px;align-items:center;flex-shrink:0}
+.sess-stat{text-align:center}
+.sess-stat-val{font-size:18px;font-weight:700}
+.sess-stat-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.progress-bar{height:6px;background:var(--border);border-radius:100px;margin-top:8px;overflow:hidden;min-width:80px}
+.progress-fill{height:100%;border-radius:100px;background:var(--congress);transition:width .5s}
+.sess-report-body{display:none;padding:0}
+.sess-report-body.open{display:block}
+/* Chart */
+.chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.chart-bar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.chart-label{font-size:12px;color:var(--text2);min-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chart-bar{flex:1;height:24px;background:var(--surface2);border-radius:6px;overflow:hidden;position:relative}
+.chart-fill{height:100%;background:var(--congress);border-radius:6px;transition:width .6s;display:flex;align-items:center;justify-content:flex-end;padding-right:6px}
+.chart-pct{font-size:10px;font-weight:700;color:white;white-space:nowrap}
+.chart-count{font-size:12px;color:var(--text3);min-width:50px;text-align:right}
+/* Empty */
+.empty-state{text-align:center;padding:48px 20px;color:var(--text3)}
+.spinner{display:inline-block;width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--congress);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:768px){.stats-grid{grid-template-columns:1fr 1fr}.chart-label{min-width:100px}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+<div class="ecm-main">
+  <div class="ecm-topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="mobile-menu-btn" id="mobileMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar-title">Report Presenze Congress</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-badge"><div class="topbar-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
+      <div id="userBarSlot"></div>
+    </div>
+  </div>
+  <div class="ecm-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Report Presenze</div>
+        <div class="page-sub" id="eventoNome">Seleziona un evento Congress</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <select class="form-input" id="evSelect" style="min-width:220px"><option value="">— Seleziona evento —</option></select>
+        <button class="btn btn-success" id="btnExcelCompleto" disabled>📊 Export Excel completo</button>
+      </div>
+    </div>
+
+    <!-- Stats globali -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val" id="sTotPart">0</div><div class="stat-label">Partecipanti</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--congress)" id="sTotSessioni">0</div><div class="stat-label">Sessioni</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--success)" id="sMediaPresenza">0%</div><div class="stat-label">Media presenza</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--warn)" id="sTotCheckin">0</div><div class="stat-label">Check-in totali</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="sessioni">Per sessione</button>
+      <button class="tab" data-tab="partecipanti">Per partecipante</button>
+      <button class="tab" data-tab="grafico">Grafico presenze</button>
+    </div>
+
+    <!-- TAB SESSIONI -->
+    <div class="tab-pane active" id="tab-sessioni">
+      <div id="sessioniReport">
+        <div class="empty-state"><div class="spinner"></div><div style="margin-top:16px;font-size:13px">Seleziona un evento per vedere il report</div></div>
+      </div>
+    </div>
+
+    <!-- TAB PARTECIPANTI -->
+    <div class="tab-pane" id="tab-partecipanti">
+      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
+        <input type="text" class="form-input" id="filterPart" placeholder="Cerca partecipante..." style="max-width:280px">
+        <button class="btn btn-success btn-sm" id="btnExcelPart" disabled>📊 Export partecipanti</button>
+      </div>
+      <div class="table-wrap" id="partReport">
+        <div class="empty-state">Seleziona un evento</div>
+      </div>
+    </div>
+
+    <!-- TAB GRAFICO -->
+    <div class="tab-pane" id="tab-grafico">
+      <div class="chart-wrap" id="graficoContent">
+        <div class="empty-state">Seleziona un evento</div>
+      </div>
+    </div>
+  </div>
+  <div class="ecm-version-footer" id="ecmVersionFooter"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof renderSidebar === 'function') renderSidebar('congress-report');
+  if (typeof renderVersionFooter === 'function') renderVersionFooter();
+});
+</script>
+
+<script type="module">
+import { requireAuth, injectUserBar } from './ecm-auth.js';
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+
+let db, auth;
+let partecipanti=[], sessioni=[], sale=[], checkinMap={};
+const TIPI={keynote:'Keynote',workshop:'Workshop',panel:'Panel',talk:'Talk',break:'Break',altro:'Altro'};
+
+// ── UI LISTENERS ──────────────────────────────────────
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('tab-' + t.dataset.tab).classList.add('active');
+    if (t.dataset.tab === 'partecipanti') renderPartReport();
+    if (t.dataset.tab === 'grafico') renderGrafico();
+  });
+});
+
+document.getElementById('filterPart').addEventListener('input', renderPartReport);
+document.getElementById('btnExcelCompleto').addEventListener('click', exportExcelCompleto);
+document.getElementById('btnExcelPart').addEventListener('click', exportExcelPart);
+
+// ── INIT FIREBASE ─────────────────────────────────────
+async function initApp() {
+  try {
+    const app = getApps().length ? getApps()[0] : initializeApp(FB);
+    db = getFirestore(app);
+    await requireAuth();
+    injectUserBar('userBarSlot');
+    document.getElementById('fbDot').className = 'topbar-dot ok';
+    document.getElementById('fbStatus').textContent = 'Firebase connesso';
+
+    const evSnap = await getDocs(collection(db, 'eventi'));
+    const evList = [];
+    evSnap.forEach(d => evList.push({id:d.id,...d.data()}));
+    evList.filter(e => e.stato !== 'archiviato')
+      .sort((a,b) => new Date(b.data||0)-new Date(a.data||0))
+      .forEach(ev => {
+        const opt = document.createElement('option');
+        opt.value = ev.id;
+        opt.textContent = (ev.nome||ev.id) + (ev.data?' ('+new Date(ev.data).toLocaleDateString('it-IT')+')':'');
+        document.getElementById('evSelect').appendChild(opt);
+      });
+
+    const savedId = localStorage.getItem('ecm_eventId');
+    const autoId = (savedId && evList.find(e=>e.id===savedId)) ? savedId : evList.find(e=>e.stato!=='archiviato')?.id;
+    if (autoId) {
+      document.getElementById('evSelect').value = autoId;
+      await loadReport(autoId, evList);
+    }
+    document.getElementById('evSelect').addEventListener('change', async function() {
+      if (this.value) await loadReport(this.value, evList);
+    });
+  } catch(e) { console.error(e); document.getElementById('fbStatus').textContent = 'Errore'; }
+}
+
+async function loadReport(evId, evList) {
+  const ev = evList.find(e => e.id === evId);
+  document.getElementById('eventoNome').textContent = ev?.nome || '—';
+  document.getElementById('sessioniReport').innerHTML = '<div class="empty-state"><div class="spinner"></div></div>';
+
+  const [partsSnap, sessSnap, saleSnap] = await Promise.all([
+    getDocs(collection(db,'eventi',evId,'partecipanti')),
+    getDocs(collection(db,'eventi',evId,'sessioni')),
+    getDocs(collection(db,'eventi',evId,'sale'))
+  ]);
+
+  partecipanti = []; partsSnap.forEach(d => partecipanti.push({id:d.id,...d.data()}));
+  sessioni = []; sessSnap.forEach(d => sessioni.push({id:d.id,...d.data()}));
+  sessioni.sort((a,b) => (a.data||'').localeCompare(b.data||'') || (a.oraInizio||'').localeCompare(b.oraInizio||''));
+  sale = []; saleSnap.forEach(d => sale.push({id:d.id,...d.data()}));
+
+  // Carica check-in per ogni sessione
+  checkinMap = {};
+  await Promise.all(sessioni.map(async s => {
+    const ciSnap = await getDocs(collection(db,'eventi',evId,'sessioni',s.id,'checkin'));
+    checkinMap[s.id] = [];
+    ciSnap.forEach(d => checkinMap[s.id].push({id:d.id,...d.data()}));
+  }));
+
+  // Stats globali
+  const totCheckin = Object.values(checkinMap).reduce((sum, arr) => sum+arr.length, 0);
+  const mediaArr = sessioni.filter(s => s.tipo !== 'break').map(s => {
+    const pres = checkinMap[s.id]?.length || 0;
+    const tot = partecipanti.length;
+    return tot > 0 ? pres/tot*100 : 0;
+  });
+  const media = mediaArr.length > 0 ? Math.round(mediaArr.reduce((a,b)=>a+b,0)/mediaArr.length) : 0;
+
+  document.getElementById('sTotPart').textContent = partecipanti.length;
+  document.getElementById('sTotSessioni').textContent = sessioni.length;
+  document.getElementById('sMediaPresenza').textContent = media + '%';
+  document.getElementById('sTotCheckin').textContent = totCheckin;
+  document.getElementById('btnExcelCompleto').disabled = false;
+  document.getElementById('btnExcelPart').disabled = false;
+
+  renderSessioniReport();
+}
+
+// ── RENDER SESSIONI ────────────────────────────────────
+function renderSessioniReport() {
+  const c = document.getElementById('sessioniReport');
+  if (!sessioni.length) { c.innerHTML = '<div class="empty-state"><div style="font-size:32px;opacity:.3;margin-bottom:8px">📅</div><div>Nessuna sessione configurata</div></div>'; return; }
+
+  c.innerHTML = sessioni.map(s => {
+    const sala = sale.find(x => x.id === s.salaId);
+    const salaNome = sala?.nome || s.salaNomeCustom || '—';
+    const checkins = checkinMap[s.id] || [];
+    const pres = checkins.length;
+    const tot = partecipanti.length;
+    const pct = tot > 0 ? Math.round(pres/tot*100) : 0;
+    const fmtDate = d => d ? new Date(d).toLocaleDateString('it-IT',{weekday:'short',day:'2-digit',month:'short'}) : '—';
+    const isBreak = s.tipo === 'break';
+
+    return `<div class="sess-report-card">
+      <div class="sess-report-header" onclick="toggleSessDetail('${s.id}')">
+        <div style="flex:1;min-width:0">
+          <div class="sess-report-title">${esc(s.titolo||'—')} ${isBreak?'<span style="font-size:11px;color:var(--text3)">☕ Break</span>':''}</div>
+          <div class="sess-report-meta">
+            <span>📅 ${fmtDate(s.data)}</span>
+            <span>🕐 ${s.oraInizio||'--:--'} → ${s.oraFine||'--:--'}</span>
+            <span>🏛️ ${esc(salaNome)}</span>
+            <span>🏷️ ${TIPI[s.tipo]||s.tipo||'—'}</span>
+          </div>
+          ${!isBreak?`<div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>`:''}
+        </div>
+        <div class="sess-report-stats">
+          ${!isBreak?`
+          <div class="sess-stat"><div class="sess-stat-val" style="color:var(--success)">${pres}</div><div class="sess-stat-lbl">Presenti</div></div>
+          <div class="sess-stat"><div class="sess-stat-val" style="color:var(--text3)">${tot-pres}</div><div class="sess-stat-lbl">Assenti</div></div>
+          <div class="sess-stat"><div class="sess-stat-val" style="color:var(--congress)">${pct}%</div><div class="sess-stat-lbl">Presenza</div></div>
+          `:`<div style="color:var(--text3);font-size:12px">Nessun check-in</div>`}
+          <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();exportExcelSessione('${s.id}','${esc(s.titolo||'sessione')}')">📊</button>
+        </div>
+      </div>
+      <div class="sess-report-body" id="detail-${s.id}">
+        ${!isBreak?`<div class="table-wrap">
+          <table>
+            <thead><tr><th>CF</th><th>Cognome</th><th>Nome</th><th>Check-in</th><th>Ora</th></tr></thead>
+            <tbody>
+              ${partecipanti.map(p => {
+                const ci = checkins.find(c => c.partecipanteId === p.id || c.id === p.id);
+                return `<tr>
+                  <td class="mono">${p.cf||'—'}</td>
+                  <td style="font-weight:500">${esc(p.cognome||'')}</td>
+                  <td>${esc(p.nome||'')}</td>
+                  <td>${ci?'<span class="badge badge-present">✓ Presente</span>':'<span class="badge badge-absent">— Assente</span>'}</td>
+                  <td class="mono">${ci?.ora||'—'}</td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`:'<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px">Break — nessun check-in</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.toggleSessDetail = function(sid) {
+  const el = document.getElementById('detail-' + sid);
+  if (el) el.classList.toggle('open');
+};
+
+// ── RENDER PARTECIPANTI ────────────────────────────────
+function renderPartReport() {
+  const q = (document.getElementById('filterPart').value||'').toLowerCase();
+  const fil = q ? partecipanti.filter(p => p.nome?.toLowerCase().includes(q)||p.cognome?.toLowerCase().includes(q)||(p.cf||'').toLowerCase().includes(q)) : partecipanti;
+  const sessFiltrate = sessioni.filter(s => s.tipo !== 'break');
+
+  document.getElementById('partReport').innerHTML = `<table>
+    <thead><tr>
+      <th>CF</th><th>Cognome</th><th>Nome</th>
+      ${sessFiltrate.map(s=>`<th style="max-width:100px;overflow:hidden;text-overflow:ellipsis" title="${esc(s.titolo||'')}">${esc((s.titolo||'').slice(0,15))}${(s.titolo||'').length>15?'...':''}</th>`).join('')}
+      <th>Presenze</th><th>%</th>
+    </tr></thead>
+    <tbody>
+      ${fil.map(p => {
+        const pres = sessFiltrate.filter(s => (checkinMap[s.id]||[]).some(c => c.partecipanteId === p.id || c.id === p.id));
+        const pct = sessFiltrate.length > 0 ? Math.round(pres.length/sessFiltrate.length*100) : 0;
+        return `<tr>
+          <td class="mono">${p.cf||'—'}</td>
+          <td style="font-weight:500">${esc(p.cognome||'')}</td>
+          <td>${esc(p.nome||'')}</td>
+          ${sessFiltrate.map(s => {
+            const ci = (checkinMap[s.id]||[]).find(c => c.partecipanteId === p.id || c.id === p.id);
+            return `<td style="text-align:center">${ci?'<span style="color:var(--success);font-size:14px">✓</span>':'<span style="color:var(--border2);font-size:14px">—</span>'}</td>`;
+          }).join('')}
+          <td style="font-weight:600">${pres.length}/${sessFiltrate.length}</td>
+          <td><span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:${pct>=80?'var(--success-light)':pct>=50?'var(--warn-light)':'var(--danger-light)'};color:${pct>=80?'var(--success)':pct>=50?'var(--warn)':'var(--danger)'}">${pct}%</span></td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table>`;
+}
+
+// ── RENDER GRAFICO ─────────────────────────────────────
+function renderGrafico() {
+  const sessFiltrate = sessioni.filter(s => s.tipo !== 'break');
+  const maxPres = Math.max(...sessFiltrate.map(s => (checkinMap[s.id]||[]).length), 1);
+
+  document.getElementById('graficoContent').innerHTML = `
+    <div style="font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:16px">Presenze per sessione</div>
+    ${sessFiltrate.length === 0 ? '<div class="empty-state">Nessuna sessione</div>' :
+      sessFiltrate.map(s => {
+        const pres = (checkinMap[s.id]||[]).length;
+        const tot = partecipanti.length;
+        const pct = tot > 0 ? Math.round(pres/tot*100) : 0;
+        const barW = tot > 0 ? Math.round(pres/maxPres*100) : 0;
+        return `<div class="chart-bar-row">
+          <div class="chart-label" title="${esc(s.titolo||'')}">${esc((s.titolo||'').slice(0,22))}${(s.titolo||'').length>22?'...':''}</div>
+          <div class="chart-bar">
+            <div class="chart-fill" style="width:${barW}%;background:${pct>=80?'var(--success)':pct>=50?'var(--congress)':'var(--warn)'}">
+              ${barW>15?`<span class="chart-pct">${pct}%</span>`:''}
+            </div>
+          </div>
+          <div class="chart-count">${pres}/${tot}</div>
+        </div>`;
+      }).join('')}`;
+}
+
+// ── EXPORT EXCEL ───────────────────────────────────────
+function exportExcelCompleto() {
+  const wb = XLSX.utils.book_new();
+  const sessFiltrate = sessioni.filter(s => s.tipo !== 'break');
+
+  // Foglio 1: Riepilogo sessioni
+  const riepilogo = [['Sessione','Data','Ora inizio','Ora fine','Sala','Tipo','Presenti','Totale','% Presenza']];
+  sessFiltrate.forEach(s => {
+    const sala = sale.find(x=>x.id===s.salaId);
+    const pres = (checkinMap[s.id]||[]).length;
+    const tot = partecipanti.length;
+    riepilogo.push([s.titolo||'—', s.data||'—', s.oraInizio||'—', s.oraFine||'—', sala?.nome||s.salaNomeCustom||'—', TIPI[s.tipo]||s.tipo||'—', pres, tot, tot>0?Math.round(pres/tot*100)+'%':'—']);
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(riepilogo), 'Riepilogo sessioni');
+
+  // Foglio 2: Presenze per partecipante
+  const header = ['CF','Cognome','Nome','Professione',...sessFiltrate.map(s=>(s.titolo||'—').slice(0,30)),'Presenze totali','%'];
+  const rows = [header];
+  partecipanti.forEach(p => {
+    const presenze = sessFiltrate.map(s => {
+      const ci = (checkinMap[s.id]||[]).find(c => c.partecipanteId===p.id||c.id===p.id);
+      return ci ? (ci.ora||'✓') : '—';
+    });
+    const tot = presenze.filter(x=>x!=='—').length;
+    const pct = sessFiltrate.length>0?Math.round(tot/sessFiltrate.length*100)+'%':'—';
+    rows.push([p.cf||'—', p.cognome||'—', p.nome||'—', p.professione||'—', ...presenze, tot, pct]);
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Presenze partecipanti');
+
+  // Un foglio per ogni sessione
+  sessFiltrate.forEach(s => {
+    const sheetData = [['CF','Cognome','Nome','Presente','Ora check-in']];
+    partecipanti.forEach(p => {
+      const ci = (checkinMap[s.id]||[]).find(c=>c.partecipanteId===p.id||c.id===p.id);
+      sheetData.push([p.cf||'—', p.cognome||'—', p.nome||'—', ci?'Sì':'No', ci?.ora||'—']);
+    });
+    const sheetName = (s.titolo||'Sessione').slice(0,28).replace(/[\\\/\?\*\[\]:]/g,'');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetData), sheetName);
+  });
+
+  XLSX.writeFile(wb, 'report_congress_' + new Date().toISOString().split('T')[0] + '.xlsx');
+}
+
+function exportExcelPart() {
+  const sessFiltrate = sessioni.filter(s => s.tipo !== 'break');
+  const header = ['CF','Cognome','Nome','Professione',...sessFiltrate.map(s=>(s.titolo||'—').slice(0,30)),'Presenze','%'];
+  const rows = [header];
+  partecipanti.forEach(p => {
+    const presenze = sessFiltrate.map(s => {
+      const ci = (checkinMap[s.id]||[]).find(c=>c.partecipanteId===p.id||c.id===p.id);
+      return ci ? (ci.ora||'Sì') : 'No';
+    });
+    const tot = presenze.filter(x=>x!=='No').length;
+    rows.push([p.cf||'—', p.cognome||'—', p.nome||'—', p.professione||'—', ...presenze, tot, sessFiltrate.length>0?Math.round(tot/sessFiltrate.length*100)+'%':'—']);
+  });
+  XLSX.writeFile(XLSX.utils.book_new(), 'presenze_partecipanti_' + new Date().toISOString().split('T')[0] + '.xlsx');
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Presenze');
+  XLSX.writeFile(wb, 'presenze_partecipanti_' + new Date().toISOString().split('T')[0] + '.xlsx');
+}
+
+window.exportExcelSessione = function(sid, titolo) {
+  const s = sessioni.find(x=>x.id===sid); if(!s) return;
+  const checkins = checkinMap[sid]||[];
+  const rows = [['CF','Cognome','Nome','Professione','Presente','Ora check-in']];
+  partecipanti.forEach(p => {
+    const ci = checkins.find(c=>c.partecipanteId===p.id||c.id===p.id);
+    rows.push([p.cf||'—', p.cognome||'—', p.nome||'—', p.professione||'—', ci?'Sì':'No', ci?.ora||'—']);
+  });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Presenze');
+  XLSX.writeFile(wb, 'sessione_' + titolo.slice(0,20).replace(/[^a-zA-Z0-9]/g,'_') + '.xlsx');
+};
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+initApp();
+</script>
+</body>
+</html>

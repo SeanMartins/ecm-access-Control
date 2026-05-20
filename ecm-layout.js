@@ -45,6 +45,7 @@
     { id:'congress', key:'nav_congress_prog', icon:'congress', href:'congress-programma.html' },
     { id:'congress-checkin', key:'nav_congress_checkin', icon:'scanner', href:'congress-checkin.html' },
     { id:'congress-agenda', key:'nav_congress_agenda', icon:'report', href:'congress-agenda.html' },
+    { id:'congress-report', key:'nav_congress_report', icon:'report', href:'congress-report.html' },
     { type:'section', key:'nav_system' },
     { id:'tablet',   key:'nav_tablet',   icon:'tablet',   href:'ecm-connetti.html' },
     { id:'admin',    key:'nav_admin',    icon:'admin',    href:'ecm-admin.html', adminOnly:true }
