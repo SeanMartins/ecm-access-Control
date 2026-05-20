@@ -262,72 +262,90 @@ document.getElementById('btnRefresh').addEventListener('click', () => {
   else if (currentMode === 'evento' && currentEvId) loadPresentiEvento();
 });
 
-// Bottone test agenda - apre con primo partecipante
+// Bottone test agenda
 document.getElementById('btnTestAgenda').addEventListener('click', () => {
   if (!currentEvId) { alert('Seleziona prima un evento.'); return; }
   if (!partecipanti.length) { alert('Nessun partecipante trovato per questo evento.'); return; }
-  // Apri select per scegliere il partecipante
+
+  const pathParts = window.location.pathname.split('/');
+  pathParts.pop();
+  const base = window.location.protocol + '//' + window.location.host + pathParts.join('/') + '/';
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  document.body.appendChild(overlay);
+
+  const box = document.createElement('div');
+  box.style.cssText = 'background:white;border-radius:14px;padding:24px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)';
+  overlay.appendChild(box);
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:15px;font-weight:700;margin-bottom:16px';
+  title.textContent = 'Agenda partecipante';
+  box.appendChild(title);
+
   const sel = document.createElement('select');
-  partecipanti.forEach(p => {
-    const o = document.createElement('option');
-    o.value = p.id;
-    o.textContent = p.cognome + ' ' + p.nome + ' (' + p.id + ')';
-    sel.appendChild(o);
-  });
-  const wrap = document.createElement('div');
-  wrap.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px';
-  wrap.innerHTML = '<div style="background:white;border-radius:14px;padding:24px;max-width:440px;width:100%"><div style="font-size:15px;font-weight:600;margin-bottom:14px">📱 Agenda partecipante</div><select id="partSel" style="width:100%;padding:9px 12px;border:1px solid #DDE1E9;border-radius:8px;font-size:13px;margin-bottom:10px"></select><div id="urlDebug" style="font-size:10px;color:#9499B0;font-family:monospace;word-break:break-all;margin-bottom:12px;padding:6px 8px;background:#F4F6F9;border-radius:6px;cursor:pointer" title="Clicca per copiare"></div><div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button id="btnAnnullaAgenda" style="padding:8px 16px;border:1px solid #DDE1E9;border-radius:8px;background:white;cursor:pointer;font-size:13px">Annulla</button><button id="btnCopiaLink" style="padding:8px 16px;border:1px solid #7C3AED;color:#7C3AED;border-radius:8px;font-size:13px;background:white;cursor:pointer">📋 Copia link</button><button id="btnApriAgenda" style="padding:8px 16px;background:#7C3AED;color:white;border-radius:8px;font-size:13px;border:none;cursor:pointer;font-weight:500">Apri agenda →</button></div></div>';
-  document.body.appendChild(wrap);
-  // Popola select
-  const partSel = wrap.querySelector('#partSel');
+  sel.style.cssText = 'width:100%;padding:9px 12px;border:1px solid #DDE1E9;border-radius:8px;font-size:13px;margin-bottom:10px;font-family:inherit';
   partecipanti.forEach(p => {
     const o = document.createElement('option');
     o.value = p.id;
     o.textContent = (p.cognome||'') + ' ' + (p.nome||'') + ' — ' + p.id;
-    partSel.appendChild(o);
+    sel.appendChild(o);
   });
-  // Aggiorna link
-  function updateLink() {
-    const base = window.location.protocol+'//'+window.location.host+window.location.pathname.split('/').slice(0,-1).join('/')+'/';
-    const url = base + 'congress-agenda.html?evId=' + encodeURIComponent(currentEvId) + '&partId=' + encodeURIComponent(partSel.value);
-    console.log('Link agenda generato:', url);
-    wrap.querySelector('#btnApriAgenda').href = url;
-    // Mostra URL nel popup per debug
-    const urlDebug = wrap.querySelector('#urlDebug');
-    if (urlDebug) urlDebug.textContent = url;
+  box.appendChild(sel);
+
+  const urlBox = document.createElement('div');
+  urlBox.style.cssText = 'font-size:10px;color:#7C3AED;font-family:monospace;word-break:break-all;margin-bottom:14px;padding:8px;background:#F5F3FF;border-radius:6px;border:1px solid rgba(124,58,237,.2);cursor:pointer';
+  urlBox.title = 'Clicca per copiare';
+  box.appendChild(urlBox);
+
+  function getUrl() {
+    return base + 'congress-agenda.html?evId=' + encodeURIComponent(currentEvId) + '&partId=' + encodeURIComponent(sel.value);
   }
-  partSel.addEventListener('change', updateLink);
-  updateLink();
-  wrap.querySelector('#btnAnnullaAgenda').addEventListener('click', () => wrap.remove());
-  wrap.addEventListener('click', e => { if(e.target === wrap) wrap.remove(); });
-  
-  // Bottone apri agenda — naviga direttamente
-  wrap.querySelector('#btnApriAgenda').addEventListener('click', () => {
-    const base = window.location.protocol+'//'+window.location.host+window.location.pathname.split('/').slice(0,-1).join('/')+'/';
-    const url = base + 'congress-agenda.html?evId=' + encodeURIComponent(currentEvId) + '&partId=' + encodeURIComponent(partSel.value);
-    console.log('Navigo a:', url);
-    window.open(url, '_blank');
+  function refreshUrl() { urlBox.textContent = getUrl(); }
+  sel.addEventListener('change', refreshUrl);
+  refreshUrl();
+
+  urlBox.addEventListener('click', () => {
+    navigator.clipboard.writeText(getUrl()).then(() => {
+      urlBox.style.color = '#059669'; urlBox.style.background = '#ECFDF5';
+      setTimeout(() => { urlBox.style.color = '#7C3AED'; urlBox.style.background = '#F5F3FF'; }, 1500);
+    }).catch(() => {});
   });
 
-  // Bottone copia link
-  wrap.querySelector('#btnCopiaLink').addEventListener('click', () => {
-    const urlDebug = wrap.querySelector('#urlDebug');
-    navigator.clipboard.writeText(urlDebug.textContent).then(() => {
-      wrap.querySelector('#btnCopiaLink').textContent = '✓ Copiato!';
-      setTimeout(() => { wrap.querySelector('#btnCopiaLink').textContent = '📋 Copia link'; }, 2000);
-    }).catch(() => {
-      // Fallback: seleziona il testo
-      const range = document.createRange();
-      range.selectNode(urlDebug);
-      window.getSelection().removeAllRanges();
-      window.getSelection().addRange(range);
+  const btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap';
+  box.appendChild(btnRow);
+
+  const btnAnnulla = document.createElement('button');
+  btnAnnulla.textContent = 'Annulla';
+  btnAnnulla.style.cssText = 'padding:8px 16px;border:1px solid #DDE1E9;border-radius:8px;background:white;cursor:pointer;font-size:13px;font-family:inherit';
+  btnAnnulla.onclick = () => overlay.remove();
+  btnRow.appendChild(btnAnnulla);
+
+  const btnCopia = document.createElement('button');
+  btnCopia.textContent = 'Copia link';
+  btnCopia.style.cssText = 'padding:8px 16px;border:1px solid #7C3AED;color:#7C3AED;border-radius:8px;background:white;cursor:pointer;font-size:13px;font-family:inherit';
+  btnCopia.onclick = () => {
+    navigator.clipboard.writeText(getUrl()).then(() => {
+      btnCopia.textContent = 'Copiato!';
+      setTimeout(() => { btnCopia.textContent = 'Copia link'; }, 2000);
     });
-  });
+  };
+  btnRow.appendChild(btnCopia);
 
-  // Click sul debug URL per copiare
-  wrap.querySelector('#urlDebug').addEventListener('click', function() {
-    navigator.clipboard.writeText(this.textContent).catch(() => {});
-  });
+  const btnApri = document.createElement('button');
+  btnApri.textContent = 'Apri agenda';
+  btnApri.style.cssText = 'padding:8px 16px;background:#7C3AED;color:white;border-radius:8px;font-size:13px;border:none;cursor:pointer;font-weight:600;font-family:inherit';
+  btnApri.onclick = () => {
+    const url = getUrl();
+    console.log('Apro:', url);
+    window.open(url, '_blank');
+    overlay.remove();
+  };
+  btnRow.appendChild(btnApri);
+
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 });
 
 // Toggle modalità
