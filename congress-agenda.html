@@ -127,6 +127,7 @@ main{max-width:600px;margin:0 auto;padding:20px 16px 40px}
 <script type="module">
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
 const app = getApps().length ? getApps()[0] : initializeApp(FB);
@@ -141,7 +142,17 @@ const TIPI = {keynote:'🌟 Keynote',workshop:'🔧 Workshop',panel:'💬 Panel'
 
 async function init() {
   try {
-    if (!evId || !partId) { showError('Link non valido. Scansiona di nuovo il tuo badge QR.'); return; }
+    if (!evId || !partId) {
+      showError('Link non valido.<br><small style="opacity:.7">Parametri ricevuti: evId=' + evId + ', partId=' + partId + '</small>');
+      return;
+    }
+    console.log('Parametri URL:', { evId, partId });
+
+    // Autenticazione anonima per accedere a Firestore
+    try {
+      const auth = getAuth(app);
+      await signInAnonymously(auth);
+    } catch(authErr) { console.warn('Auth anonima fallita:', authErr); }
 
     // Carica dati in parallelo
     const [evSnap, partSnap, sessioniSnap, saleSnap] = await Promise.all([
@@ -151,8 +162,16 @@ async function init() {
       getDocs(collection(db,'eventi',evId,'sale'))
     ]);
 
-    if (!evSnap.exists()) { showError('Evento non trovato.'); return; }
-    if (!partSnap.exists()) { showError('Partecipante non trovato.'); return; }
+    console.log('evId:', evId, 'exists:', evSnap.exists());
+    console.log('partId:', partId, 'exists:', partSnap.exists());
+    if (!evSnap.exists()) {
+      showError('Evento non trovato.<br><small style="font-family:monospace;opacity:.7">evId: ' + evId + '</small><br><small style="opacity:.6">Verifica che il link sia corretto</small>');
+      return;
+    }
+    if (!partSnap.exists()) {
+      showError('Partecipante non trovato.<br><small style="font-family:monospace;opacity:.7">partId: ' + partId + '</small>');
+      return;
+    }
 
     const ev = evSnap.data();
     const part = partSnap.data();
