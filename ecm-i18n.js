@@ -27,6 +27,7 @@
       login_title:'Accedi al sistema', login_sub:'Inserisci le tue credenziali',
       username:'Username', password:'Password', login_btn:'Accedi →', login_google:'Accedi con Google',
       nav_congress:'Congress',
+      nav_congress_checkin:'Check-in sessioni',
       nav_congress_prog:'Programma sessioni',
       nav_congress_speakers:'Relatori',
       ver_label:'ECM Access Control'

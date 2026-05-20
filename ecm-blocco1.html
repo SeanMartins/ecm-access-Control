@@ -153,6 +153,15 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
     <div class="card-title"><span class="step-badge">1</span>Dati evento</div>
     <div class="form-grid">
       <div class="form-group span2"><label>Nome evento *</label><input type="text" id="evNome" placeholder="Es. Congresso Nazionale Medicina Interna 2025"></div>
+      <div class="form-group"><label>Tipo evento</label>
+        <select id="evTipo" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:inherit;font-size:14px;color:var(--text);outline:none;width:100%">
+          <option value="ecm">🏥 Evento ECM</option>
+          <option value="congress">🎤 Congresso / Convegno</option>
+          <option value="convention">🏢 Convention</option>
+          <option value="wedding">💍 Wedding</option>
+          <option value="altro">📌 Altro evento</option>
+        </select>
+      </div>
       <div class="form-group"><label>Data inizio *</label><input type="date" id="evData"></div>
       <div class="form-group"><label>Data fine</label><input type="date" id="evDataFine"></div>
       <div class="form-group span2"><label>Luogo *</label><input type="text" id="evLuogo" placeholder="Es. Centro Congressi Torino"></div>
@@ -229,6 +238,7 @@ if(evId){
     if(!s.exists()) return;
     const ev=s.data();
     document.getElementById('evNome').value=ev.nome||'';
+    if(document.getElementById('evTipo'))document.getElementById('evTipo').value=ev.tipo||'ecm';
     document.getElementById('evData').value=ev.data||'';
     document.getElementById('evDataFine').value=ev.dataFine||'';
     document.getElementById('evLuogo').value=ev.luogo||'';
@@ -391,7 +401,7 @@ async function salvaEvento(){
     const creatoDAUidOriginale = evExist.exists() ? (evExist.data().creatoDAUid || creatoDAUid) : creatoDAUid;
 
     await setDoc(doc(db,'eventi',id),{
-      nome, data:document.getElementById('evData').value,
+      nome, tipo:document.getElementById('evTipo').value||'ecm', data:document.getElementById('evData').value,
       dataFine:document.getElementById('evDataFine').value,
       luogo:document.getElementById('evLuogo').value,
       desc:document.getElementById('evDesc').value,

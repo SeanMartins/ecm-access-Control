@@ -43,7 +43,7 @@
     { id:'quiz',     key:'nav_quiz',     icon:'quiz',     href:'ecm-blocco7.html' },
     { type:'section', key:'nav_congress' },
     { id:'congress', key:'nav_congress_prog', icon:'congress', href:'congress-programma.html' },
-    { id:'congress-speakers', key:'nav_congress_speakers', icon:'speaker', href:'congress-programma.html#relatori' },
+    { id:'congress-checkin', key:'nav_congress_checkin', icon:'scanner', href:'congress-checkin.html' },
     { type:'section', key:'nav_system' },
     { id:'tablet',   key:'nav_tablet',   icon:'tablet',   href:'ecm-connetti.html' },
     { id:'admin',    key:'nav_admin',    icon:'admin',    href:'ecm-admin.html', adminOnly:true }
