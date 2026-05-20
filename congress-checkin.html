@@ -204,6 +204,7 @@ select.form-input{cursor:pointer}
             <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)">Presenti alla sessione</div>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
               <button class="btn btn-outline btn-sm" id="btnRefresh">↻ Aggiorna</button>
+              <button class="btn btn-outline btn-sm" id="btnTestAgenda">📱 Testa agenda</button>
               <a href="ecm-blocco3.html" class="btn btn-outline btn-sm" id="btnVaiAccessi" style="display:none">🔀 Accessi evento</a>
               <a href="congress-programma.html" class="btn btn-outline btn-sm">← Programma</a>
             </div>
@@ -259,6 +260,41 @@ document.getElementById('searchInput').addEventListener('input', doSearch);
 document.getElementById('btnRefresh').addEventListener('click', () => {
   if (currentMode === 'sessione' && currentSessId) loadPresenti(currentSessId);
   else if (currentMode === 'evento' && currentEvId) loadPresentiEvento();
+});
+
+// Bottone test agenda - apre con primo partecipante
+document.getElementById('btnTestAgenda').addEventListener('click', () => {
+  if (!currentEvId) { alert('Seleziona prima un evento.'); return; }
+  if (!partecipanti.length) { alert('Nessun partecipante trovato per questo evento.'); return; }
+  // Apri select per scegliere il partecipante
+  const sel = document.createElement('select');
+  partecipanti.forEach(p => {
+    const o = document.createElement('option');
+    o.value = p.id;
+    o.textContent = p.cognome + ' ' + p.nome + ' (' + p.id + ')';
+    sel.appendChild(o);
+  });
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px';
+  wrap.innerHTML = '<div style="background:white;border-radius:14px;padding:24px;max-width:400px;width:100%"><div style="font-size:15px;font-weight:600;margin-bottom:14px">Seleziona partecipante</div><select id="partSel" style="width:100%;padding:9px 12px;border:1px solid #DDE1E9;border-radius:8px;font-size:13px;margin-bottom:14px"></select><div style="display:flex;gap:8px;justify-content:flex-end"><button id="btnAnnullaAgenda" style="padding:8px 16px;border:1px solid #DDE1E9;border-radius:8px;background:white;cursor:pointer;font-size:13px">Annulla</button><a id="btnApriAgenda" href="#" target="_blank" style="padding:8px 16px;background:#7C3AED;color:white;border-radius:8px;font-size:13px;text-decoration:none;font-weight:500">Apri agenda →</a></div></div>';
+  document.body.appendChild(wrap);
+  // Popola select
+  const partSel = wrap.querySelector('#partSel');
+  partecipanti.forEach(p => {
+    const o = document.createElement('option');
+    o.value = p.id;
+    o.textContent = (p.cognome||'') + ' ' + (p.nome||'') + ' — ' + p.id;
+    partSel.appendChild(o);
+  });
+  // Aggiorna link
+  function updateLink() {
+    const base = window.location.protocol+'//'+window.location.host+window.location.pathname.split('/').slice(0,-1).join('/')+'/';
+    wrap.querySelector('#btnApriAgenda').href = base + 'congress-agenda.html?evId=' + currentEvId + '&partId=' + partSel.value;
+  }
+  partSel.addEventListener('change', updateLink);
+  updateLink();
+  wrap.querySelector('#btnAnnullaAgenda').addEventListener('click', () => wrap.remove());
+  wrap.addEventListener('click', e => { if(e.target === wrap) wrap.remove(); });
 });
 
 // Toggle modalità
