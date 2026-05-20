@@ -310,7 +310,11 @@ document.getElementById('btnTestAgenda').addEventListener('click', () => {
     console.log('getUrl():', url, '| eid:', eid, '| pid:', pid);
     return url;
   }
-  function refreshUrl() { urlBox.textContent = getUrl(); }
+  function refreshUrl() {
+    const url = getUrl();
+    urlBox.textContent = url;
+    console.log('URL aggiornato:', url);
+  }
   sel.addEventListener('change', refreshUrl);
   refreshUrl();
 
@@ -342,26 +346,14 @@ document.getElementById('btnTestAgenda').addEventListener('click', () => {
   };
   btnRow.appendChild(btnCopia);
 
-  const btnApri = document.createElement('button');
+  // Usa un vero <a> tag - più affidabile di window.location
+  const btnApri = document.createElement('a');
   btnApri.textContent = 'Apri agenda';
-  btnApri.style.cssText = 'padding:8px 16px;background:#7C3AED;color:white;border-radius:8px;font-size:13px;border:none;cursor:pointer;font-weight:600;font-family:inherit';
-  btnApri.onclick = () => {
-    const url = getUrl();
-    console.log('Apro:', url);
-    // Naviga nella stessa scheda (evita blocco popup browser)
-    window.location.href = url;
-  };
-  
-  // Aggiorna anche il testo del link come <a> cliccabile
-  const linkDiretto = document.createElement('a');
-  linkDiretto.style.cssText = 'display:block;font-size:11px;color:#7C3AED;text-align:center;margin-top:10px;word-break:break-all';
-  linkDiretto.textContent = 'Oppure clicca qui se il bottone non funziona';
-  linkDiretto.target = '_blank';
-  linkDiretto.rel = 'noopener';
-  function updateLinkDiretto() { linkDiretto.href = getUrl(); }
-  sel.addEventListener('change', updateLinkDiretto);
-  updateLinkDiretto();
-  box.appendChild(linkDiretto);
+  btnApri.style.cssText = 'padding:8px 16px;background:#7C3AED;color:white;border-radius:8px;font-size:13px;border:none;cursor:pointer;font-weight:600;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center';
+  btnApri.href = getUrl();
+  // Aggiorna href quando cambia select
+  sel.addEventListener('change', () => { btnApri.href = getUrl(); console.log('href aggiornato:', btnApri.href); });
+  console.log('href iniziale:', btnApri.href);
   btnRow.appendChild(btnApri);
 
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
