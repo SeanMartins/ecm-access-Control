@@ -276,7 +276,7 @@ document.getElementById('btnTestAgenda').addEventListener('click', () => {
   });
   const wrap = document.createElement('div');
   wrap.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px';
-  wrap.innerHTML = '<div style="background:white;border-radius:14px;padding:24px;max-width:440px;width:100%"><div style="font-size:15px;font-weight:600;margin-bottom:14px">📱 Agenda partecipante</div><select id="partSel" style="width:100%;padding:9px 12px;border:1px solid #DDE1E9;border-radius:8px;font-size:13px;margin-bottom:10px"></select><div id="urlDebug" style="font-size:10px;color:#9499B0;font-family:monospace;word-break:break-all;margin-bottom:12px;padding:6px 8px;background:#F4F6F9;border-radius:6px"></div><div style="display:flex;gap:8px;justify-content:flex-end"><button id="btnAnnullaAgenda" style="padding:8px 16px;border:1px solid #DDE1E9;border-radius:8px;background:white;cursor:pointer;font-size:13px">Annulla</button><a id="btnApriAgenda" href="#" target="_blank" style="padding:8px 16px;background:#7C3AED;color:white;border-radius:8px;font-size:13px;text-decoration:none;font-weight:500">Apri agenda →</a></div></div>';
+  wrap.innerHTML = '<div style="background:white;border-radius:14px;padding:24px;max-width:440px;width:100%"><div style="font-size:15px;font-weight:600;margin-bottom:14px">📱 Agenda partecipante</div><select id="partSel" style="width:100%;padding:9px 12px;border:1px solid #DDE1E9;border-radius:8px;font-size:13px;margin-bottom:10px"></select><div id="urlDebug" style="font-size:10px;color:#9499B0;font-family:monospace;word-break:break-all;margin-bottom:12px;padding:6px 8px;background:#F4F6F9;border-radius:6px;cursor:pointer" title="Clicca per copiare"></div><div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button id="btnAnnullaAgenda" style="padding:8px 16px;border:1px solid #DDE1E9;border-radius:8px;background:white;cursor:pointer;font-size:13px">Annulla</button><button id="btnCopiaLink" style="padding:8px 16px;border:1px solid #7C3AED;color:#7C3AED;border-radius:8px;font-size:13px;background:white;cursor:pointer">📋 Copia link</button><button id="btnApriAgenda" style="padding:8px 16px;background:#7C3AED;color:white;border-radius:8px;font-size:13px;border:none;cursor:pointer;font-weight:500">Apri agenda →</button></div></div>';
   document.body.appendChild(wrap);
   // Popola select
   const partSel = wrap.querySelector('#partSel');
@@ -300,6 +300,34 @@ document.getElementById('btnTestAgenda').addEventListener('click', () => {
   updateLink();
   wrap.querySelector('#btnAnnullaAgenda').addEventListener('click', () => wrap.remove());
   wrap.addEventListener('click', e => { if(e.target === wrap) wrap.remove(); });
+  
+  // Bottone apri agenda — naviga direttamente
+  wrap.querySelector('#btnApriAgenda').addEventListener('click', () => {
+    const base = window.location.protocol+'//'+window.location.host+window.location.pathname.split('/').slice(0,-1).join('/')+'/';
+    const url = base + 'congress-agenda.html?evId=' + encodeURIComponent(currentEvId) + '&partId=' + encodeURIComponent(partSel.value);
+    console.log('Navigo a:', url);
+    window.open(url, '_blank');
+  });
+
+  // Bottone copia link
+  wrap.querySelector('#btnCopiaLink').addEventListener('click', () => {
+    const urlDebug = wrap.querySelector('#urlDebug');
+    navigator.clipboard.writeText(urlDebug.textContent).then(() => {
+      wrap.querySelector('#btnCopiaLink').textContent = '✓ Copiato!';
+      setTimeout(() => { wrap.querySelector('#btnCopiaLink').textContent = '📋 Copia link'; }, 2000);
+    }).catch(() => {
+      // Fallback: seleziona il testo
+      const range = document.createRange();
+      range.selectNode(urlDebug);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+    });
+  });
+
+  // Click sul debug URL per copiare
+  wrap.querySelector('#urlDebug').addEventListener('click', function() {
+    navigator.clipboard.writeText(this.textContent).catch(() => {});
+  });
 });
 
 // Toggle modalità
