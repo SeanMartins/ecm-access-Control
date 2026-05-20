@@ -500,6 +500,17 @@ function renderProgramma(){
 }
 
 // ── MODAL SESSIONE ──────────────────────────────────────
+// Esponi reset functions al bridge
+window._resetEditingSessione = function() {
+  editingSessioneId = null;
+  populateSaleSelect();
+  populateRelatoriCheck();
+};
+window._resetEditingRelatore = function() {
+  editingRelatoreId = null;
+};
+// Bottone nuova sessione — gestito dal bridge esterno
+// ma anche qui per sicurezza
 document.getElementById('btnNuovaSessione').addEventListener('click',()=>{
   if(!currentEvId){alert('Seleziona prima un evento.');return;}
   editingSessioneId=null;
@@ -770,6 +781,82 @@ document.querySelectorAll('.modal-overlay').forEach(o=>{
 function clearForm(ids){ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});}
 function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('show');e.style.display='block';setTimeout(()=>{e.classList.remove('show');e.style.display='none';},4000);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+</script>
+
+<script>
+// Bridge: collega bottoni UI prima che Firebase sia pronto
+document.addEventListener('DOMContentLoaded', function() {
+
+  // Bottone nuova sessione
+  var btnNS = document.getElementById('btnNuovaSessione');
+  if (btnNS) btnNS.addEventListener('click', function() {
+    var evId = document.getElementById('evSelect').value;
+    if (!evId) { alert('Seleziona prima un evento dal menu in alto.'); return; }
+    // Reset form
+    ['sTitolo','sOraInizio','sOraFine','sDescrizione'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) el.value = '';
+    });
+    var sData = document.getElementById('sData');
+    if (sData) sData.value = '';
+    var sTipo = document.getElementById('sTipo');
+    if (sTipo) sTipo.value = 'keynote';
+    var sMax = document.getElementById('sMaxPosti');
+    if (sMax) sMax.value = '0';
+    var sLing = document.getElementById('sLingua');
+    if (sLing) sLing.value = 'it';
+    // Apri modal
+    var modal = document.getElementById('modalSessione');
+    if (modal) modal.classList.add('show');
+    var title = document.getElementById('modalSessioneTitolo');
+    if (title) title.textContent = 'Nuova sessione';
+    // editingSessioneId = null gestito dal modulo
+    if (window._resetEditingSessione) window._resetEditingSessione();
+  });
+
+  // Bottone nuovo relatore
+  var btnNR = document.getElementById('btnNuovoRelatore');
+  if (btnNR) btnNR.addEventListener('click', function() {
+    var evId = document.getElementById('evSelect').value;
+    if (!evId) { alert('Seleziona prima un evento.'); return; }
+    ['rNome','rCognome','rTitolo','rOrg','rEmail','rTel','rBio','rFoto'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) el.value = '';
+    });
+    var modal = document.getElementById('modalRelatore');
+    if (modal) modal.classList.add('show');
+    var title = document.getElementById('modalRelatoreTitolo');
+    if (title) title.textContent = 'Nuovo relatore';
+    if (window._resetEditingRelatore) window._resetEditingRelatore();
+  });
+
+  // Bottone nuova sala
+  var btnNSl = document.getElementById('btnNuovaSala');
+  if (btnNSl) btnNSl.addEventListener('click', function() {
+    var evId = document.getElementById('evSelect').value;
+    if (!evId) { alert('Seleziona prima un evento.'); return; }
+    ['slNome','slPiano','slNote'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) el.value = '';
+    });
+    var cap = document.getElementById('slCapacita');
+    if (cap) cap.value = '100';
+    var col = document.getElementById('slColore');
+    if (col) col.value = '#7C3AED';
+    var modal = document.getElementById('modalSala');
+    if (modal) modal.classList.add('show');
+  });
+
+  // Chiudi modal cliccando overlay
+  document.querySelectorAll('.modal-overlay').forEach(function(o) {
+    o.addEventListener('click', function(e) {
+      if (e.target === o) o.classList.remove('show');
+    });
+  });
+
+  // closeModal globale
+  window.closeModal = function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('show');
+  };
+});
 </script>
 </body>
 </html>
