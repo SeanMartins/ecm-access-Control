@@ -327,8 +327,28 @@ textarea.form-input{resize:vertical;min-height:80px}
       <textarea class="form-input" id="rBio" placeholder="Breve biografia del relatore..."></textarea>
     </div>
     <div class="form-group">
-      <label class="field-label">URL Foto (opzionale)</label>
-      <input type="url" class="form-input" id="rFoto" placeholder="https://...">
+      <label class="field-label">Foto relatore</label>
+      <div style="display:flex;gap:10px;margin-bottom:8px">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);flex:1;justify-content:center">
+          <input type="radio" name="fotoOpt" value="no" id="fotoNo" checked style="accent-color:var(--congress)"> Nessuna foto
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);flex:1;justify-content:center">
+          <input type="radio" name="fotoOpt" value="url" id="fotoUrl" style="accent-color:var(--congress)"> URL immagine
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);flex:1;justify-content:center">
+          <input type="radio" name="fotoOpt" value="upload" id="fotoUpload" style="accent-color:var(--congress)"> Carica foto
+        </label>
+      </div>
+      <div id="fotoUrlSection" style="display:none">
+        <input type="url" class="form-input" id="rFoto" placeholder="https://esempio.com/foto.jpg">
+      </div>
+      <div id="fotoUploadSection" style="display:none">
+        <input type="file" id="rFotoFile" accept="image/*" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-size:13px;width:100%;cursor:pointer">
+        <div id="fotoPreview" style="margin-top:8px;display:none">
+          <img id="fotoPreviewImg" src="" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--congress)">
+          <span style="font-size:11px;color:var(--success);margin-left:8px">✓ Foto caricata</span>
+        </div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modalRelatore')">Annulla</button>
@@ -642,7 +662,29 @@ window.openEditRelatore=function(rid){
   document.getElementById('rEmail').value=r.email||'';
   document.getElementById('rTel').value=r.tel||'';
   document.getElementById('rBio').value=r.bio||'';
-  document.getElementById('rFoto').value=r.foto||'';
+  // Ripristina opzione foto
+  if(r.foto){
+    if(r.foto.startsWith('data:')){
+      document.getElementById('fotoUpload').checked=true;
+      document.getElementById('fotoUploadSection').style.display='block';
+      document.getElementById('fotoUrlSection').style.display='none';
+      document.getElementById('fotoPreviewImg').src=r.foto;
+      document.getElementById('fotoPreview').style.display='flex';
+      document.getElementById('fotoPreview').style.alignItems='center';
+      window._fotoBase64=r.foto;
+    }else{
+      document.getElementById('fotoUrl').checked=true;
+      document.getElementById('fotoUrlSection').style.display='block';
+      document.getElementById('fotoUploadSection').style.display='none';
+      document.getElementById('rFoto').value=r.foto;
+    }
+  }else{
+    document.getElementById('fotoNo').checked=true;
+    document.getElementById('fotoUrlSection').style.display='none';
+    document.getElementById('fotoUploadSection').style.display='none';
+    document.getElementById('rFoto').value='';
+    window._fotoBase64='';
+  }
   openModal('modalRelatore');
 };
 
@@ -654,7 +696,12 @@ document.getElementById('btnSalvaRelatore').addEventListener('click',async()=>{
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
   try{
     await signInAnonymously(auth);
-    const payload={nome,cognome,titolo:document.getElementById('rTitolo').value.trim(),org:document.getElementById('rOrg').value.trim(),email:document.getElementById('rEmail').value.trim(),tel:document.getElementById('rTel').value.trim(),bio:document.getElementById('rBio').value.trim(),foto:document.getElementById('rFoto').value.trim(),updatedAt:serverTimestamp()};
+    // Determina foto in base all'opzione selezionata
+    const fotoOpt = document.querySelector('input[name="fotoOpt"]:checked')?.value || 'no';
+    let fotoVal = '';
+    if (fotoOpt === 'url') fotoVal = document.getElementById('rFoto').value.trim();
+    else if (fotoOpt === 'upload') fotoVal = window._fotoBase64 || '';
+    const payload={nome,cognome,titolo:document.getElementById('rTitolo').value.trim(),org:document.getElementById('rOrg').value.trim(),email:document.getElementById('rEmail').value.trim(),tel:document.getElementById('rTel').value.trim(),bio:document.getElementById('rBio').value.trim(),foto:fotoVal,updatedAt:serverTimestamp()};
     if(editingRelatoreId){await setDoc(doc(db,'eventi',currentEvId,'relatori',editingRelatoreId),payload,{merge:true});}
     else{payload.createdAt=serverTimestamp();await addDoc(collection(db,'eventi',currentEvId,'relatori'),payload);}
     closeModal('modalRelatore');await loadRelatori();updateStats();
@@ -856,6 +903,32 @@ document.addEventListener('DOMContentLoaded', function() {
     var el = document.getElementById(id);
     if (el) el.classList.remove('show');
   };
+
+  // Toggle opzioni foto relatore
+  document.querySelectorAll('input[name="fotoOpt"]').forEach(function(r) {
+    r.addEventListener('change', function() {
+      document.getElementById('fotoUrlSection').style.display = this.value === 'url' ? 'block' : 'none';
+      document.getElementById('fotoUploadSection').style.display = this.value === 'upload' ? 'block' : 'none';
+    });
+  });
+
+  // Preview foto caricata
+  var fotoFileInput = document.getElementById('rFotoFile');
+  if (fotoFileInput) {
+    fotoFileInput.addEventListener('change', function() {
+      var file = this.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('fotoPreviewImg').src = e.target.result;
+        document.getElementById('fotoPreview').style.display = 'flex';
+        document.getElementById('fotoPreview').style.alignItems = 'center';
+        // Salva base64 in campo nascosto
+        window._fotoBase64 = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
 });
 </script>
 </body>
