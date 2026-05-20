@@ -296,24 +296,39 @@ async function initApp() {
     document.getElementById('fbDot').className = 'topbar-dot ok';
     document.getElementById('fbStatus').textContent = 'Firebase connesso';
 
-    // Carica eventi
+    // Carica eventi — tutti tranne archiviati
     const evSnap = await getDocs(collection(db,'eventi'));
     const evList = [];
     evSnap.forEach(d => evList.push({id:d.id,...d.data()}));
-    evList.filter(e => e.stato !== 'archiviato')
-      .sort((a,b) => new Date(b.data||0)-new Date(a.data||0))
-      .forEach(ev => {
-        const opt = document.createElement('option');
-        opt.value = ev.id;
-        opt.textContent = ev.nome || ev.id;
-        document.getElementById('evSelect').appendChild(opt);
-      });
+    console.log('Eventi trovati:', evList.length, evList.map(e=>e.nome));
 
-    // Auto-seleziona evento salvato
+    // Mostra tutti gli eventi non archiviati (stato può mancare)
+    const evFiltrati = evList
+      .filter(e => e.stato !== 'archiviato')
+      .sort((a,b) => new Date(b.data||0)-new Date(a.data||0));
+
+    // Se nessun evento filtrato mostra tutti
+    const evDaMostrare = evFiltrati.length > 0 ? evFiltrati : evList;
+
+    evDaMostrare.forEach(ev => {
+      const opt = document.createElement('option');
+      opt.value = ev.id;
+      const dataStr = ev.data ? ' (' + new Date(ev.data).toLocaleDateString('it-IT') + ')' : '';
+      opt.textContent = (ev.nome || ev.id) + dataStr;
+      document.getElementById('evSelect').appendChild(opt);
+    });
+
+    console.log('Eventi nel select:', evDaMostrare.length);
+
+    // Auto-seleziona: prima quello salvato, poi il primo disponibile
     const savedEvId = localStorage.getItem('ecm_eventId');
-    if (savedEvId && evList.find(e => e.id === savedEvId)) {
-      document.getElementById('evSelect').value = savedEvId;
-      await onEvSelect(savedEvId);
+    const autoId = (savedEvId && evDaMostrare.find(e => e.id === savedEvId))
+      ? savedEvId
+      : evDaMostrare[0]?.id;
+
+    if (autoId) {
+      document.getElementById('evSelect').value = autoId;
+      await onEvSelect(autoId);
     }
 
     document.getElementById('evSelect').addEventListener('change', async function() {
@@ -328,46 +343,76 @@ async function initApp() {
 async function onEvSelect(evId) {
   currentEvId = evId;
   localStorage.setItem('ecm_eventId', evId);
+  console.log('onEvSelect:', evId);
 
-  // Carica sessioni e sale
-  const [sessSnap, saleSnap, partsSnap] = await Promise.all([
-    getDocs(collection(db,'eventi',evId,'sessioni')),
-    getDocs(collection(db,'eventi',evId,'sale')),
-    getDocs(collection(db,'eventi',evId,'partecipanti'))
-  ]);
-  sessioni = []; sessSnap.forEach(d => sessioni.push({id:d.id,...d.data()}));
-  sessioni.sort((a,b) => (a.data||'').localeCompare(b.data||'') || (a.oraInizio||'').localeCompare(b.oraInizio||''));
-  sale = []; saleSnap.forEach(d => sale.push({id:d.id,...d.data()}));
-  partecipanti = []; partsSnap.forEach(d => partecipanti.push({id:d.id,...d.data()}));
+  try {
+    // Carica sessioni, sale e partecipanti
+    const [sessSnap, saleSnap, partsSnap] = await Promise.all([
+      getDocs(collection(db,'eventi',evId,'sessioni')),
+      getDocs(collection(db,'eventi',evId,'sale')),
+      getDocs(collection(db,'eventi',evId,'partecipanti'))
+    ]);
 
-  document.getElementById('sTotPart').textContent = partecipanti.length;
+    sessioni = [];
+    sessSnap.forEach(d => sessioni.push({id:d.id,...d.data()}));
+    sessioni.sort((a,b) => (a.data||'').localeCompare(b.data||'') || (a.oraInizio||'').localeCompare(b.oraInizio||''));
 
-  // Popola select sessioni
-  const sel = document.getElementById('sessSelect');
-  sel.innerHTML = '<option value="">— Seleziona sessione —</option>';
-  const grouped = {};
-  sessioni.forEach(s => {
-    const d = s.data || 'nd';
-    if (!grouped[d]) grouped[d] = [];
-    grouped[d].push(s);
-  });
-  Object.keys(grouped).sort().forEach(day => {
-    const grp = document.createElement('optgroup');
-    grp.label = day && day !== 'nd' ? new Date(day).toLocaleDateString('it-IT',{weekday:'long',day:'2-digit',month:'long'}) : 'Senza data';
-    grouped[day].forEach(s => {
-      const opt = document.createElement('option');
-      opt.value = s.id;
-      opt.textContent = (s.oraInizio||'--:--') + ' — ' + (s.titolo||'—');
-      grp.appendChild(opt);
-    });
-    sel.appendChild(grp);
-  });
-  sel.disabled = false;
-  sel.addEventListener('change', function() {
-    if (this.value) onSessSelect(this.value);
-  });
+    sale = [];
+    saleSnap.forEach(d => sale.push({id:d.id,...d.data()}));
 
-  document.getElementById('searchInput').disabled = false;
+    partecipanti = [];
+    partsSnap.forEach(d => partecipanti.push({id:d.id,...d.data()}));
+
+    console.log('Sessioni:', sessioni.length, '| Sale:', sale.length, '| Partecipanti:', partecipanti.length);
+
+    document.getElementById('sTotPart').textContent = partecipanti.length;
+    document.getElementById('searchInput').disabled = false;
+
+    // Popola select sessioni
+    const sel = document.getElementById('sessSelect');
+    // Rimuovi listener vecchi clonando il nodo
+    const newSel = sel.cloneNode(false);
+    sel.parentNode.replaceChild(newSel, sel);
+    newSel.id = 'sessSelect';
+
+    if (!sessioni.length) {
+      newSel.innerHTML = '<option value="">— Nessuna sessione configurata —</option>';
+      newSel.disabled = true;
+    } else {
+      newSel.innerHTML = '<option value="">— Seleziona sessione —</option>';
+      const grouped = {};
+      sessioni.forEach(s => {
+        const d = s.data || 'nd';
+        if (!grouped[d]) grouped[d] = [];
+        grouped[d].push(s);
+      });
+      Object.keys(grouped).sort().forEach(day => {
+        const grp = document.createElement('optgroup');
+        grp.label = day && day !== 'nd'
+          ? new Date(day).toLocaleDateString('it-IT',{weekday:'long',day:'2-digit',month:'long'})
+          : 'Senza data';
+        grouped[day].forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s.id;
+          opt.textContent = (s.oraInizio||'--:--') + ' — ' + (s.titolo||'—');
+          grp.appendChild(opt);
+        });
+        newSel.appendChild(grp);
+      });
+      newSel.disabled = false;
+      newSel.addEventListener('change', function() {
+        if (this.value) onSessSelect(this.value);
+      });
+    }
+
+    // In modalità evento carica subito i presenti
+    if (currentMode === 'evento') {
+      document.getElementById('btnAvvia').disabled = false;
+      loadPresentiEvento();
+    }
+  } catch(e) {
+    console.error('onEvSelect error:', e);
+  }
 }
 
 function onSessSelect(sessId) {
