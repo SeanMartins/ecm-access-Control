@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>La mia agenda — Congress</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#7C3AED">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --congress:#7C3AED;--congress-light:#F5F3FF;--congress-dark:#5B21B6;
+  --success:#059669;--success-light:#ECFDF5;
+  --warn:#D97706;--warn-light:#FFFBEB;
+  --danger:#DC2626;--danger-light:#FEF2F2;
+  --bg:#F4F6F9;--surface:#FFF;--surface2:#F0F2F5;
+  --border:#DDE1E9;--text:#1A1D2E;--text2:#5A5F7A;--text3:#9499B0;
+  --radius:12px;--radius-lg:18px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 8px 24px rgba(0,0,0,.06)
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
+
+/* HEADER */
+.app-header{background:var(--congress);color:white;padding:0;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(124,58,237,.3)}
+.header-inner{max-width:600px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+.header-logo{display:flex;align-items:center;gap:10px}
+.header-logo img{width:36px;height:36px;border-radius:8px}
+.header-title{font-size:15px;font-weight:700;letter-spacing:-.01em}
+.header-sub{font-size:11px;opacity:.75}
+
+/* MAIN */
+main{max-width:600px;margin:0 auto;padding:20px 16px 40px}
+
+/* HERO CARD */
+.hero-card{background:linear-gradient(135deg,var(--congress-dark) 0%,var(--congress) 100%);border-radius:var(--radius-lg);padding:24px;margin-bottom:20px;color:white;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(124,58,237,.3)}
+.hero-card::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.06)}
+.hero-card::after{content:'';position:absolute;bottom:-60px;left:-30px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04)}
+.hero-nome{font-size:24px;font-weight:700;letter-spacing:-.02em;margin-bottom:2px;position:relative}
+.hero-cf{font-family:'DM Mono',monospace;font-size:12px;opacity:.7;margin-bottom:14px;position:relative}
+.hero-evento{font-size:13px;opacity:.85;font-weight:500;position:relative}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);backdrop-filter:blur(4px);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;margin-top:6px;position:relative}
+
+/* QR */
+.qr-card{background:var(--surface);border-radius:var(--radius-lg);padding:20px;margin-bottom:20px;box-shadow:var(--shadow);text-align:center}
+.qr-title{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:14px}
+.qr-wrap{display:inline-flex;padding:12px;background:white;border-radius:var(--radius);border:1px solid var(--border);margin-bottom:12px}
+.qr-hint{font-size:12px;color:var(--text3)}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:14px 10px;text-align:center;box-shadow:var(--shadow);border:1px solid var(--border)}
+.stat-num{font-size:26px;font-weight:700;letter-spacing:-.02em}
+.stat-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+
+/* AGENDA */
+.section-title{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.day-group{margin-bottom:24px}
+.day-label{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.day-line{flex:1;height:1px;background:var(--border)}
+.session-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:14px 16px;margin-bottom:8px;display:flex;gap:12px;box-shadow:var(--shadow);transition:all .2s;position:relative;overflow:hidden}
+.session-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--congress)}
+.session-card.presente::before{background:var(--success)}
+.session-card.assente::before{background:var(--border)}
+.sess-time{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);min-width:90px;padding-top:2px}
+.sess-body{flex:1;min-width:0}
+.sess-titolo{font-size:14px;font-weight:600;margin-bottom:4px}
+.sess-meta{font-size:11px;color:var(--text3);display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.sess-tags{display:flex;gap:5px;flex-wrap:wrap}
+.tag{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.tag-tipo{background:var(--congress-light);color:var(--congress)}
+.tag-sala{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+.checkin-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700}
+.cb-presente{background:var(--success-light);color:var(--success)}
+.cb-assente{background:var(--surface2);color:var(--text3)}
+.cb-futuro{background:var(--congress-light);color:var(--congress)}
+
+/* STATO LOADING / EMPTY */
+.loading-wrap{text-align:center;padding:60px 20px}
+.spinner-big{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--congress);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-wrap{text-align:center;padding:48px 20px}
+.error-icon{font-size:48px;margin-bottom:12px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;text-decoration:none;transition:all .18s}
+.btn-congress{background:var(--congress);color:white}.btn-congress:hover{background:var(--congress-dark)}
+.btn-outline{background:var(--surface);color:var(--text2);border:1px solid var(--border)}
+
+/* Tutte le sessioni */
+.all-sessions-toggle{text-align:center;margin-top:8px}
+.toggle-link{font-size:12px;color:var(--congress);cursor:pointer;font-weight:500;text-decoration:underline}
+
+/* Footer */
+.app-footer{text-align:center;padding:20px;font-size:11px;color:var(--text3)}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="header-logo">
+      <img src="logo.png" alt="ECM" onerror="this.style.display='none'">
+      <div>
+        <div class="header-title">Congress Manager</div>
+        <div class="header-sub" id="headerEvento">La mia agenda</div>
+      </div>
+    </div>
+    <div style="font-size:11px;opacity:.75" id="headerData"></div>
+  </div>
+</header>
+
+<main>
+  <div id="mainContent">
+    <div class="loading-wrap">
+      <div class="spinner-big"></div>
+      <div style="font-size:14px;color:var(--text2)">Caricamento agenda...</div>
+    </div>
+  </div>
+</main>
+
+<div class="app-footer">
+  Multimedia Meeting Group · ECM Access Control
+</div>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+const app = getApps().length ? getApps()[0] : initializeApp(FB);
+const db = getFirestore(app);
+
+// Legge parametri URL
+const params = new URLSearchParams(window.location.search);
+const evId = params.get('evId');
+const partId = params.get('partId');
+
+const TIPI = {keynote:'🌟 Keynote',workshop:'🔧 Workshop',panel:'💬 Panel',talk:'🎤 Talk',break:'☕ Break',altro:'📌 Altro'};
+
+async function init() {
+  try {
+    if (!evId || !partId) { showError('Link non valido. Scansiona di nuovo il tuo badge QR.'); return; }
+
+    // Carica dati in parallelo
+    const [evSnap, partSnap, sessioniSnap, saleSnap] = await Promise.all([
+      getDoc(doc(db,'eventi',evId)),
+      getDoc(doc(db,'eventi',evId,'partecipanti',partId)),
+      getDocs(collection(db,'eventi',evId,'sessioni')),
+      getDocs(collection(db,'eventi',evId,'sale'))
+    ]);
+
+    if (!evSnap.exists()) { showError('Evento non trovato.'); return; }
+    if (!partSnap.exists()) { showError('Partecipante non trovato.'); return; }
+
+    const ev = evSnap.data();
+    const part = partSnap.data();
+
+    // Carica sessioni e sale
+    const sessioni = [];
+    sessioniSnap.forEach(d => sessioni.push({id:d.id,...d.data()}));
+    sessioni.sort((a,b) => (a.data||'').localeCompare(b.data||'') || (a.oraInizio||'').localeCompare(b.oraInizio||''));
+
+    const sale = [];
+    saleSnap.forEach(d => sale.push({id:d.id,...d.data()}));
+
+    // Carica check-in del partecipante per ogni sessione
+    const checkinMap = {};
+    await Promise.all(sessioni.map(async s => {
+      try {
+        const ciSnap = await getDoc(doc(db,'eventi',evId,'sessioni',s.id,'checkin',partId));
+        checkinMap[s.id] = ciSnap.exists() ? ciSnap.data() : null;
+      } catch(e) { checkinMap[s.id] = null; }
+    }));
+
+    // Aggiorna header
+    document.getElementById('headerEvento').textContent = ev.nome || '—';
+    const oggi = new Date().toISOString().split('T')[0];
+    document.getElementById('headerData').textContent = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'short'});
+
+    // Sessioni prenotate dal partecipante
+    const sessioniPrenotate = part.sessioniPrenotate || [];
+    const mieSessioni = sessioni.filter(s => sessioniPrenotate.includes(s.id));
+    const tutteSessioni = sessioni; // Mostra tutte se nessuna prenotata
+
+    const sessioniDaMostrare = mieSessioni.length > 0 ? mieSessioni : sessioni;
+    const haPrenotazioni = mieSessioni.length > 0;
+
+    // Calcola stats
+    const totSessioni = sessioniDaMostrare.length;
+    const presenze = sessioniDaMostrare.filter(s => checkinMap[s.id]).length;
+    const future = sessioniDaMostrare.filter(s => (s.data||'') >= oggi && !checkinMap[s.id]).length;
+
+    // Genera QR
+    const qrData = `ECM|${partId}|${part.cf||''}|${part.cognome||''}|${part.nome||''}`;
+
+    // Render pagina
+    document.getElementById('mainContent').innerHTML = `
+      <!-- HERO -->
+      <div class="hero-card">
+        <div class="hero-nome">${esc(part.cognome||'')} ${esc(part.nome||'')}</div>
+        <div class="hero-cf">${part.cf||'—'}</div>
+        <div class="hero-evento">📅 ${esc(ev.nome||'—')}</div>
+        <div class="hero-badge">🎤 ${esc(ev.tipo?.toUpperCase()||'EVENTO')}</div>
+      </div>
+
+      <!-- QR PERSONALE -->
+      <div class="qr-card">
+        <div class="qr-title">Il tuo badge QR</div>
+        <div class="qr-wrap" id="qrWrap"></div>
+        <div class="qr-hint">Mostra questo QR agli operatori per il check-in</div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-num">${totSessioni}</div>
+          <div class="stat-lbl">Sessioni</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" style="color:var(--success)">${presenze}</div>
+          <div class="stat-lbl">Presenze</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" style="color:var(--congress)">${future}</div>
+          <div class="stat-lbl">In programma</div>
+        </div>
+      </div>
+
+      <!-- AGENDA -->
+      <div class="section-title">
+        📅 ${haPrenotazioni ? 'La mia agenda' : 'Programma completo'}
+      </div>
+      <div id="agendaContent"></div>
+    `;
+
+    // Genera QR
+    new QRCode(document.getElementById('qrWrap'), {
+      text: qrData, width: 180, height: 180,
+      correctLevel: QRCode.CorrectLevel.M
+    });
+
+    // Render agenda raggruppata per giorno
+    const byDay = {};
+    sessioniDaMostrare.forEach(s => {
+      const d = s.data || 'nd';
+      if (!byDay[d]) byDay[d] = [];
+      byDay[d].push(s);
+    });
+
+    const fmtDate = d => d && d !== 'nd'
+      ? new Date(d).toLocaleDateString('it-IT',{weekday:'long',day:'2-digit',month:'long'})
+      : 'Data da definire';
+
+    const agendaHTML = Object.keys(byDay).sort().map((day, di) => {
+      const isOggi = day === oggi;
+      return `<div class="day-group">
+        <div class="day-label">
+          <span style="background:${isOggi?'var(--congress)':'var(--surface2)'};color:${isOggi?'white':'var(--text2)'};padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600">
+            ${isOggi ? '🟢 Oggi' : 'Giorno '+(di+1)}
+          </span>
+          <span style="font-size:12px;color:var(--text3)">${fmtDate(day)}</span>
+          <div class="day-line"></div>
+        </div>
+        ${byDay[day].map(s => {
+          const sala = sale.find(x => x.id === s.salaId);
+          const salaNome = sala?.nome || s.salaNomeCustom || null;
+          const ci = checkinMap[s.id];
+          const isFutura = (s.data||'') > oggi;
+          const isOggiSess = s.data === oggi;
+          const cardClass = ci ? 'presente' : isFutura || isOggiSess ? '' : 'assente';
+          const badgeHTML = ci
+            ? `<span class="checkin-badge cb-presente">✓ Presente · ${ci.ora||'—'}</span>`
+            : isFutura || isOggiSess
+            ? `<span class="checkin-badge cb-futuro">📅 In programma</span>`
+            : `<span class="checkin-badge cb-assente">— Non presente</span>`;
+          return `<div class="session-card ${cardClass}">
+            <div class="sess-time">
+              <div>${s.oraInizio||'--:--'}</div>
+              <div style="color:var(--border2)">↓</div>
+              <div>${s.oraFine||'--:--'}</div>
+            </div>
+            <div class="sess-body">
+              <div class="sess-titolo">${esc(s.titolo||'—')}</div>
+              <div class="sess-meta">
+                ${salaNome ? `<span>🏛️ ${esc(salaNome)}</span>` : ''}
+                ${s.lingua && s.lingua !== 'it' ? `<span>🌐 ${s.lingua.toUpperCase()}</span>` : ''}
+              </div>
+              <div class="sess-tags">
+                <span class="tag tag-tipo">${TIPI[s.tipo]||s.tipo||'Sessione'}</span>
+                ${salaNome ? `<span class="tag tag-sala">${esc(salaNome)}</span>` : ''}
+              </div>
+              <div style="margin-top:8px">${badgeHTML}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }).join('');
+
+    document.getElementById('agendaContent').innerHTML = agendaHTML || '<div style="text-align:center;padding:32px;color:var(--text3)">Nessuna sessione in programma</div>';
+
+  } catch(e) {
+    console.error(e);
+    showError('Errore nel caricamento: ' + e.message);
+  }
+}
+
+function showError(msg) {
+  document.getElementById('mainContent').innerHTML = `
+    <div class="error-wrap">
+      <div class="error-icon">⚠️</div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:8px;color:var(--text)">Ops!</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:20px">${esc(msg)}</div>
+      <a href="ecm-eventi.html" class="btn btn-congress">← Torna agli eventi</a>
+    </div>`;
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+init();
+</script>
+</body>
+</html>
