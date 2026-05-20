@@ -26,6 +26,9 @@
       role_scan:'Scanner accessi', role_rep:'Solo report',
       login_title:'Accedi al sistema', login_sub:'Inserisci le tue credenziali',
       username:'Username', password:'Password', login_btn:'Accedi →', login_google:'Accedi con Google',
+      nav_congress:'Congress',
+      nav_congress_prog:'Programma sessioni',
+      nav_congress_speakers:'Relatori',
       ver_label:'ECM Access Control'
     },
     en: { name:'English', flag:'🇬🇧',
@@ -51,6 +54,9 @@
       role_scan:'Access scanner', role_rep:'Report only',
       login_title:'Sign in to system', login_sub:'Enter your credentials',
       username:'Username', password:'Password', login_btn:'Sign in →', login_google:'Sign in with Google',
+      nav_congress:'Congress',
+      nav_congress_prog:'Session schedule',
+      nav_congress_speakers:'Speakers',
       ver_label:'ECM Access Control'
     },
     fr: { name:'Français', flag:'🇫🇷',
@@ -76,6 +82,9 @@
       role_scan:'Scanner accès', role_rep:'Rapport uniquement',
       login_title:'Connexion au système', login_sub:'Entrez vos identifiants',
       username:"Nom d'utilisateur", password:'Mot de passe', login_btn:'Se connecter →', login_google:'Se connecter avec Google',
+      nav_congress:'Congrès',
+      nav_congress_prog:'Programme sessions',
+      nav_congress_speakers:'Intervenants',
       ver_label:'ECM Access Control'
     },
     es: { name:'Español', flag:'🇪🇸',
@@ -101,6 +110,9 @@
       role_scan:'Scanner accesos', role_rep:'Solo informes',
       login_title:'Acceder al sistema', login_sub:'Ingresa tus credenciales',
       username:'Usuario', password:'Contraseña', login_btn:'Acceder →', login_google:'Acceder con Google',
+      nav_congress:'Congreso',
+      nav_congress_prog:'Programa sesiones',
+      nav_congress_speakers:'Ponentes',
       ver_label:'ECM Access Control'
     },
     de: { name:'Deutsch', flag:'🇩🇪',
@@ -126,6 +138,9 @@
       role_scan:'Zugangs-Scanner', role_rep:'Nur Bericht',
       login_title:'Beim System anmelden', login_sub:'Geben Sie Ihre Anmeldedaten ein',
       username:'Benutzername', password:'Passwort', login_btn:'Anmelden →', login_google:'Mit Google anmelden',
+      nav_congress:'Kongress',
+      nav_congress_prog:'Sitzungsprogramm',
+      nav_congress_speakers:'Referenten',
       ver_label:'ECM Access Control'
     },
     pt: { name:'Português', flag:'🇵🇹',
@@ -151,6 +166,9 @@
       role_scan:'Scanner de acesso', role_rep:'Apenas relatório',
       login_title:'Entrar no sistema', login_sub:'Digite suas credenciais',
       username:'Usuário', password:'Senha', login_btn:'Entrar →', login_google:'Entrar com Google',
+      nav_congress:'Congresso',
+      nav_congress_prog:'Programa sessoes',
+      nav_congress_speakers:'Palestrantes',
       ver_label:'ECM Access Control'
     }
   };
