@@ -226,10 +226,20 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<script>
+window.addEventListener('error', function(e) {
+  console.error('ERRORE GLOBALE:', e.message, e.filename, e.lineno);
+  document.getElementById('fbStatus').textContent = 'Errore JS: ' + e.message.slice(0,30);
+});
+window.addEventListener('unhandledrejection', function(e) {
+  console.error('PROMISE RIFIUTATA:', e.reason);
+  document.getElementById('fbStatus').textContent = 'Errore: ' + String(e.reason).slice(0,30);
+});
+</script>
 <script type="module">
 import { requireAuth, injectUserBar } from './ecm-auth.js';
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, collection, getDocs, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
@@ -291,6 +301,7 @@ async function initApp() {
     const app = getApps().length ? getApps()[0] : initializeApp(FB);
     db = getFirestore(app);
     auth = getAuth(app);
+
     await requireAuth();
     injectUserBar('userBarSlot');
     document.getElementById('fbDot').className = 'topbar-dot ok';
