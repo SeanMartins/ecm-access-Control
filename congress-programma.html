@@ -448,9 +448,11 @@ document.getElementById('btnSalvaSessione').addEventListener('click', async () =
   const data = document.getElementById('sData').value;
   const oraInizio = document.getElementById('sOraInizio').value;
   const oraFine = document.getElementById('sOraFine').value;
+  if (!currentEvId) { showErr('msErr', 'Nessun evento selezionato. Torna alla home e seleziona un evento.'); return; }
   if (!titolo) { showErr('msErr', 'Inserisci il titolo della sessione.'); return; }
   if (!data) { showErr('msErr', 'Inserisci la data.'); return; }
   if (!oraInizio || !oraFine) { showErr('msErr', 'Inserisci ora inizio e fine.'); return; }
+  console.log('Salvataggio sessione per evento:', currentEvId);
   const btn = document.getElementById('btnSalvaSessione');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Salvataggio...';
   try {
@@ -469,10 +471,23 @@ document.getElementById('btnSalvaSessione').addEventListener('click', async () =
       lingua: document.getElementById('sLingua').value,
       relatori: relatoriSel, iscritti: 0, updatedAt: serverTimestamp()
     };
-    if (editSid) await setDoc(doc(db,'eventi',currentEvId,'sessioni',editSid), payload, {merge:true});
-    else { payload.createdAt = serverTimestamp(); await addDoc(collection(db,'eventi',currentEvId,'sessioni'), payload); }
+    let savedId;
+    if (editSid) {
+      await setDoc(doc(db,'eventi',currentEvId,'sessioni',editSid), payload, {merge:true});
+      savedId = editSid;
+    } else {
+      const ref = await addDoc(collection(db,'eventi',currentEvId,'sessioni'), payload);
+      savedId = ref.id;
+    }
+    console.log('Sessione salvata:', savedId, 'per evento:', currentEvId);
     closeModal('modalSessione');
+    // Ricarica e forza render
     await loadSessioni();
+    // Assicura che il tab programma sia visibile
+    document.querySelectorAll('.main-tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(x => x.classList.remove('active'));
+    document.querySelector('.main-tab[data-tab="programma"]').classList.add('active');
+    document.getElementById('tab-programma').classList.add('active');
   } catch(e) { showErr('msErr', 'Errore: ' + e.message); }
   finally { btn.disabled = false; btn.innerHTML = '💾 Salva sessione'; }
 });
@@ -585,17 +600,27 @@ async function loadEventoData(evId, evList) {
 async function loadSessioni() {
   if (!currentEvId || !db) return;
   try {
-    const snap = await getDocs(query(collection(db,'eventi',currentEvId,'sessioni'), orderBy('data'), orderBy('oraInizio')));
-    sessioni = []; snap.forEach(d => sessioni.push({id:d.id,...d.data()}));
+    const snap = await getDocs(collection(db,'eventi',currentEvId,'sessioni'));
+    sessioni = [];
+    snap.forEach(d => sessioni.push({id:d.id,...d.data()}));
+    console.log('Sessioni caricate:', sessioni.length, sessioni.map(s=>s.titolo));
+    // Ordina lato client
+    sessioni.sort((a,b) => {
+      const dataCmp = (a.data||'').localeCompare(b.data||'');
+      if (dataCmp !== 0) return dataCmp;
+      return (a.oraInizio||'').localeCompare(b.oraInizio||'');
+    });
     renderProgramma();
-  } catch(e) { sessioni = []; }
+  } catch(e) { console.error('loadSessioni error:', e); sessioni = []; renderProgramma(); }
 }
 
 async function loadRelatori() {
   if (!currentEvId || !db) return;
   try {
-    const snap = await getDocs(query(collection(db,'eventi',currentEvId,'relatori'), orderBy('cognome')));
-    relatori = []; snap.forEach(d => relatori.push({id:d.id,...d.data()}));
+    const snap = await getDocs(collection(db,'eventi',currentEvId,'relatori'));
+    relatori = [];
+    snap.forEach(d => relatori.push({id:d.id,...d.data()}));
+    relatori.sort((a,b) => (a.cognome||'').localeCompare(b.cognome||''));
     renderRelatori();
     document.getElementById('sTotRelatori').textContent = relatori.length;
   } catch(e) { relatori = []; }
@@ -625,6 +650,7 @@ async function loadIscrizioni() {
 
 // ── RENDER ────────────────────────────────────────────────
 function renderProgramma() {
+  console.log('renderProgramma called, sessioni:', sessioni.length);
   document.getElementById('sTotSessioni').textContent = sessioni.length;
   const c = document.getElementById('programmaContent');
   if (!sessioni.length) { c.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">Nessuna sessione ancora</div><div style="font-size:13px;color:var(--text3)">Clicca "+ Nuova sessione" per iniziare</div></div>'; return; }
