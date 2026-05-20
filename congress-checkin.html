@@ -340,9 +340,20 @@ document.getElementById('btnTestAgenda').addEventListener('click', () => {
   btnApri.onclick = () => {
     const url = getUrl();
     console.log('Apro:', url);
-    window.open(url, '_blank');
-    overlay.remove();
+    // Naviga nella stessa scheda (evita blocco popup browser)
+    window.location.href = url;
   };
+  
+  // Aggiorna anche il testo del link come <a> cliccabile
+  const linkDiretto = document.createElement('a');
+  linkDiretto.style.cssText = 'display:block;font-size:11px;color:#7C3AED;text-align:center;margin-top:10px;word-break:break-all';
+  linkDiretto.textContent = 'Oppure clicca qui se il bottone non funziona';
+  linkDiretto.target = '_blank';
+  linkDiretto.rel = 'noopener';
+  function updateLinkDiretto() { linkDiretto.href = getUrl(); }
+  sel.addEventListener('change', updateLinkDiretto);
+  updateLinkDiretto();
+  box.appendChild(linkDiretto);
   btnRow.appendChild(btnApri);
 
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
