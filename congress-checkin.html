@@ -299,8 +299,16 @@ document.getElementById('btnTestAgenda').addEventListener('click', () => {
   urlBox.title = 'Clicca per copiare';
   box.appendChild(urlBox);
 
+  // Cattura evId al momento dell'apertura popup, non al click
+  const evIdSnapshot = currentEvId;
+  console.log('evIdSnapshot al momento popup:', evIdSnapshot, 'currentEvId:', currentEvId);
+  
   function getUrl() {
-    return base + 'congress-agenda.html?evId=' + encodeURIComponent(currentEvId) + '&partId=' + encodeURIComponent(sel.value);
+    const eid = evIdSnapshot || currentEvId || localStorage.getItem('ecm_eventId') || '';
+    const pid = sel.value || '';
+    const url = base + 'congress-agenda.html?evId=' + encodeURIComponent(eid) + '&partId=' + encodeURIComponent(pid);
+    console.log('getUrl():', url, '| eid:', eid, '| pid:', pid);
+    return url;
   }
   function refreshUrl() { urlBox.textContent = getUrl(); }
   sel.addEventListener('change', refreshUrl);
