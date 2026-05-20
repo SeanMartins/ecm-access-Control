@@ -133,10 +133,30 @@ const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-acces
 const app = getApps().length ? getApps()[0] : initializeApp(FB);
 const db = getFirestore(app);
 
-// Legge parametri URL
-const params = new URLSearchParams(window.location.search);
-const evId = params.get('evId');
-const partId = params.get('partId');
+// Legge parametri URL — più metodi per compatibilità
+function getParam(name) {
+  // Metodo 1: URLSearchParams standard
+  const p1 = new URLSearchParams(window.location.search).get(name);
+  if (p1) return p1;
+  // Metodo 2: parse manuale dell'href completo
+  const href = window.location.href;
+  const regex = new RegExp('[?&]' + name + '=([^&#]*)');
+  const m = href.match(regex);
+  if (m) return decodeURIComponent(m[1]);
+  // Metodo 3: hash params (fallback per alcuni redirect)
+  const hash = window.location.hash;
+  if (hash.includes(name + '=')) {
+    const hParams = new URLSearchParams(hash.replace('#','?'));
+    const p3 = hParams.get(name);
+    if (p3) return p3;
+  }
+  return null;
+}
+
+const evId = getParam('evId');
+const partId = getParam('partId');
+console.log('URL completo:', window.location.href);
+console.log('Parametri letti:', { evId, partId });
 
 const TIPI = {keynote:'🌟 Keynote',workshop:'🔧 Workshop',panel:'💬 Panel',talk:'🎤 Talk',break:'☕ Break',altro:'📌 Altro'};
 
@@ -330,7 +350,7 @@ function showError(msg) {
     <div class="error-wrap">
       <div class="error-icon">⚠️</div>
       <div style="font-size:16px;font-weight:600;margin-bottom:8px;color:var(--text)">Ops!</div>
-      <div style="font-size:13px;color:var(--text2);margin-bottom:20px">${esc(msg)}</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:20px">${msg}</div>
       <a href="ecm-eventi.html" class="btn btn-congress">← Torna agli eventi</a>
     </div>`;
 }
