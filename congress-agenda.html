@@ -124,6 +124,50 @@ main{max-width:600px;margin:0 auto;padding:20px 16px 40px}
   Multimedia Meeting Group · ECM Access Control
 </div>
 
+<script>
+// Controlla parametri URL immediatamente prima di qualsiasi altra cosa
+(function() {
+  function getParam(name) {
+    // URLSearchParams
+    try {
+      var p = new URLSearchParams(window.location.search).get(name);
+      if (p && p !== 'null') return p;
+    } catch(e) {}
+    // Regex
+    try {
+      var m = window.location.href.match(new RegExp('[?&]' + name + '=([^&#]+)'));
+      if (m) return decodeURIComponent(m[1]);
+    } catch(e) {}
+    return null;
+  }
+
+  var evId = getParam('evId');
+  var partId = getParam('partId');
+
+  // Se parametri mancanti, prova localStorage
+  if (!evId || !partId) {
+    try {
+      var lsEv = localStorage.getItem('agenda_evId');
+      var lsPart = localStorage.getItem('agenda_partId');
+      if (lsEv && lsPart && lsEv !== 'null' && lsPart !== 'null') {
+        var base = window.location.pathname;
+        var newUrl = base + '?evId=' + encodeURIComponent(lsEv) + '&partId=' + encodeURIComponent(lsPart);
+        console.log('Redirect con localStorage:', newUrl);
+        window.location.replace(newUrl);
+        // Blocca esecuzione ulteriore
+      }
+    } catch(e) {}
+  } else {
+    // Parametri trovati — salva in localStorage per uso futuro
+    try {
+      localStorage.setItem('agenda_evId', evId);
+      localStorage.setItem('agenda_partId', partId);
+    } catch(e) {}
+    console.log('Parametri URL OK:', evId, partId);
+  }
+})();
+</script>
+
 <script type="module">
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -133,36 +177,19 @@ const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-acces
 const app = getApps().length ? getApps()[0] : initializeApp(FB);
 const db = getFirestore(app);
 
-// Legge parametri URL — tutti i metodi possibili
+// Legge parametri URL
 function getParam(name) {
-  // Metodo 1: URLSearchParams standard
   try {
-    const p1 = new URLSearchParams(window.location.search).get(name);
-    if (p1 && p1 !== 'null') return p1;
+    var p = new URLSearchParams(window.location.search).get(name);
+    if (p && p !== 'null') return p;
   } catch(e) {}
-  // Metodo 2: regex sull'href completo
   try {
-    const m = window.location.href.match(new RegExp('[?&]' + name + '=([^&#]+)'));
+    var m = window.location.href.match(new RegExp('[?&]' + name + '=([^&#]+)'));
     if (m) return decodeURIComponent(m[1]);
   } catch(e) {}
-  // Metodo 3: hash params
   try {
-    const hash = window.location.hash;
-    if (hash.includes(name + '=')) {
-      const p3 = new URLSearchParams(hash.replace(/^#\/?/, '?')).get(name);
-      if (p3 && p3 !== 'null') return p3;
-    }
-  } catch(e) {}
-  // Metodo 4: localStorage (salvato dal checkin prima della navigazione)
-  try {
-    const key = name === 'evId' ? 'agenda_evId' : name === 'partId' ? 'agenda_partId' : null;
-    if (key) {
-      const val = localStorage.getItem(key);
-      if (val && val !== 'null' && val !== '') {
-        console.log('Param da localStorage:', name, '=', val);
-        return val;
-      }
-    }
+    var key = name === 'evId' ? 'agenda_evId' : name === 'partId' ? 'agenda_partId' : null;
+    if (key) { var v = localStorage.getItem(key); if (v && v !== 'null') return v; }
   } catch(e) {}
   return null;
 }

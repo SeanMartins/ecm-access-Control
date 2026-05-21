@@ -240,10 +240,111 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<script>
+// ── UI LISTENERS — registrati subito, non dipendono da Firebase ──
+let firmaBase64 = '', logoBase64 = '', templateBase64 = '';
+
+document.addEventListener('DOMContentLoaded', function() {
+
+  // Upload firma
+  document.getElementById('cfgFirmaImg').addEventListener('change', function() {
+    const file = this.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      firmaBase64 = e.target.result;
+      document.getElementById('firmaPreview').innerHTML =
+        '<img src="'+firmaBase64+'" style="max-height:60px;max-width:200px;object-fit:contain">' +
+        '<div style="font-size:11px;color:#059669;margin-top:4px">✓ Firma caricata</div>';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Upload logo evento
+  document.getElementById('cfgLogoEvento').addEventListener('change', function() {
+    const file = this.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      logoBase64 = e.target.result;
+      document.getElementById('logoPreview').innerHTML =
+        '<img src="'+logoBase64+'" style="max-height:60px;max-width:200px;object-fit:contain">' +
+        '<div style="font-size:11px;color:#059669;margin-top:4px">✓ Logo caricato</div>';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Upload template sfondo
+  document.getElementById('cfgTemplate').addEventListener('change', function() {
+    const file = this.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      templateBase64 = e.target.result;
+      document.getElementById('templatePreview').innerHTML =
+        '<img src="'+templateBase64+'" style="max-height:80px;width:100%;object-fit:cover;border-radius:6px">' +
+        '<div style="font-size:11px;color:#059669;margin-top:4px">✓ Template caricato</div>';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Opacità template
+  document.getElementById('cfgTemplateOpacity').addEventListener('input', function() {
+    document.getElementById('opacityVal').textContent = this.value + '%';
+  });
+
+  // Selezione tutti/nessuno
+  document.getElementById('btnSelAll').addEventListener('click', () => {
+    document.querySelectorAll('.part-check').forEach(c => c.checked = true);
+    updateStampaBtn();
+  });
+  document.getElementById('btnDesAll').addEventListener('click', () => {
+    document.querySelectorAll('.part-check').forEach(c => c.checked = false);
+    updateStampaBtn();
+  });
+  document.getElementById('btnStampa').addEventListener('click', stampaSelezionati);
+
+  // Aggiorna lista quando cambiano config
+  ['cfgOrg','cfgDataLuogo','cfgFirma','cfgRuolo','cfgTesto'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => { if (window._certEvId) window._loadPartecipanti(); });
+  });
+  ['cfgShowSess','cfgSoglia'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', () => { if (window._certEvId) window._loadPartecipanti(); });
+  });
+});
+
+function updateStampaBtn() {
+  const sel = document.querySelectorAll('.part-check:checked').length;
+  const btn = document.getElementById('btnStampa');
+  if (!btn) return;
+  btn.disabled = sel === 0;
+  btn.textContent = sel > 0 ? '🖨️ Stampa '+sel+' certificati' : '🖨️ Stampa selezionati';
+}
+
+function stampaSelezionati() {
+  if (!window._partecipanti) return;
+  const selIds = [...document.querySelectorAll('.part-check:checked')].map(c=>c.value);
+  if (!selIds.length) return;
+  const certs = selIds.map(id => {
+    const p = window._partecipanti.find(x=>x.id===id);
+    return p ? buildCert(p) : '';
+  }).join('');
+  document.getElementById('printArea').innerHTML = certs;
+  setTimeout(() => window.print(), 600);
+}
+
+window.stampaSingolo = function(partId) {
+  if (!window._partecipanti) return;
+  const p = window._partecipanti.find(x=>x.id===partId);
+  if (!p) return;
+  document.getElementById('printArea').innerHTML = buildCert(p);
+  setTimeout(() => window.print(), 400);
+};
+</script>
+
 <script type="module">
 import { requireAuth, injectUserBar } from './ecm-auth.js';
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
 
@@ -251,179 +352,27 @@ let db;
 let partecipanti=[], sessioni=[], sale=[], checkinMap={};
 let currentEvId=null, currentEv=null;
 
-// ── LISTENERS UI ──────────────────────────────────────
-let firmaBase64 = '', logoBase64 = '', templateBase64 = '';
-
-// Upload firma
-document.getElementById('cfgFirmaImg').addEventListener('change', function() {
-  const file = this.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    firmaBase64 = e.target.result;
-    document.getElementById('firmaPreview').innerHTML =
-      '<img src="'+firmaBase64+'" style="max-height:60px;max-width:200px;object-fit:contain">' +
-      '<div style="font-size:11px;color:var(--success);margin-top:4px">✓ Firma caricata</div>';
-    if (currentEvId) loadPartecipanti();
-  };
-  reader.readAsDataURL(file);
-});
-
-// Upload logo evento
-document.getElementById('cfgLogoEvento').addEventListener('change', function() {
-  const file = this.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    logoBase64 = e.target.result;
-    document.getElementById('logoPreview').innerHTML =
-      '<img src="'+logoBase64+'" style="max-height:60px;max-width:200px;object-fit:contain">' +
-      '<div style="font-size:11px;color:var(--success);margin-top:4px">✓ Logo caricato</div>';
-    if (currentEvId) loadPartecipanti();
-  };
-  reader.readAsDataURL(file);
-});
-
-// Upload template sfondo
-document.getElementById('cfgTemplate').addEventListener('change', function() {
-  const file = this.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    templateBase64 = e.target.result;
-    document.getElementById('templatePreview').innerHTML =
-      '<img src="'+templateBase64+'" style="max-height:80px;width:100%;object-fit:cover;border-radius:6px">' +
-      '<div style="font-size:11px;color:var(--success);margin-top:4px">✓ Template caricato</div>';
-    if (currentEvId) loadPartecipanti();
-  };
-  reader.readAsDataURL(file);
-});
-
-// Opacità template
-document.getElementById('cfgTemplateOpacity').addEventListener('input', function() {
-  document.getElementById('opacityVal').textContent = this.value + '%';
-});
-
-document.getElementById('btnSelAll').addEventListener('click', () => {
-  document.querySelectorAll('.part-check').forEach(c => c.checked = true);
-  updateStampaBtn();
-});
-document.getElementById('btnDesAll').addEventListener('click', () => {
-  document.querySelectorAll('.part-check').forEach(c => c.checked = false);
-  updateStampaBtn();
-});
-document.getElementById('btnStampa').addEventListener('click', stampaSelezionati);
-
-// Aggiorna preview quando cambiano le config
-['cfgOrg','cfgDataLuogo','cfgFirma','cfgRuolo','cfgTesto','cfgShowSess','cfgSoglia'].forEach(id => {
-  document.getElementById(id).addEventListener('input', () => {
-    if (currentEvId) loadPartecipanti(currentEvId);
-  });
-  document.getElementById(id).addEventListener('change', () => {
-    if (currentEvId) loadPartecipanti(currentEvId);
-  });
-});
-
-// ── INIT FIREBASE ─────────────────────────────────────
-async function initApp() {
-  try {
-    const app = getApps().length ? getApps()[0] : initializeApp(FB);
-    db = getFirestore(app);
-    await requireAuth();
-    injectUserBar('userBarSlot');
-    document.getElementById('fbDot').className = 'topbar-dot ok';
-    document.getElementById('fbStatus').textContent = 'Firebase connesso';
-
-    const evSnap = await getDocs(collection(db,'eventi'));
-    const evList = [];
-    evSnap.forEach(d => evList.push({id:d.id,...d.data()}));
-    evList.filter(e => e.stato !== 'archiviato')
-      .sort((a,b) => new Date(b.data||0)-new Date(a.data||0))
-      .forEach(ev => {
-        const opt = document.createElement('option');
-        opt.value = ev.id;
-        opt.textContent = (ev.nome||ev.id) + (ev.data?' ('+new Date(ev.data).toLocaleDateString('it-IT')+')':'');
-        document.getElementById('evSelect').appendChild(opt);
-      });
-
-    const savedId = localStorage.getItem('ecm_eventId');
-    const autoId = (savedId && evList.find(e=>e.id===savedId)) ? savedId : evList.find(e=>e.stato!=='archiviato')?.id;
-    if (autoId) {
-      document.getElementById('evSelect').value = autoId;
-      currentEv = evList.find(e=>e.id===autoId);
-      // Pre-compila data/luogo
-      if (currentEv?.data) {
-        document.getElementById('cfgDataLuogo').value = currentEv.luogo
-          ? (currentEv.luogo + ', ' + new Date(currentEv.data).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}))
-          : new Date(currentEv.data).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
-      }
-      await loadEvento(autoId, evList);
-    }
-
-    document.getElementById('evSelect').addEventListener('change', async function() {
-      if (this.value) {
-        currentEv = evList.find(e=>e.id===this.value);
-        if (currentEv?.data) {
-          document.getElementById('cfgDataLuogo').value = currentEv.luogo
-            ? (currentEv.luogo + ', ' + new Date(currentEv.data).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}))
-            : new Date(currentEv.data).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
-        }
-        await loadEvento(this.value, evList);
-      }
-    });
-  } catch(e) { console.error(e); }
-}
-
-async function loadEvento(evId, evList) {
-  currentEvId = evId;
-  // Leggi anche logo dall'evento
-  try {
-    const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    const evSnap2 = await getDoc(doc(db,'eventi',evId));
-    if (evSnap2.exists() && evSnap2.data().logo && !logoBase64) {
-      logoBase64 = evSnap2.data().logo;
-      document.getElementById('logoPreview').innerHTML =
-        '<img src="'+logoBase64+'" style="max-height:60px;object-fit:contain">' +
-        '<div style="font-size:11px;color:var(--success);margin-top:4px">✓ Logo dall'evento</div>';
-    }
-  } catch(e) {}
-
-  const [partsSnap, sessSnap, saleSnap] = await Promise.all([
-    getDocs(collection(db,'eventi',evId,'partecipanti')),
-    getDocs(collection(db,'eventi',evId,'sessioni')),
-    getDocs(collection(db,'eventi',evId,'sale'))
-  ]);
-  partecipanti=[]; partsSnap.forEach(d=>partecipanti.push({id:d.id,...d.data()}));
-  sessioni=[]; sessSnap.forEach(d=>sessioni.push({id:d.id,...d.data()}));
-  sessioni.sort((a,b)=>(a.data||'').localeCompare(b.data||'')||(a.oraInizio||'').localeCompare(b.oraInizio||''));
-  sale=[]; saleSnap.forEach(d=>sale.push({id:d.id,...d.data()}));
-
-  checkinMap={};
-  await Promise.all(sessioni.map(async s=>{
-    const ciSnap = await getDocs(collection(db,'eventi',evId,'sessioni',s.id,'checkin'));
-    checkinMap[s.id]=[];
-    ciSnap.forEach(d=>checkinMap[s.id].push({id:d.id,...d.data()}));
-  }));
-
-  document.getElementById('partCard').style.display = 'block';
-  loadPartecipanti(evId);
-}
+// Esponi globalmente per i listener non-module
+window._partecipanti = partecipanti;
+window._certEvId = null;
 
 function calcPct(partId) {
-  const sessFiltrate = sessioni.filter(s=>s.tipo!=='break');
-  if (!sessFiltrate.length) return 0;
-  const pres = sessFiltrate.filter(s=>(checkinMap[s.id]||[]).some(c=>c.partecipanteId===partId||c.id===partId)).length;
-  return Math.round(pres/sessFiltrate.length*100);
+  const sf = sessioni.filter(s=>s.tipo!=='break');
+  if (!sf.length) return 0;
+  const pres = sf.filter(s=>(checkinMap[s.id]||[]).some(c=>c.partecipanteId===partId||c.id===partId)).length;
+  return Math.round(pres/sf.length*100);
 }
 
 function calcOre(partId) {
-  let minuti = 0;
+  let min = 0;
   sessioni.filter(s=>s.tipo!=='break').forEach(s=>{
     const ci = (checkinMap[s.id]||[]).find(c=>c.partecipanteId===partId||c.id===partId);
     if (!ci) return;
     const [h1,m1]=(s.oraInizio||'00:00').split(':').map(Number);
     const [h2,m2]=(s.oraFine||'00:00').split(':').map(Number);
-    minuti += Math.max(0,(h2*60+m2)-(h1*60+m1));
+    min += Math.max(0,(h2*60+m2)-(h1*60+m1));
   });
-  const h = Math.floor(minuti/60), m = minuti%60;
-  return {str: h+'h'+(m>0?m+'m':''), minuti};
+  return {str:Math.floor(min/60)+'h'+(min%60>0?min%60+'m':''), minuti:min};
 }
 
 function sessPresenti(partId) {
@@ -433,40 +382,35 @@ function sessPresenti(partId) {
 function loadPartecipanti() {
   const soglia = parseInt(document.getElementById('cfgSoglia').value)||0;
   const idonei = partecipanti.filter(p=>calcPct(p.id)>=soglia);
+  window._partecipanti = partecipanti;
 
   const wrap = document.getElementById('partListWrap');
   if (!partecipanti.length) { wrap.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3)">Nessun partecipante</div>'; return; }
 
-  wrap.innerHTML = `<div class="part-list">${idonei.map(p=>{
+  wrap.innerHTML = '<div class="part-list">'+idonei.map(p=>{
     const pct = calcPct(p.id);
     const ore = calcOre(p.id);
-    const pctClass = pct>=80?'pct-ok':pct>=50?'pct-warn':'pct-no';
-    return `<div class="part-item">
-      <input type="checkbox" class="part-check" value="${p.id}" checked onchange="updateStampaBtn()">
-      <div class="part-info">
-        <div class="part-nome">${esc(p.cognome||'')} ${esc(p.nome||'')}</div>
-        <div class="part-cf">${p.cf||'—'} · ${p.professione||'—'}</div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <span class="part-pct ${pctClass}">${pct}% presenza</span>
-        <span style="font-size:11px;color:var(--text3)">${ore.str}</span>
-        <button class="btn btn-outline btn-sm" onclick="stampaSingolo('${p.id}')">👁️ Anteprima</button>
-      </div>
-    </div>`;
-  }).join('')}</div>
-  ${idonei.length===0?'<div style="text-align:center;padding:24px;color:var(--text3)">Nessun partecipante supera la soglia selezionata</div>':''}
-  <div style="margin-top:10px;font-size:12px;color:var(--text3)">
-    ${idonei.length} partecipanti idonei su ${partecipanti.length} totali (soglia: ${soglia}%)
-  </div>`;
+    const cls = pct>=80?'pct-ok':pct>=50?'pct-warn':'pct-no';
+    return '<div class="part-item">' +
+      '<input type="checkbox" class="part-check" value="'+p.id+'" checked onchange="updateStampaBtn()">' +
+      '<div class="part-info">' +
+        '<div class="part-nome">'+esc(p.cognome||'')+' '+esc(p.nome||'')+'</div>' +
+        '<div class="part-cf">'+(p.cf||'—')+' · '+(p.professione||'—')+'</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px;align-items:center">' +
+        '<span class="part-pct '+cls+'">'+pct+'% presenza</span>' +
+        '<span style="font-size:11px;color:var(--text3)">'+ore.str+'</span>' +
+        '<button class="btn btn-outline btn-sm" onclick="stampaSingolo(''+p.id+'')">👁️</button>' +
+      '</div>' +
+    '</div>';
+  }).join('')+'</div>' +
+  '<div style="margin-top:10px;font-size:12px;color:var(--text3)">'+idonei.length+' idonei su '+partecipanti.length+' totali (soglia: '+soglia+'%)</div>';
+
   updateStampaBtn();
 }
 
-window.updateStampaBtn = function() {
-  const sel = document.querySelectorAll('.part-check:checked').length;
-  const btn = document.getElementById('btnStampa');
-  btn.disabled = sel === 0;
-  btn.textContent = sel > 0 ? `🖨️ Stampa ${sel} certificati` : '🖨️ Stampa selezionati';
-};
+// Esponi per i listener non-module
+window._loadPartecipanti = loadPartecipanti;
 
 function buildCert(p) {
   const pct = calcPct(p.id);
@@ -479,84 +423,132 @@ function buildCert(p) {
   const ruolo = document.getElementById('cfgRuolo').value || 'Responsabile Scientifico';
   const testoCustom = document.getElementById('cfgTesto').value;
   const evNome = currentEv?.nome || '—';
-  const certNum = 'CERT-' + p.id + '-' + Date.now().toString(36).toUpperCase();
-
-  const defaultTesto = `ha partecipato al <strong>${esc(evNome)}</strong>, svoltosi il <strong>${esc(dataLuogo)}</strong>, con una presenza pari al <strong>${pct}%</strong> delle sessioni previste, per un totale di <strong>${ore.str}</strong> di formazione.`;
-
+  const certNum = 'CERT-'+p.id+'-'+Date.now().toString(36).toUpperCase();
   const logoSrc = logoBase64 || 'logo.png';
-  const opacity = (document.getElementById('cfgTemplateOpacity').value || 100) / 100;
-  const templateStyle = templateBase64
-    ? `background-image:url(${templateBase64});background-size:cover;background-position:center;background-repeat:no-repeat;`
-    : '';
-  const templateOverlay = templateBase64
-    ? `<div style="position:absolute;inset:0;background:rgba(255,255,255,${1-opacity});border-radius:2px;pointer-events:none"></div>`
-    : '';
+  const opacity = (document.getElementById('cfgTemplateOpacity').value||100)/100;
+  const templateStyle = templateBase64 ? 'background-image:url('+templateBase64+');background-size:cover;background-position:center;' : '';
+  const templateOverlay = templateBase64 ? '<div style="position:absolute;inset:0;background:rgba(255,255,255,'+(1-opacity)+');pointer-events:none"></div>' : '';
+  const defaultTesto = 'ha partecipato al <strong>'+esc(evNome)+'</strong>, svoltosi il <strong>'+esc(dataLuogo)+'</strong>, con una presenza pari al <strong>'+pct+'%</strong> delle sessioni, per un totale di <strong>'+ore.str+'</strong> di formazione.';
 
-  return `<div class="cert" style="page-break-after:always;${templateStyle}position:relative">
-    ${templateOverlay}
-    ${!templateBase64 ? '<div class="cert-border"></div><div class="cert-corner tl"></div><div class="cert-corner tr"></div><div class="cert-corner bl"></div><div class="cert-corner br"></div>' : ''}
-    <div class="cert-header" style="position:relative">
-      <img src="${logoSrc}" class="cert-logo" onerror="this.src='logo.png'">
-      <div class="cert-org">${esc(org)}</div>
-      <div class="cert-tipo">Congress Manager — Certificato di Partecipazione</div>
-      <div class="cert-divider"></div>
-    </div>
-    <div class="cert-titolo">Attestato di Partecipazione</div>
-    <div class="cert-body">
-      <div class="cert-intro">Si attesta che</div>
-      <div class="cert-nome">${esc(p.cognome||'')} ${esc(p.nome||'')}</div>
-      ${p.cf?`<div class="cert-cf">C.F. ${p.cf}</div>`:''}
-      ${p.professione&&p.professione!=='—'?`<div style="font-size:12px;color:var(--text3);margin-bottom:12px">${esc(p.professione)}</div>`:''}
-      <div class="cert-desc">${testoCustom || defaultTesto}</div>
-    </div>
-    <div class="cert-stats">
-      <div class="cert-stat"><div class="cert-stat-val">${pct}%</div><div class="cert-stat-lbl">Presenza</div></div>
-      <div class="cert-stat"><div class="cert-stat-val">${ore.str}</div><div class="cert-stat-lbl">Ore totali</div></div>
-      <div class="cert-stat"><div class="cert-stat-val">${sessPres.length}</div><div class="cert-stat-lbl">Sessioni</div></div>
-    </div>
-    ${showSess && sessPres.length > 0 ? `
-    <div class="cert-sessioni">
-      <div class="cert-sess-title">Sessioni frequentate</div>
-      <ul class="cert-sess-list">
-        ${sessPres.map(s=>`<li>${esc(s.titolo||'—')} ${s.oraInizio?'— '+s.oraInizio:''}</li>`).join('')}
-      </ul>
-    </div>` : ''}
-    <div class="cert-footer" style="position:relative">
-      <div class="cert-firma">
-        ${firmaBase64
-          ? `<img src="${firmaBase64}" style="max-height:50px;max-width:140px;object-fit:contain;display:block;margin:0 auto 4px">`
-          : '<div class="cert-firma-line"></div>'}
-        <div class="cert-firma-nome">${esc(firma)}</div>
-        <div class="cert-firma-ruolo">${esc(ruolo)}</div>
-      </div>
-      <div style="text-align:center">
-        <div style="font-size:11px;color:var(--text3)">${esc(dataLuogo)}</div>
-      </div>
-      <div class="cert-num">
-        <div>${certNum}</div>
-        <div style="margin-top:2px">${new Date().toLocaleDateString('it-IT')}</div>
-      </div>
-    </div>
-  </div>`;
+  return '<div class="cert" style="page-break-after:always;'+templateStyle+'position:relative">'+
+    templateOverlay+
+    (!templateBase64?'<div class="cert-border"></div><div class="cert-corner tl"></div><div class="cert-corner tr"></div><div class="cert-corner bl"></div><div class="cert-corner br"></div>':'')+
+    '<div class="cert-header" style="position:relative">'+
+      '<img src="'+logoSrc+'" class="cert-logo" onerror="this.src='logo.png'">'+
+      '<div class="cert-org">'+esc(org)+'</div>'+
+      '<div class="cert-tipo">Certificato di Partecipazione</div>'+
+      '<div class="cert-divider"></div>'+
+    '</div>'+
+    '<div class="cert-titolo">Attestato di Partecipazione</div>'+
+    '<div class="cert-body">'+
+      '<div class="cert-intro">Si attesta che</div>'+
+      '<div class="cert-nome">'+esc(p.cognome||'')+' '+esc(p.nome||'')+'</div>'+
+      (p.cf?'<div class="cert-cf">C.F. '+p.cf+'</div>':'')+
+      (p.professione&&p.professione!=='—'?'<div style="font-size:12px;color:var(--text3);margin-bottom:12px">'+esc(p.professione)+'</div>':'')+
+      '<div class="cert-desc">'+(testoCustom||defaultTesto)+'</div>'+
+    '</div>'+
+    '<div class="cert-stats">'+
+      '<div class="cert-stat"><div class="cert-stat-val">'+pct+'%</div><div class="cert-stat-lbl">Presenza</div></div>'+
+      '<div class="cert-stat"><div class="cert-stat-val">'+ore.str+'</div><div class="cert-stat-lbl">Ore totali</div></div>'+
+      '<div class="cert-stat"><div class="cert-stat-val">'+sessPres.length+'</div><div class="cert-stat-lbl">Sessioni</div></div>'+
+    '</div>'+
+    (showSess&&sessPres.length>0?
+      '<div class="cert-sessioni"><div class="cert-sess-title">Sessioni frequentate</div><ul class="cert-sess-list">'+
+      sessPres.map(s=>'<li>'+esc(s.titolo||'—')+(s.oraInizio?' — '+s.oraInizio:'')+'</li>').join('')+
+      '</ul></div>':'')+
+    '<div class="cert-footer">'+
+      '<div class="cert-firma">'+
+        (firmaBase64?'<img src="'+firmaBase64+'" style="max-height:50px;max-width:140px;object-fit:contain;display:block;margin:0 auto 4px">':'<div class="cert-firma-line"></div>')+
+        '<div class="cert-firma-nome">'+esc(firma)+'</div>'+
+        '<div class="cert-firma-ruolo">'+esc(ruolo)+'</div>'+
+      '</div>'+
+      '<div style="text-align:center"><div style="font-size:11px;color:var(--text3)">'+esc(dataLuogo)+'</div></div>'+
+      '<div class="cert-num"><div>'+certNum+'</div><div style="margin-top:2px">'+new Date().toLocaleDateString('it-IT')+'</div></div>'+
+    '</div>'+
+  '</div>';
 }
 
-window.stampaSingolo = function(partId) {
-  const p = partecipanti.find(x=>x.id===partId);
-  if (!p) return;
-  document.getElementById('printArea').innerHTML = buildCert(p);
-  document.getElementById('printArea').scrollIntoView({behavior:'smooth'});
-  setTimeout(() => window.print(), 500);
-};
+// Esponi buildCert globalmente
+window.buildCert = buildCert;
 
-function stampaSelezionati() {
-  const selIds = [...document.querySelectorAll('.part-check:checked')].map(c=>c.value);
-  if (!selIds.length) return;
-  const certs = selIds.map(id=>{
-    const p = partecipanti.find(x=>x.id===id);
-    return p ? buildCert(p) : '';
-  }).join('');
-  document.getElementById('printArea').innerHTML = certs;
-  setTimeout(() => window.print(), 500);
+async function initApp() {
+  try {
+    const app = getApps().length ? getApps()[0] : initializeApp(FB);
+    db = getFirestore(app);
+    await requireAuth();
+    injectUserBar('userBarSlot');
+    document.getElementById('fbDot').className = 'topbar-dot ok';
+    document.getElementById('fbStatus').textContent = 'Firebase connesso';
+
+    const evSnap = await getDocs(collection(db,'eventi'));
+    const evList = [];
+    evSnap.forEach(d => evList.push({id:d.id,...d.data()}));
+    evList.filter(e=>e.stato!=='archiviato')
+      .sort((a,b)=>new Date(b.data||0)-new Date(a.data||0))
+      .forEach(ev=>{
+        const opt=document.createElement('option');
+        opt.value=ev.id;
+        opt.textContent=(ev.nome||ev.id)+(ev.data?' ('+new Date(ev.data).toLocaleDateString('it-IT')+')':'');
+        document.getElementById('evSelect').appendChild(opt);
+      });
+
+    const savedId = localStorage.getItem('ecm_eventId');
+    const autoId = (savedId&&evList.find(e=>e.id===savedId)) ? savedId : evList.find(e=>e.stato!=='archiviato')?.id;
+    if (autoId) {
+      document.getElementById('evSelect').value = autoId;
+      currentEv = evList.find(e=>e.id===autoId);
+      precompila(currentEv);
+      await loadEvento(autoId);
+    }
+
+    document.getElementById('evSelect').addEventListener('change', async function() {
+      if (!this.value) return;
+      currentEv = evList.find(e=>e.id===this.value);
+      precompila(currentEv);
+      await loadEvento(this.value);
+    });
+  } catch(e) { console.error(e); document.getElementById('fbStatus').textContent='Errore: '+e.message; }
+}
+
+function precompila(ev) {
+  if (!ev) return;
+  if (ev.data) {
+    const d = new Date(ev.data).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+    document.getElementById('cfgDataLuogo').value = ev.luogo ? ev.luogo+', '+d : d;
+  }
+  if (ev.logo && !logoBase64) {
+    logoBase64 = ev.logo;
+    document.getElementById('logoPreview').innerHTML =
+      '<img src="'+ev.logo+'" style="max-height:60px;object-fit:contain">' +
+      '<div style="font-size:11px;color:#059669;margin-top:4px">✓ Logo dall'evento</div>';
+  }
+}
+
+async function loadEvento(evId) {
+  currentEvId = evId;
+  window._certEvId = evId;
+  document.getElementById('partCard').style.display = 'block';
+  document.getElementById('partListWrap').innerHTML = '<div style="text-align:center;padding:24px"><div class="spinner"></div></div>';
+
+  const [partsSnap, sessSnap, saleSnap] = await Promise.all([
+    getDocs(collection(db,'eventi',evId,'partecipanti')),
+    getDocs(collection(db,'eventi',evId,'sessioni')),
+    getDocs(collection(db,'eventi',evId,'sale'))
+  ]);
+
+  partecipanti=[]; partsSnap.forEach(d=>partecipanti.push({id:d.id,...d.data()}));
+  sessioni=[]; sessSnap.forEach(d=>sessioni.push({id:d.id,...d.data()}));
+  sessioni.sort((a,b)=>(a.data||'').localeCompare(b.data||'')||(a.oraInizio||'').localeCompare(b.oraInizio||''));
+  sale=[]; saleSnap.forEach(d=>sale.push({id:d.id,...d.data()}));
+  checkinMap={};
+  await Promise.all(sessioni.map(async s=>{
+    const ciSnap = await getDocs(collection(db,'eventi',evId,'sessioni',s.id,'checkin'));
+    checkinMap[s.id]=[];
+    ciSnap.forEach(d=>checkinMap[s.id].push({id:d.id,...d.data()}));
+  }));
+
+  window._partecipanti = partecipanti;
+  loadPartecipanti();
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
