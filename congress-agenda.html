@@ -125,46 +125,45 @@ main{max-width:600px;margin:0 auto;padding:20px 16px 40px}
 </div>
 
 <script>
-// Controlla parametri URL immediatamente prima di qualsiasi altra cosa
+// Controlla parametri URL - eseguito subito
 (function() {
-  function getParam(name) {
-    // URLSearchParams
+  function tryGetFromUrl(name) {
     try {
       var p = new URLSearchParams(window.location.search).get(name);
-      if (p && p !== 'null') return p;
+      if (p && p !== 'null' && p !== '') return p;
     } catch(e) {}
-    // Regex
     try {
       var m = window.location.href.match(new RegExp('[?&]' + name + '=([^&#]+)'));
-      if (m) return decodeURIComponent(m[1]);
+      if (m && m[1] !== 'null') return decodeURIComponent(m[1]);
     } catch(e) {}
     return null;
   }
 
-  var evId = getParam('evId');
-  var partId = getParam('partId');
+  var evId = tryGetFromUrl('evId');
+  var partId = tryGetFromUrl('partId');
 
-  // Se parametri mancanti, prova localStorage
-  if (!evId || !partId) {
-    try {
-      var lsEv = localStorage.getItem('agenda_evId');
-      var lsPart = localStorage.getItem('agenda_partId');
-      if (lsEv && lsPart && lsEv !== 'null' && lsPart !== 'null') {
-        var base = window.location.pathname;
-        var newUrl = base + '?evId=' + encodeURIComponent(lsEv) + '&partId=' + encodeURIComponent(lsPart);
-        console.log('Redirect con localStorage:', newUrl);
-        window.location.replace(newUrl);
-        // Blocca esecuzione ulteriore
-      }
-    } catch(e) {}
-  } else {
-    // Parametri trovati — salva in localStorage per uso futuro
-    try {
-      localStorage.setItem('agenda_evId', evId);
-      localStorage.setItem('agenda_partId', partId);
-    } catch(e) {}
-    console.log('Parametri URL OK:', evId, partId);
+  console.log('Pre-script: evId='+evId+' partId='+partId);
+
+  if (evId && partId) {
+    // Parametri nell'URL - salva in localStorage e procedi
+    localStorage.setItem('agenda_evId', evId);
+    localStorage.setItem('agenda_partId', partId);
+    console.log('Parametri URL OK, salvati in localStorage');
+    return;
   }
+
+  // Parametri mancanti - prova localStorage
+  var lsEv = localStorage.getItem('agenda_evId');
+  var lsPart = localStorage.getItem('agenda_partId');
+  console.log('localStorage:', lsEv, lsPart);
+
+  if (lsEv && lsPart && lsEv !== 'null' && lsPart !== 'null' && lsEv !== '' && lsPart !== '') {
+    // Redirect con parametri
+    var newUrl = window.location.pathname + '?evId=' + encodeURIComponent(lsEv) + '&partId=' + encodeURIComponent(lsPart);
+    console.log('Redirect a:', newUrl);
+    window.location.replace(newUrl);
+  }
+  // Se localStorage è vuoto, il modulo ES6 mostrerà l'errore
 })();
 </script>
 

@@ -310,13 +310,7 @@ document.getElementById('btnTestAgenda').addEventListener('click', () => {
     console.log('getUrl():', url, '| eid:', eid, '| pid:', pid);
     return url;
   }
-  function refreshUrl() {
-    const url = getUrl();
-    urlBox.textContent = url;
-    console.log('URL aggiornato:', url);
-  }
-  sel.addEventListener('change', refreshUrl);
-  refreshUrl();
+
 
   urlBox.addEventListener('click', () => {
     navigator.clipboard.writeText(getUrl()).then(() => {
@@ -350,23 +344,32 @@ document.getElementById('btnTestAgenda').addEventListener('click', () => {
   const btnApri = document.createElement('a');
   btnApri.textContent = 'Apri agenda';
   btnApri.style.cssText = 'padding:8px 16px;background:#7C3AED;color:white;border-radius:8px;font-size:13px;border:none;cursor:pointer;font-weight:600;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center';
-  btnApri.href = getUrl();
-  // Aggiorna href quando cambia select
-  sel.addEventListener('change', () => { btnApri.href = getUrl(); });
-  // Salva in localStorage PRIMA di navigare
-  btnApri.addEventListener('click', function(e) {
-    e.preventDefault(); // blocca navigazione immediata
-    const url = getUrl();
+  // Aggiorna href e URLBox quando cambia select
+  function aggiornaLink() {
     const eid = evIdSnapshot || currentEvId || localStorage.getItem('ecm_eventId') || '';
     const pid = sel.value || '';
-    // Salva in localStorage
+    // Salva SUBITO in localStorage ad ogni cambio
     try {
       localStorage.setItem('agenda_evId', eid);
       localStorage.setItem('agenda_partId', pid);
-      console.log('Salvato localStorage: evId='+eid+' partId='+pid);
-    } catch(ex) { console.warn(ex); }
-    // Naviga dopo il salvataggio
-    setTimeout(() => { window.location.href = url; }, 50);
+    } catch(ex) {}
+    const url = base + 'congress-agenda.html?evId=' + encodeURIComponent(eid) + '&partId=' + encodeURIComponent(pid);
+    btnApri.href = url;
+    urlBox.textContent = url;
+    return url;
+  }
+  sel.addEventListener('change', aggiornaLink);
+  aggiornaLink(); // Salva subito all'apertura del popup
+
+  btnApri.addEventListener('click', function(e) {
+    // Salva di nuovo per sicurezza
+    const eid = evIdSnapshot || currentEvId || localStorage.getItem('ecm_eventId') || '';
+    const pid = sel.value || '';
+    localStorage.setItem('agenda_evId', eid);
+    localStorage.setItem('agenda_partId', pid);
+    console.log('Click Apri agenda - localStorage salvato:', eid, pid);
+    console.log('href:', this.href);
+    // Lascia il browser navigare normalmente
   });
   btnRow.appendChild(btnApri);
 

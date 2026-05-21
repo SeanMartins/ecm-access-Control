@@ -481,7 +481,7 @@ function buildCert(p) {
     templateOverlay+
     (!templateBase64?'<div class="cert-border"></div><div class="cert-corner tl"></div><div class="cert-corner tr"></div><div class="cert-corner bl"></div><div class="cert-corner br"></div>':'')+
     '<div class="cert-header" style="position:relative">'+
-      '<img src="'+logoSrc+'" class="cert-logo" onerror="this.src='logo.png'">'+
+      '<img src="'+logoSrc+'" class="cert-logo" onerror="this.src=&quot;logo.png&quot;">'+
       '<div class="cert-org">'+esc(org)+'</div>'+
       '<div class="cert-tipo">Certificato di Partecipazione</div>'+
       '<div class="cert-divider"></div>'+
