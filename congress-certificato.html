@@ -533,8 +533,21 @@ async function initApp() {
     }
     // Assicura sempre un token auth valido per Firestore
     if (!auth.currentUser) {
-      try { await signAnon(auth); } catch(e) { console.warn('signAnon:', e.message); }
+      try { 
+        await signAnon(auth);
+        console.log('Auth anonima OK:', auth.currentUser?.uid);
+      } catch(e) { console.warn('signAnon:', e.message); }
+    } else {
+      console.log('Auth esistente:', auth.currentUser?.uid);
     }
+    // Attendi che l'auth sia propagata
+    await new Promise(resolve => {
+      if (auth.currentUser) { resolve(); return; }
+      const unsub = onAuthStateChanged(auth, user => {
+        if (user) { unsub(); resolve(); }
+      });
+      setTimeout(resolve, 2000); // fallback timeout
+    });
     document.getElementById('fbDot').className = 'topbar-dot ok';
     document.getElementById('fbStatus').textContent = 'Firebase connesso';
 
