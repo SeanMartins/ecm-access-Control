@@ -34,6 +34,8 @@
       nav_congress_checkin:'Check-in sessioni',
       nav_congress_prog:'Programma sessioni',
       nav_congress_speakers:'Relatori',
+      nav_payments:'Pagamenti',
+      nav_payments_mgmt:'Gestione pagamenti',
       ver_label:'ECM Access Control'
     },
     en: { name:'English', flag:'🇬🇧',
@@ -62,6 +64,8 @@
       nav_congress:'Congress',
       nav_congress_prog:'Session schedule',
       nav_congress_speakers:'Speakers',
+      nav_payments:'Payments',
+      nav_payments_mgmt:'Payment management',
       ver_label:'ECM Access Control'
     },
     fr: { name:'Français', flag:'🇫🇷',
@@ -90,6 +94,8 @@
       nav_congress:'Congrès',
       nav_congress_prog:'Programme sessions',
       nav_congress_speakers:'Intervenants',
+      nav_payments:'Paiements',
+      nav_payments_mgmt:'Gestion paiements',
       ver_label:'ECM Access Control'
     },
     es: { name:'Español', flag:'🇪🇸',
@@ -118,6 +124,8 @@
       nav_congress:'Congreso',
       nav_congress_prog:'Programa sesiones',
       nav_congress_speakers:'Ponentes',
+      nav_payments:'Pagos',
+      nav_payments_mgmt:'Gestión pagos',
       ver_label:'ECM Access Control'
     },
     de: { name:'Deutsch', flag:'🇩🇪',
@@ -146,6 +154,8 @@
       nav_congress:'Kongress',
       nav_congress_prog:'Sitzungsprogramm',
       nav_congress_speakers:'Referenten',
+      nav_payments:'Zahlungen',
+      nav_payments_mgmt:'Zahlungsverwaltung',
       ver_label:'ECM Access Control'
     },
     pt: { name:'Português', flag:'🇵🇹',

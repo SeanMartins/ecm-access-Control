@@ -177,6 +177,44 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
         </div>
       </div>
       <div class="form-group span2"><label>Note</label><textarea id="evDesc" placeholder="Note aggiuntive..."></textarea></div>
+
+      <!-- SEZIONE PAGAMENTI -->
+      <div class="form-group span2" style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px">
+        <label style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:12px">💳 Impostazioni pagamento</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group">
+            <label>Evento a pagamento</label>
+            <select id="evPagamento" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:inherit;font-size:14px;color:var(--text);outline:none;width:100%">
+              <option value="no">Gratuito</option>
+              <option value="si">A pagamento</option>
+              <option value="optional">Contributo facoltativo</option>
+            </select>
+          </div>
+          <div class="form-group" id="prezzoWrap" style="display:none">
+            <label>Quota iscrizione (€)</label>
+            <input type="number" id="evPrezzo" placeholder="Es. 150" min="0" step="0.01" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:inherit;font-size:14px;outline:none;width:100%">
+          </div>
+        </div>
+        <div id="paymentLinksWrap" style="display:none;margin-top:12px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-group">
+              <label>Link PayPal</label>
+              <input type="url" id="evPaypal" placeholder="https://paypal.me/..." style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:inherit;font-size:14px;outline:none;width:100%">
+              <div style="font-size:11px;color:var(--text3);margin-top:3px">paypal.me/tuonome o link PayPal.me</div>
+            </div>
+            <div class="form-group">
+              <label>Link Stripe</label>
+              <input type="url" id="evStripe" placeholder="https://buy.stripe.com/..." style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:inherit;font-size:14px;outline:none;width:100%">
+              <div style="font-size:11px;color:var(--text3);margin-top:3px">buy.stripe.com/... (Payment Link)</div>
+            </div>
+          </div>
+          <div style="margin-top:10px;padding:10px 14px;background:#FFF8E1;border:1px solid #FFD54F;border-radius:var(--radius);font-size:12px;color:#6D4C00">
+            💡 <strong>Come ottenere i link:</strong>
+            PayPal: <a href="https://paypal.me" target="_blank" style="color:var(--accent)">paypal.me</a> → crea link |
+            Stripe: <a href="https://dashboard.stripe.com/payment-links" target="_blank" style="color:var(--accent)">dashboard.stripe.com</a> → Payment Links → Crea
+          </div>
+        </div>
+      </div>
     </div>
     <div style="margin-top:22px">
       <div class="card-title" style="margin-bottom:12px"><span class="step-badge" style="background:var(--accent)">2</span>Crediti ECM</div>
@@ -250,6 +288,13 @@ if(evId){
     const ev=s.data();
     document.getElementById('evNome').value=ev.nome||'';
     if(document.getElementById('evTipo'))document.getElementById('evTipo').value=ev.tipo||'ecm';
+    if(ev.pagamento&&document.getElementById('evPagamento')){
+      document.getElementById('evPagamento').value=ev.pagamento||'no';
+      document.getElementById('evPagamento').dispatchEvent(new Event('change'));
+    }
+    if(document.getElementById('evPrezzo'))document.getElementById('evPrezzo').value=ev.prezzo||'';
+    if(document.getElementById('evPaypal'))document.getElementById('evPaypal').value=ev.linkPaypal||'';
+    if(document.getElementById('evStripe'))document.getElementById('evStripe').value=ev.linkStripe||'';
     document.getElementById('evData').value=ev.data||'';
     document.getElementById('evDataFine').value=ev.dataFine||'';
     document.getElementById('evLuogo').value=ev.luogo||'';
@@ -412,7 +457,14 @@ async function salvaEvento(){
     const creatoDAUidOriginale = evExist.exists() ? (evExist.data().creatoDAUid || creatoDAUid) : creatoDAUid;
 
     await setDoc(doc(db,'eventi',id),{
-      nome, tipo:document.getElementById('evTipo').value||'ecm', logo:_logoEventoBase64||null, data:document.getElementById('evData').value,
+      nome,
+      tipo:document.getElementById('evTipo').value||'ecm',
+      logo:_logoEventoBase64||null,
+      pagamento:document.getElementById('evPagamento')?.value||'no',
+      prezzo:parseFloat(document.getElementById('evPrezzo')?.value)||0,
+      linkPaypal:document.getElementById('evPaypal')?.value?.trim()||'',
+      linkStripe:document.getElementById('evStripe')?.value?.trim()||'',
+      data:document.getElementById('evData').value,
       dataFine:document.getElementById('evDataFine').value,
       luogo:document.getElementById('evLuogo').value,
       desc:document.getElementById('evDesc').value,

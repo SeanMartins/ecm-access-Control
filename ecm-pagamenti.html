@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ECM — Gestione Pagamenti</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
+<script src="ecm-layout.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F6F9;--surface:#FFF;--surface2:#F0F2F5;--border:#DDE1E9;--text:#1A1D2E;--text2:#5A5F7A;--text3:#9499B0;--accent:#2563EB;--success:#059669;--success-light:#ECFDF5;--danger:#DC2626;--danger-light:#FEF2F2;--warn:#D97706;--warn-light:#FFFBEB;--paypal:#003087;--stripe:#635BFF;--radius:10px;--radius-lg:14px;--shadow:0 1px 3px rgba(0,0,0,.1),0 4px 12px rgba(0,0,0,.07)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+.ecm-content{padding:24px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none}
+.btn-primary{background:var(--accent);color:white}
+.btn-success{background:var(--success);color:white}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{background:var(--surface2)}
+.btn-paypal{background:var(--paypal);color:white}
+.btn-stripe{background:var(--stripe);color:white}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%}
+.form-input:focus{border-color:var(--accent)}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.page-title{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.page-sub{font-size:13px;color:var(--text3);margin-top:2px}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow)}
+.stat-val{font-size:26px;font-weight:700}.stat-label{font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
+/* Filtri tab */
+.filter-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.ftab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text2);transition:all .2s}
+.ftab.active{background:var(--accent);color:white;border-color:var(--accent)}
+/* Tabella */
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--surface2);position:sticky;top:0;z-index:1}
+th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.mono{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
+/* Badge pagamento */
+.pay-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s}
+.pay-pagato{background:var(--success-light);color:var(--success);border:1px solid rgba(5,150,105,.2)}
+.pay-sede{background:var(--warn-light);color:var(--warn);border:1px solid rgba(217,119,6,.2)}
+.pay-nonpagato{background:var(--danger-light);color:var(--danger);border:1px solid rgba(220,38,38,.2)}
+.pay-badge:hover{transform:scale(1.05)}
+/* Metodo pagamento */
+.method-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.method-paypal{background:#E8F0FE;color:var(--paypal)}
+.method-stripe{background:#F0EFFF;color:var(--stripe)}
+.method-sede{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+.method-altro{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+/* Link pagamento card */
+.payment-links-card{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;color:white}
+.plink-title{font-size:14px;font-weight:700;margin-bottom:4px}
+.plink-sub{font-size:12px;opacity:.8;margin-bottom:14px}
+.plink-btns{display:flex;gap:10px;flex-wrap:wrap}
+.plink-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:var(--radius);font-size:13px;font-weight:600;text-decoration:none;transition:all .2s;border:none;cursor:pointer}
+.plink-paypal{background:#003087;color:white}.plink-paypal:hover{background:#001a4d}
+.plink-stripe{background:#635BFF;color:white}.plink-stripe:hover{background:#4a44cc}
+.plink-copia{background:rgba(255,255,255,.2);color:white;backdrop-filter:blur(4px)}.plink-copia:hover{background:rgba(255,255,255,.3)}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius-lg);padding:24px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:16px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.spinner{display:inline-block;width:20px;height:20px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:48px 20px;color:var(--text3)}
+@media(max-width:768px){.stats-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+<div class="ecm-main">
+  <div class="ecm-topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="mobile-menu-btn" id="mobileMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar-title">Gestione Pagamenti</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-badge"><div class="topbar-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
+      <div id="userBarSlot"></div>
+    </div>
+  </div>
+  <div class="ecm-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Gestione Pagamenti</div>
+        <div class="page-sub" id="eventoNome">Seleziona un evento a pagamento</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <select class="form-input" id="evSelect" style="min-width:220px"><option value="">— Seleziona evento —</option></select>
+        <button class="btn btn-success btn-sm" id="btnExport" disabled>📊 Export Excel</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val" id="sTot">0</div><div class="stat-label">Iscritti</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--success)" id="sPagati">0</div><div class="stat-label">Pagati</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--warn)" id="sSede">0</div><div class="stat-label">Paga in sede</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--danger)" id="sNonPagati">0</div><div class="stat-label">Non pagati</div></div>
+    </div>
+
+    <!-- Incasso -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div class="stat-card" style="display:flex;align-items:center;gap:14px">
+        <div style="font-size:32px">💰</div>
+        <div>
+          <div style="font-size:22px;font-weight:700;color:var(--success)">€ <span id="sIncasso">0</span></div>
+          <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Incassato confermato</div>
+        </div>
+      </div>
+      <div class="stat-card" style="display:flex;align-items:center;gap:14px">
+        <div style="font-size:32px">⏳</div>
+        <div>
+          <div style="font-size:22px;font-weight:700;color:var(--warn)">€ <span id="sAtteso">0</span></div>
+          <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Atteso (sede + non pagati)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Link pagamento -->
+    <div class="payment-links-card" id="paymentLinksCard" style="display:none">
+      <div class="plink-title">💳 Link di pagamento evento</div>
+      <div class="plink-sub">Condividi questi link con i partecipanti per il pagamento online</div>
+      <div class="plink-btns">
+        <a class="plink-btn plink-paypal" id="lnkPaypal" href="#" target="_blank">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.59 3.025-2.566 6.082-8.558 6.082h-2.19c-1.57 0-2.902 1.145-3.149 2.7L5.5 21.337h1.576l1.12-7.106c.247-1.555 1.579-2.7 3.149-2.7h2.19c6.004 0 9.537-3.163 10.536-9.436.092-.582.126-1.1.152-1.178z"/></svg>
+          Paga con PayPal
+        </a>
+        <a class="plink-btn plink-stripe" id="lnkStripe" href="#" target="_blank">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/></svg>
+          Paga con Stripe
+        </a>
+        <button class="plink-btn plink-copia" id="btnCopiaLink">
+          📋 Copia link PayPal
+        </button>
+      </div>
+      <div style="font-size:11px;opacity:.7;margin-top:10px">
+        Quota: <strong id="quotaDisplay">€ 0</strong> &nbsp;·&nbsp; I pagamenti vengono verificati manualmente dall'operatore
+      </div>
+    </div>
+
+    <!-- Filtri e ricerca -->
+    <div class="card" style="padding:14px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+        <input type="text" class="form-input" id="searchPart" placeholder="Cerca per nome o CF..." style="flex:1;min-width:180px">
+        <button class="btn btn-outline btn-sm" id="btnMarcaTutti">✓ Marca tutti pagato</button>
+      </div>
+      <div class="filter-tabs">
+        <button class="ftab active" data-filter="tutti">Tutti <span id="cntTutti" style="font-size:10px;opacity:.7"></span></button>
+        <button class="ftab" data-filter="pagato">✓ Pagati <span id="cntPagati" style="font-size:10px;opacity:.7"></span></button>
+        <button class="ftab" data-filter="sede">⏳ In sede <span id="cntSede" style="font-size:10px;opacity:.7"></span></button>
+        <button class="ftab" data-filter="nonpagato">✗ Non pagati <span id="cntNon" style="font-size:10px;opacity:.7"></span></button>
+      </div>
+    </div>
+
+    <!-- Tabella partecipanti -->
+    <div id="partContent">
+      <div class="empty-state"><div style="font-size:32px;opacity:.3;margin-bottom:8px">💳</div><div>Seleziona un evento a pagamento</div></div>
+    </div>
+  </div>
+  <div class="ecm-version-footer" id="ecmVersionFooter"></div>
+</div>
+
+<!-- MODAL aggiorna pagamento -->
+<div class="modal-overlay" id="modalPagamento">
+  <div class="modal">
+    <div class="modal-title" id="modalPagNome">Aggiorna pagamento</div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;display:block;margin-bottom:6px">Stato pagamento</label>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .2s" id="optPagato">
+          <input type="radio" name="statoPag" value="pagato" style="accent-color:var(--success);width:16px;height:16px">
+          <div><div style="font-weight:600;color:var(--success)">✓ Pagato</div><div style="font-size:11px;color:var(--text3)">Pagamento confermato e ricevuto</div></div>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer" id="optSede">
+          <input type="radio" name="statoPag" value="sede" style="accent-color:var(--warn);width:16px;height:16px">
+          <div><div style="font-weight:600;color:var(--warn)">⏳ Paga in sede</div><div style="font-size:11px;color:var(--text3)">Ha confermato pagamento all'arrivo</div></div>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer" id="optNon">
+          <input type="radio" name="statoPag" value="nonpagato" style="accent-color:var(--danger);width:16px;height:16px">
+          <div><div style="font-weight:600;color:var(--danger)">✗ Non pagato</div><div style="font-size:11px;color:var(--text3)">Nessun pagamento ricevuto</div></div>
+        </label>
+      </div>
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;display:block;margin-bottom:6px">Metodo di pagamento</label>
+      <select class="form-input" id="metodoPag">
+        <option value="">— Non specificato —</option>
+        <option value="paypal">💙 PayPal</option>
+        <option value="stripe">💜 Stripe / Carta</option>
+        <option value="bonifico">🏦 Bonifico bancario</option>
+        <option value="contanti">💵 Contanti in sede</option>
+        <option value="pos">💳 POS in sede</option>
+        <option value="altro">📌 Altro</option>
+      </select>
+    </div>
+    <div>
+      <label style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;display:block;margin-bottom:6px">Note / Riferimento transazione</label>
+      <input type="text" class="form-input" id="notePag" placeholder="Es. TXN123456789 / Pagato il 20/05">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btnAnnullaPag">Annulla</button>
+      <button class="btn btn-success" id="btnSalvaPag">💾 Salva pagamento</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof renderSidebar === 'function') renderSidebar('pagamenti');
+  if (typeof renderVersionFooter === 'function') renderVersionFooter();
+  // Filtri
+  document.querySelectorAll('.ftab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.ftab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      currentFilter = t.dataset.filter;
+      renderTabella();
+    });
+  });
+  // Ricerca
+  document.getElementById('searchPart').addEventListener('input', renderTabella);
+  // Modal
+  document.getElementById('btnAnnullaPag').addEventListener('click', () => document.getElementById('modalPagamento').classList.remove('show'));
+  document.getElementById('btnSalvaPag').addEventListener('click', salvaPagamento);
+  document.getElementById('btnMarcaTutti').addEventListener('click', marcaTutti);
+  document.getElementById('btnCopiaLink').addEventListener('click', function() {
+    const lnk = document.getElementById('lnkPaypal').href;
+    navigator.clipboard.writeText(lnk).then(() => {
+      this.textContent = '✓ Copiato!';
+      setTimeout(() => this.textContent = '📋 Copia link PayPal', 2000);
+    });
+  });
+});
+
+let currentFilter = 'tutti';
+window.updateStampaBtn = function(){};
+</script>
+
+<script type="module">
+import { requireAuth, injectUserBar } from './ecm-auth.js';
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+
+let db, auth;
+let partecipanti = [], currentEv = null, currentEvId = null;
+let editingPartId = null;
+
+// ── INIT ──────────────────────────────────────────────
+async function initApp() {
+  try {
+    const app = getApps().length ? getApps()[0] : initializeApp(FB);
+    db = getFirestore(app);
+    auth = getAuth(app);
+    try { await requireAuth(); injectUserBar('userBarSlot'); } catch(e) {}
+    if (!auth.currentUser) { try { await signInAnonymously(auth); } catch(e) {} }
+    document.getElementById('fbDot').className = 'topbar-dot ok';
+    document.getElementById('fbStatus').textContent = 'Firebase connesso';
+
+    const evSnap = await getDocs(collection(db,'eventi'));
+    const evList = [];
+    evSnap.forEach(d => evList.push({id:d.id,...d.data()}));
+    evList.filter(e => e.stato !== 'archiviato')
+      .sort((a,b) => new Date(b.data||0)-new Date(a.data||0))
+      .forEach(ev => {
+        const opt = document.createElement('option');
+        opt.value = ev.id;
+        opt.textContent = (ev.nome||ev.id) + (ev.pagamento&&ev.pagamento!=='no'?' 💳':'') + (ev.data?' ('+new Date(ev.data).toLocaleDateString('it-IT')+')':'');
+        document.getElementById('evSelect').appendChild(opt);
+      });
+
+    const savedId = localStorage.getItem('ecm_eventId');
+    const autoId = (savedId && evList.find(e=>e.id===savedId)) ? savedId : evList.find(e=>e.pagamento&&e.pagamento!=='no')?.id || evList[0]?.id;
+    if (autoId) {
+      document.getElementById('evSelect').value = autoId;
+      await loadEvento(autoId, evList);
+    }
+    document.getElementById('evSelect').addEventListener('change', async function() {
+      if (this.value) await loadEvento(this.value, evList);
+    });
+    document.getElementById('btnExport').addEventListener('click', exportExcel);
+  } catch(e) { console.error(e); }
+}
+
+async function loadEvento(evId, evList) {
+  currentEvId = evId;
+  currentEv = evList.find(e => e.id === evId);
+  localStorage.setItem('ecm_eventId', evId);
+  document.getElementById('eventoNome').textContent = currentEv?.nome || '—';
+
+  // Mostra link pagamento
+  const isPag = currentEv?.pagamento && currentEv.pagamento !== 'no';
+  const linksCard = document.getElementById('paymentLinksCard');
+  linksCard.style.display = isPag ? 'block' : 'none';
+  if (isPag) {
+    const paypal = currentEv.linkPaypal || '';
+    const stripe = currentEv.linkStripe || '';
+    const prezzo = currentEv.prezzo || 0;
+    const lnkP = document.getElementById('lnkPaypal');
+    const lnkS = document.getElementById('lnkStripe');
+    lnkP.href = paypal || '#';
+    lnkP.style.opacity = paypal ? '1' : '.4';
+    lnkP.style.pointerEvents = paypal ? 'auto' : 'none';
+    lnkS.href = stripe || '#';
+    lnkS.style.opacity = stripe ? '1' : '.4';
+    lnkS.style.pointerEvents = stripe ? 'auto' : 'none';
+    document.getElementById('quotaDisplay').textContent = prezzo ? prezzo.toFixed(2) : '—';
+    document.getElementById('btnCopiaLink').textContent = paypal ? '📋 Copia link PayPal' : '📋 Copia link Stripe';
+    document.getElementById('btnCopiaLink').onclick = () => {
+      const lnk = paypal || stripe;
+      navigator.clipboard.writeText(lnk).then(() => {
+        document.getElementById('btnCopiaLink').textContent = '✓ Copiato!';
+        setTimeout(() => document.getElementById('btnCopiaLink').textContent = paypal?'📋 Copia link PayPal':'📋 Copia link Stripe', 2000);
+      });
+    };
+  }
+
+  document.getElementById('btnExport').disabled = false;
+
+  // Carica partecipanti
+  const snap = await getDocs(collection(db,'eventi',evId,'partecipanti'));
+  partecipanti = [];
+  snap.forEach(d => partecipanti.push({id:d.id,...d.data()}));
+
+  updateStats();
+  renderTabella();
+}
+
+function updateStats() {
+  const prezzo = currentEv?.prezzo || 0;
+  const pagati = partecipanti.filter(p => p.pagamento === 'pagato').length;
+  const sede = partecipanti.filter(p => p.pagamento === 'sede').length;
+  const nonPag = partecipanti.filter(p => !p.pagamento || p.pagamento === 'nonpagato').length;
+
+  document.getElementById('sTot').textContent = partecipanti.length;
+  document.getElementById('sPagati').textContent = pagati;
+  document.getElementById('sSede').textContent = sede;
+  document.getElementById('sNonPagati').textContent = nonPag;
+  document.getElementById('sIncasso').textContent = prezzo ? (pagati * prezzo).toFixed(2) : '—';
+  document.getElementById('sAtteso').textContent = prezzo ? ((sede + nonPag) * prezzo).toFixed(2) : '—';
+
+  document.getElementById('cntTutti').textContent = '('+partecipanti.length+')';
+  document.getElementById('cntPagati').textContent = '('+pagati+')';
+  document.getElementById('cntSede').textContent = '('+sede+')';
+  document.getElementById('cntNon').textContent = '('+nonPag+')';
+}
+
+function renderTabella() {
+  const q = (document.getElementById('searchPart').value||'').toLowerCase();
+  const filter = window.currentFilter || 'tutti';
+
+  let fil = partecipanti.filter(p => {
+    if (q && !(p.nome?.toLowerCase().includes(q)||p.cognome?.toLowerCase().includes(q)||(p.cf||'').toLowerCase().includes(q))) return false;
+    if (filter === 'pagato') return p.pagamento === 'pagato';
+    if (filter === 'sede') return p.pagamento === 'sede';
+    if (filter === 'nonpagato') return !p.pagamento || p.pagamento === 'nonpagato';
+    return true;
+  });
+
+  const c = document.getElementById('partContent');
+  if (!fil.length) {
+    c.innerHTML = '<div class="empty-state"><div style="font-size:32px;opacity:.3;margin-bottom:8px">🔍</div><div>'+(partecipanti.length?'Nessun risultato':'Nessun partecipante iscritto')+'</div></div>';
+    return;
+  }
+
+  c.innerHTML = '<div class="table-wrap"><table><thead><tr>'+
+    '<th>CF</th><th>Cognome</th><th>Nome</th><th>Professione</th>'+
+    '<th>Stato pagamento</th><th>Metodo</th><th>Note</th><th>Azioni</th>'+
+    '</tr></thead><tbody>'+
+    fil.map(p => {
+      const stato = p.pagamento || 'nonpagato';
+      const badgeCls = stato==='pagato'?'pay-pagato':stato==='sede'?'pay-sede':'pay-nonpagato';
+      const badgeTxt = stato==='pagato'?'✓ Pagato':stato==='sede'?'⏳ In sede':'✗ Non pagato';
+      const methCls = p.metodoPag==='paypal'?'method-paypal':p.metodoPag==='stripe'?'method-stripe':'method-sede';
+      const methTxt = {paypal:'💙 PayPal',stripe:'💜 Stripe',bonifico:'🏦 Bonifico',contanti:'💵 Contanti',pos:'💳 POS',altro:'📌 Altro'}[p.metodoPag]||'—';
+      return '<tr>'+
+        '<td class="mono">'+(p.cf||'—')+'</td>'+
+        '<td style="font-weight:500">'+esc(p.cognome||'')+'</td>'+
+        '<td>'+esc(p.nome||'')+'</td>'+
+        '<td style="color:var(--text2)">'+esc(p.professione||'—')+'</td>'+
+        '<td><span class="pay-badge '+badgeCls+'" onclick="apriModalPag(\''+p.id+'\')">'+badgeTxt+'</span></td>'+
+        '<td>'+(p.metodoPag?'<span class="method-badge '+methCls+'">'+methTxt+'</span>':'<span style="color:var(--text3);font-size:12px">—</span>')+'</td>'+
+        '<td class="mono" style="max-width:120px;overflow:hidden;text-overflow:ellipsis" title="'+(p.notePag||'')+'">'+esc((p.notePag||'').slice(0,20))+(p.notePag&&p.notePag.length>20?'...':'')+'</td>'+
+        '<td><button class="btn btn-outline btn-sm" onclick="apriModalPag(\''+p.id+'\')">✏️ Aggiorna</button></td>'+
+      '</tr>';
+    }).join('')+
+    '</tbody></table></div>';
+}
+
+window.apriModalPag = function(partId) {
+  const p = partecipanti.find(x=>x.id===partId); if(!p) return;
+  editingPartId = partId;
+  document.getElementById('modalPagNome').textContent = esc(p.cognome||'')+' '+esc(p.nome||'');
+  const stato = p.pagamento || 'nonpagato';
+  document.querySelector('input[name="statoPag"][value="'+stato+'"]').checked = true;
+  document.getElementById('metodoPag').value = p.metodoPag || '';
+  document.getElementById('notePag').value = p.notePag || '';
+  document.getElementById('modalPagamento').classList.add('show');
+  document.getElementById('modalPagamento').onclick = e => { if(e.target===document.getElementById('modalPagamento')) document.getElementById('modalPagamento').classList.remove('show'); };
+};
+
+async function salvaPagamento() {
+  if (!editingPartId || !currentEvId) return;
+  const stato = document.querySelector('input[name="statoPag"]:checked')?.value || 'nonpagato';
+  const metodo = document.getElementById('metodoPag').value;
+  const note = document.getElementById('notePag').value.trim();
+  const btn = document.getElementById('btnSalvaPag');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  try {
+    await setDoc(doc(db,'eventi',currentEvId,'partecipanti',editingPartId), {
+      pagamento: stato, metodoPag: metodo, notePag: note,
+      pagamentoAggiornato: serverTimestamp()
+    }, {merge:true});
+    const p = partecipanti.find(x=>x.id===editingPartId);
+    if (p) { p.pagamento=stato; p.metodoPag=metodo; p.notePag=note; }
+    document.getElementById('modalPagamento').classList.remove('show');
+    updateStats(); renderTabella();
+  } catch(e) { alert('Errore: '+e.message); }
+  finally { btn.disabled=false; btn.textContent='💾 Salva pagamento'; }
+}
+
+async function marcaTutti() {
+  if (!currentEvId) return;
+  if (!confirm('Marcare TUTTI i partecipanti come PAGATO? Questa azione può essere annullata singolarmente.')) return;
+  for (const p of partecipanti) {
+    if (p.pagamento !== 'pagato') {
+      await setDoc(doc(db,'eventi',currentEvId,'partecipanti',p.id), {pagamento:'pagato',pagamentoAggiornato:serverTimestamp()},{merge:true});
+      p.pagamento = 'pagato';
+    }
+  }
+  updateStats(); renderTabella();
+}
+
+function exportExcel() {
+  const rows = [['CF','Cognome','Nome','Professione','Stato pagamento','Metodo','Note','Data aggiornamento']];
+  partecipanti.forEach(p => {
+    const stato = {pagato:'Pagato',sede:'Paga in sede',nonpagato:'Non pagato'}[p.pagamento||'nonpagato'] || '—';
+    const metodo = {paypal:'PayPal',stripe:'Stripe',bonifico:'Bonifico',contanti:'Contanti',pos:'POS in sede',altro:'Altro'}[p.metodoPag||''] || '—';
+    rows.push([p.cf||'—',p.cognome||'—',p.nome||'—',p.professione||'—',stato,metodo,p.notePag||'—','—']);
+  });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Pagamenti');
+  XLSX.writeFile(wb, 'pagamenti_'+(currentEv?.nome||'evento').replace(/\s/g,'_')+'_'+new Date().toISOString().split('T')[0]+'.xlsx');
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+initApp();
+</script>
+</body>
+</html>
