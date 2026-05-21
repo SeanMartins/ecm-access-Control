@@ -165,6 +165,49 @@ textarea.form-input{resize:vertical;min-height:70px;cursor:text}
             <option value="100">100% presenze</option>
           </select>
         </div>
+
+        <!-- FIRMA -->
+        <div>
+          <label class="field-label">Firma responsabile (immagine)</label>
+          <div style="border:2px dashed var(--border);border-radius:var(--radius);padding:12px;background:var(--surface2);position:relative;cursor:pointer" id="firmaDropZone">
+            <input type="file" id="cfgFirmaImg" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">
+            <div id="firmaPreview" style="text-align:center">
+              <div style="font-size:24px;opacity:.4">✍️</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:4px">Carica firma (PNG/JPG con sfondo trasparente)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LOGO EVENTO -->
+        <div>
+          <label class="field-label">Logo evento (sovrascrive logo app)</label>
+          <div style="border:2px dashed var(--border);border-radius:var(--radius);padding:12px;background:var(--surface2);position:relative;cursor:pointer">
+            <input type="file" id="cfgLogoEvento" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">
+            <div id="logoPreview" style="text-align:center">
+              <div style="font-size:24px;opacity:.4">🖼️</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:4px">Carica logo evento (opzionale)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TEMPLATE SFONDO -->
+        <div class="span2">
+          <label class="field-label">Template certificato (immagine sfondo opzionale)</label>
+          <div style="border:2px dashed var(--border);border-radius:var(--radius);padding:12px;background:var(--surface2);position:relative;cursor:pointer">
+            <input type="file" id="cfgTemplate" accept="image/*,.pdf" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">
+            <div id="templatePreview" style="text-align:center">
+              <div style="font-size:24px;opacity:.4">📄</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:4px">Carica immagine/template come sfondo del certificato — l'app inserisce i dati sopra</div>
+              <div style="font-size:11px;color:var(--text3)">Consigliato: PNG 1240x877px (A4 orizzontale)</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+            <input type="text" class="form-input" id="cfgNomeCampo" placeholder="Nome (posizione Y %)">
+            <span style="font-size:12px;color:var(--text3)">Opacità sfondo:</span>
+            <input type="range" id="cfgTemplateOpacity" min="10" max="100" value="100" style="width:100px">
+            <span id="opacityVal" style="font-size:12px;font-weight:600;color:var(--congress)">100%</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -209,6 +252,55 @@ let partecipanti=[], sessioni=[], sale=[], checkinMap={};
 let currentEvId=null, currentEv=null;
 
 // ── LISTENERS UI ──────────────────────────────────────
+let firmaBase64 = '', logoBase64 = '', templateBase64 = '';
+
+// Upload firma
+document.getElementById('cfgFirmaImg').addEventListener('change', function() {
+  const file = this.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    firmaBase64 = e.target.result;
+    document.getElementById('firmaPreview').innerHTML =
+      '<img src="'+firmaBase64+'" style="max-height:60px;max-width:200px;object-fit:contain">' +
+      '<div style="font-size:11px;color:var(--success);margin-top:4px">✓ Firma caricata</div>';
+    if (currentEvId) loadPartecipanti();
+  };
+  reader.readAsDataURL(file);
+});
+
+// Upload logo evento
+document.getElementById('cfgLogoEvento').addEventListener('change', function() {
+  const file = this.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    logoBase64 = e.target.result;
+    document.getElementById('logoPreview').innerHTML =
+      '<img src="'+logoBase64+'" style="max-height:60px;max-width:200px;object-fit:contain">' +
+      '<div style="font-size:11px;color:var(--success);margin-top:4px">✓ Logo caricato</div>';
+    if (currentEvId) loadPartecipanti();
+  };
+  reader.readAsDataURL(file);
+});
+
+// Upload template sfondo
+document.getElementById('cfgTemplate').addEventListener('change', function() {
+  const file = this.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    templateBase64 = e.target.result;
+    document.getElementById('templatePreview').innerHTML =
+      '<img src="'+templateBase64+'" style="max-height:80px;width:100%;object-fit:cover;border-radius:6px">' +
+      '<div style="font-size:11px;color:var(--success);margin-top:4px">✓ Template caricato</div>';
+    if (currentEvId) loadPartecipanti();
+  };
+  reader.readAsDataURL(file);
+});
+
+// Opacità template
+document.getElementById('cfgTemplateOpacity').addEventListener('input', function() {
+  document.getElementById('opacityVal').textContent = this.value + '%';
+});
+
 document.getElementById('btnSelAll').addEventListener('click', () => {
   document.querySelectorAll('.part-check').forEach(c => c.checked = true);
   updateStampaBtn();
@@ -281,6 +373,18 @@ async function initApp() {
 
 async function loadEvento(evId, evList) {
   currentEvId = evId;
+  // Leggi anche logo dall'evento
+  try {
+    const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const evSnap2 = await getDoc(doc(db,'eventi',evId));
+    if (evSnap2.exists() && evSnap2.data().logo && !logoBase64) {
+      logoBase64 = evSnap2.data().logo;
+      document.getElementById('logoPreview').innerHTML =
+        '<img src="'+logoBase64+'" style="max-height:60px;object-fit:contain">' +
+        '<div style="font-size:11px;color:var(--success);margin-top:4px">✓ Logo dall'evento</div>';
+    }
+  } catch(e) {}
+
   const [partsSnap, sessSnap, saleSnap] = await Promise.all([
     getDocs(collection(db,'eventi',evId,'partecipanti')),
     getDocs(collection(db,'eventi',evId,'sessioni')),
@@ -379,12 +483,20 @@ function buildCert(p) {
 
   const defaultTesto = `ha partecipato al <strong>${esc(evNome)}</strong>, svoltosi il <strong>${esc(dataLuogo)}</strong>, con una presenza pari al <strong>${pct}%</strong> delle sessioni previste, per un totale di <strong>${ore.str}</strong> di formazione.`;
 
-  return `<div class="cert" style="page-break-after:always">
-    <div class="cert-border"></div>
-    <div class="cert-corner tl"></div><div class="cert-corner tr"></div>
-    <div class="cert-corner bl"></div><div class="cert-corner br"></div>
-    <div class="cert-header">
-      <img src="logo.png" class="cert-logo" onerror="this.style.display='none'">
+  const logoSrc = logoBase64 || 'logo.png';
+  const opacity = (document.getElementById('cfgTemplateOpacity').value || 100) / 100;
+  const templateStyle = templateBase64
+    ? `background-image:url(${templateBase64});background-size:cover;background-position:center;background-repeat:no-repeat;`
+    : '';
+  const templateOverlay = templateBase64
+    ? `<div style="position:absolute;inset:0;background:rgba(255,255,255,${1-opacity});border-radius:2px;pointer-events:none"></div>`
+    : '';
+
+  return `<div class="cert" style="page-break-after:always;${templateStyle}position:relative">
+    ${templateOverlay}
+    ${!templateBase64 ? '<div class="cert-border"></div><div class="cert-corner tl"></div><div class="cert-corner tr"></div><div class="cert-corner bl"></div><div class="cert-corner br"></div>' : ''}
+    <div class="cert-header" style="position:relative">
+      <img src="${logoSrc}" class="cert-logo" onerror="this.src='logo.png'">
       <div class="cert-org">${esc(org)}</div>
       <div class="cert-tipo">Congress Manager — Certificato di Partecipazione</div>
       <div class="cert-divider"></div>
@@ -409,9 +521,11 @@ function buildCert(p) {
         ${sessPres.map(s=>`<li>${esc(s.titolo||'—')} ${s.oraInizio?'— '+s.oraInizio:''}</li>`).join('')}
       </ul>
     </div>` : ''}
-    <div class="cert-footer">
+    <div class="cert-footer" style="position:relative">
       <div class="cert-firma">
-        <div class="cert-firma-line"></div>
+        ${firmaBase64
+          ? `<img src="${firmaBase64}" style="max-height:50px;max-width:140px;object-fit:contain;display:block;margin:0 auto 4px">`
+          : '<div class="cert-firma-line"></div>'}
         <div class="cert-firma-nome">${esc(firma)}</div>
         <div class="cert-firma-ruolo">${esc(ruolo)}</div>
       </div>

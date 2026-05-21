@@ -121,6 +121,7 @@ tr:hover td{background:var(--surface2)}
     <div class="tabs">
       <button class="tab active" data-tab="sessioni">Per sessione</button>
       <button class="tab" data-tab="partecipanti">Per partecipante</button>
+      <button class="tab" data-tab="evento">Intero evento</button>
       <button class="tab" data-tab="grafico">Grafico presenze</button>
     </div>
 
@@ -139,6 +140,14 @@ tr:hover td{background:var(--surface2)}
       </div>
       <div class="table-wrap" id="partReport">
         <div class="empty-state">Seleziona un evento</div>
+      </div>
+    </div>
+
+    <!-- TAB INTERO EVENTO -->
+    <div class="tab-pane" id="tab-evento">
+      <div class="card" style="margin-bottom:16px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:16px">Presenze globali all'evento (entrate/uscite)</div>
+        <div id="eventoReport"><div class="empty-state">Seleziona un evento</div></div>
       </div>
     </div>
 
@@ -180,6 +189,7 @@ document.querySelectorAll('.tab').forEach(t => {
     document.getElementById('tab-' + t.dataset.tab).classList.add('active');
     if (t.dataset.tab === 'partecipanti') renderPartReport();
     if (t.dataset.tab === 'grafico') renderGrafico();
+    if (t.dataset.tab === 'evento') renderEventoReport();
   });
 });
 
@@ -384,6 +394,92 @@ function renderGrafico() {
         </div>`;
       }).join('')}`;
 }
+
+// ── RENDER INTERO EVENTO ──────────────────────────────
+async function renderEventoReport() {
+  const c = document.getElementById('eventoReport');
+  if (!partecipanti.length) { c.innerHTML = '<div class="empty-state">Nessun partecipante</div>'; return; }
+  c.innerHTML = '<div class="empty-state"><div class="spinner"></div></div>';
+
+  // Carica i log dell'evento (entrate/uscite dal Blocco 3)
+  try {
+    const { getDocs: _getDocs, collection: _col, orderBy: _ob, query: _q } =
+      await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const evSel = document.getElementById('evSelect').value;
+    const logsSnap = await _getDocs(_col(db,'eventi',evSel,'logs'));
+    const logs = [];
+    logsSnap.forEach(d => logs.push({id:d.id,...d.data()}));
+    logs.sort((a,b) => (a.ts?.seconds||0)-(b.ts?.seconds||0));
+
+    // Calcola stato per ogni partecipante
+    const stati = {};
+    logs.forEach(l => {
+      if (!stati[l.partecipanteId]) stati[l.partecipanteId] = {entrate:0,uscite:0,logs:[]};
+      stati[l.partecipanteId].logs.push(l);
+      if (l.tipo==='entrata') stati[l.partecipanteId].entrate++;
+      else stati[l.partecipanteId].uscite++;
+    });
+
+    const presenti = partecipanti.filter(p => {
+      const s = stati[p.id];
+      return s && s.entrate > s.uscite;
+    });
+
+    c.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+        <div class="stat-card"><div class="stat-val">${partecipanti.length}</div><div class="stat-label">Iscritti</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--success)">${presenti.length}</div><div class="stat-label">Presenti ora</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--congress)">${logs.length}</div><div class="stat-label">Movimenti</div></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>CF</th><th>Cognome</th><th>Nome</th><th>Prima entrata</th><th>Ultima uscita</th><th>Entrate</th><th>Stato</th></tr></thead>
+          <tbody>
+            ${partecipanti.map(p => {
+              const s = stati[p.id];
+              const primaEntrata = s?.logs.find(l=>l.tipo==='entrata')?.ora || '—';
+              const ultimaUscita = [...(s?.logs||[])].reverse().find(l=>l.tipo==='uscita')?.ora || '—';
+              const dentro = s && s.entrate > s.uscite;
+              const maiEntrato = !s || s.entrate === 0;
+              return `<tr>
+                <td class="mono">${p.cf||'—'}</td>
+                <td style="font-weight:500">${esc(p.cognome||'')}</td>
+                <td>${esc(p.nome||'')}</td>
+                <td class="mono">${primaEntrata}</td>
+                <td class="mono">${ultimaUscita}</td>
+                <td style="text-align:center">${s?.entrate||0}</td>
+                <td>${maiEntrato?'<span class="badge badge-absent">Non presente</span>':dentro?'<span class="badge badge-present">✓ In sala</span>':'<span class="badge badge-warn">Uscito</span>'}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button class="btn btn-success btn-sm" onclick="exportExcelEvento()">📊 Export Excel evento</button>
+      </div>`;
+    
+    // Salva logs per export
+    window._currentLogs = logs;
+    window._currentStati = stati;
+  } catch(e) { c.innerHTML = '<div class="empty-state">Errore: '+e.message+'</div>'; }
+}
+
+window.exportExcelEvento = function() {
+  const logs = window._currentLogs || [];
+  const stati = window._currentStati || {};
+  const rows = [['CF','Cognome','Nome','Professione','Prima entrata','Ultima uscita','N° entrate','Stato']];
+  partecipanti.forEach(p => {
+    const s = stati[p.id];
+    const primaEntrata = s?.logs?.find(l=>l.tipo==='entrata')?.ora||'—';
+    const ultimaUscita = [...(s?.logs||[])].reverse().find(l=>l.tipo==='uscita')?.ora||'—';
+    const dentro = s && s.entrate > s.uscite;
+    const mai = !s || s.entrate===0;
+    rows.push([p.cf||'—',p.cognome||'—',p.nome||'—',p.professione||'—',primaEntrata,ultimaUscita,s?.entrate||0,mai?'Non presente':dentro?'In sala':'Uscito']);
+  });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Presenze evento');
+  XLSX.writeFile(wb, 'presenze_evento_'+new Date().toISOString().split('T')[0]+'.xlsx');
+};
 
 // ── EXPORT EXCEL ───────────────────────────────────────
 function exportExcelCompleto() {

@@ -101,7 +101,7 @@ main{max-width:600px;margin:0 auto;padding:20px 16px 40px}
 <header class="app-header">
   <div class="header-inner">
     <div class="header-logo">
-      <img src="logo.png" alt="ECM" onerror="this.style.display='none'">
+      <img id="headerLogo" alt="ECM" onerror="this.src='logo.png'" style="width:36px;height:36px;border-radius:8px;object-fit:cover">
       <div>
         <div class="header-title">Congress Manager</div>
         <div class="header-sub" id="headerEvento">La mia agenda</div>
@@ -133,28 +133,41 @@ const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-acces
 const app = getApps().length ? getApps()[0] : initializeApp(FB);
 const db = getFirestore(app);
 
-// Legge parametri URL — più metodi per compatibilità
+// Legge parametri URL — tutti i metodi possibili
 function getParam(name) {
   // Metodo 1: URLSearchParams standard
-  const p1 = new URLSearchParams(window.location.search).get(name);
-  if (p1) return p1;
-  // Metodo 2: parse manuale dell'href completo
-  const href = window.location.href;
-  const regex = new RegExp('[?&]' + name + '=([^&#]*)');
-  const m = href.match(regex);
-  if (m) return decodeURIComponent(m[1]);
-  // Metodo 3: hash params (fallback per alcuni redirect)
-  const hash = window.location.hash;
-  if (hash.includes(name + '=')) {
-    const hParams = new URLSearchParams(hash.replace('#','?'));
-    const p3 = hParams.get(name);
-    if (p3) return p3;
-  }
+  try {
+    const p1 = new URLSearchParams(window.location.search).get(name);
+    if (p1 && p1 !== 'null') return p1;
+  } catch(e) {}
+  // Metodo 2: regex sull'href completo
+  try {
+    const m = window.location.href.match(new RegExp('[?&]' + name + '=([^&#]+)'));
+    if (m) return decodeURIComponent(m[1]);
+  } catch(e) {}
+  // Metodo 3: hash params
+  try {
+    const hash = window.location.hash;
+    if (hash.includes(name + '=')) {
+      const p3 = new URLSearchParams(hash.replace(/^#\/?/, '?')).get(name);
+      if (p3 && p3 !== 'null') return p3;
+    }
+  } catch(e) {}
+  // Metodo 4: sessionStorage (salvato dal checkin)
+  try {
+    const key = name === 'evId' ? 'agenda_evId' : name === 'partId' ? 'agenda_partId' : null;
+    if (key) {
+      const val = sessionStorage.getItem(key);
+      if (val && val !== 'null' && val !== '') return val;
+    }
+  } catch(e) {}
   return null;
 }
 
 const evId = getParam('evId');
 const partId = getParam('partId');
+console.log('URL:', window.location.href);
+console.log('evId:', evId, '| partId:', partId);
 console.log('URL completo:', window.location.href);
 console.log('Parametri letti:', { evId, partId });
 
@@ -215,6 +228,7 @@ async function init() {
 
     // Aggiorna header
     document.getElementById('headerEvento').textContent = ev.nome || '—';
+    const logoEl = document.getElementById('headerLogo'); if(logoEl) logoEl.src = ev.logo || 'logo.png';
     const oggi = new Date().toISOString().split('T')[0];
     document.getElementById('headerData').textContent = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'short'});
 
@@ -233,6 +247,7 @@ async function init() {
 
     // Genera QR
     const qrData = `ECM|${partId}|${part.cf||''}|${part.cognome||''}|${part.nome||''}`;
+    const logoSrc = ev.logo || 'logo.png';
 
     // Render pagina
     document.getElementById('mainContent').innerHTML = `
