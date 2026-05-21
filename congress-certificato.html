@@ -367,23 +367,23 @@ function updateStampaBtn() {
   btn.textContent = sel > 0 ? '🖨️ Stampa '+sel+' certificati' : '🖨️ Stampa selezionati';
 }
 
-function stampaSelezionati() {
+async function stampaSelezionati() {
   if (!window._partecipanti) return;
   const selIds = [...document.querySelectorAll('.part-check:checked')].map(c=>c.value);
   if (!selIds.length) return;
-  const certs = selIds.map(id => {
-    const p = window._partecipanti.find(x=>x.id===id);
-    return p ? buildCert(p) : '';
-  }).join('');
+  const parts = selIds.map(id => window._partecipanti.find(x=>x.id===id)).filter(Boolean);
+  const certs = parts.map(p => buildCert(p)).join('');
   document.getElementById('printArea').innerHTML = certs;
+  await salvaInArchivio(parts);
   setTimeout(() => window.print(), 600);
 }
 
-window.stampaSingolo = function(partId) {
+window.stampaSingolo = async function(partId) {
   if (!window._partecipanti) return;
   const p = window._partecipanti.find(x=>x.id===partId);
   if (!p) return;
   document.getElementById('printArea').innerHTML = buildCert(p);
+  await salvaInArchivio([p]);
   setTimeout(() => window.print(), 400);
 };
 </script>
@@ -517,6 +517,34 @@ function buildCert(p) {
 
 // Esponi buildCert globalmente
 window.buildCert = buildCert;
+
+async function salvaInArchivio(parts) {
+  if (!db || !currentEvId) return;
+  try {
+    const { addDoc, collection: col, serverTimestamp: sts } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const { getAuth: gA, signInAnonymously: sIA } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+    const { initializeApp: iApp, getApps: gApps } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const app2 = gApps().length ? gApps()[0] : iApp(FB);
+    try { await sIA(gA(app2)); } catch(e) {}
+    for (const p of parts) {
+      const pct = calcPct(p.id);
+      const ore = calcOre(p.id);
+      const certNum = 'CERT-' + p.id + '-' + Date.now().toString(36).toUpperCase();
+      await addDoc(col(db,'eventi',currentEvId,'certificati'), {
+        partecipanteId: p.id,
+        nome: p.nome, cognome: p.cognome, cf: p.cf||'',
+        professione: p.professione||'',
+        pct, ore: ore.str, sessioni: sessPresenti(p.id).length,
+        certNum,
+        org: document.getElementById('cfgOrg').value||'',
+        evento: currentEv?.nome||'',
+        dataEmissione: new Date().toISOString(),
+        ts: sts()
+      });
+    }
+    console.log('Certificati salvati in archivio:', parts.length);
+  } catch(e) { console.warn('Archivio:', e.message); }
+}
 
 async function initApp() {
   try {

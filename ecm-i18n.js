@@ -27,6 +27,7 @@
       login_title:'Accedi al sistema', login_sub:'Inserisci le tue credenziali',
       username:'Username', password:'Password', login_btn:'Accedi →', login_google:'Accedi con Google',
       nav_congress:'Congress',
+      nav_congress_archivio:'Archivio certificati',
       nav_congress_cert:'Certificati',
       nav_congress_report:'Report presenze',
       nav_congress_agenda:'Agenda partecipante',

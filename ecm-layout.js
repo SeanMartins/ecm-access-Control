@@ -2,7 +2,7 @@
 (function(window) {
   'use strict';
 
-  var VERSION = 'v2.4.1';
+  var VERSION = 'v2.5.0';
 
   // ── ICONE SVG ──────────────────────────────────────
   var IC = {
@@ -47,6 +47,7 @@
     { id:'congress-agenda', key:'nav_congress_agenda', icon:'report', href:'congress-agenda.html' },
     { id:'congress-report', key:'nav_congress_report', icon:'report', href:'congress-report.html' },
     { id:'congress-cert', key:'nav_congress_cert', icon:'quiz', href:'congress-certificato.html' },
+    { id:'congress-archivio', key:'nav_congress_archivio', icon:'report', href:'congress-archivio.html' },
     { type:'section', key:'nav_system' },
     { id:'tablet',   key:'nav_tablet',   icon:'tablet',   href:'ecm-connetti.html' },
     { id:'admin',    key:'nav_admin',    icon:'admin',    href:'ecm-admin.html', adminOnly:true }

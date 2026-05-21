@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Congress — Archivio Certificati</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
+<script src="ecm-layout.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F6F9;--surface:#FFF;--surface2:#F0F2F5;--border:#DDE1E9;--text:#1A1D2E;--text2:#5A5F7A;--text3:#9499B0;--congress:#7C3AED;--congress-light:#F5F3FF;--congress-dark:#5B21B6;--success:#059669;--success-light:#ECFDF5;--danger:#DC2626;--danger-light:#FEF2F2;--radius:10px;--radius-lg:14px;--shadow:0 1px 3px rgba(0,0,0,.1),0 4px 12px rgba(0,0,0,.07)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+.ecm-content{padding:24px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none}
+.btn-congress{background:var(--congress);color:white}.btn-congress:hover{background:var(--congress-dark)}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{background:var(--surface2)}
+.btn-danger{background:var(--danger-light);color:var(--danger);border:1px solid rgba(220,38,38,.2)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%}
+.form-input:focus{border-color:var(--congress)}
+.field-label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase;display:block;margin-bottom:5px}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.page-title{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.page-sub{font-size:13px;color:var(--text3);margin-top:2px}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow)}
+.stat-val{font-size:28px;font-weight:700}.stat-label{font-size:11px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--surface2);position:sticky;top:0}
+th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.mono{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.badge-ok{background:var(--success-light);color:var(--success)}
+.spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--congress);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:48px 20px;color:var(--text3)}
+@media(max-width:768px){.stats-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+<div class="ecm-main">
+  <div class="ecm-topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="mobile-menu-btn" id="mobileMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar-title">Archivio Certificati</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-badge"><div class="topbar-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
+      <div id="userBarSlot"></div>
+    </div>
+  </div>
+  <div class="ecm-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Archivio Certificati</div>
+        <div class="page-sub">Tutti i certificati emessi per ogni evento</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <select class="form-input" id="evSelect" style="min-width:220px"><option value="">— Seleziona evento —</option></select>
+        <a href="congress-certificato.html" class="btn btn-congress">+ Emetti certificati</a>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val" id="sTotCert">0</div><div class="stat-label">Certificati emessi</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--congress)" id="sUltimi">0</div><div class="stat-label">Ultima emissione</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--success)" id="sMediaPct">—</div><div class="stat-label">Media presenza</div></div>
+    </div>
+
+    <!-- Ricerca -->
+    <div class="card" style="padding:14px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <input type="text" class="form-input" id="searchCert" placeholder="Cerca per nome, CF o numero certificato..." style="flex:1;min-width:200px">
+        <button class="btn btn-outline btn-sm" id="btnExportArchivio">📊 Export Excel</button>
+      </div>
+    </div>
+
+    <!-- Tabella certificati -->
+    <div id="archivioContent">
+      <div class="empty-state">
+        <div style="font-size:32px;margin-bottom:12px;opacity:.3">🏆</div>
+        <div style="font-size:14px;font-weight:500;color:var(--text2)">Seleziona un evento per vedere i certificati emessi</div>
+      </div>
+    </div>
+  </div>
+  <div class="ecm-version-footer" id="ecmVersionFooter"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof renderSidebar === 'function') renderSidebar('congress-archivio');
+  if (typeof renderVersionFooter === 'function') renderVersionFooter();
+});
+</script>
+
+<script type="module">
+import { requireAuth, injectUserBar } from './ecm-auth.js';
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, deleteDoc, doc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+
+let db, certificati = [], filtrati = [];
+
+// UI listeners
+document.getElementById('searchCert').addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  filtrati = q ? certificati.filter(c =>
+    (c.cognome||'').toLowerCase().includes(q) ||
+    (c.nome||'').toLowerCase().includes(q) ||
+    (c.cf||'').toLowerCase().includes(q) ||
+    (c.certNum||'').toLowerCase().includes(q)
+  ) : [...certificati];
+  renderTabella();
+});
+
+document.getElementById('btnExportArchivio').addEventListener('click', exportExcel);
+
+async function initApp() {
+  try {
+    const app = getApps().length ? getApps()[0] : initializeApp(FB);
+    db = getFirestore(app);
+    const auth = getAuth(app);
+    try { await requireAuth(); injectUserBar('userBarSlot'); } catch(e) {}
+    if (!auth.currentUser) { try { await signInAnonymously(auth); } catch(e) {} }
+
+    document.getElementById('fbDot').className = 'topbar-dot ok';
+    document.getElementById('fbStatus').textContent = 'Firebase connesso';
+
+    const evSnap = await getDocs(collection(db,'eventi'));
+    const evList = [];
+    evSnap.forEach(d => evList.push({id:d.id,...d.data()}));
+    evList.filter(e => e.stato !== 'archiviato')
+      .sort((a,b) => new Date(b.data||0)-new Date(a.data||0))
+      .forEach(ev => {
+        const opt = document.createElement('option');
+        opt.value = ev.id;
+        opt.textContent = (ev.nome||ev.id) + (ev.data?' ('+new Date(ev.data).toLocaleDateString('it-IT')+')':'');
+        document.getElementById('evSelect').appendChild(opt);
+      });
+
+    const savedId = localStorage.getItem('ecm_eventId');
+    const autoId = (savedId && evList.find(e=>e.id===savedId)) ? savedId : evList.find(e=>e.stato!=='archiviato')?.id;
+    if (autoId) {
+      document.getElementById('evSelect').value = autoId;
+      await loadCertificati(autoId);
+    }
+    document.getElementById('evSelect').addEventListener('change', async function() {
+      if (this.value) await loadCertificati(this.value);
+    });
+  } catch(e) { console.error(e); }
+}
+
+async function loadCertificati(evId) {
+  document.getElementById('archivioContent').innerHTML = '<div class="empty-state"><div class="spinner"></div></div>';
+  try {
+    const snap = await getDocs(collection(db,'eventi',evId,'certificati'));
+    certificati = [];
+    snap.forEach(d => certificati.push({id:d.id,...d.data()}));
+    certificati.sort((a,b) => (b.ts?.seconds||0)-(a.ts?.seconds||0));
+    filtrati = [...certificati];
+
+    // Stats
+    document.getElementById('sTotCert').textContent = certificati.length;
+    const ultime = certificati.slice(0,3).map(c => new Date(c.dataEmissione||'').toLocaleDateString('it-IT',{day:'2-digit',month:'short'})).filter(Boolean);
+    document.getElementById('sUltimi').textContent = ultime[0] || '—';
+    const media = certificati.length > 0 ? Math.round(certificati.reduce((sum,c)=>sum+(c.pct||0),0)/certificati.length) : 0;
+    document.getElementById('sMediaPct').textContent = certificati.length ? media+'%' : '—';
+
+    renderTabella();
+  } catch(e) {
+    document.getElementById('archivioContent').innerHTML = '<div class="empty-state"><div style="font-size:32px;margin-bottom:8px">⚠️</div><div>'+e.message+'</div></div>';
+  }
+}
+
+function renderTabella() {
+  const c = document.getElementById('archivioContent');
+  if (!filtrati.length) {
+    c.innerHTML = certificati.length
+      ? '<div class="empty-state"><div style="font-size:32px;margin-bottom:8px;opacity:.3">🔍</div><div>Nessun risultato per la ricerca</div></div>'
+      : '<div class="empty-state"><div style="font-size:32px;margin-bottom:8px;opacity:.3">🏆</div><div style="font-size:14px;font-weight:500;color:var(--text2)">Nessun certificato emesso ancora</div><div style="margin-top:12px"><a href="congress-certificato.html" class="btn btn-congress">+ Emetti il primo certificato</a></div></div>';
+    return;
+  }
+
+  c.innerHTML = '<div class="table-wrap"><table><thead><tr>' +
+    '<th>N° Certificato</th><th>Cognome</th><th>Nome</th><th>CF</th>' +
+    '<th>Presenza</th><th>Ore</th><th>Sessioni</th><th>Data emissione</th><th></th>' +
+    '</tr></thead><tbody>' +
+    filtrati.map(cert => {
+      const dataEm = cert.dataEmissione ? new Date(cert.dataEmissione).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+      const pctColor = (cert.pct||0)>=80?'var(--success)':(cert.pct||0)>=50?'var(--warn)':'var(--danger)';
+      return '<tr>' +
+        '<td class="mono">'+esc(cert.certNum||'—')+'</td>' +
+        '<td style="font-weight:500">'+esc(cert.cognome||'')+'</td>' +
+        '<td>'+esc(cert.nome||'')+'</td>' +
+        '<td class="mono">'+esc(cert.cf||'—')+'</td>' +
+        '<td><span style="font-weight:700;color:'+pctColor+'">'+( cert.pct||0)+'%</span></td>' +
+        '<td>'+esc(cert.ore||'—')+'</td>' +
+        '<td style="text-align:center">'+( cert.sessioni||0)+'</td>' +
+        '<td class="mono" style="font-size:11px">'+dataEm+'</td>' +
+        '<td><button class="btn btn-danger btn-sm" data-cert-id="'+cert.id+'" onclick="eliminaCert(\''+cert.id+'\')">✕</button></td>' +
+      '</tr>';
+    }).join('') +
+    '</tbody></table></div>' +
+    '<div style="padding:10px 14px;font-size:12px;color:var(--text3);background:var(--surface2);border-top:1px solid var(--border)">'+filtrati.length+' certificati — click ✕ per revocare</div>';
+}
+
+window.eliminaCert = async function(certId) {
+  if (!confirm('Revocare questo certificato? Non sarà più valido.')) return;
+  try {
+    const evId = document.getElementById('evSelect').value;
+    await deleteDoc(doc(db,'eventi',evId,'certificati',certId));
+    await loadCertificati(evId);
+  } catch(e) { alert('Errore: '+e.message); }
+};
+
+function exportExcel() {
+  if (!filtrati.length) { alert('Nessun certificato da esportare.'); return; }
+  const rows = [['N° Certificato','Cognome','Nome','CF','Professione','% Presenza','Ore','Sessioni','Data emissione','Evento','Organizzazione']];
+  filtrati.forEach(c => {
+    rows.push([c.certNum||'—',c.cognome||'—',c.nome||'—',c.cf||'—',c.professione||'—',(c.pct||0)+'%',c.ore||'—',c.sessioni||0,c.dataEmissione?new Date(c.dataEmissione).toLocaleDateString('it-IT'):'—',c.evento||'—',c.org||'—']);
+  });
+  // Export CSV semplice (senza libreria xlsx)
+  const csv = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'archivio_certificati_'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+initApp();
+</script>
+</body>
+</html>

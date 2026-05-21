@@ -34,6 +34,33 @@ service cloud.firestore {
         allow delete: if false;
       }
 
+      match /sessioni/{sessId} {
+        allow read: if true;
+        allow write: if isAuth();
+
+        // Check-in per sessione congress
+        match /checkin/{partId} {
+          allow read: if true;
+          allow write: if isAuth();
+        }
+      }
+
+      match /relatori/{relId} {
+        allow read: if true;
+        allow write: if isAuth();
+      }
+
+      match /sale/{salaId} {
+        allow read: if true;
+        allow write: if isAuth();
+      }
+
+      // Certificati emessi
+      match /certificati/{certId} {
+        allow read: if isAuth();
+        allow write: if isAuth();
+      }
+
       match /survey/config {
         allow read: if true;
         allow write: if isAuth();
@@ -60,6 +87,11 @@ service cloud.firestore {
       match /{subCol}/{docId} {
         allow read: if true;
         allow write: if isAuth();
+
+        match /{nestedCol}/{nestedId} {
+          allow read: if true;
+          allow write: if isAuth();
+        }
       }
     }
   }
