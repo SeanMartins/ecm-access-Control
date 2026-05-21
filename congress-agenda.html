@@ -153,12 +153,15 @@ function getParam(name) {
       if (p3 && p3 !== 'null') return p3;
     }
   } catch(e) {}
-  // Metodo 4: sessionStorage (salvato dal checkin)
+  // Metodo 4: localStorage (salvato dal checkin prima della navigazione)
   try {
     const key = name === 'evId' ? 'agenda_evId' : name === 'partId' ? 'agenda_partId' : null;
     if (key) {
-      const val = sessionStorage.getItem(key);
-      if (val && val !== 'null' && val !== '') return val;
+      const val = localStorage.getItem(key);
+      if (val && val !== 'null' && val !== '') {
+        console.log('Param da localStorage:', name, '=', val);
+        return val;
+      }
     }
   } catch(e) {}
   return null;
@@ -176,7 +179,17 @@ const TIPI = {keynote:'🌟 Keynote',workshop:'🔧 Workshop',panel:'💬 Panel'
 async function init() {
   try {
     if (!evId || !partId) {
-      showError('Link non valido.<br><small style="opacity:.7">Parametri ricevuti: evId=' + evId + ', partId=' + partId + '</small>');
+      // Ultimo tentativo: leggi direttamente da localStorage
+      const lsEvId = localStorage.getItem('agenda_evId');
+      const lsPartId = localStorage.getItem('agenda_partId');
+      console.log('Fallback localStorage:', lsEvId, lsPartId);
+      if (lsEvId && lsPartId && lsEvId !== 'null' && lsPartId !== 'null') {
+        // Ricarica la pagina con i parametri corretti nell'URL
+        const base = window.location.href.split('?')[0];
+        window.location.replace(base + '?evId=' + encodeURIComponent(lsEvId) + '&partId=' + encodeURIComponent(lsPartId));
+        return;
+      }
+      showError('Link non valido. Torna al Check-in e usa il bottone "Testa agenda".');
       return;
     }
     console.log('Parametri URL:', { evId, partId });
