@@ -481,7 +481,7 @@ function buildCert(p) {
     templateOverlay+
     (!templateBase64?'<div class="cert-border"></div><div class="cert-corner tl"></div><div class="cert-corner tr"></div><div class="cert-corner bl"></div><div class="cert-corner br"></div>':'')+
     '<div class="cert-header" style="position:relative">'+
-      '<img src="'+logoSrc+'" class="cert-logo" onerror="this.src=&quot;logo.png&quot;">'+
+      '<img src="'+logoSrc+'" class="cert-logo" id="certLogo">'+
       '<div class="cert-org">'+esc(org)+'</div>'+
       '<div class="cert-tipo">Certificato di Partecipazione</div>'+
       '<div class="cert-divider"></div>'+
@@ -567,7 +567,7 @@ function precompila(ev) {
     logoBase64 = ev.logo;
     document.getElementById('logoPreview').innerHTML =
       '<img src="'+ev.logo+'" style="max-height:60px;object-fit:contain">' +
-      '<div style="font-size:11px;color:#059669;margin-top:4px">✓ Logo dall'evento</div>';
+      '<div style="font-size:11px;color:#059669;margin-top:4px">✓ Logo evento</div>';
   }
 }
 
