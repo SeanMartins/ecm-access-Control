@@ -202,8 +202,11 @@ async function initApp() {
   try {
     const app = getApps().length ? getApps()[0] : initializeApp(FB);
     db = getFirestore(app);
-    await requireAuth();
-    injectUserBar('userBarSlot');
+    try { await requireAuth(); injectUserBar('userBarSlot'); } catch(e) {}
+    // Assicura token auth per Firestore
+    const { getAuth: _gA, signInAnonymously: _sIA } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+    const _auth = _gA(app);
+    if (!_auth.currentUser) { try { await _sIA(_auth); } catch(e) {} }
     document.getElementById('fbDot').className = 'topbar-dot ok';
     document.getElementById('fbStatus').textContent = 'Firebase connesso';
 
