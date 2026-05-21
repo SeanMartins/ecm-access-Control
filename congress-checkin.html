@@ -352,8 +352,22 @@ document.getElementById('btnTestAgenda').addEventListener('click', () => {
   btnApri.style.cssText = 'padding:8px 16px;background:#7C3AED;color:white;border-radius:8px;font-size:13px;border:none;cursor:pointer;font-weight:600;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center';
   btnApri.href = getUrl();
   // Aggiorna href quando cambia select
-  sel.addEventListener('change', () => { btnApri.href = getUrl(); console.log('href aggiornato:', btnApri.href); });
-  console.log('href iniziale:', btnApri.href);
+  sel.addEventListener('change', () => { btnApri.href = getUrl(); });
+  // Salva in localStorage PRIMA di navigare
+  btnApri.addEventListener('click', function(e) {
+    e.preventDefault(); // blocca navigazione immediata
+    const url = getUrl();
+    const eid = evIdSnapshot || currentEvId || localStorage.getItem('ecm_eventId') || '';
+    const pid = sel.value || '';
+    // Salva in localStorage
+    try {
+      localStorage.setItem('agenda_evId', eid);
+      localStorage.setItem('agenda_partId', pid);
+      console.log('Salvato localStorage: evId='+eid+' partId='+pid);
+    } catch(ex) { console.warn(ex); }
+    // Naviga dopo il salvataggio
+    setTimeout(() => { window.location.href = url; }, 50);
+  });
   btnRow.appendChild(btnApri);
 
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });

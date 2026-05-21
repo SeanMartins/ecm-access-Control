@@ -211,6 +211,20 @@ textarea.form-input{resize:vertical;min-height:70px;cursor:text}
       </div>
     </div>
 
+    <!-- SALVA CONFIGURAZIONE -->
+    <div class="card no-print" style="background:var(--congress-light);border-color:rgba(124,58,237,.2)">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--congress)">✅ Configurazione completata?</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">Salva firma, logo e template per usarli nel certificato</div>
+        </div>
+        <button class="btn btn-congress" id="btnSalvaCfg">💾 Salva configurazione</button>
+      </div>
+      <div id="cfgSavedMsg" style="display:none;margin-top:10px;padding:8px 12px;background:var(--success-light);border-radius:var(--radius);font-size:12px;color:var(--success)">
+        ✓ Configurazione salvata! Puoi ora stampare i certificati.
+      </div>
+    </div>
+
     <!-- SELEZIONE PARTECIPANTI -->
     <div class="card no-print" id="partCard" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
@@ -291,6 +305,39 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Selezione tutti/nessuno
+  // Salva configurazione
+  document.getElementById('btnSalvaCfg').addEventListener('click', () => {
+    try {
+      if (firmaBase64) localStorage.setItem('cert_firma', firmaBase64);
+      if (logoBase64) localStorage.setItem('cert_logo', logoBase64);
+      if (templateBase64) localStorage.setItem('cert_template', templateBase64);
+      localStorage.setItem('cert_opacity', document.getElementById('cfgTemplateOpacity').value);
+      localStorage.setItem('cert_org', document.getElementById('cfgOrg').value);
+      localStorage.setItem('cert_firma_nome', document.getElementById('cfgFirma').value);
+      localStorage.setItem('cert_ruolo', document.getElementById('cfgRuolo').value);
+      const msg = document.getElementById('cfgSavedMsg');
+      if (msg) { msg.style.display = 'block'; setTimeout(() => msg.style.display = 'none', 3000); }
+    } catch(e) { alert('Errore salvataggio: '+e.message); }
+  });
+
+  // Carica configurazione salvata
+  (function() {
+    const f = localStorage.getItem('cert_firma');
+    const l = localStorage.getItem('cert_logo');
+    const t = localStorage.getItem('cert_template');
+    if (f) { firmaBase64 = f; document.getElementById('firmaPreview').innerHTML = '<img src="'+f+'" style="max-height:60px;object-fit:contain"><div style="font-size:11px;color:#059669;margin-top:4px">✓ Firma salvata</div>'; }
+    if (l) { logoBase64 = l; document.getElementById('logoPreview').innerHTML = '<img src="'+l+'" style="max-height:60px;object-fit:contain"><div style="font-size:11px;color:#059669;margin-top:4px">✓ Logo salvato</div>'; }
+    if (t) { templateBase64 = t; document.getElementById('templatePreview').innerHTML = '<img src="'+t+'" style="max-height:80px;width:100%;object-fit:cover;border-radius:6px"><div style="font-size:11px;color:#059669;margin-top:4px">✓ Template salvato</div>'; }
+    const op = localStorage.getItem('cert_opacity');
+    if (op) { document.getElementById('cfgTemplateOpacity').value = op; document.getElementById('opacityVal').textContent = op+'%'; }
+    const org = localStorage.getItem('cert_org');
+    if (org) document.getElementById('cfgOrg').value = org;
+    const fn = localStorage.getItem('cert_firma_nome');
+    if (fn) document.getElementById('cfgFirma').value = fn;
+    const ru = localStorage.getItem('cert_ruolo');
+    if (ru) document.getElementById('cfgRuolo').value = ru;
+  })();
+
   document.getElementById('btnSelAll').addEventListener('click', () => {
     document.querySelectorAll('.part-check').forEach(c => c.checked = true);
     updateStampaBtn();
@@ -400,7 +447,7 @@ function loadPartecipanti() {
       '<div style="display:flex;gap:8px;align-items:center">' +
         '<span class="part-pct '+cls+'">'+pct+'% presenza</span>' +
         '<span style="font-size:11px;color:var(--text3)">'+ore.str+'</span>' +
-        '<button class="btn btn-outline btn-sm" onclick="stampaSingolo(''+p.id+'')">👁️</button>' +
+        '<button class="btn btn-outline btn-sm" onclick="stampaSingolo(&quot;'+p.id+'&quot;)">👁️</button>' +
       '</div>' +
     '</div>';
   }).join('')+'</div>' +
