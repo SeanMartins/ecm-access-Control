@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Super Admin — ECM Access Control</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
+<script src="ecm-layout.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F6F9;--surface:#FFF;--surface2:#F0F2F5;--border:#DDE1E9;--text:#1A1D2E;--text2:#5A5F7A;--text3:#9499B0;--accent:#2563EB;--accent-light:#EFF6FF;--success:#059669;--success-light:#ECFDF5;--danger:#DC2626;--danger-light:#FEF2F2;--warn:#D97706;--warn-light:#FFFBEB;--super:#1E1B4B;--super-light:#EEF2FF;--radius:10px;--radius-lg:14px;--shadow:0 1px 3px rgba(0,0,0,.1),0 4px 12px rgba(0,0,0,.07)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+.ecm-content{padding:24px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none}
+.btn-super{background:var(--super);color:white}.btn-super:hover{background:#312e81}
+.btn-accent{background:var(--accent);color:white}
+.btn-success{background:var(--success);color:white}
+.btn-danger{background:var(--danger-light);color:var(--danger);border:1px solid rgba(220,38,38,.2)}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{background:var(--surface2)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%}
+.form-input:focus{border-color:var(--accent);background:white}
+select.form-input{cursor:pointer}
+.field-label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase;display:block;margin-bottom:5px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.span2{grid-column:span 2}
+/* Super admin hero */
+.super-hero{background:linear-gradient(135deg,#1E1B4B 0%,#3730A3 100%);color:white;border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.super-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.06em}
+/* Tabs */
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:20px;flex-wrap:wrap}
+.tab{padding:10px 18px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;background:none;border-left:none;border-right:none;border-top:none;font-family:'Inter',sans-serif}
+.tab.active{color:var(--super);border-bottom-color:var(--super)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow);text-align:center}
+.stat-val{font-size:28px;font-weight:700}.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+/* Utenti */
+.user-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow);transition:all .2s}
+.user-card:hover{border-color:var(--accent)}
+.user-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:white;flex-shrink:0}
+.role-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.role-superadmin{background:#EEF2FF;color:#3730A3;border:1px solid rgba(55,48,163,.2)}
+.role-admin{background:var(--accent-light);color:var(--accent);border:1px solid rgba(37,99,235,.2)}
+.role-operatore{background:var(--success-light);color:var(--success);border:1px solid rgba(5,150,105,.2)}
+.role-scanner{background:var(--warn-light);color:var(--warn);border:1px solid rgba(217,119,6,.2)}
+.role-viewer{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+/* Log attività */
+.log-item{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;transition:background .15s}
+.log-item:hover{background:var(--surface2)}
+.log-item:last-child{border-bottom:none}
+.log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.log-dot.login{background:var(--success)}
+.log-dot.logout{background:var(--text3)}
+.log-dot.create{background:var(--accent)}
+.log-dot.delete{background:var(--danger)}
+.log-dot.update{background:var(--warn)}
+.log-time{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0}
+/* Tabella eventi */
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--surface2)}
+th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.mono{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius-lg);padding:26px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.alert{padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:12px;display:none}
+.alert-error{background:var(--danger-light);color:var(--danger);border:1px solid rgba(220,38,38,.2)}
+.alert-success{background:var(--success-light);color:var(--success);border:1px solid rgba(5,150,105,.2)}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:40px;color:var(--text3)}
+/* Online indicator */
+.online-dot{width:10px;height:10px;border-radius:50%;background:var(--success);display:inline-block;box-shadow:0 0 0 2px rgba(5,150,105,.3);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 2px rgba(5,150,105,.3)}50%{box-shadow:0 0 0 5px rgba(5,150,105,.1)}}
+@media(max-width:768px){.stats-grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.span2{grid-column:span 1}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+<div class="ecm-main">
+  <div class="ecm-topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="mobile-menu-btn" id="mobileMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar-title">Super Admin Panel</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-badge"><div class="topbar-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
+      <div id="userBarSlot"></div>
+    </div>
+  </div>
+  <div class="ecm-content">
+
+    <!-- Hero Super Admin -->
+    <div class="super-hero">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <span class="super-badge">🔑 SUPER ADMIN</span>
+        </div>
+        <div style="font-size:20px;font-weight:700">Pannello di controllo globale</div>
+        <div style="font-size:13px;opacity:.75;margin-top:2px">Gestione utenti, permessi, attività e assistenza remota</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.3)" id="btnNuovoAdmin">+ Nuovo Admin</button>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.3)" id="btnRefreshAll">↻ Aggiorna</button>
+      </div>
+    </div>
+
+    <!-- Stats globali -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val" id="sTotUtenti">0</div><div class="stat-label">Utenti totali</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--accent)" id="sTotAdmin">0</div><div class="stat-label">Admin</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--success)" id="sTotOp">0</div><div class="stat-label">Operatori</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--warn)" id="sTotEventi">0</div><div class="stat-label">Eventi totali</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--super)" id="sTotLog">0</div><div class="stat-label">Attività oggi</div></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="utenti">👥 Utenti & Ruoli</button>
+      <button class="tab" data-tab="attivita">📊 Attività in tempo reale</button>
+      <button class="tab" data-tab="eventi">🗓️ Tutti gli eventi</button>
+      <button class="tab" data-tab="assistenza">🛠️ Assistenza remota</button>
+      <button class="tab" data-tab="impostazioni">⚙️ Impostazioni sistema</button>
+    </div>
+
+    <!-- TAB UTENTI -->
+    <div class="tab-pane active" id="tab-utenti">
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <input type="text" class="form-input" id="searchUtenti" placeholder="Cerca utente..." style="max-width:250px">
+        <select class="form-input" id="filterRuolo" style="max-width:180px">
+          <option value="">Tutti i ruoli</option>
+          <option value="superadmin">Super Admin</option>
+          <option value="admin">Admin</option>
+          <option value="operatore">Operatore</option>
+          <option value="scanner">Scanner</option>
+          <option value="viewer">Viewer</option>
+        </select>
+      </div>
+      <div id="utentiList"><div class="empty-state"><div style="font-size:32px;opacity:.3">👥</div><div style="margin-top:8px">Caricamento...</div></div></div>
+    </div>
+
+    <!-- TAB ATTIVITA -->
+    <div class="tab-pane" id="tab-attivita">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="online-dot"></span>
+          <span style="font-size:13px;font-weight:500">Live — aggiornamento automatico</span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <select class="form-input btn-sm" id="filterLogTipo" style="max-width:160px">
+            <option value="">Tutte le attività</option>
+            <option value="login">Login</option>
+            <option value="logout">Logout</option>
+            <option value="checkin">Check-in</option>
+            <option value="create">Creazioni</option>
+            <option value="update">Modifiche</option>
+          </select>
+          <button class="btn btn-outline btn-sm" id="btnClearLog">🗑️ Svuota log</button>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;max-height:500px;overflow-y:auto">
+        <div id="logList"><div class="empty-state">Nessuna attività registrata</div></div>
+      </div>
+    </div>
+
+    <!-- TAB EVENTI -->
+    <div class="tab-pane" id="tab-eventi">
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <input type="text" class="form-input" id="searchEventi" placeholder="Cerca evento..." style="max-width:250px">
+        <select class="form-input" id="filterTipoEv" style="max-width:160px">
+          <option value="">Tutti i tipi</option>
+          <option value="ecm">ECM</option>
+          <option value="congress">Congress</option>
+          <option value="convention">Convention</option>
+          <option value="wedding">Wedding</option>
+        </select>
+      </div>
+      <div class="table-wrap" id="eventiTable"><div class="empty-state">Caricamento...</div></div>
+    </div>
+
+    <!-- TAB ASSISTENZA -->
+    <div class="tab-pane" id="tab-assistenza">
+      <div class="card" style="background:var(--accent-light);border-color:rgba(37,99,235,.2);margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-size:32px">🛠️</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--accent)">Modalità Assistenza Remota</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px">Accedi come qualsiasi utente per verificare problemi. Tutte le azioni vengono registrate nel log.</div>
+          </div>
+          <button class="btn btn-accent btn-sm" id="btnAttivaAssistenza" style="margin-left:auto">Attiva</button>
+        </div>
+      </div>
+      <div id="assistenzaPanel">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px">Seleziona utente da assistere</div>
+        <div id="utentiAssistenza"><div class="empty-state">Attiva la modalità assistenza</div></div>
+      </div>
+    </div>
+
+    <!-- TAB IMPOSTAZIONI -->
+    <div class="tab-pane" id="tab-impostazioni">
+      <div class="card">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:16px">⚙️ Configurazione sistema</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="field-label">Nome organizzazione</label>
+            <input type="text" class="form-input" id="sysNomeOrg" placeholder="Multimedia Meeting Group">
+          </div>
+          <div class="form-group">
+            <label class="field-label">Email supporto</label>
+            <input type="email" class="form-input" id="sysSupportEmail" placeholder="support@esempio.com">
+          </div>
+          <div class="form-group">
+            <label class="field-label">Max admin consentiti</label>
+            <input type="number" class="form-input" id="sysMaxAdmin" value="10" min="1">
+          </div>
+          <div class="form-group">
+            <label class="field-label">Max operatori per admin</label>
+            <input type="number" class="form-input" id="sysMaxOp" value="20" min="1">
+          </div>
+          <div class="form-group span2">
+            <label class="field-label">Messaggio di benvenuto (login)</label>
+            <input type="text" class="form-input" id="sysWelcome" placeholder="Benvenuto in ECM Access Control">
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:14px">
+          <button class="btn btn-super" id="btnSalvaImpostazioni">💾 Salva impostazioni</button>
+        </div>
+      </div>
+
+      <!-- Zona pericolosa -->
+      <div class="card" style="border-color:rgba(220,38,38,.3);background:var(--danger-light)">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--danger);margin-bottom:12px">⚠️ Zona pericolosa</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-danger btn-sm" id="btnResetLog">🗑️ Reset log attività</button>
+          <button class="btn btn-danger btn-sm" id="btnExportBackup">📦 Export backup completo</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="ecm-version-footer" id="ecmVersionFooter"></div>
+</div>
+
+<!-- MODAL NUOVO ADMIN/UTENTE -->
+<div class="modal-overlay" id="modalUtente">
+  <div class="modal">
+    <div style="font-size:17px;font-weight:700;margin-bottom:4px" id="modalUtenteTitolo">Nuovo Admin</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:20px" id="modalUtenteSub">Crea un nuovo account amministratore</div>
+    <div class="alert alert-error" id="utenteErr"></div>
+    <div class="alert alert-success" id="utenteOk"></div>
+    <div class="form-grid" style="margin-bottom:12px">
+      <div class="form-group">
+        <label class="field-label">Nome *</label>
+        <input type="text" class="form-input" id="uNome" placeholder="Mario">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Cognome *</label>
+        <input type="text" class="form-input" id="uCognome" placeholder="Rossi">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Email *</label>
+        <input type="email" class="form-input" id="uEmail" placeholder="mario@esempio.com">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Password *</label>
+        <div style="position:relative">
+          <input type="password" class="form-input" id="uPassword" placeholder="Min. 8 caratteri">
+          <button type="button" id="togglePwd" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--text3)">👁</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="field-label">Ruolo *</label>
+        <select class="form-input" id="uRuolo">
+          <option value="admin">👔 Admin</option>
+          <option value="operatore">🔧 Operatore</option>
+          <option value="scanner">📷 Scanner</option>
+          <option value="viewer">👁 Viewer</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="field-label">Organizzazione / Ente</label>
+        <input type="text" class="form-input" id="uOrg" placeholder="Nome organizzazione">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Telefono</label>
+        <input type="text" class="form-input" id="uTel" placeholder="+39 000 000 0000">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Stato account</label>
+        <select class="form-input" id="uStato">
+          <option value="attivo">✓ Attivo</option>
+          <option value="sospeso">⏸ Sospeso</option>
+        </select>
+      </div>
+      <div class="form-group span2">
+        <label class="field-label">Note interne</label>
+        <input type="text" class="form-input" id="uNote" placeholder="Evento assegnato, note...">
+      </div>
+    </div>
+    <div style="padding:10px 14px;background:var(--accent-light);border-radius:var(--radius);font-size:12px;color:var(--accent);margin-bottom:14px">
+      ℹ️ Verrà creato un account Firebase Auth con le credenziali inserite. L'utente potrà accedere con email e password.
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btnAnnullaUtente">Annulla</button>
+      <button class="btn btn-super" id="btnSalvaUtente">✓ Crea account</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof renderSidebar === 'function') renderSidebar('superadmin');
+  if (typeof renderVersionFooter === 'function') renderVersionFooter();
+
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById('tab-'+t.dataset.tab).classList.add('active');
+    });
+  });
+  document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show')}));
+  document.getElementById('btnAnnullaUtente').addEventListener('click',()=>document.getElementById('modalUtente').classList.remove('show'));
+  document.getElementById('btnNuovoAdmin').addEventListener('click',apriNuovoUtente);
+  document.getElementById('btnSalvaUtente').addEventListener('click',()=>window._salvaUtente&&window._salvaUtente());
+  document.getElementById('btnRefreshAll').addEventListener('click',()=>window._reloadAll&&window._reloadAll());
+  document.getElementById('searchUtenti').addEventListener('input',()=>window._renderUtenti&&window._renderUtenti());
+  document.getElementById('filterRuolo').addEventListener('change',()=>window._renderUtenti&&window._renderUtenti());
+  document.getElementById('togglePwd').addEventListener('click',function(){const i=document.getElementById('uPassword');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'👁':'🙈';});
+  document.getElementById('btnAttivaAssistenza').addEventListener('click',attivaAssistenza);
+  document.getElementById('btnSalvaImpostazioni').addEventListener('click',()=>window._salvaImpostazioni&&window._salvaImpostazioni());
+  document.getElementById('btnResetLog').addEventListener('click',()=>{if(confirm('Svuotare il log attività?'))window._resetLog&&window._resetLog();});
+});
+
+function apriNuovoUtente() {
+  document.getElementById('modalUtenteTitolo').textContent='Nuovo utente';
+  document.getElementById('modalUtenteSub').textContent='Crea account con email e password';
+  ['uNome','uCognome','uEmail','uPassword','uOrg','uTel','uNote'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('uRuolo').value='admin';
+  document.getElementById('uStato').value='attivo';
+  document.getElementById('utenteErr').style.display='none';
+  document.getElementById('utenteOk').style.display='none';
+  document.getElementById('modalUtente').classList.add('show');
+  setTimeout(()=>document.getElementById('uNome').focus(),100);
+}
+
+function attivaAssistenza() {
+  document.getElementById('assistenzaPanel').innerHTML='<div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px">Seleziona utente da assistere</div><div id="utentiAssistenza"></div>';
+  window._renderAssistenza&&window._renderAssistenza();
+  document.getElementById('btnAttivaAssistenza').textContent='Attiva ✓';
+  document.getElementById('btnAttivaAssistenza').style.background='var(--success)';
+}
+</script>
+
+<script type="module">
+import { requireAuth, injectUserBar } from './ecm-auth.js';
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, setDoc, getDoc, addDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+const SUPER_ADMIN_EMAIL = 'martinsosem@gmail.com';
+
+const RUOLO_INFO = {
+  superadmin:{lbl:'Super Admin',cls:'role-superadmin',icon:'🔑',color:'#3730A3'},
+  admin:{lbl:'Admin',cls:'role-admin',icon:'👔',color:'#2563EB'},
+  operatore:{lbl:'Operatore',cls:'role-operatore',icon:'🔧',color:'#059669'},
+  scanner:{lbl:'Scanner',cls:'role-scanner',icon:'📷',color:'#D97706'},
+  viewer:{lbl:'Viewer',cls:'role-viewer',icon:'👁',color:'#9499B0'}
+};
+
+let db, auth, utenti=[], eventi=[], logs=[];
+let unsubLogs=null;
+
+async function initApp() {
+  try {
+    const app = getApps().length ? getApps()[0] : initializeApp(FB);
+    db = getFirestore(app);
+    auth = getAuth(app);
+    await requireAuth();
+    injectUserBar('userBarSlot');
+
+    // Verifica super admin
+    const user = auth.currentUser;
+    if (!user || user.email !== SUPER_ADMIN_EMAIL) {
+      document.querySelector('.ecm-content').innerHTML = `
+        <div style="text-align:center;padding:80px 20px">
+          <div style="font-size:48px;margin-bottom:16px">🔒</div>
+          <div style="font-size:20px;font-weight:700;margin-bottom:8px">Accesso negato</div>
+          <div style="font-size:14px;color:var(--text2)">Questa pagina è riservata al Super Amministratore.</div>
+          <a href="ecm-home.html" style="display:inline-block;margin-top:20px;padding:10px 20px;background:var(--accent);color:white;border-radius:var(--radius);text-decoration:none;font-size:13px">← Torna alla home</a>
+        </div>`;
+      return;
+    }
+
+    document.getElementById('fbDot').className = 'topbar-dot ok';
+    document.getElementById('fbStatus').textContent = 'Super Admin connesso';
+
+    await loadAll();
+    startLiveLog();
+
+    window._reloadAll = loadAll;
+    window._renderUtenti = renderUtenti;
+    window._salvaUtente = salvaUtente;
+    window._renderAssistenza = renderAssistenza;
+    window._salvaImpostazioni = salvaImpostazioni;
+    window._resetLog = resetLog;
+  } catch(e) {
+    console.error(e);
+    document.getElementById('fbStatus').textContent = 'Errore: ' + e.message;
+  }
+}
+
+async function loadAll() {
+  const [utSnap, evSnap] = await Promise.all([
+    getDocs(collection(db, 'utenti')),
+    getDocs(collection(db, 'eventi'))
+  ]);
+  utenti = []; utSnap.forEach(d => utenti.push({id:d.id,...d.data()}));
+  eventi = []; evSnap.forEach(d => eventi.push({id:d.id,...d.data()}));
+
+  // Stats
+  document.getElementById('sTotUtenti').textContent = utenti.length;
+  document.getElementById('sTotAdmin').textContent = utenti.filter(u=>u.ruolo==='admin').length;
+  document.getElementById('sTotOp').textContent = utenti.filter(u=>u.ruolo==='operatore'||u.ruolo==='scanner').length;
+  document.getElementById('sTotEventi').textContent = eventi.length;
+
+  renderUtenti();
+  renderEventi();
+  renderAssistenza();
+
+  // Carica impostazioni
+  try {
+    const sysDoc = await getDoc(doc(db,'sistema','config'));
+    if (sysDoc.exists()) {
+      const d = sysDoc.data();
+      if(d.nomeOrg) document.getElementById('sysNomeOrg').value = d.nomeOrg;
+      if(d.supportEmail) document.getElementById('sysSupportEmail').value = d.supportEmail;
+      if(d.maxAdmin) document.getElementById('sysMaxAdmin').value = d.maxAdmin;
+      if(d.maxOp) document.getElementById('sysMaxOp').value = d.maxOp;
+      if(d.welcome) document.getElementById('sysWelcome').value = d.welcome;
+    }
+  } catch(e) {}
+}
+
+function renderUtenti() {
+  const q = (document.getElementById('searchUtenti').value||'').toLowerCase();
+  const fr = document.getElementById('filterRuolo').value;
+  const fil = utenti.filter(u => {
+    if(q && !((u.nome||'').toLowerCase().includes(q)||(u.cognome||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q))) return false;
+    if(fr && u.ruolo !== fr) return false;
+    return true;
+  });
+
+  const c = document.getElementById('utentiList');
+  if(!fil.length) { c.innerHTML='<div class="empty-state"><div style="font-size:32px;opacity:.3">👥</div><div style="margin-top:8px">Nessun utente trovato</div></div>'; return; }
+
+  c.innerHTML = fil.map(u => {
+    const ri = RUOLO_INFO[u.ruolo||'viewer'] || RUOLO_INFO.viewer;
+    const initiali = ((u.nome||'?')[0]+(u.cognome||'?')[0]).toUpperCase();
+    const isSuperAdmin = u.email === SUPER_ADMIN_EMAIL;
+    return `<div class="user-card">
+      <div class="user-avatar" style="background:${ri.color}">${initiali}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap">
+          <div style="font-size:14px;font-weight:600">${esc(u.nome||'')} ${esc(u.cognome||'')}</div>
+          <span class="role-badge ${ri.cls}">${ri.icon} ${ri.lbl}</span>
+          ${u.stato==='sospeso'?'<span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:var(--danger-light);color:var(--danger)">⏸ Sospeso</span>':''}
+        </div>
+        <div style="font-size:12px;color:var(--text3);display:flex;gap:10px;flex-wrap:wrap">
+          <span>📧 ${esc(u.email||'—')}</span>
+          ${u.org?`<span>🏢 ${esc(u.org)}</span>`:''}
+          ${u.tel?`<span>📞 ${esc(u.tel)}</span>`:''}
+        </div>
+        ${u.note?`<div style="font-size:11px;color:var(--text3);margin-top:2px">📝 ${esc(u.note)}</div>`:''}
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap">
+        ${!isSuperAdmin?`
+          <button class="btn btn-outline btn-sm" data-toggle-stato="${u.id}" data-stato="${u.stato||'attivo'}">
+            ${u.stato==='sospeso'?'▶ Attiva':'⏸ Sospendi'}
+          </button>
+          <button class="btn btn-outline btn-sm" data-impersona="${u.id}">🛠️ Assisti</button>
+          <button class="btn btn-danger btn-sm" data-del-utente="${u.id}">✕</button>
+        `:'<span style="font-size:12px;color:var(--text3)">Account principale</span>'}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Listener bottoni
+  c.querySelectorAll('[data-toggle-stato]').forEach(b => b.addEventListener('click', () => toggleStato(b.dataset.toggleStato, b.dataset.stato)));
+  c.querySelectorAll('[data-del-utente]').forEach(b => b.addEventListener('click', () => eliminaUtente(b.dataset.delUtente)));
+  c.querySelectorAll('[data-impersona]').forEach(b => b.addEventListener('click', () => {
+    const uid = b.dataset.impersona;
+    const u = utenti.find(x=>x.id===uid);
+    if(u) mostraInfoAssistenza(u);
+  }));
+}
+
+function renderEventi() {
+  const q = (document.getElementById('searchEventi').value||'').toLowerCase();
+  const ft = document.getElementById('filterTipoEv').value;
+  const fil = eventi.filter(e => {
+    if(q && !(e.nome||'').toLowerCase().includes(q)) return false;
+    if(ft && e.tipo !== ft) return false;
+    return true;
+  });
+  const tipoIcon = {ecm:'🏥',congress:'🎤',convention:'🏢',wedding:'💍',altro:'📌'};
+  const c = document.getElementById('eventiTable');
+  if(!fil.length){c.innerHTML='<div class="empty-state">Nessun evento</div>';return;}
+  c.innerHTML = '<table><thead><tr><th>Nome evento</th><th>Tipo</th><th>Data</th><th>Stato</th><th>Partecipanti</th><th>Azioni</th></tr></thead><tbody>'+
+    fil.map(ev => `<tr>
+      <td style="font-weight:500">${esc(ev.nome||'—')}</td>
+      <td>${tipoIcon[ev.tipo||'ecm']||'📌'} ${esc(ev.tipo||'ecm')}</td>
+      <td class="mono">${ev.data?new Date(ev.data).toLocaleDateString('it-IT'):' —'}</td>
+      <td><span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:${ev.stato==='archiviato'?'var(--surface2)':'var(--success-light)'};color:${ev.stato==='archiviato'?'var(--text3)':'var(--success)'}">
+        ${ev.stato==='archiviato'?'Archiviato':'Attivo'}
+      </span></td>
+      <td>—</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="window.open('ecm-blocco3.html')">👁 Vedi</button>
+      </td>
+    </tr>`).join('') + '</tbody></table>';
+
+  document.getElementById('searchEventi').addEventListener('input', renderEventi);
+  document.getElementById('filterTipoEv').addEventListener('change', renderEventi);
+}
+
+function renderAssistenza() {
+  const c = document.getElementById('utentiAssistenza');
+  if(!c) return;
+  if(!utenti.length){c.innerHTML='<div class="empty-state">Nessun utente</div>';return;}
+  c.innerHTML = utenti.filter(u=>u.email!==SUPER_ADMIN_EMAIL).map(u => {
+    const ri = RUOLO_INFO[u.ruolo||'viewer']||RUOLO_INFO.viewer;
+    return `<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--border);transition:background .15s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
+      <div style="width:36px;height:36px;border-radius:50%;background:${ri.color};display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:700;flex-shrink:0">
+        ${((u.nome||'?')[0]+(u.cognome||'?')[0]).toUpperCase()}
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500">${esc(u.nome||'')} ${esc(u.cognome||'')}</div>
+        <div style="font-size:11px;color:var(--text3)">${esc(u.email||'—')} · ${ri.icon} ${ri.lbl}</div>
+      </div>
+      <button class="btn btn-accent btn-sm" onclick="mostraInfoAssistenza(${JSON.stringify(u).replace(/"/g,'&quot;')})">🛠️ Assisti</button>
+    </div>`;
+  }).join('');
+}
+
+window.mostraInfoAssistenza = function(u) {
+  const ri = RUOLO_INFO[u.ruolo||'viewer']||RUOLO_INFO.viewer;
+  const info = `
+    <div style="margin-top:16px;padding:16px;background:var(--accent-light);border-radius:var(--radius-lg);border:1px solid rgba(37,99,235,.2)">
+      <div style="font-size:14px;font-weight:600;color:var(--accent);margin-bottom:8px">🛠️ Modalità assistenza: ${esc(u.nome||'')} ${esc(u.cognome||'')}</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px">
+        <strong>Email:</strong> ${esc(u.email||'—')}<br>
+        <strong>Ruolo:</strong> ${ri.icon} ${ri.lbl}<br>
+        <strong>Org:</strong> ${esc(u.org||'—')}
+      </div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
+        ℹ️ Per assistere questo utente, accedi con le sue credenziali o chiedigli di condividere lo schermo. 
+        Come Super Admin puoi modificare tutti i dati direttamente dalla Firebase Console.
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-accent btn-sm" onclick="logAssistenza('${esc(u.email||'')}')">📝 Registra sessione assistenza</button>
+        <button class="btn btn-outline btn-sm" onclick="this.closest('div').parentElement.remove()">✕ Chiudi</button>
+      </div>
+    </div>`;
+  const panel = document.getElementById('assistenzaPanel');
+  const existing = panel.querySelector('.assist-info');
+  if(existing) existing.remove();
+  const div = document.createElement('div');
+  div.className = 'assist-info';
+  div.innerHTML = info;
+  panel.appendChild(div);
+};
+
+window.logAssistenza = async function(email) {
+  try {
+    await addDoc(collection(db,'log_attivita'), {
+      tipo:'assistenza', email:SUPER_ADMIN_EMAIL,
+      dettaglio:'Sessione assistenza per: '+email,
+      ts:serverTimestamp(), data:new Date().toISOString()
+    });
+    alert('Sessione assistenza registrata nel log.');
+  } catch(e) { alert('Errore: '+e.message); }
+};
+
+function startLiveLog() {
+  if(unsubLogs) unsubLogs();
+  try {
+    const q = query(collection(db,'log_attivita'), orderBy('ts','desc'), limit(100));
+    unsubLogs = onSnapshot(q, snap => {
+      logs = [];
+      snap.forEach(d => logs.push({id:d.id,...d.data()}));
+      renderLogs();
+      const oggi = new Date().toDateString();
+      const logOggi = logs.filter(l => l.data && new Date(l.data).toDateString()===oggi).length;
+      document.getElementById('sTotLog').textContent = logOggi;
+    });
+  } catch(e) { console.warn('Log:', e.message); }
+}
+
+function renderLogs() {
+  const tipo = document.getElementById('filterLogTipo').value;
+  const fil = tipo ? logs.filter(l=>l.tipo===tipo) : logs;
+  const c = document.getElementById('logList');
+  if(!fil.length){c.innerHTML='<div class="empty-state">Nessuna attività</div>';return;}
+  c.innerHTML = fil.map(l => {
+    const dotCls = {login:'login',logout:'logout',checkin:'create',create:'create',update:'update',delete:'delete',assistenza:'update'}[l.tipo||'update']||'update';
+    const ts = l.data ? new Date(l.data).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) : '—';
+    const dt = l.data ? new Date(l.data).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'}) : '—';
+    return `<div class="log-item">
+      <div class="log-dot ${dotCls}" style="margin-top:5px"></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px">${esc(l.dettaglio||l.tipo||'—')}</div>
+        <div style="font-size:11px;color:var(--text3)">${esc(l.email||'—')}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div class="log-time">${ts}</div>
+        <div style="font-size:10px;color:var(--text3)">${dt}</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('filterLogTipo').addEventListener('change', renderLogs);
+}
+
+async function salvaUtente() {
+  const nome = document.getElementById('uNome').value.trim();
+  const cognome = document.getElementById('uCognome').value.trim();
+  const email = document.getElementById('uEmail').value.trim();
+  const password = document.getElementById('uPassword').value;
+  if(!nome||!cognome||!email||!password){showErr('utenteErr','Compila tutti i campi obbligatori.');return;}
+  if(password.length<8){showErr('utenteErr','La password deve avere almeno 8 caratteri.');return;}
+
+  const btn = document.getElementById('btnSalvaUtente');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Creazione...';
+  try {
+    // Crea utente Firebase Auth — usa una seconda app per non scollegare il superadmin
+    const secondApp = initializeApp({...FB,appId:'temp_create_'+Date.now()}, 'tempApp_'+Date.now());
+    const secondAuth = getAuth(secondApp);
+    const cred = await createUserWithEmailAndPassword(secondAuth, email, password);
+    const uid = cred.user.uid;
+    // Disconnette subito il secondo app
+    await secondAuth.signOut();
+
+    // Salva profilo in Firestore
+    await setDoc(doc(db,'utenti',uid), {
+      uid, nome, cognome, email,
+      ruolo: document.getElementById('uRuolo').value,
+      org: document.getElementById('uOrg').value.trim(),
+      tel: document.getElementById('uTel').value.trim(),
+      note: document.getElementById('uNote').value.trim(),
+      stato: document.getElementById('uStato').value,
+      createdBy: SUPER_ADMIN_EMAIL,
+      createdAt: serverTimestamp()
+    });
+
+    // Log attività
+    await addDoc(collection(db,'log_attivita'), {
+      tipo:'create',email:SUPER_ADMIN_EMAIL,
+      dettaglio:'Creato account: '+email+' ('+document.getElementById('uRuolo').value+')',
+      ts:serverTimestamp(),data:new Date().toISOString()
+    });
+
+    showOk('utenteOk','✓ Account creato! Email: '+email);
+    await loadAll();
+    setTimeout(()=>document.getElementById('modalUtente').classList.remove('show'), 2000);
+  } catch(e) {
+    const msg = e.code==='auth/email-already-in-use' ? 'Email già registrata.' : e.code==='auth/weak-password' ? 'Password troppo debole.' : 'Errore: '+e.message;
+    showErr('utenteErr', msg);
+  }
+  finally { btn.disabled=false; btn.textContent='✓ Crea account'; }
+}
+
+async function toggleStato(uid, statoCorrente) {
+  const nuovoStato = statoCorrente==='sospeso' ? 'attivo' : 'sospeso';
+  if(!confirm(`${nuovoStato==='sospeso'?'Sospendere':'Riattivare'} questo account?`)) return;
+  try {
+    await setDoc(doc(db,'utenti',uid),{stato:nuovoStato,updatedAt:serverTimestamp()},{merge:true});
+    await addDoc(collection(db,'log_attivita'),{tipo:'update',email:SUPER_ADMIN_EMAIL,dettaglio:'Account '+nuovoStato+': '+uid,ts:serverTimestamp(),data:new Date().toISOString()});
+    await loadAll();
+  } catch(e) { alert('Errore: '+e.message); }
+}
+
+async function eliminaUtente(uid) {
+  const u = utenti.find(x=>x.id===uid);
+  if(!confirm(`Eliminare l'account di ${u?.nome||''} ${u?.cognome||''}? Questa azione non può essere annullata.`)) return;
+  try {
+    await deleteDoc(doc(db,'utenti',uid));
+    await addDoc(collection(db,'log_attivita'),{tipo:'delete',email:SUPER_ADMIN_EMAIL,dettaglio:'Eliminato account: '+(u?.email||uid),ts:serverTimestamp(),data:new Date().toISOString()});
+    await loadAll();
+  } catch(e) { alert('Errore: '+e.message); }
+}
+
+async function salvaImpostazioni() {
+  try {
+    await setDoc(doc(db,'sistema','config'),{
+      nomeOrg:document.getElementById('sysNomeOrg').value,
+      supportEmail:document.getElementById('sysSupportEmail').value,
+      maxAdmin:parseInt(document.getElementById('sysMaxAdmin').value)||10,
+      maxOp:parseInt(document.getElementById('sysMaxOp').value)||20,
+      welcome:document.getElementById('sysWelcome').value,
+      updatedAt:serverTimestamp()
+    },{merge:true});
+    const btn=document.getElementById('btnSalvaImpostazioni');
+    btn.textContent='✓ Salvato!';btn.style.background='var(--success)';
+    setTimeout(()=>{btn.textContent='💾 Salva impostazioni';btn.style.background='';},2000);
+  } catch(e) { alert('Errore: '+e.message); }
+}
+
+async function resetLog() {
+  try {
+    const snap = await getDocs(collection(db,'log_attivita'));
+    for(const d of snap.docs) await deleteDoc(doc(db,'log_attivita',d.id));
+    alert('Log svuotato.');
+  } catch(e) { alert('Errore: '+e.message); }
+}
+
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block';setTimeout(()=>e.style.display='none',5000);}
+function showOk(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block';}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+initApp();
+</script>
+</body>
+</html>

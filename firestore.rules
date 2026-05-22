@@ -73,5 +73,24 @@ service cloud.firestore {
         }
       }
     }
+
+    // Log attività (solo Super Admin può leggere/eliminare)
+    match /log_attivita/{logId} {
+      allow read: if isAuth();
+      allow create: if isAuth();
+      allow delete: if isAuth() && request.auth.token.email == 'martinsosem@gmail.com';
+    }
+
+    // Configurazione sistema
+    match /sistema/{docId} {
+      allow read: if isAuth();
+      allow write: if isAuth() && request.auth.token.email == 'martinsosem@gmail.com';
+    }
+
+    // Utenti (profili estesi)
+    match /utenti/{uid} {
+      allow read: if isAuth();
+      allow write: if isAuth() && (request.auth.uid == uid || request.auth.token.email == 'martinsosem@gmail.com');
+    }
   }
 }

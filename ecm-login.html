@@ -2,108 +2,218 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
-  <!-- App Icons / PWA -->
-  <link rel="icon" type="image/png" sizes="512x512" href="logo.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="logo-192.png">
-  <link rel="apple-touch-icon" sizes="512x512" href="logo.png">
-  <link rel="apple-touch-icon" sizes="192x192" href="logo-192.png">
-  <link rel="manifest" href="manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="ECM Access">
-  <meta name="application-name" content="ECM Access Control">
-  <meta name="theme-color" content="#8B0000">
-  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
-  <meta name="googlebot" content="noindex, nofollow">
-  <meta name="bingbot" content="noindex, nofollow"><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ECM Access Control — Accedi</title>
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ECM Access Control — Login</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+:root{--accent:#2563EB;--danger:#DC2626;--success:#059669;--text:#1A1D2E;--text2:#5A5F7A;--text3:#9499B0;--border:#DDE1E9;--surface:#FFF;--surface2:#F0F2F5;--bg:#F4F6F9;--radius:10px}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0D0F14;--surface:#13161F;--surface2:#1C2030;--border:#2A2E45;--border2:#363C58;--text:#F0F2FF;--text2:#8B93B8;--text3:#4A5070;--accent:#4D6EFF;--success:#22C97A;--danger:#FF4D4D;--radius:12px;--radius-lg:20px}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(43,78,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(43,78,255,.06) 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
-.bg-glow{position:fixed;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(77,110,255,.07) 0%,transparent 70%);top:-150px;left:-100px;pointer-events:none}
-.login-card{position:relative;z-index:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:48px 40px;width:100%;max-width:420px;text-align:center;box-shadow:var(--shadow)}
-.logo-mark{width:52px;height:52px;border-radius:14px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:white;margin:0 auto 24px}
-.login-title{font-size:24px;font-weight:600;letter-spacing:-.02em;margin-bottom:8px}
-.login-sub{font-size:14px;color:var(--text2);margin-bottom:36px;line-height:1.6}
-.google-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px 20px;border-radius:var(--radius);border:1px solid var(--border2);background:white;color:#1A1714;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all .2s}
-.google-btn:hover{box-shadow:0 4px 20px rgba(0,0,0,.3);transform:translateY(-1px)}
-.google-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.google-icon{width:20px;height:20px;flex-shrink:0}
-.divider{display:flex;align-items:center;gap:12px;margin:24px 0;color:var(--text3);font-size:12px}
+body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(135deg,#1A1D2E 0%,#2D3561 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{background:white;border-radius:20px;padding:40px;max-width:420px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,.4)}
+.logo-wrap{text-align:center;margin-bottom:28px}
+.logo-wrap img{width:72px;height:72px;border-radius:16px;margin-bottom:12px}
+.app-title{font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.02em}
+.app-sub{font-size:13px;color:var(--text3);margin-top:4px}
+.form-group{margin-bottom:14px}
+.field-label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase;display:block;margin-bottom:6px}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:11px 14px;font-family:'Inter',sans-serif;font-size:14px;color:var(--text);outline:none;width:100%;transition:border-color .2s,background .2s}
+.form-input:focus{border-color:var(--accent);background:white;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.pwd-wrap{position:relative}
+.pwd-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--text3);padding:4px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;width:100%;transition:all .2s}
+.btn-primary{background:var(--accent);color:white}.btn-primary:hover{background:#1d4ed8}
+.btn-google{background:white;color:var(--text);border:1px solid var(--border)}.btn-google:hover{background:var(--surface2)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.divider{display:flex;align-items:center;gap:12px;margin:18px 0}
 .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
-.info-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:left;margin-top:24px}
-.info-row{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text2);margin-bottom:8px}
-.info-row:last-child{margin-bottom:0}
-.info-dot{width:6px;height:6px;border-radius:50%;background:var(--success);flex-shrink:0}
-.status-msg{margin-top:20px;font-size:13px;color:var(--text2);min-height:20px}
-.status-msg.err{color:var(--danger)}
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+.divider-text{font-size:12px;color:var(--text3)}
+.alert{padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:14px;display:none}
+.alert-error{background:#FEF2F2;color:var(--danger);border:1px solid rgba(220,38,38,.2)}
+.alert-info{background:#EFF6FF;color:var(--accent);border:1px solid rgba(37,99,235,.2)}
+.forgot-link{text-align:right;margin-top:6px}
+.forgot-link a{font-size:12px;color:var(--accent);text-decoration:none}.forgot-link a:hover{text-decoration:underline}
+.footer-login{text-align:center;margin-top:24px;font-size:11px;color:var(--text3)}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* RESPONSIVE AUTO-SIZING */
-
-@media(max-width:480px){
-  .login-card{padding:32px 22px}
-  .login-title{font-size:20px}
-}
+.role-info{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface2);border-radius:var(--radius);font-size:12px;color:var(--text2);margin-top:16px}
 </style>
 </head>
 <body>
-<div class="bg-grid"></div>
-<div class="bg-glow"></div>
 <div class="login-card">
-  <div class="logo-mark">E</div>
-  <div class="login-title">ECM Access Control</div>
-  <div class="login-sub">Accedi con il tuo account Google per gestire gli eventi ECM in modo sicuro</div>
-  <button class="google-btn" id="googleBtn" onclick="signInGoogle()">
-    <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+  <div class="logo-wrap">
+    <img src="logo.png" alt="ECM" onerror="this.style.display='none'">
+    <div class="app-title" id="appTitle">ECM Access Control</div>
+    <div class="app-sub" id="welcomeMsg">Accedi per continuare</div>
+  </div>
+
+  <div class="alert alert-error" id="loginErr"></div>
+  <div class="alert alert-info" id="loginInfo"></div>
+
+  <!-- Login Email/Password -->
+  <div class="form-group">
+    <label class="field-label">Email</label>
+    <input type="email" class="form-input" id="loginEmail" placeholder="email@esempio.com" autocomplete="email">
+  </div>
+  <div class="form-group">
+    <label class="field-label">Password</label>
+    <div class="pwd-wrap">
+      <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+      <button class="pwd-toggle" id="togglePwd" type="button">👁</button>
+    </div>
+    <div class="forgot-link"><a href="#" id="forgotLink">Password dimenticata?</a></div>
+  </div>
+
+  <button class="btn btn-primary" id="btnLogin">Accedi</button>
+
+  <div class="divider"><span class="divider-text">oppure</span></div>
+
+  <!-- Login Google (per admin esistenti) -->
+  <button class="btn btn-google" id="btnGoogle">
+    <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
     Accedi con Google
   </button>
-  <div class="status-msg" id="statusMsg"></div>
-  <div class="info-box">
-    <div class="info-row"><div class="info-dot"></div>Solo gli account Google autorizzati possono accedere</div>
-    <div class="info-row"><div class="info-dot"></div>I dati sono protetti su Firebase Firestore</div>
-    <div class="info-row"><div class="info-dot"></div>Nessuna password da ricordare</div>
+
+  <div class="role-info">
+    <span>ℹ️</span>
+    <span>Admin e operatori usano email+password · Super Admin usa Google</span>
+  </div>
+
+  <div class="footer-login">
+    ECM Access Control &copy; 2026 Multimedia Meeting Group
   </div>
 </div>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
-const app=initializeApp(FB);
-const auth=getAuth(app);
-const provider=new GoogleAuthProvider();
 
-// Se già loggato, vai direttamente alla home
-onAuthStateChanged(auth, user => {
-  if(user){
-    window.location.href='ecm-home.html';
-  }
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+const app = getApps().length ? getApps()[0] : initializeApp(FB);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const SUPER_ADMIN_EMAIL = 'martinsosem@gmail.com';
+
+// Carica messaggio di benvenuto personalizzato
+async function loadWelcome() {
+  try {
+    const cfg = await getDoc(doc(db,'sistema','config'));
+    if(cfg.exists()) {
+      const d = cfg.data();
+      if(d.welcome) document.getElementById('welcomeMsg').textContent = d.welcome;
+      if(d.nomeOrg) document.getElementById('appTitle').textContent = d.nomeOrg;
+    }
+  } catch(e) {}
+}
+loadWelcome();
+
+// Toggle password
+document.getElementById('togglePwd').addEventListener('click', function() {
+  const i = document.getElementById('loginPassword');
+  i.type = i.type==='password'?'text':'password';
+  this.textContent = i.type==='password'?'👁':'🙈';
 });
 
-window.signInGoogle = async function(){
-  const btn=document.getElementById('googleBtn');
-  const msg=document.getElementById('statusMsg');
-  btn.disabled=true;
-  btn.innerHTML='<span class="spinner"></span> Accesso in corso...';
-  msg.textContent='';msg.className='status-msg';
-  try{
-    await signInWithPopup(auth, provider);
-    msg.textContent='✓ Accesso effettuato! Reindirizzamento...';
-    msg.style.color='var(--success)';
-    window.location.href='ecm-home.html';
-  }catch(err){
-    console.error(err);
-    btn.disabled=false;
-    btn.innerHTML=`<svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Accedi con Google`;
-    if(err.code==='auth/popup-closed-by-user'){msg.textContent='Accesso annullato.';}
-    else if(err.code==='auth/unauthorized-domain'){msg.textContent='⚠️ Dominio non autorizzato. Aggiungi seanmartins.github.io in Firebase Console → Authentication → Authorized domains';msg.className='status-msg err';}
-    else{msg.textContent='Errore: '+err.message;msg.className='status-msg err';}
+// Enter per submit
+document.getElementById('loginPassword').addEventListener('keydown', e => {
+  if(e.key==='Enter') document.getElementById('btnLogin').click();
+});
+document.getElementById('loginEmail').addEventListener('keydown', e => {
+  if(e.key==='Enter') document.getElementById('loginPassword').focus();
+});
+
+// Login email/password
+document.getElementById('btnLogin').addEventListener('click', async () => {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pwd = document.getElementById('loginPassword').value;
+  if(!email||!pwd){showErr('Inserisci email e password.');return;}
+  const btn = document.getElementById('btnLogin');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Accesso in corso...';
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, pwd);
+    // Verifica che l'account esista in Firestore e sia attivo
+    const uDoc = await getDoc(doc(db,'utenti',cred.user.uid));
+    if(uDoc.exists()) {
+      const u = uDoc.data();
+      if(u.stato==='sospeso') {
+        await auth.signOut();
+        showErr('Account sospeso. Contatta l\'amministratore.');
+        return;
+      }
+      // Log accesso
+      await logAccesso(email, u.ruolo||'utente');
+      // Redirect in base al ruolo
+      redirectByRole(u.ruolo, u.email);
+    } else if(email===SUPER_ADMIN_EMAIL) {
+      await logAccesso(email, 'superadmin');
+      window.location.href = 'ecm-home.html';
+    } else {
+      // Utente non trovato in Firestore ma auth ok - accesso limitato
+      window.location.href = 'ecm-home.html';
+    }
+  } catch(e) {
+    const msg = {
+      'auth/user-not-found':'Utente non trovato.',
+      'auth/wrong-password':'Password errata.',
+      'auth/invalid-email':'Email non valida.',
+      'auth/too-many-requests':'Troppi tentativi. Riprova tra qualche minuto.',
+      'auth/invalid-credential':'Credenziali non valide.'
+    }[e.code] || 'Errore di accesso: '+e.message;
+    showErr(msg);
   }
-};
+  finally { btn.disabled=false; btn.innerHTML='Accedi'; }
+});
+
+// Login Google (principalmente per Super Admin)
+document.getElementById('btnGoogle').addEventListener('click', async () => {
+  const btn = document.getElementById('btnGoogle');
+  btn.disabled=true;
+  try {
+    const provider = new GoogleAuthProvider();
+    const cred = await signInWithPopup(auth, provider);
+    await logAccesso(cred.user.email, cred.user.email===SUPER_ADMIN_EMAIL?'superadmin':'google');
+    window.location.href = cred.user.email===SUPER_ADMIN_EMAIL ? 'ecm-superadmin.html' : 'ecm-home.html';
+  } catch(e) {
+    if(e.code!=='auth/popup-closed-by-user') showErr('Errore Google: '+e.message);
+  }
+  finally { btn.disabled=false; }
+});
+
+// Password reset
+document.getElementById('forgotLink').addEventListener('click', async e => {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  if(!email){showErr('Inserisci prima la tua email.');return;}
+  try {
+    await sendPasswordResetEmail(auth, email);
+    showInfo('Email di reset inviata a '+email+'. Controlla la casella.');
+  } catch(e) { showErr('Errore: '+e.message); }
+});
+
+async function logAccesso(email, ruolo) {
+  try {
+    await addDoc(collection(db,'log_attivita'),{
+      tipo:'login', email, ruolo,
+      dettaglio:'Login: '+email+' ('+ruolo+')',
+      ts:serverTimestamp(), data:new Date().toISOString(),
+      ua:navigator.userAgent.slice(0,80)
+    });
+  } catch(e) {}
+}
+
+function redirectByRole(ruolo, email) {
+  if(email===SUPER_ADMIN_EMAIL) { window.location.href='ecm-superadmin.html'; return; }
+  switch(ruolo) {
+    case 'scanner': window.location.href='ecm-blocco3.html'; break;
+    case 'viewer': window.location.href='ecm-blocco4.html'; break;
+    default: window.location.href='ecm-home.html';
+  }
+}
+
+function showErr(msg){const e=document.getElementById('loginErr');e.textContent=msg;e.style.display='block';document.getElementById('loginInfo').style.display='none';}
+function showInfo(msg){const e=document.getElementById('loginInfo');e.textContent=msg;e.style.display='block';document.getElementById('loginErr').style.display='none';}
 </script>
 </body>
 </html>
