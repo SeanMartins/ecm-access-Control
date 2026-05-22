@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Convention — Check-in Multi-area</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
+<script src="ecm-layout.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F6F9;--surface:#FFF;--surface2:#F0F2F5;--border:#DDE1E9;--text:#1A1D2E;--text2:#5A5F7A;--text3:#9499B0;--conv:#0EA5E9;--conv-light:#F0F9FF;--conv-dark:#0369A1;--success:#059669;--success-light:#ECFDF5;--danger:#DC2626;--danger-light:#FEF2F2;--warn:#D97706;--warn-light:#FFFBEB;--vip:#7C3AED;--vip-light:#F5F3FF;--radius:10px;--radius-lg:14px;--shadow:0 1px 3px rgba(0,0,0,.1),0 4px 12px rgba(0,0,0,.07)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+.ecm-content{padding:24px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none}
+.btn-conv{background:var(--conv);color:white}.btn-conv:hover{background:var(--conv-dark)}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{background:var(--surface2)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%}
+.form-input:focus{border-color:var(--conv)}
+/* Area buttons */
+.area-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px}
+.area-btn{padding:14px;border-radius:var(--radius-lg);border:2px solid var(--border);background:var(--surface);cursor:pointer;text-align:center;transition:all .2s;font-family:'Inter',sans-serif}
+.area-btn:hover{border-color:var(--conv)}
+.area-btn.active{border-color:var(--conv);background:var(--conv-light)}
+.area-icon{font-size:28px;margin-bottom:4px}
+.area-name{font-size:12px;font-weight:600;color:var(--text)}
+.area-count{font-size:11px;color:var(--text3);margin-top:2px}
+/* Layout */
+.layout{display:grid;grid-template-columns:380px 1fr;gap:16px;align-items:start}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;text-align:center;box-shadow:var(--shadow)}
+.stat-val{font-size:26px;font-weight:700}.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.scanner-wrap{position:relative;border-radius:var(--radius);overflow:hidden;background:#000;aspect-ratio:1;width:100%}
+.scan-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:var(--surface2)}
+.result-card{border-radius:var(--radius-lg);padding:14px 18px;margin-top:12px;display:none}
+.result-card.show{display:block;animation:fadeIn .3s}
+.rc-in{background:var(--success-light);border:1px solid rgba(5,150,105,.3)}
+.rc-warn{background:var(--warn-light);border:1px solid rgba(217,119,6,.3)}
+.rc-err{background:var(--danger-light);border:1px solid rgba(220,38,38,.2)}
+.rc-vip{background:var(--vip-light);border:1px solid rgba(124,58,237,.3)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.presenti-list{display:flex;flex-direction:column;gap:6px;max-height:450px;overflow-y:auto}
+.presenti-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
+.ruolo-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.search-results{display:flex;flex-direction:column;gap:5px;max-height:160px;overflow-y:auto;margin-top:6px}
+.sr-item{padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.sr-item:hover{border-color:var(--conv)}
+#html5qr-scanner video{width:100%!important;height:100%!important;object-fit:cover!important;position:absolute!important;inset:0!important}
+#html5qr-scanner>div:first-child{display:none!important}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:880px){.layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+<div class="ecm-main">
+  <div class="ecm-topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="mobile-menu-btn" id="mobileMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar-title">Check-in Multi-area</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-badge"><div class="topbar-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
+      <div id="userBarSlot"></div>
+    </div>
+  </div>
+  <div class="ecm-content">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+      <div><div style="font-size:22px;font-weight:700">Check-in Multi-area</div><div style="font-size:13px;color:var(--text3)" id="evNomeDisplay">Seleziona evento</div></div>
+      <select class="form-input btn-sm" id="evSelect" style="min-width:200px"><option value="">— Evento —</option></select>
+    </div>
+
+    <!-- Selezione area -->
+    <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px">Seleziona area di check-in</div>
+    <div class="area-grid">
+      <button class="area-btn active" data-area="ingresso"><div class="area-icon">🚪</div><div class="area-name">Ingresso Generale</div><div class="area-count" id="cntIngresso">0 presenti</div></button>
+      <button class="area-btn" data-area="vip"><div class="area-icon">⭐</div><div class="area-name">Area VIP</div><div class="area-count" id="cntVip">0 presenti</div></button>
+      <button class="area-btn" data-area="espositori"><div class="area-icon">🏢</div><div class="area-name">Area Espositori</div><div class="area-count" id="cntEspositori">0 presenti</div></button>
+      <button class="area-btn" data-area="conferenze"><div class="area-icon">🎤</div><div class="area-name">Sala Conferenze</div><div class="area-count" id="cntConferenze">0 presenti</div></button>
+      <button class="area-btn" data-area="workshop"><div class="area-icon">🔧</div><div class="area-name">Area Workshop</div><div class="area-count" id="cntWorkshop">0 presenti</div></button>
+      <button class="area-btn" data-area="catering"><div class="area-icon">🍽️</div><div class="area-name">Catering</div><div class="area-count" id="cntCatering">0 presenti</div></button>
+    </div>
+
+    <!-- Stats rapide -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+      <div class="stat-card"><div class="stat-val" id="sTotPart">0</div><div class="stat-label">Partecipanti</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--success)" id="sDentro">0</div><div class="stat-label">Presenti area</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--conv)" id="sPct">0%</div><div class="stat-label">% presenza</div></div>
+    </div>
+
+    <div class="layout">
+      <!-- Scanner -->
+      <div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;box-shadow:var(--shadow)">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px">📷 Scanner QR — <span id="areaCorrente" style="color:var(--conv)">Ingresso Generale</span></div>
+          <div class="scanner-wrap">
+            <div id="html5qr-scanner" style="display:none;width:100%;height:100%"></div>
+            <div class="scan-ph" id="scanPH"><div style="font-size:40px;opacity:.3">📷</div><div style="font-size:13px;color:var(--text2)">Camera non attiva</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+            <button class="btn btn-conv" id="btnAvvia" disabled>▶ Avvia camera</button>
+            <button class="btn btn-outline" id="btnFerma" disabled>⏹ Ferma</button>
+          </div>
+          <div id="scanInfo" style="display:none;font-size:11px;color:var(--success);text-align:center;margin-top:6px;font-weight:500">🟢 Scanner attivo</div>
+          <div class="result-card" id="resCard">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div>
+                <div style="font-size:18px;font-weight:700;margin-bottom:2px" id="resName">—</div>
+                <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)" id="resAzienda">—</div>
+                <div style="font-size:13px;font-weight:500;margin-top:6px" id="resStatus">—</div>
+              </div>
+              <div style="font-size:32px" id="resEmoji">—</div>
+            </div>
+            <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap" id="resInfo"></div>
+          </div>
+        </div>
+        <!-- Ricerca manuale -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-top:12px;box-shadow:var(--shadow)">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px">🔍 Ricerca manuale</div>
+          <input type="text" class="form-input" id="searchInput" placeholder="Nome, cognome o azienda..." disabled>
+          <div class="search-results" id="searchResults"></div>
+        </div>
+      </div>
+
+      <!-- Lista presenti area -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;box-shadow:var(--shadow)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)">Presenti in area</div>
+          <button class="btn btn-outline btn-sm" id="btnRefresh">↻ Aggiorna</button>
+        </div>
+        <div class="presenti-list" id="presentiList">
+          <div style="text-align:center;padding:24px;color:var(--text3)">Seleziona un evento</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ecm-version-footer" id="ecmVersionFooter"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof renderSidebar === 'function') renderSidebar('convention-checkin');
+  if (typeof renderVersionFooter === 'function') renderVersionFooter();
+  document.getElementById('btnAvvia').addEventListener('click', avviaCamera);
+  document.getElementById('btnFerma').addEventListener('click', fermaCamera);
+  document.getElementById('searchInput').addEventListener('input', doSearch);
+  document.getElementById('btnRefresh').addEventListener('click', () => { if(window._currentArea && window._convEvId) loadPresenti(); });
+  document.querySelectorAll('.area-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.area-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      window._currentArea = btn.dataset.area;
+      document.getElementById('areaCorrente').textContent = btn.querySelector('.area-name').textContent;
+      if(window._convEvId) loadPresenti();
+      document.getElementById('btnAvvia').disabled = !window._convEvId;
+    });
+  });
+});
+window._currentArea = 'ingresso';
+</script>
+
+<script type="module">
+import { requireAuth, injectUserBar } from './ecm-auth.js';
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+const RUOLO_COLORS={vip:'#7C3AED',espositore:'#D97706',visitatore:'#0EA5E9',staff:'#059669',relatore:'#3730A3'};
+let db, auth, partecipanti=[], presenti=[], html5QrCode=null, cooldown=false, unsubscribe=null;
+
+async function initApp() {
+  const app=getApps().length?getApps()[0]:initializeApp(FB);
+  db=getFirestore(app);auth=getAuth(app);
+  try{await requireAuth();injectUserBar('userBarSlot');}catch(e){}
+  if(!auth.currentUser){try{await signInAnonymously(auth);}catch(e){}}
+  document.getElementById('fbDot').className='topbar-dot ok';
+  document.getElementById('fbStatus').textContent='Firebase connesso';
+  const evSnap=await getDocs(collection(db,'eventi'));
+  const evList=[];evSnap.forEach(d=>evList.push({id:d.id,...d.data()}));
+  evList.filter(e=>e.stato!=='archiviato').sort((a,b)=>new Date(b.data||0)-new Date(a.data||0)).forEach(ev=>{
+    const opt=document.createElement('option');opt.value=ev.id;
+    opt.textContent=(ev.nome||ev.id)+(ev.data?' ('+new Date(ev.data).toLocaleDateString('it-IT')+')':'')+(' ');
+    document.getElementById('evSelect').appendChild(opt);
+  });
+  const savedId=localStorage.getItem('ecm_eventId');
+  const autoId=(savedId&&evList.find(e=>e.id===savedId))?savedId:evList[0]?.id;
+  if(autoId){document.getElementById('evSelect').value=autoId;await onEvSelect(autoId,evList);}
+  document.getElementById('evSelect').addEventListener('change',async function(){if(this.value)await onEvSelect(this.value,evList);});
+}
+
+async function onEvSelect(evId,evList) {
+  window._convEvId=evId;localStorage.setItem('ecm_eventId',evId);
+  const ev=evList?.find(e=>e.id===evId);
+  document.getElementById('evNomeDisplay').textContent=ev?.nome||'—';
+  const snap=await getDocs(collection(db,'eventi',evId,'partecipanti'));
+  partecipanti=[];snap.forEach(d=>partecipanti.push({id:d.id,...d.data()}));
+  document.getElementById('sTotPart').textContent=partecipanti.length;
+  document.getElementById('searchInput').disabled=false;
+  document.getElementById('btnAvvia').disabled=false;
+  loadPresenti();
+  updateAreaCounts(evId);
+}
+
+async function loadPresenti() {
+  if(unsubscribe)unsubscribe();
+  if(!window._convEvId||!db)return;
+  const area=window._currentArea||'ingresso';
+  const q=collection(db,'eventi',window._convEvId,'checkin_'+area);
+  unsubscribe=onSnapshot(q,snap=>{
+    presenti=[];snap.forEach(d=>presenti.push({id:d.id,...d.data()}));
+    presenti.sort((a,b)=>(b.ts?.seconds||0)-(a.ts?.seconds||0));
+    renderPresenti();updateStats();
+  });
+}
+
+async function updateAreaCounts(evId) {
+  const aree=['ingresso','vip','espositori','conferenze','workshop','catering'];
+  for(const area of aree){
+    try{
+      const snap=await getDocs(collection(db,'eventi',evId,'checkin_'+area));
+      const el=document.getElementById('cnt'+area.charAt(0).toUpperCase()+area.slice(1));
+      if(el)el.textContent=snap.size+' presenti';
+    }catch(e){}
+  }
+}
+
+function renderPresenti() {
+  const list=document.getElementById('presentiList');
+  if(!presenti.length){list.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3)">Nessun check-in in questa area</div>';return;}
+  list.innerHTML=presenti.map(p=>{
+    const colore=RUOLO_COLORS[p.ruolo||'visitatore']||'var(--conv)';
+    return `<div class="presenti-item">
+      <div class="ruolo-dot" style="background:${colore}"></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:500">${esc(p.cognome||'')} ${esc(p.nome||'')} </div>
+        ${p.azienda?`<div style="font-size:10px;color:var(--text3)">${esc(p.azienda)}</div>`:''}
+      </div>
+      <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">${p.ora||'—'}</div>
+    </div>`;
+  }).join('');
+}
+
+function updateStats(){
+  document.getElementById('sDentro').textContent=presenti.length;
+  const tot=partecipanti.length;
+  document.getElementById('sPct').textContent=tot>0?Math.round(presenti.length/tot*100)+'%':'—';
+}
+
+async function avviaCamera(){
+  if(!window._convEvId){alert('Seleziona prima un evento.');return;}
+  try{
+    document.getElementById('html5qr-scanner').style.display='block';
+    html5QrCode=new Html5Qrcode('html5qr-scanner');
+    await html5QrCode.start({facingMode:'environment'},{fps:10,qrbox:{width:220,height:220},aspectRatio:1.0},
+      decoded=>{if(!cooldown){handleQR(decoded);cooldown=true;setTimeout(()=>cooldown=false,2500);}},()=>{});
+    document.getElementById('scanPH').style.display='none';
+    document.getElementById('btnAvvia').disabled=true;
+    document.getElementById('btnFerma').disabled=false;
+    document.getElementById('scanInfo').style.display='block';
+  }catch(e){alert('Camera: '+e.message);}
+}
+
+async function fermaCamera(){
+  if(html5QrCode){try{await html5QrCode.stop();html5QrCode.clear();}catch(e){}html5QrCode=null;}
+  document.getElementById('scanPH').style.display='flex';
+  document.getElementById('html5qr-scanner').style.display='none';
+  document.getElementById('btnAvvia').disabled=false;
+  document.getElementById('btnFerma').disabled=true;
+  document.getElementById('scanInfo').style.display='none';
+}
+
+async function handleQR(raw){
+  const pts=raw.split('|');
+  if(pts[0]!=='ECM'||pts.length<5){showResult('err','—','—','QR non riconosciuto','⚠️','');return;}
+  const p=partecipanti.find(x=>x.id===pts[1]);
+  if(!p){showResult('err','—','—','Partecipante non trovato','❌','');return;}
+  await registraCheckin(p);
+}
+
+async function registraCheckin(p){
+  const ora=new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const area=window._currentArea||'ingresso';
+  const giaPres=presenti.find(x=>x.partecipanteId===p.id);
+  if(giaPres){showResult('warn',p.cognome+' '+p.nome,p.azienda||'—','Già registrato alle '+giaPres.ora,'⚠️',p.ruolo||'visitatore');return;}
+  try{
+    await signInAnonymously(auth);
+    await addDoc(collection(db,'eventi',window._convEvId,'checkin_'+area),{
+      partecipanteId:p.id,nome:p.nome,cognome:p.cognome,azienda:p.azienda||'',
+      ruolo:p.ruolo||'visitatore',area,ora,ts:serverTimestamp()
+    });
+    const isVip=p.ruolo==='vip';
+    showResult(isVip?'vip':'ok',p.cognome+' '+p.nome,p.azienda||'—',
+      (isVip?'⭐ VIP — ':'')+'✓ Check-in '+area,isVip?'⭐':'✅',p.ruolo||'visitatore');
+    try{navigator.vibrate(200);}catch(e){}
+  }catch(e){showResult('err',p.cognome+' '+p.nome,'','Errore: '+e.message,'❌','');}
+}
+
+function showResult(type,name,sub,status,emoji,ruolo){
+  const card=document.getElementById('resCard');
+  card.className='result-card show '+(type==='ok'?'rc-in':type==='vip'?'rc-vip':type==='warn'?'rc-warn':'rc-err');
+  document.getElementById('resName').textContent=name;
+  document.getElementById('resAzienda').textContent=sub;
+  const statusEl=document.getElementById('resStatus');
+  statusEl.textContent=status;
+  statusEl.style.color=type==='ok'||type==='vip'?'var(--success)':type==='warn'?'var(--warn)':'var(--danger)';
+  document.getElementById('resEmoji').textContent=emoji;
+  const colors={vip:'#7C3AED',espositore:'#D97706',visitatore:'#0EA5E9',staff:'#059669',relatore:'#3730A3'};
+  document.getElementById('resInfo').innerHTML=ruolo?`<span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:${colors[ruolo]||'#0EA5E9'}20;color:${colors[ruolo]||'#0EA5E9'}">` + ruolo.toUpperCase() + '</span>':'';
+}
+
+function doSearch(){
+  const q=document.getElementById('searchInput').value.toLowerCase().trim();
+  const c=document.getElementById('searchResults');
+  if(q.length<2){c.innerHTML='';return;}
+  const fil=partecipanti.filter(p=>
+    (p.nome||'').toLowerCase().includes(q)||(p.cognome||'').toLowerCase().includes(q)||
+    (p.azienda||'').toLowerCase().includes(q)||(p.cf||'').toLowerCase().includes(q)
+  ).slice(0,8);
+  c.innerHTML='';
+  fil.forEach(p=>{
+    const giaPres=presenti.find(x=>x.partecipanteId===p.id);
+    const div=document.createElement('div');div.className='sr-item';
+    div.innerHTML=`<div><div style="font-size:13px;font-weight:500">${esc(p.cognome||'')} ${esc(p.nome||'')} </div>
+      <div style="font-size:10px;color:var(--text3)">${p.azienda||p.cf||'—'}</div></div>
+      <span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:${giaPres?'var(--success-light)':'var(--surface)'};color:${giaPres?'var(--success)':'var(--text3)'}">
+        ${giaPres?'✓ Presente':'Check-in'}</span>`;
+    div.addEventListener('click',()=>{if(!window._convEvId)return;registraCheckin(p);document.getElementById('searchInput').value='';c.innerHTML='';});
+    c.appendChild(div);
+  });
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+initApp();
+</script>
+</body>
+</html>

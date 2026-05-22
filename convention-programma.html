@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Convention — Programma & Workshop</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
+<script src="ecm-layout.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F6F9;--surface:#FFF;--surface2:#F0F2F5;--border:#DDE1E9;--text:#1A1D2E;--text2:#5A5F7A;--text3:#9499B0;--conv:#0EA5E9;--conv-light:#F0F9FF;--conv-dark:#0369A1;--success:#059669;--success-light:#ECFDF5;--danger:#DC2626;--danger-light:#FEF2F2;--warn:#D97706;--warn-light:#FFFBEB;--radius:10px;--radius-lg:14px;--shadow:0 1px 3px rgba(0,0,0,.1),0 4px 12px rgba(0,0,0,.07)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+.ecm-content{padding:24px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none}
+.btn-conv{background:var(--conv);color:white}.btn-conv:hover{background:var(--conv-dark)}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{background:var(--surface2)}
+.btn-danger{background:var(--danger-light);color:var(--danger);border:1px solid rgba(220,38,38,.2)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.span2{grid-column:span 2}
+.field-label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%}
+.form-input:focus{border-color:var(--conv);background:white}
+select.form-input{cursor:pointer}
+textarea.form-input{resize:vertical;min-height:70px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)}
+.stat-val{font-size:26px;font-weight:700}.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:20px}
+.tab{padding:10px 20px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;background:none;border-left:none;border-right:none;border-top:none;font-family:'Inter',sans-serif}
+.tab.active{color:var(--conv);border-bottom-color:var(--conv)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+.session-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;transition:all .2s}
+.session-item:hover{border-color:var(--conv)}
+.session-time{font-family:'DM Mono',monospace;font-size:12px;color:var(--text3);min-width:100px}
+.tag{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.tag-talk{background:var(--conv-light);color:var(--conv)}
+.tag-workshop{background:#D1FAE5;color:#065F46}
+.tag-keynote{background:#FEF3C7;color:#92400E}
+.tag-break{background:var(--surface2);color:var(--text3)}
+.workshop-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.progress-bar{height:8px;background:var(--border);border-radius:100px;margin-top:8px;overflow:hidden}
+.progress-fill{height:100%;border-radius:100px;background:var(--conv);transition:width .4s}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius-lg);padding:26px;max-width:580px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.alert-error{background:var(--danger-light);color:var(--danger);border:1px solid rgba(220,38,38,.2);padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:12px;display:none}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:40px;color:var(--text3)}
+@media(max-width:768px){.stats-grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.span2{grid-column:span 1}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+<div class="ecm-main">
+  <div class="ecm-topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="mobile-menu-btn" id="mobileMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar-title">Programma & Workshop</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-badge"><div class="topbar-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
+      <div id="userBarSlot"></div>
+    </div>
+  </div>
+  <div class="ecm-content">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div>
+        <div style="font-size:22px;font-weight:700">Programma & Workshop</div>
+        <div style="font-size:13px;color:var(--text3)" id="evNomeDisplay">Seleziona evento</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select class="form-input btn-sm" id="evSelect" style="min-width:200px"><option value="">— Evento —</option></select>
+        <button class="btn btn-conv" id="btnNuovoItem">+ Aggiungi</button>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val" id="sTalk">0</div><div class="stat-label">Talk / Sessioni</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--success)" id="sWorkshop">0</div><div class="stat-label">Workshop</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--conv)" id="sIscrWorkshop">0</div><div class="stat-label">Iscritti workshop</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--warn)" id="sPostiLib">0</div><div class="stat-label">Posti liberi</div></div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-tab="programma">📅 Programma</button>
+      <button class="tab" data-tab="workshops">🔧 Workshop prenotabili</button>
+    </div>
+    <div class="tab-pane active" id="tab-programma">
+      <div id="programmaContent"><div class="empty-state"><div style="font-size:32px;opacity:.3">📅</div><div style="margin-top:8px">Seleziona un evento</div></div></div>
+    </div>
+    <div class="tab-pane" id="tab-workshops">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+        <button class="btn btn-conv btn-sm" id="btnNuovoWs">+ Nuovo workshop</button>
+      </div>
+      <div id="workshopsContent"><div class="empty-state"><div style="font-size:32px;opacity:.3">🔧</div><div style="margin-top:8px">Nessun workshop</div></div></div>
+    </div>
+  </div>
+  <div class="ecm-version-footer" id="ecmVersionFooter"></div>
+</div>
+
+<!-- MODAL SESSIONE/TALK -->
+<div class="modal-overlay" id="modalItem">
+  <div class="modal">
+    <div style="font-size:17px;font-weight:700;margin-bottom:4px" id="modalItemTitolo">Nuova sessione</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:20px">Talk, keynote, panel o break</div>
+    <div class="alert-error" id="itemErr"></div>
+    <div class="form-grid" style="margin-bottom:12px">
+      <div class="form-group span2">
+        <label class="field-label">Titolo *</label>
+        <input type="text" class="form-input" id="iTitolo" placeholder="Es. Keynote apertura">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Data *</label>
+        <input type="date" class="form-input" id="iData">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Tipo</label>
+        <select class="form-input" id="iTipo">
+          <option value="keynote">🌟 Keynote</option>
+          <option value="talk">🎤 Talk</option>
+          <option value="panel">💬 Panel</option>
+          <option value="break">☕ Break</option>
+          <option value="altro">📌 Altro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="field-label">Ora inizio *</label>
+        <input type="time" class="form-input" id="iOraInizio">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Ora fine</label>
+        <input type="time" class="form-input" id="iOraFine">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Sala / Location</label>
+        <input type="text" class="form-input" id="iSala" placeholder="Es. Sala Plenaria">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Relatore / Speaker</label>
+        <input type="text" class="form-input" id="iRelatore" placeholder="Nome relatore">
+      </div>
+      <div class="form-group span2">
+        <label class="field-label">Descrizione</label>
+        <textarea class="form-input" id="iDescrizione" placeholder="Descrizione sessione..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btnAnnullaItem">Annulla</button>
+      <button class="btn btn-conv" id="btnSalvaItem">💾 Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL WORKSHOP -->
+<div class="modal-overlay" id="modalWs">
+  <div class="modal">
+    <div style="font-size:17px;font-weight:700;margin-bottom:4px" id="modalWsTitolo">Nuovo workshop</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:20px">Workshop prenotabile con limite posti</div>
+    <div class="alert-error" id="wsErr"></div>
+    <div class="form-grid" style="margin-bottom:12px">
+      <div class="form-group span2">
+        <label class="field-label">Titolo workshop *</label>
+        <input type="text" class="form-input" id="wsTitolo" placeholder="Es. Workshop AI applicata">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Data *</label>
+        <input type="date" class="form-input" id="wsData">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Ora inizio *</label>
+        <input type="time" class="form-input" id="wsOraInizio">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Ora fine</label>
+        <input type="time" class="form-input" id="wsOraFine">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Sala / Location</label>
+        <input type="text" class="form-input" id="wsSala" placeholder="Es. Sala Workshop A">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Posti massimi *</label>
+        <input type="number" class="form-input" id="wsMaxPosti" value="20" min="1">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Quota aggiuntiva (€)</label>
+        <input type="number" class="form-input" id="wsQuota" value="0" min="0" step="0.01" placeholder="0 = gratuito">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Relatore / Docente</label>
+        <input type="text" class="form-input" id="wsRelatore" placeholder="Nome docente">
+      </div>
+      <div class="form-group span2">
+        <label class="field-label">Descrizione</label>
+        <textarea class="form-input" id="wsDescrizione" placeholder="Cosa impareranno i partecipanti..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="field-label">Materiale necessario</label>
+        <input type="text" class="form-input" id="wsMateriale" placeholder="Es. Laptop, notebook">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Livello</label>
+        <select class="form-input" id="wsLivello">
+          <option value="tutti">👥 Tutti i livelli</option>
+          <option value="base">🟢 Base</option>
+          <option value="intermedio">🟡 Intermedio</option>
+          <option value="avanzato">🔴 Avanzato</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btnAnnullaWs">Annulla</button>
+      <button class="btn btn-conv" id="btnSalvaWs">💾 Salva workshop</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof renderSidebar === 'function') renderSidebar('convention-programma');
+  if (typeof renderVersionFooter === 'function') renderVersionFooter();
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById('tab-'+t.dataset.tab).classList.add('active');
+    });
+  });
+  document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show')}));
+  document.getElementById('btnAnnullaItem').addEventListener('click',()=>document.getElementById('modalItem').classList.remove('show'));
+  document.getElementById('btnAnnullaWs').addEventListener('click',()=>document.getElementById('modalWs').classList.remove('show'));
+  document.getElementById('btnNuovoItem').addEventListener('click',()=>{
+    if(!window._convEvId){alert('Seleziona prima un evento.');return;}
+    window._editItemId=null;
+    ['iTitolo','iSala','iRelatore','iDescrizione'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('iData').value='';document.getElementById('iOraInizio').value='';document.getElementById('iOraFine').value='';
+    document.getElementById('iTipo').value='talk';
+    document.getElementById('itemErr').style.display='none';
+    document.getElementById('modalItem').classList.add('show');
+  });
+  document.getElementById('btnNuovoWs').addEventListener('click',()=>{
+    if(!window._convEvId){alert('Seleziona prima un evento.');return;}
+    window._editWsId=null;
+    ['wsTitolo','wsSala','wsRelatore','wsDescrizione','wsMateriale'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('wsData').value='';document.getElementById('wsOraInizio').value='';document.getElementById('wsOraFine').value='';
+    document.getElementById('wsMaxPosti').value='20';document.getElementById('wsQuota').value='0';
+    document.getElementById('wsLivello').value='tutti';
+    document.getElementById('wsErr').style.display='none';
+    document.getElementById('modalWs').classList.add('show');
+  });
+  document.getElementById('btnSalvaItem').addEventListener('click',salvaItem);
+  document.getElementById('btnSalvaWs').addEventListener('click',salvaWs);
+});
+</script>
+
+<script type="module">
+import { requireAuth, injectUserBar } from './ecm-auth.js';
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc, setDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+const TIPI={keynote:'🌟 Keynote',talk:'🎤 Talk',panel:'💬 Panel',break:'☕ Break',altro:'📌 Altro'};
+const TAG_CLS={keynote:'tag-keynote',talk:'tag-talk',panel:'tag-talk',break:'tag-break',altro:'tag-break'};
+const LIVELLI={tutti:'👥 Tutti',base:'🟢 Base',intermedio:'🟡 Intermedio',avanzato:'🔴 Avanzato'};
+
+let db, sessioni=[], workshops=[], partecipanti=[];
+
+async function initApp() {
+  const app=getApps().length?getApps()[0]:initializeApp(FB);
+  db=getFirestore(app); const auth=getAuth(app);
+  try{await requireAuth();injectUserBar('userBarSlot');}catch(e){}
+  if(!auth.currentUser){try{await signInAnonymously(auth);}catch(e){}}
+  document.getElementById('fbDot').className='topbar-dot ok';
+  document.getElementById('fbStatus').textContent='Firebase connesso';
+
+  const evSnap=await getDocs(collection(db,'eventi'));
+  const evList=[];evSnap.forEach(d=>evList.push({id:d.id,...d.data()}));
+  evList.filter(e=>e.stato!=='archiviato').sort((a,b)=>new Date(b.data||0)-new Date(a.data||0)).forEach(ev=>{
+    const opt=document.createElement('option');opt.value=ev.id;
+    opt.textContent=(ev.nome||ev.id)+(ev.data?' ('+new Date(ev.data).toLocaleDateString('it-IT')+')':'');
+    document.getElementById('evSelect').appendChild(opt);
+  });
+
+  const savedId=localStorage.getItem('ecm_eventId');
+  const autoId=(savedId&&evList.find(e=>e.id===savedId))?savedId:evList[0]?.id;
+  if(autoId){document.getElementById('evSelect').value=autoId;await loadData(autoId);}
+  document.getElementById('evSelect').addEventListener('change',async function(){if(this.value)await loadData(this.value);});
+
+  window.salvaItem=salvaItem; window.salvaWs=salvaWs;
+  window.eliminaItem=eliminaItem; window.eliminaWs=eliminaWs;
+  window.apriWsIscritti=apriWsIscritti;
+}
+
+async function loadData(evId) {
+  window._convEvId=evId; localStorage.setItem('ecm_eventId',evId);
+  const ev=(await getDocs(collection(db,'eventi'))).docs.find(d=>d.id===evId)?.data();
+  document.getElementById('evNomeDisplay').textContent=ev?.nome||'—';
+  const [sessSnap,wsSnap,partsSnap]=await Promise.all([
+    getDocs(collection(db,'eventi',evId,'sessioni')),
+    getDocs(collection(db,'eventi',evId,'workshops')),
+    getDocs(collection(db,'eventi',evId,'partecipanti'))
+  ]);
+  sessioni=[];sessSnap.forEach(d=>sessioni.push({id:d.id,...d.data()}));
+  sessioni.sort((a,b)=>(a.data||'').localeCompare(b.data||'')||(a.oraInizio||'').localeCompare(b.oraInizio||''));
+  workshops=[];wsSnap.forEach(d=>workshops.push({id:d.id,...d.data()}));
+  workshops.sort((a,b)=>(a.data||'').localeCompare(b.data||'')||(a.oraInizio||'').localeCompare(b.oraInizio||''));
+  partecipanti=[];partsSnap.forEach(d=>partecipanti.push({id:d.id,...d.data()}));
+  updateStats();renderProgramma();renderWorkshops();
+}
+
+function updateStats() {
+  document.getElementById('sTalk').textContent=sessioni.length;
+  document.getElementById('sWorkshop').textContent=workshops.length;
+  const totIscrWs=workshops.reduce((s,w)=>(w.iscritti||[]).length+s,0);
+  const totPostiLib=workshops.reduce((s,w)=>Math.max(0,(w.maxPosti||0)-(w.iscritti||[]).length)+s,0);
+  document.getElementById('sIscrWorkshop').textContent=totIscrWs;
+  document.getElementById('sPostiLib').textContent=totPostiLib;
+}
+
+function renderProgramma() {
+  const c=document.getElementById('programmaContent');
+  if(!sessioni.length){c.innerHTML='<div class="empty-state"><div style="font-size:32px;opacity:.3">📅</div><div style="margin-top:8px">Nessuna sessione</div></div>';return;}
+  const byDay={};sessioni.forEach(s=>{const d=s.data||'nd';if(!byDay[d])byDay[d]=[];byDay[d].push(s);});
+  c.innerHTML=Object.keys(byDay).sort().map((day,di)=>`
+    <div style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span style="background:var(--conv);color:white;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:600">Giorno ${di+1}</span>
+        <span style="font-size:12px;color:var(--text3)">${day&&day!=='nd'?new Date(day).toLocaleDateString('it-IT',{weekday:'long',day:'2-digit',month:'long'}):''}</span>
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+      </div>
+      ${byDay[day].map(s=>`
+        <div class="session-item">
+          <div class="session-time">${s.oraInizio||'--:--'}<br><span style="opacity:.5">→ ${s.oraFine||'--:--'}</span></div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:600;margin-bottom:4px">${esc(s.titolo||'—')}</div>
+            <div style="font-size:12px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap;margin-bottom:5px">
+              ${s.sala?`<span>🏛️ ${esc(s.sala)}</span>`:''}
+              ${s.relatore?`<span>🎤 ${esc(s.relatore)}</span>`:''}
+            </div>
+            <span class="tag ${TAG_CLS[s.tipo]||'tag-break'}">${TIPI[s.tipo]||s.tipo||'—'}</span>
+          </div>
+          <div style="display:flex;gap:5px">
+            <button class="btn btn-outline btn-sm" data-edit="${s.id}">✏️</button>
+            <button class="btn btn-danger btn-sm" data-del="${s.id}">✕</button>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+  c.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>apriEditItem(b.dataset.edit)));
+  c.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>eliminaItem(b.dataset.del)));
+}
+
+function renderWorkshops() {
+  const c=document.getElementById('workshopsContent');
+  if(!workshops.length){c.innerHTML='<div class="empty-state"><div style="font-size:32px;opacity:.3">🔧</div><div style="margin-top:8px">Nessun workshop prenotabile</div></div>';return;}
+  c.innerHTML=workshops.map(w=>{
+    const iscritti=(w.iscritti||[]).length; const max=w.maxPosti||20;
+    const pct=Math.min(100,Math.round(iscritti/max*100)); const liberi=Math.max(0,max-iscritti);
+    const barColor=pct>=90?'var(--danger)':pct>=70?'var(--warn)':'var(--conv)';
+    return `<div class="workshop-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span class="tag" style="background:#D1FAE5;color:#065F46">🔧 Workshop</span>
+            <span class="tag" style="background:var(--surface2);color:var(--text2)">${LIVELLI[w.livello||'tutti']||'Tutti'}</span>
+            ${w.quota>0?`<span class="tag" style="background:#FEF3C7;color:#92400E">€ ${w.quota}</span>`:'<span class="tag" style="background:var(--success-light);color:var(--success)">Gratuito</span>'}
+          </div>
+          <div style="font-size:15px;font-weight:600;margin-bottom:4px">${esc(w.titolo||'—')}</div>
+          <div style="font-size:12px;color:var(--text3);display:flex;gap:10px;flex-wrap:wrap">
+            ${w.data?`<span>📅 ${new Date(w.data).toLocaleDateString('it-IT',{day:'2-digit',month:'short'})}</span>`:''}
+            <span>🕐 ${w.oraInizio||'--:--'} → ${w.oraFine||'--:--'}</span>
+            ${w.sala?`<span>🏛️ ${esc(w.sala)}</span>`:''}
+            ${w.relatore?`<span>🎤 ${esc(w.relatore)}</span>`:''}
+          </div>
+          ${w.descrizione?`<div style="font-size:12px;color:var(--text2);margin-top:6px;line-height:1.5">${esc(w.descrizione.slice(0,120))}${w.descrizione.length>120?'...':''}</div>`:''}
+          ${w.materiale?`<div style="font-size:11px;color:var(--text3);margin-top:4px">📋 Serve: ${esc(w.materiale)}</div>`:''}
+        </div>
+        <div style="text-align:right;min-width:120px">
+          <div style="font-size:22px;font-weight:700;color:${barColor}">${iscritti}/${max}</div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">iscritti</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${barColor}"></div></div>
+          <div style="font-size:11px;color:${liberi>0?'var(--success)':'var(--danger)'};margin-top:4px;font-weight:600">${liberi>0?liberi+' posti liberi':'COMPLETO'}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:12px;justify-content:flex-end">
+        <button class="btn btn-outline btn-sm" onclick="apriWsIscritti('${w.id}')">👥 Iscritti (${iscritti})</button>
+        <button class="btn btn-outline btn-sm" data-editws="${w.id}">✏️</button>
+        <button class="btn btn-danger btn-sm" data-delws="${w.id}">✕ Elimina</button>
+      </div>
+    </div>`;
+  }).join('');
+  c.querySelectorAll('[data-editws]').forEach(b=>b.addEventListener('click',()=>apriEditWs(b.dataset.editws)));
+  c.querySelectorAll('[data-delws]').forEach(b=>b.addEventListener('click',()=>eliminaWs(b.dataset.delws)));
+}
+
+async function salvaItem() {
+  const titolo=document.getElementById('iTitolo').value.trim();
+  const data=document.getElementById('iData').value;
+  const oraInizio=document.getElementById('iOraInizio').value;
+  if(!titolo||!data||!oraInizio){showErr('itemErr','Compila titolo, data e ora inizio.');return;}
+  const btn=document.getElementById('btnSalvaItem');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
+  try {
+    const payload={titolo,data,tipo:document.getElementById('iTipo').value,oraInizio,oraFine:document.getElementById('iOraFine').value,sala:document.getElementById('iSala').value.trim(),relatore:document.getElementById('iRelatore').value.trim(),descrizione:document.getElementById('iDescrizione').value.trim(),updatedAt:serverTimestamp()};
+    const evId=window._convEvId;
+    if(window._editItemId) await setDoc(doc(db,'eventi',evId,'sessioni',window._editItemId),payload,{merge:true});
+    else {payload.createdAt=serverTimestamp();await addDoc(collection(db,'eventi',evId,'sessioni'),payload);}
+    document.getElementById('modalItem').classList.remove('show');
+    await loadData(evId);
+  }catch(e){showErr('itemErr','Errore: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='💾 Salva';}
+}
+
+async function salvaWs() {
+  const titolo=document.getElementById('wsTitolo').value.trim();
+  const data=document.getElementById('wsData').value;
+  const oraInizio=document.getElementById('wsOraInizio').value;
+  const maxPosti=parseInt(document.getElementById('wsMaxPosti').value)||20;
+  if(!titolo||!data||!oraInizio){showErr('wsErr','Compila titolo, data e ora inizio.');return;}
+  const btn=document.getElementById('btnSalvaWs');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
+  try {
+    const payload={titolo,data,tipo:'workshop',oraInizio,oraFine:document.getElementById('wsOraFine').value,sala:document.getElementById('wsSala').value.trim(),maxPosti,quota:parseFloat(document.getElementById('wsQuota').value)||0,relatore:document.getElementById('wsRelatore').value.trim(),descrizione:document.getElementById('wsDescrizione').value.trim(),materiale:document.getElementById('wsMateriale').value.trim(),livello:document.getElementById('wsLivello').value,updatedAt:serverTimestamp()};
+    const evId=window._convEvId;
+    if(window._editWsId) await setDoc(doc(db,'eventi',evId,'workshops',window._editWsId),payload,{merge:true});
+    else {payload.iscritti=[];payload.createdAt=serverTimestamp();await addDoc(collection(db,'eventi',evId,'workshops'),payload);}
+    document.getElementById('modalWs').classList.remove('show');
+    await loadData(evId);
+  }catch(e){showErr('wsErr','Errore: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='💾 Salva workshop';}
+}
+
+function apriEditItem(sid) {
+  const s=sessioni.find(x=>x.id===sid);if(!s)return;
+  window._editItemId=sid;
+  document.getElementById('iTitolo').value=s.titolo||'';document.getElementById('iData').value=s.data||'';
+  document.getElementById('iTipo').value=s.tipo||'talk';document.getElementById('iOraInizio').value=s.oraInizio||'';
+  document.getElementById('iOraFine').value=s.oraFine||'';document.getElementById('iSala').value=s.sala||'';
+  document.getElementById('iRelatore').value=s.relatore||'';document.getElementById('iDescrizione').value=s.descrizione||'';
+  document.getElementById('itemErr').style.display='none';
+  document.getElementById('modalItem').classList.add('show');
+}
+function apriEditWs(wid) {
+  const w=workshops.find(x=>x.id===wid);if(!w)return;
+  window._editWsId=wid;
+  document.getElementById('wsTitolo').value=w.titolo||'';document.getElementById('wsData').value=w.data||'';
+  document.getElementById('wsOraInizio').value=w.oraInizio||'';document.getElementById('wsOraFine').value=w.oraFine||'';
+  document.getElementById('wsSala').value=w.sala||'';document.getElementById('wsMaxPosti').value=w.maxPosti||20;
+  document.getElementById('wsQuota').value=w.quota||0;document.getElementById('wsRelatore').value=w.relatore||'';
+  document.getElementById('wsDescrizione').value=w.descrizione||'';document.getElementById('wsMateriale').value=w.materiale||'';
+  document.getElementById('wsLivello').value=w.livello||'tutti';
+  document.getElementById('wsErr').style.display='none';
+  document.getElementById('modalWs').classList.add('show');
+}
+async function eliminaItem(sid){if(!confirm('Eliminare questa sessione?'))return;try{await deleteDoc(doc(db,'eventi',window._convEvId,'sessioni',sid));await loadData(window._convEvId);}catch(e){alert(e.message);}}
+async function eliminaWs(wid){if(!confirm('Eliminare questo workshop?'))return;try{await deleteDoc(doc(db,'eventi',window._convEvId,'workshops',wid));await loadData(window._convEvId);}catch(e){alert(e.message);}}
+
+function apriWsIscritti(wid) {
+  const w=workshops.find(x=>x.id===wid);if(!w)return;
+  const iscrIds=w.iscritti||[];
+  const iscr=iscrIds.map(id=>partecipanti.find(p=>p.id===id)).filter(Boolean);
+  alert('Iscritti al workshop "'+w.titolo+'":\n\n'+(iscr.length?iscr.map(p=>'• '+p.cognome+' '+p.nome+(p.azienda?' ('+p.azienda+')':'')).join('\n'):'Nessun iscritto ancora'));
+}
+
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block';setTimeout(()=>e.style.display='none',4000);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+initApp();
+</script>
+</body>
+</html>

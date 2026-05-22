@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Convention Manager</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
+<script src="ecm-layout.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F6F9;--surface:#FFF;--surface2:#F0F2F5;--border:#DDE1E9;
+  --text:#1A1D2E;--text2:#5A5F7A;--text3:#9499B0;
+  --conv:#0EA5E9;--conv-light:#F0F9FF;--conv-dark:#0369A1;
+  --success:#059669;--success-light:#ECFDF5;
+  --danger:#DC2626;--danger-light:#FEF2F2;
+  --warn:#D97706;--warn-light:#FFFBEB;
+  --vip:#7C3AED;--vip-light:#F5F3FF;
+  --radius:10px;--radius-lg:14px;
+  --shadow:0 1px 3px rgba(0,0,0,.1),0 4px 12px rgba(0,0,0,.07)
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+.ecm-content{padding:24px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none}
+.btn-conv{background:var(--conv);color:white}.btn-conv:hover{background:var(--conv-dark)}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{background:var(--surface2)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.page-title{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.page-sub{font-size:13px;color:var(--text3);margin-top:2px}
+.badge-conv{display:inline-flex;align-items:center;gap:6px;background:var(--conv-light);color:var(--conv);border:1px solid rgba(14,165,233,.2);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow)}
+.stat-val{font-size:28px;font-weight:700}.stat-label{font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
+/* Module cards */
+.modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:24px}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);text-decoration:none;color:var(--text);transition:all .2s;display:flex;flex-direction:column;gap:10px}
+.module-card:hover{border-color:var(--conv);transform:translateY(-2px);box-shadow:0 4px 20px rgba(14,165,233,.15)}
+.module-icon{font-size:32px;width:56px;height:56px;border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.module-title{font-size:15px;font-weight:600}
+.module-sub{font-size:12px;color:var(--text3);line-height:1.5}
+.module-stats{display:flex;gap:12px;margin-top:4px}
+.ms{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:4px}
+.ms-val{font-weight:700;color:var(--text)}
+/* Ruoli badge */
+.ruolo-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.ruolo-vip{background:var(--vip-light);color:var(--vip)}
+.ruolo-espositore{background:#FEF3C7;color:#92400E}
+.ruolo-visitatore{background:var(--conv-light);color:var(--conv)}
+.ruolo-staff{background:var(--success-light);color:var(--success)}
+.ruolo-relatore{background:#E0E7FF;color:#3730A3}
+/* Tabs */
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:20px}
+.tab{padding:10px 20px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;background:none;border-left:none;border-right:none;border-top:none;font-family:'Inter',sans-serif}
+.tab.active{color:var(--conv);border-bottom-color:var(--conv)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+/* Card */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+/* Form */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.field-label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%}
+.form-input:focus{border-color:var(--conv);box-shadow:0 0 0 3px rgba(14,165,233,.1);background:white}
+select.form-input{cursor:pointer}
+textarea.form-input{resize:vertical;min-height:80px}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius-lg);padding:26px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:4px}
+.modal-sub{font-size:13px;color:var(--text3);margin-bottom:20px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.alert{padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:12px;display:none}
+.alert-error{background:var(--danger-light);color:var(--danger);border:1px solid rgba(220,38,38,.2)}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3)}
+/* Stand mappa */
+.stand-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.stand-cell{border:2px solid var(--border);border-radius:var(--radius);padding:10px;text-align:center;cursor:pointer;transition:all .2s;min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.stand-cell:hover{border-color:var(--conv);box-shadow:0 0 0 2px rgba(14,165,233,.15)}
+.stand-cell.occupato{border-color:var(--warn);background:var(--warn-light)}
+.stand-cell.libero{border-color:var(--border);background:var(--surface2)}
+.stand-num{font-size:18px;font-weight:700;color:var(--conv)}
+.stand-name{font-size:10px;color:var(--text2);text-align:center;line-height:1.3}
+@media(max-width:768px){.stats-grid{grid-template-columns:1fr 1fr}.modules-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+<div class="ecm-main">
+  <div class="ecm-topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="mobile-menu-btn" id="mobileMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar-title">Convention Manager</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-badge"><div class="topbar-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
+      <div id="userBarSlot"></div>
+    </div>
+  </div>
+  <div class="ecm-content">
+    <div class="page-header">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <div class="page-title">Convention Manager</div>
+          <span class="badge-conv">🏢 Convention</span>
+        </div>
+        <div class="page-sub" id="eventoNomeDisplay">Seleziona un evento Convention</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select class="form-input btn-sm" id="evSelect" style="min-width:200px"><option value="">— Seleziona evento —</option></select>
+      </div>
+    </div>
+
+    <!-- Stats globali -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val" id="sTotPart">0</div><div class="stat-label">Partecipanti</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--warn)" id="sTotStand">0</div><div class="stat-label">Stand</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--conv)" id="sTotWorkshop">0</div><div class="stat-label">Workshop</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--success)" id="sTotCheckin">0</div><div class="stat-label">Check-in oggi</div></div>
+    </div>
+
+    <!-- Moduli -->
+    <div class="modules-grid" id="moduliGrid">
+      <a class="module-card" href="convention-programma.html">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="module-icon" style="background:#EFF6FF">📅</div>
+          <div>
+            <div class="module-title">Programma & Workshop</div>
+            <div class="module-sub">Sessioni, talk e workshop prenotabili con gestione posti</div>
+          </div>
+        </div>
+        <div class="module-stats">
+          <div class="ms"><span class="ms-val" id="mStalk">0</span> sessioni</div>
+          <div class="ms"><span class="ms-val" id="mSwork">0</span> workshop</div>
+        </div>
+      </a>
+      <a class="module-card" href="convention-stand.html">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="module-icon" style="background:#FFFBEB">🏢</div>
+          <div>
+            <div class="module-title">Stand & Espositori</div>
+            <div class="module-sub">Mappa stand, schede espositori e badge dedicati</div>
+          </div>
+        </div>
+        <div class="module-stats">
+          <div class="ms"><span class="ms-val" id="mSstand">0</span> stand</div>
+          <div class="ms"><span class="ms-val" id="mSoccupati">0</span> occupati</div>
+        </div>
+      </a>
+      <a class="module-card" href="convention-checkin.html">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="module-icon" style="background:#F0FDF4">📷</div>
+          <div>
+            <div class="module-title">Check-in multi-area</div>
+            <div class="module-sub">Scanner QR per ingresso generale, VIP, espositori, conferenze</div>
+          </div>
+        </div>
+        <div class="module-stats">
+          <div class="ms"><span class="ms-val" id="mSdentro">0</span> presenti ora</div>
+        </div>
+      </a>
+      <a class="module-card" href="convention-catering.html">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="module-icon" style="background:#FFF7ED">🍽️</div>
+          <div>
+            <div class="module-title">Catering</div>
+            <div class="module-sub">Preferenze alimentari, gestione pasti e report per cucina</div>
+          </div>
+        </div>
+        <div class="module-stats">
+          <div class="ms"><span class="ms-val" id="mSveg">0</span> vegetariani</div>
+          <div class="ms"><span class="ms-val" id="mSalle">0</span> allergie</div>
+        </div>
+      </a>
+      <a class="module-card" href="convention-navette.html">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="module-icon" style="background:#F5F3FF">🚌</div>
+          <div>
+            <div class="module-title">Navette & Parcheggi</div>
+            <div class="module-sub">Prenotazione navetta, assegnazione posti parcheggio</div>
+          </div>
+        </div>
+        <div class="module-stats">
+          <div class="ms"><span class="ms-val" id="mSnavetta">0</span> prenotazioni</div>
+          <div class="ms"><span class="ms-val" id="mSparcheggi">0</span> parcheggi</div>
+        </div>
+      </a>
+      <a class="module-card" href="convention-report.html">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="module-icon" style="background:#F0F9FF">📊</div>
+          <div>
+            <div class="module-title">Report & Flussi</div>
+            <div class="module-sub">Statistiche presenze per area, workshop, catering ed export</div>
+          </div>
+        </div>
+        <div class="module-stats">
+          <div class="ms">Report completo</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Tabs iscritti per ruolo -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)">👥 Partecipanti per ruolo</div>
+        <button class="btn btn-conv btn-sm" id="btnNuovoPart">+ Aggiungi partecipante</button>
+      </div>
+      <!-- Ruoli stats -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--vip-light);border-radius:20px;font-size:12px">
+          <span style="font-weight:700;color:var(--vip)" id="cntVip">0</span><span style="color:var(--vip)">VIP</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:#FEF3C7;border-radius:20px;font-size:12px">
+          <span style="font-weight:700;color:#92400E" id="cntEsp">0</span><span style="color:#92400E">Espositori</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--conv-light);border-radius:20px;font-size:12px">
+          <span style="font-weight:700;color:var(--conv)" id="cntVis">0</span><span style="color:var(--conv)">Visitatori</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--success-light);border-radius:20px;font-size:12px">
+          <span style="font-weight:700;color:var(--success)" id="cntStaff">0</span><span style="color:var(--success)">Staff</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:#E0E7FF;border-radius:20px;font-size:12px">
+          <span style="font-weight:700;color:#3730A3" id="cntRel">0</span><span style="color:#3730A3">Relatori</span>
+        </div>
+      </div>
+      <div id="partListPreview">
+        <div class="empty-state"><div style="font-size:28px;opacity:.3">👥</div><div style="margin-top:8px;font-size:13px">Seleziona un evento per vedere i partecipanti</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="ecm-version-footer" id="ecmVersionFooter"></div>
+</div>
+
+<!-- MODAL NUOVO PARTECIPANTE -->
+<div class="modal-overlay" id="modalPart">
+  <div class="modal">
+    <div class="modal-title">Nuovo partecipante Convention</div>
+    <div class="modal-sub">Registra un partecipante con ruolo specifico</div>
+    <div class="alert alert-error" id="partErr"></div>
+    <div class="form-grid" style="margin-bottom:12px">
+      <div class="form-group">
+        <label class="field-label">Nome *</label>
+        <input type="text" class="form-input" id="pNome" placeholder="Mario">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Cognome *</label>
+        <input type="text" class="form-input" id="pCognome" placeholder="Rossi">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Email</label>
+        <input type="email" class="form-input" id="pEmail" placeholder="email@esempio.com">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Telefono</label>
+        <input type="text" class="form-input" id="pTel" placeholder="+39 000 000 0000">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Azienda / Organizzazione</label>
+        <input type="text" class="form-input" id="pAzienda" placeholder="Nome azienda">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Ruolo *</label>
+        <select class="form-input" id="pRuolo">
+          <option value="visitatore">👤 Visitatore</option>
+          <option value="vip">⭐ VIP</option>
+          <option value="espositore">🏢 Espositore</option>
+          <option value="relatore">🎤 Relatore</option>
+          <option value="staff">🔧 Staff</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="field-label">CF (opzionale)</label>
+        <input type="text" class="form-input" id="pCF" placeholder="RSSMRA80A01H501Z" maxlength="16" style="text-transform:uppercase;font-family:'DM Mono',monospace">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Pagamento</label>
+        <select class="form-input" id="pPagamento">
+          <option value="nonpagato">Non pagato</option>
+          <option value="pagato">✓ Pagato</option>
+          <option value="sede">Paga in sede</option>
+          <option value="gratuito">Gratuito / Invitato</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btnAnnullaPart">Annulla</button>
+      <button class="btn btn-conv" id="btnSalvaPart">💾 Salva partecipante</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof renderSidebar === 'function') renderSidebar('convention');
+  if (typeof renderVersionFooter === 'function') renderVersionFooter();
+  document.getElementById('btnNuovoPart').addEventListener('click', () => {
+    const evId = document.getElementById('evSelect').value;
+    if (!evId) { alert('Seleziona prima un evento.'); return; }
+    ['pNome','pCognome','pEmail','pTel','pAzienda','pCF'].forEach(id => { const el=document.getElementById(id);if(el)el.value=''; });
+    document.getElementById('pRuolo').value = 'visitatore';
+    document.getElementById('pPagamento').value = 'nonpagato';
+    document.getElementById('partErr').style.display = 'none';
+    document.getElementById('modalPart').classList.add('show');
+    setTimeout(() => document.getElementById('pNome').focus(), 100);
+  });
+  document.getElementById('btnAnnullaPart').addEventListener('click', () => document.getElementById('modalPart').classList.remove('show'));
+  document.getElementById('btnSalvaPart').addEventListener('click', salvaPart);
+  document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('show'); }));
+});
+
+async function salvaPart() {
+  if (!window._convDb || !window._convEvId) return;
+  const nome = document.getElementById('pNome').value.trim();
+  const cognome = document.getElementById('pCognome').value.trim();
+  if (!nome || !cognome) { showErr('partErr','Inserisci nome e cognome'); return; }
+  const btn = document.getElementById('btnSalvaPart');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  try {
+    const { addDoc, collection, serverTimestamp, getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+    const { initializeApp, getApps } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control"};
+    const app = getApps().length ? getApps()[0] : initializeApp(FB);
+    try { await signInAnonymously(getAuth(app)); } catch(e) {}
+    // Genera ID progressivo
+    const snap = await getDocs(collection(window._convDb,'eventi',window._convEvId,'partecipanti'));
+    const maxId = snap.size;
+    const newId = 'C' + String(maxId+1).padStart(4,'0');
+    await addDoc(collection(window._convDb,'eventi',window._convEvId,'partecipanti'), {
+      id: newId, nome, cognome,
+      email: document.getElementById('pEmail').value.trim(),
+      tel: document.getElementById('pTel').value.trim(),
+      azienda: document.getElementById('pAzienda').value.trim(),
+      cf: document.getElementById('pCF').value.trim().toUpperCase(),
+      ruolo: document.getElementById('pRuolo').value,
+      pagamento: document.getElementById('pPagamento').value,
+      tipoEvento: 'convention',
+      createdAt: serverTimestamp()
+    });
+    document.getElementById('modalPart').classList.remove('show');
+    if (window._reloadPart) window._reloadPart();
+  } catch(e) { showErr('partErr','Errore: '+e.message); }
+  finally { btn.disabled=false; btn.innerHTML='💾 Salva partecipante'; }
+}
+function showErr(id, msg) { const e=document.getElementById(id); e.textContent=msg; e.style.display='block'; setTimeout(()=>e.style.display='none',4000); }
+</script>
+
+<script type="module">
+import { requireAuth, injectUserBar } from './ecm-auth.js';
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+
+let db, partecipanti=[], stand=[], workshops=[];
+const RUOLI = {vip:'⭐ VIP',espositore:'🏢 Espositore',visitatore:'👤 Visitatore',staff:'🔧 Staff',relatore:'🎤 Relatore'};
+const RUOLO_CLS = {vip:'ruolo-vip',espositore:'ruolo-espositore',visitatore:'ruolo-visitatore',staff:'ruolo-staff',relatore:'ruolo-relatore'};
+
+async function initApp() {
+  try {
+    const app = getApps().length ? getApps()[0] : initializeApp(FB);
+    db = getFirestore(app);
+    window._convDb = db;
+    const auth = getAuth(app);
+    try { await requireAuth(); injectUserBar('userBarSlot'); } catch(e) {}
+    if (!auth.currentUser) { try { await signInAnonymously(auth); } catch(e) {} }
+    document.getElementById('fbDot').className = 'topbar-dot ok';
+    document.getElementById('fbStatus').textContent = 'Firebase connesso';
+
+    const evSnap = await getDocs(collection(db,'eventi'));
+    const evList = [];
+    evSnap.forEach(d => evList.push({id:d.id,...d.data()}));
+    evList.filter(e => e.stato !== 'archiviato' && (e.tipo === 'convention' || !e.tipo))
+      .sort((a,b) => new Date(b.data||0)-new Date(a.data||0))
+      .forEach(ev => {
+        const opt = document.createElement('option');
+        opt.value = ev.id;
+        opt.textContent = (ev.nome||ev.id) + (ev.data?' ('+new Date(ev.data).toLocaleDateString('it-IT')+')':'');
+        document.getElementById('evSelect').appendChild(opt);
+      });
+
+    // Mostra anche tutti gli altri eventi
+    evList.filter(e => e.stato !== 'archiviato' && e.tipo && e.tipo !== 'convention').forEach(ev => {
+      const opt = document.createElement('option');
+      opt.value = ev.id;
+      opt.textContent = (ev.nome||ev.id) + ' ['+e.tipo+']';
+      document.getElementById('evSelect').appendChild(opt);
+    });
+
+    const savedId = localStorage.getItem('ecm_eventId');
+    const autoId = (savedId && evList.find(e=>e.id===savedId)) ? savedId : evList.find(e=>e.tipo==='convention')?.id || evList[0]?.id;
+    if (autoId) {
+      document.getElementById('evSelect').value = autoId;
+      await loadEventoData(autoId, evList);
+    }
+    document.getElementById('evSelect').addEventListener('change', async function() {
+      if (this.value) await loadEventoData(this.value, evList);
+    });
+  } catch(e) { console.error(e); }
+}
+
+async function loadEventoData(evId, evList) {
+  window._convEvId = evId;
+  localStorage.setItem('ecm_eventId', evId);
+  const ev = evList.find(e=>e.id===evId);
+  document.getElementById('eventoNomeDisplay').textContent = ev?.nome || '—';
+
+  const [partsSnap, standSnap, wsSnap] = await Promise.all([
+    getDocs(collection(db,'eventi',evId,'partecipanti')),
+    getDocs(collection(db,'eventi',evId,'stand')),
+    getDocs(collection(db,'eventi',evId,'workshops'))
+  ]);
+
+  partecipanti=[]; partsSnap.forEach(d=>partecipanti.push({id:d.id,...d.data()}));
+  stand=[]; standSnap.forEach(d=>stand.push({id:d.id,...d.data()}));
+  workshops=[]; wsSnap.forEach(d=>workshops.push({id:d.id,...d.data()}));
+
+  updateStats(); renderPartecipanti();
+  window._reloadPart = () => loadEventoData(evId, evList);
+}
+
+function updateStats() {
+  document.getElementById('sTotPart').textContent = partecipanti.length;
+  document.getElementById('sTotStand').textContent = stand.length;
+  document.getElementById('sTotWorkshop').textContent = workshops.length;
+  document.getElementById('cntVip').textContent = partecipanti.filter(p=>p.ruolo==='vip').length;
+  document.getElementById('cntEsp').textContent = partecipanti.filter(p=>p.ruolo==='espositore').length;
+  document.getElementById('cntVis').textContent = partecipanti.filter(p=>p.ruolo==='visitatore'||!p.ruolo).length;
+  document.getElementById('cntStaff').textContent = partecipanti.filter(p=>p.ruolo==='staff').length;
+  document.getElementById('cntRel').textContent = partecipanti.filter(p=>p.ruolo==='relatore').length;
+  document.getElementById('mSstand').textContent = stand.length;
+  document.getElementById('mSoccupati').textContent = stand.filter(s=>s.espositoreId||s.azienda).length;
+  document.getElementById('mStalk').textContent = workshops.filter(w=>w.tipo!=='workshop').length;
+  document.getElementById('mSwork').textContent = workshops.filter(w=>w.tipo==='workshop').length;
+}
+
+function renderPartecipanti() {
+  const c = document.getElementById('partListPreview');
+  if (!partecipanti.length) {
+    c.innerHTML = '<div class="empty-state"><div style="font-size:28px;opacity:.3">👥</div><div style="margin-top:8px;font-size:13px">Nessun partecipante ancora</div></div>';
+    return;
+  }
+  const preview = partecipanti.slice(0,10);
+  c.innerHTML = preview.map(p => {
+    const ruolo = p.ruolo || 'visitatore';
+    const cls = RUOLO_CLS[ruolo] || 'ruolo-visitatore';
+    const lbl = RUOLI[ruolo] || ruolo;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border)">
+      <span class="ruolo-badge ${cls}">${lbl}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:500">${esc(p.cognome||'')} ${esc(p.nome||'')}</div>
+        ${p.azienda?`<div style="font-size:11px;color:var(--text3)">${esc(p.azienda)}</div>`:''}
+      </div>
+      ${p.email?`<div style="font-size:11px;color:var(--text3)">${esc(p.email)}</div>`:''}
+    </div>`;
+  }).join('') + (partecipanti.length>10?`<div style="padding:10px 14px;font-size:12px;color:var(--text3);text-align:center">+${partecipanti.length-10} altri partecipanti</div>`:'');
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+initApp();
+</script>
+</body>
+</html>

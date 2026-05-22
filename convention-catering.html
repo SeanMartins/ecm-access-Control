@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Convention — Catering</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
+<script src="ecm-layout.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F6F9;--surface:#FFF;--surface2:#F0F2F5;--border:#DDE1E9;--text:#1A1D2E;--text2:#5A5F7A;--text3:#9499B0;--conv:#0EA5E9;--conv-light:#F0F9FF;--conv-dark:#0369A1;--success:#059669;--success-light:#ECFDF5;--danger:#DC2626;--danger-light:#FEF2F2;--warn:#D97706;--warn-light:#FFFBEB;--radius:10px;--radius-lg:14px;--shadow:0 1px 3px rgba(0,0,0,.1),0 4px 12px rgba(0,0,0,.07)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+.ecm-content{padding:24px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none}
+.btn-conv{background:var(--conv);color:white}.btn-conv:hover{background:var(--conv-dark)}
+.btn-success{background:var(--success);color:white}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{background:var(--surface2)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%}
+.form-input:focus{border-color:var(--conv)}
+select.form-input{cursor:pointer}
+.field-label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase;display:block;margin-bottom:5px}
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:20px}
+.tab{padding:10px 20px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;background:none;border-left:none;border-right:none;border-top:none;font-family:'Inter',sans-serif}
+.tab.active{color:var(--conv);border-bottom-color:var(--conv)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+/* Pasto card */
+.pasto-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.pasto-title{font-size:15px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.preferenza-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:12px}
+.pref-card{border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center;background:var(--surface2)}
+.pref-icon{font-size:24px;margin-bottom:4px}
+.pref-num{font-size:22px;font-weight:700;color:var(--conv)}
+.pref-label{font-size:11px;color:var(--text3)}
+/* Tabella partecipanti */
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--surface2)}
+th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+/* Badge dieta */
+.dieta-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.dieta-standard{background:var(--success-light);color:var(--success)}
+.dieta-vegetariano{background:#D1FAE5;color:#065F46}
+.dieta-vegano{background:#ECFCCB;color:#365314}
+.dieta-halal{background:#FEF3C7;color:#92400E}
+.dieta-kosher{background:#E0E7FF;color:#3730A3}
+.dieta-senzaglutine{background:var(--warn-light);color:var(--warn)}
+.dieta-senzalattosio{background:var(--conv-light);color:var(--conv)}
+.allergia-badge{background:var(--danger-light);color:var(--danger);display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border-radius:20px;font-size:9px;font-weight:600;margin:1px}
+/* Print */
+@media print{.ecm-sidebar,.ecm-topbar,.ecm-version-footer,.no-print{display:none!important}.ecm-main{margin:0!important}.ecm-content{padding:8px!important}}
+.spinner{display:inline-block;width:20px;height:20px;border:3px solid var(--border);border-top-color:var(--conv);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:40px;color:var(--text3)}
+@media(max-width:768px){.preferenza-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+<div class="ecm-main">
+  <div class="ecm-topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="mobile-menu-btn" id="mobileMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar-title">Catering</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-badge"><div class="topbar-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
+      <div id="userBarSlot"></div>
+    </div>
+  </div>
+  <div class="ecm-content">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div>
+        <div style="font-size:22px;font-weight:700">Gestione Catering</div>
+        <div style="font-size:13px;color:var(--text3)" id="evNomeDisplay">Seleziona evento</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select class="form-input btn-sm" id="evSelect" style="min-width:200px"><option value="">— Evento —</option></select>
+        <button class="btn btn-success btn-sm no-print" id="btnExport">📊 Export cucina</button>
+        <button class="btn btn-outline btn-sm no-print" id="btnStampa">🖨️ Stampa</button>
+      </div>
+    </div>
+
+    <!-- Sommario preferenze globale -->
+    <div class="card" id="sommarioCard">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:14px">📊 Riepilogo preferenze alimentari</div>
+      <div class="preferenza-grid" id="prefGrid">
+        <div class="empty-state" style="grid-column:span 6;padding:20px"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="partecipanti">👥 Per partecipante</button>
+      <button class="tab" data-tab="colazione">☕ Colazione</button>
+      <button class="tab" data-tab="pranzo">🍽️ Pranzo</button>
+      <button class="tab" data-tab="cena">🌙 Cena</button>
+      <button class="tab" data-tab="allergie">⚠️ Allergie</button>
+    </div>
+
+    <div class="tab-pane active" id="tab-partecipanti">
+      <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+        <input type="text" class="form-input" id="searchCat" placeholder="Cerca partecipante..." style="max-width:280px">
+        <select class="form-input" id="filterDieta" style="max-width:180px">
+          <option value="">Tutte le diete</option>
+          <option value="standard">Standard</option>
+          <option value="vegetariano">Vegetariano</option>
+          <option value="vegano">Vegano</option>
+          <option value="halal">Halal</option>
+          <option value="kosher">Kosher</option>
+          <option value="senzaglutine">Senza glutine</option>
+          <option value="senzalattosio">Senza lattosio</option>
+        </select>
+      </div>
+      <div class="table-wrap" id="partCateringTable">
+        <div class="empty-state"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="tab-colazione">
+      <div id="colazioneContent"><div class="empty-state">Seleziona un evento</div></div>
+    </div>
+    <div class="tab-pane" id="tab-pranzo">
+      <div id="pranzoContent"><div class="empty-state">Seleziona un evento</div></div>
+    </div>
+    <div class="tab-pane" id="tab-cena">
+      <div id="cenaContent"><div class="empty-state">Seleziona un evento</div></div>
+    </div>
+    <div class="tab-pane" id="tab-allergie">
+      <div id="allergieContent"><div class="empty-state">Seleziona un evento</div></div>
+    </div>
+  </div>
+  <div class="ecm-version-footer no-print" id="ecmVersionFooter"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof renderSidebar === 'function') renderSidebar('convention-catering');
+  if (typeof renderVersionFooter === 'function') renderVersionFooter();
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById('tab-'+t.dataset.tab).classList.add('active');
+    });
+  });
+  document.getElementById('searchCat').addEventListener('input', renderTabella);
+  document.getElementById('filterDieta').addEventListener('change', renderTabella);
+  document.getElementById('btnStampa').addEventListener('click', () => window.print());
+  document.getElementById('btnExport').addEventListener('click', exportExcel);
+});
+</script>
+
+<script type="module">
+import { requireAuth, injectUserBar } from './ecm-auth.js';
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+
+const DIETE = {
+  standard:{label:'Standard',icon:'🍽️',cls:'dieta-standard'},
+  vegetariano:{label:'Vegetariano',icon:'🥗',cls:'dieta-vegetariano'},
+  vegano:{label:'Vegano',icon:'🌱',cls:'dieta-vegano'},
+  halal:{label:'Halal',icon:'☪️',cls:'dieta-halal'},
+  kosher:{label:'Kosher',icon:'✡️',cls:'dieta-kosher'},
+  senzaglutine:{label:'Senza glutine',icon:'🌾',cls:'dieta-senzaglutine'},
+  senzalattosio:{label:'Senza lattosio',icon:'🥛',cls:'dieta-senzalattosio'}
+};
+const PASTI = ['colazione','pranzo','cena'];
+
+let db, partecipanti=[];
+
+async function initApp() {
+  const app=getApps().length?getApps()[0]:initializeApp(FB);
+  db=getFirestore(app);const auth=getAuth(app);
+  try{await requireAuth();injectUserBar('userBarSlot');}catch(e){}
+  if(!auth.currentUser){try{await signInAnonymously(auth);}catch(e){}}
+  document.getElementById('fbDot').className='topbar-dot ok';
+  document.getElementById('fbStatus').textContent='Firebase connesso';
+
+  const evSnap=await getDocs(collection(db,'eventi'));
+  const evList=[];evSnap.forEach(d=>evList.push({id:d.id,...d.data()}));
+  evList.filter(e=>e.stato!=='archiviato').sort((a,b)=>new Date(b.data||0)-new Date(a.data||0)).forEach(ev=>{
+    const opt=document.createElement('option');opt.value=ev.id;
+    opt.textContent=(ev.nome||ev.id)+(ev.data?' ('+new Date(ev.data).toLocaleDateString('it-IT')+')':'');
+    document.getElementById('evSelect').appendChild(opt);
+  });
+  const savedId=localStorage.getItem('ecm_eventId');
+  const autoId=(savedId&&evList.find(e=>e.id===savedId))?savedId:evList[0]?.id;
+  if(autoId){document.getElementById('evSelect').value=autoId;await loadData(autoId,evList);}
+  document.getElementById('evSelect').addEventListener('change',async function(){if(this.value)await loadData(this.value,evList);});
+}
+
+async function loadData(evId,evList) {
+  localStorage.setItem('ecm_eventId',evId);
+  const ev=evList?.find(e=>e.id===evId);
+  document.getElementById('evNomeDisplay').textContent=ev?.nome||'—';
+  const snap=await getDocs(collection(db,'eventi',evId,'partecipanti'));
+  partecipanti=[];snap.forEach(d=>partecipanti.push({id:d.id,...d.data()}));
+  renderSommario();renderTabella();renderPasto('colazione');renderPasto('pranzo');renderPasto('cena');renderAllergie();
+}
+
+function renderSommario() {
+  const counts={};
+  Object.keys(DIETE).forEach(k=>counts[k]=0);
+  partecipanti.forEach(p=>{const d=p.dieta||'standard';if(counts[d]!==undefined)counts[d]++;else counts['standard']++;});
+  document.getElementById('prefGrid').innerHTML=Object.entries(DIETE).map(([k,v])=>`
+    <div class="pref-card">
+      <div class="pref-icon">${v.icon}</div>
+      <div class="pref-num">${counts[k]||0}</div>
+      <div class="pref-label">${v.label}</div>
+    </div>`).join('');
+}
+
+function renderTabella() {
+  const q=(document.getElementById('searchCat').value||'').toLowerCase();
+  const fd=document.getElementById('filterDieta').value;
+  const fil=partecipanti.filter(p=>{
+    if(q&&!(p.nome?.toLowerCase().includes(q)||p.cognome?.toLowerCase().includes(q)))return false;
+    if(fd&&(p.dieta||'standard')!==fd)return false;
+    return true;
+  });
+  const c=document.getElementById('partCateringTable');
+  if(!fil.length){c.innerHTML='<div class="empty-state">Nessun risultato</div>';return;}
+  c.innerHTML='<table><thead><tr><th>Cognome</th><th>Nome</th><th>Ruolo</th><th>Dieta</th>'+
+    PASTI.map(p=>'<th>'+p.charAt(0).toUpperCase()+p.slice(1)+'</th>').join('')+
+    '<th>Allergie / Note</th></tr></thead><tbody>'+
+    fil.map(p=>{
+      const d=p.dieta||'standard';const dInfo=DIETE[d]||DIETE.standard;
+      const pasti=(p.pasti||{colazione:true,pranzo:true,cena:false});
+      return '<tr><td style="font-weight:500">'+esc(p.cognome||'')+'</td>'+
+        '<td>'+esc(p.nome||'')+'</td>'+
+        '<td style="color:var(--text3);font-size:12px">'+esc(p.ruolo||'visitatore')+'</td>'+
+        '<td><span class="dieta-badge '+dInfo.cls+'">'+dInfo.icon+' '+dInfo.label+'</span></td>'+
+        PASTI.map(pa=>'<td style="text-align:center">'+(pasti[pa]?'<span style="color:var(--success);font-size:16px">✓</span>':'<span style="color:var(--border);font-size:16px">—</span>')+'</td>').join('')+
+        '<td style="font-size:11px">'+((p.allergie||[]).map(a=>'<span class="allergia-badge">⚠️ '+esc(a)+'</span>').join(''))||'<span style="color:var(--text3)">—</span>'+'</td></tr>';
+    }).join('')+'</tbody></table>';
+}
+
+function renderPasto(pasto) {
+  const icon={colazione:'☕',pranzo:'🍽️',cena:'🌙'}[pasto];
+  const partPasto=partecipanti.filter(p=>{const pa=p.pasti||{colazione:true,pranzo:true,cena:false};return pa[pasto];});
+  const byDieta={};partPasto.forEach(p=>{const d=p.dieta||'standard';if(!byDieta[d])byDieta[d]=[];byDieta[d].push(p);});
+  document.getElementById(pasto+'Content').innerHTML=`
+    <div class="pasto-card">
+      <div class="pasto-title">${icon} ${pasto.charAt(0).toUpperCase()+pasto.slice(1)} — <strong>${partPasto.length}</strong> persone</div>
+      <div class="preferenza-grid">
+        ${Object.entries(byDieta).map(([d,ps])=>{const dI=DIETE[d]||DIETE.standard;return`<div class="pref-card"><div class="pref-icon">${dI.icon}</div><div class="pref-num">${ps.length}</div><div class="pref-label">${dI.label}</div></div>`;}).join('')}
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Cognome</th><th>Nome</th><th>Dieta</th><th>Allergie</th></tr></thead><tbody>
+        ${partPasto.map(p=>{const d=p.dieta||'standard';const dI=DIETE[d]||DIETE.standard;return`<tr><td style="font-weight:500">${esc(p.cognome||'')}</td><td>${esc(p.nome||'')}</td><td><span class="dieta-badge ${dI.cls}">${dI.icon} ${dI.label}</span></td><td style="font-size:11px">${(p.allergie||[]).map(a=>'<span class="allergia-badge">⚠️ '+esc(a)+'</span>').join('')||'—'}</td></tr>`;}).join('')}
+      </tbody></table></div>
+    </div>`;
+}
+
+function renderAllergie() {
+  const conAllergie=partecipanti.filter(p=>(p.allergie||[]).length>0);
+  document.getElementById('allergieContent').innerHTML=conAllergie.length?`
+    <div style="margin-bottom:12px;padding:10px 14px;background:var(--danger-light);border:1px solid rgba(220,38,38,.2);border-radius:var(--radius);font-size:13px;color:var(--danger);font-weight:500">
+      ⚠️ ${conAllergie.length} partecipanti con allergie o intolleranze
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>Cognome</th><th>Nome</th><th>Dieta</th><th>Allergie / Intolleranze</th><th>Note catering</th></tr></thead><tbody>
+      ${conAllergie.map(p=>{const d=p.dieta||'standard';const dI=DIETE[d]||DIETE.standard;return`<tr><td style="font-weight:600">${esc(p.cognome||'')}</td><td>${esc(p.nome||'')}</td><td><span class="dieta-badge ${dI.cls}">${dI.icon} ${dI.label}</span></td><td>${(p.allergie||[]).map(a=>'<span class="allergia-badge">⚠️ '+esc(a)+'</span>').join(' ')}</td><td style="font-size:12px;color:var(--text2)">${esc(p.noteCatering||'—')}</td></tr>`;}).join('')}
+    </tbody></table></div>`:
+    '<div class="empty-state"><div style="font-size:32px;opacity:.3;margin-bottom:8px">✅</div><div>Nessun partecipante con allergie registrate</div></div>';
+}
+
+function exportExcel() {
+  if(!partecipanti.length){alert('Nessun dato da esportare.');return;}
+  const wb=XLSX.utils.book_new();
+  // Riepilogo
+  const riepilogo=[['Dieta','Colazione','Pranzo','Cena']];
+  Object.entries(DIETE).forEach(([d,dI])=>{
+    const tot=partecipanti.filter(p=>(p.dieta||'standard')===d).length;
+    const col=partecipanti.filter(p=>(p.dieta||'standard')===d&&(p.pasti||{colazione:true}).colazione).length;
+    const pra=partecipanti.filter(p=>(p.dieta||'standard')===d&&(p.pasti||{pranzo:true}).pranzo).length;
+    const cen=partecipanti.filter(p=>(p.dieta||'standard')===d&&(p.pasti||{}).cena).length;
+    riepilogo.push([dI.label,col,pra,cen]);
+  });
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(riepilogo),'Riepilogo cucina');
+  // Dettaglio
+  const rows=[['Cognome','Nome','Ruolo','Dieta','Colazione','Pranzo','Cena','Allergie','Note catering']];
+  partecipanti.forEach(p=>{
+    const pa=p.pasti||{colazione:true,pranzo:true,cena:false};
+    rows.push([p.cognome||'—',p.nome||'—',p.ruolo||'visitatore',DIETE[p.dieta||'standard']?.label||'Standard',pa.colazione?'Sì':'No',pa.pranzo?'Sì':'No',pa.cena?'Sì':'No',(p.allergie||[]).join(', ')||'—',p.noteCatering||'—']);
+  });
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'Dettaglio partecipanti');
+  XLSX.writeFile(wb,'catering_'+new Date().toISOString().split('T')[0]+'.xlsx');
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+initApp();
+</script>
+</body>
+</html>

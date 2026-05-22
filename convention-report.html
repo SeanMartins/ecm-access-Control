@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Convention — Report & Flussi</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
+<script src="ecm-layout.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F6F9;--surface:#FFF;--surface2:#F0F2F5;--border:#DDE1E9;--text:#1A1D2E;--text2:#5A5F7A;--text3:#9499B0;--conv:#0EA5E9;--conv-light:#F0F9FF;--conv-dark:#0369A1;--success:#059669;--success-light:#ECFDF5;--danger:#DC2626;--danger-light:#FEF2F2;--warn:#D97706;--warn-light:#FFFBEB;--vip:#7C3AED;--radius:10px;--radius-lg:14px;--shadow:0 1px 3px rgba(0,0,0,.1),0 4px 12px rgba(0,0,0,.07)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+.ecm-content{padding:24px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none}
+.btn-conv{background:var(--conv);color:white}.btn-conv:hover{background:var(--conv-dark)}
+.btn-success{background:var(--success);color:white}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{background:var(--surface2)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%}
+select.form-input{cursor:pointer}
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:20px;flex-wrap:wrap}
+.tab{padding:10px 16px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;background:none;border-left:none;border-right:none;border-top:none;font-family:'Inter',sans-serif}
+.tab.active{color:var(--conv);border-bottom-color:var(--conv)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+.stats-big{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow);text-align:center}
+.stat-val{font-size:28px;font-weight:700}.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.chart-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.chart-label{font-size:12px;color:var(--text2);min-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chart-bar{flex:1;height:22px;background:var(--surface2);border-radius:6px;overflow:hidden}
+.chart-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding-right:6px;justify-content:flex-end;transition:width .5s}
+.chart-pct{font-size:10px;font-weight:700;color:white;white-space:nowrap}
+.chart-count{font-size:12px;color:var(--text3);min-width:40px;text-align:right}
+.ruolo-row{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border)}
+.ruolo-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--surface2)}
+th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+td{padding:10px 14px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.mono{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
+.spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--conv);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:40px;color:var(--text3)}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+<div class="ecm-main">
+  <div class="ecm-topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="mobile-menu-btn" id="mobileMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar-title">Report & Flussi Convention</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-badge"><div class="topbar-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
+      <div id="userBarSlot"></div>
+    </div>
+  </div>
+  <div class="ecm-content">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div>
+        <div style="font-size:22px;font-weight:700">Report & Flussi</div>
+        <div style="font-size:13px;color:var(--text3)" id="evNomeDisplay">Seleziona evento</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select class="form-input btn-sm" id="evSelect" style="min-width:200px"><option value="">— Evento —</option></select>
+        <button class="btn btn-success btn-sm" id="btnExportCompleto">📊 Export completo</button>
+      </div>
+    </div>
+
+    <!-- Stats globali -->
+    <div class="stats-big" id="statsGlobali">
+      <div class="stat-card"><div class="stat-val" id="sTotPart">0</div><div class="stat-label">Partecipanti</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--success)" id="sPresenti">0</div><div class="stat-label">Presenti oggi</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--warn)" id="sTotStand">0</div><div class="stat-label">Stand</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--conv)" id="sTotWs">0</div><div class="stat-label">Workshop</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--vip)" id="sTotVip">0</div><div class="stat-label">VIP</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:#D97706" id="sTotEsp">0</div><div class="stat-label">Espositori</div></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="ruoli">👥 Per ruolo</button>
+      <button class="tab" data-tab="aree">📍 Per area</button>
+      <button class="tab" data-tab="workshops">🔧 Workshop</button>
+      <button class="tab" data-tab="pagamenti">💳 Pagamenti</button>
+      <button class="tab" data-tab="completo">📋 Lista completa</button>
+    </div>
+
+    <div class="tab-pane active" id="tab-ruoli"><div id="ruoliContent"><div class="empty-state"><div class="spinner"></div></div></div></div>
+    <div class="tab-pane" id="tab-aree"><div id="areeContent"><div class="empty-state">Seleziona evento</div></div></div>
+    <div class="tab-pane" id="tab-workshops"><div id="wsContent"><div class="empty-state">Seleziona evento</div></div></div>
+    <div class="tab-pane" id="tab-pagamenti"><div id="pagContent"><div class="empty-state">Seleziona evento</div></div></div>
+    <div class="tab-pane" id="tab-completo">
+      <div style="margin-bottom:12px"><input type="text" class="form-input" id="searchCompleto" placeholder="Cerca..." style="max-width:300px"></div>
+      <div class="table-wrap" id="completoTable"><div class="empty-state">Seleziona evento</div></div>
+    </div>
+  </div>
+  <div class="ecm-version-footer" id="ecmVersionFooter"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof renderSidebar === 'function') renderSidebar('convention-report');
+  if (typeof renderVersionFooter === 'function') renderVersionFooter();
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById('tab-'+t.dataset.tab).classList.add('active');
+    });
+  });
+  document.getElementById('searchCompleto').addEventListener('input', renderCompleto);
+  document.getElementById('btnExportCompleto').addEventListener('click', exportCompleto);
+});
+</script>
+
+<script type="module">
+import { requireAuth, injectUserBar } from './ecm-auth.js';
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+
+const RUOLI_INFO={vip:{label:'VIP',icon:'⭐',color:'#7C3AED'},espositore:{label:'Espositore',icon:'🏢',color:'#D97706'},visitatore:{label:'Visitatore',icon:'👤',color:'#0EA5E9'},staff:{label:'Staff',icon:'🔧',color:'#059669'},relatore:{label:'Relatore',icon:'🎤',color:'#3730A3'}};
+const AREE=['ingresso','vip','espositori','conferenze','workshop','catering'];
+
+let db, partecipanti=[], workshops=[], stand=[], checkinAree={};
+
+async function initApp() {
+  const app=getApps().length?getApps()[0]:initializeApp(FB);
+  db=getFirestore(app);const auth=getAuth(app);
+  try{await requireAuth();injectUserBar('userBarSlot');}catch(e){}
+  if(!auth.currentUser){try{await signInAnonymously(auth);}catch(e){}}
+  document.getElementById('fbDot').className='topbar-dot ok';
+  document.getElementById('fbStatus').textContent='Firebase connesso';
+  const evSnap=await getDocs(collection(db,'eventi'));
+  const evList=[];evSnap.forEach(d=>evList.push({id:d.id,...d.data()}));
+  evList.filter(e=>e.stato!=='archiviato').sort((a,b)=>new Date(b.data||0)-new Date(a.data||0)).forEach(ev=>{
+    const opt=document.createElement('option');opt.value=ev.id;
+    opt.textContent=(ev.nome||ev.id)+(ev.data?' ('+new Date(ev.data).toLocaleDateString('it-IT')+')':'');
+    document.getElementById('evSelect').appendChild(opt);
+  });
+  const savedId=localStorage.getItem('ecm_eventId');
+  const autoId=(savedId&&evList.find(e=>e.id===savedId))?savedId:evList[0]?.id;
+  if(autoId){document.getElementById('evSelect').value=autoId;await loadData(autoId,evList);}
+  document.getElementById('evSelect').addEventListener('change',async function(){if(this.value)await loadData(this.value,evList);});
+}
+
+async function loadData(evId,evList) {
+  window._convEvId=evId;localStorage.setItem('ecm_eventId',evId);
+  const ev=evList?.find(e=>e.id===evId);
+  document.getElementById('evNomeDisplay').textContent=ev?.nome||'—';
+  const snaps=await Promise.all([
+    getDocs(collection(db,'eventi',evId,'partecipanti')),
+    getDocs(collection(db,'eventi',evId,'workshops')),
+    getDocs(collection(db,'eventi',evId,'stand')),
+    ...AREE.map(a=>getDocs(collection(db,'eventi',evId,'checkin_'+a)).catch(()=>({docs:[],forEach:()=>{}})))
+  ]);
+  partecipanti=[];snaps[0].forEach(d=>partecipanti.push({id:d.id,...d.data()}));
+  workshops=[];snaps[1].forEach(d=>workshops.push({id:d.id,...d.data()}));
+  stand=[];snaps[2].forEach(d=>stand.push({id:d.id,...d.data()}));
+  checkinAree={};
+  AREE.forEach((a,i)=>{checkinAree[a]=[];snaps[3+i].forEach(d=>checkinAree[a].push({id:d.id,...d.data()}));});
+  updateStats();renderRuoli();renderAree();renderWorkshops();renderPagamenti();renderCompleto();
+}
+
+function updateStats() {
+  const presenti=new Set(Object.values(checkinAree).flatMap(arr=>arr.map(c=>c.partecipanteId)));
+  document.getElementById('sTotPart').textContent=partecipanti.length;
+  document.getElementById('sPresenti').textContent=presenti.size;
+  document.getElementById('sTotStand').textContent=stand.length;
+  document.getElementById('sTotWs').textContent=workshops.length;
+  document.getElementById('sTotVip').textContent=partecipanti.filter(p=>p.ruolo==='vip').length;
+  document.getElementById('sTotEsp').textContent=partecipanti.filter(p=>p.ruolo==='espositore').length;
+}
+
+function renderRuoli() {
+  const c=document.getElementById('ruoliContent');
+  const totale=partecipanti.length||1;
+  c.innerHTML='<div class="card">'+
+    Object.entries(RUOLI_INFO).map(([ruolo,info])=>{
+      const cnt=partecipanti.filter(p=>(p.ruolo||'visitatore')===ruolo).length;
+      const pct=Math.round(cnt/totale*100);
+      return `<div class="chart-bar-row">
+        <div class="chart-label"><span class="ruolo-dot" style="background:${info.color};display:inline-block;margin-right:6px"></span>${info.icon} ${info.label}</div>
+        <div class="chart-bar"><div class="chart-fill" style="width:${pct}%;background:${info.color}">${pct>10?'<span class="chart-pct">'+pct+'%</span>':''}</div></div>
+        <div class="chart-count">${cnt}</div>
+      </div>`;
+    }).join('')+
+    '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><strong>'+partecipanti.length+'</strong> partecipanti totali</div>'+
+  '</div>';
+}
+
+function renderAree() {
+  const c=document.getElementById('areeContent');
+  const totale=partecipanti.length||1;
+  const areaLabels={ingresso:'🚪 Ingresso',vip:'⭐ Area VIP',espositori:'🏢 Espositori',conferenze:'🎤 Conferenze',workshop:'🔧 Workshop',catering:'🍽️ Catering'};
+  c.innerHTML='<div class="card">'+
+    AREE.map(a=>{
+      const cnt=checkinAree[a]?.length||0;
+      const pct=Math.round(cnt/totale*100);
+      return `<div class="chart-bar-row">
+        <div class="chart-label">${areaLabels[a]||a}</div>
+        <div class="chart-bar"><div class="chart-fill" style="width:${pct}%;background:var(--conv)">${pct>10?'<span class="chart-pct">'+pct+'%</span>':''}</div></div>
+        <div class="chart-count">${cnt}</div>
+      </div>`;
+    }).join('')+
+  '</div>';
+}
+
+function renderWorkshops() {
+  const c=document.getElementById('wsContent');
+  if(!workshops.length){c.innerHTML='<div class="empty-state">Nessun workshop</div>';return;}
+  c.innerHTML='<div class="card"><div class="table-wrap"><table><thead><tr><th>Workshop</th><th>Data</th><th>Orario</th><th>Sala</th><th>Iscritti</th><th>Max</th><th>%</th></tr></thead><tbody>'+
+    workshops.map(w=>{
+      const isc=(w.iscritti||[]).length;const max=w.maxPosti||0;
+      const pct=max>0?Math.round(isc/max*100):0;
+      const color=pct>=90?'var(--danger)':pct>=70?'var(--warn)':'var(--success)';
+      return `<tr><td style="font-weight:500">${esc(w.titolo||'—')}</td>
+        <td class="mono">${w.data?new Date(w.data).toLocaleDateString('it-IT',{day:'2-digit',month:'short'}):' —'}</td>
+        <td class="mono">${w.oraInizio||'—'}</td>
+        <td>${esc(w.sala||'—')}</td>
+        <td style="font-weight:600;color:${color}">${isc}</td>
+        <td>${max}</td>
+        <td><span style="font-weight:700;color:${color}">${pct}%</span></td>
+      </tr>`;
+    }).join('')+'</tbody></table></div></div>';
+}
+
+function renderPagamenti() {
+  const c=document.getElementById('pagContent');
+  const pagati=partecipanti.filter(p=>p.pagamento==='pagato').length;
+  const sede=partecipanti.filter(p=>p.pagamento==='sede').length;
+  const non=partecipanti.filter(p=>!p.pagamento||p.pagamento==='nonpagato').length;
+  const grat=partecipanti.filter(p=>p.pagamento==='gratuito').length;
+  c.innerHTML='<div class="card">'+
+    [['✓ Pagato',pagati,'var(--success)'],['⏳ Paga in sede',sede,'var(--warn)'],['✗ Non pagato',non,'var(--danger)'],['🎁 Gratuito/Invitato',grat,'var(--text3)']].map(([lbl,cnt,col])=>{
+      const pct=partecipanti.length>0?Math.round(cnt/partecipanti.length*100):0;
+      return `<div class="chart-bar-row">
+        <div class="chart-label">${lbl}</div>
+        <div class="chart-bar"><div class="chart-fill" style="width:${pct}%;background:${col}"></div></div>
+        <div class="chart-count" style="color:${col};font-weight:600">${cnt}</div>
+      </div>`;
+    }).join('')+'</div>';
+}
+
+function renderCompleto() {
+  const q=(document.getElementById('searchCompleto').value||'').toLowerCase();
+  const fil=q?partecipanti.filter(p=>(p.nome||'').toLowerCase().includes(q)||(p.cognome||'').toLowerCase().includes(q)||(p.azienda||'').toLowerCase().includes(q)):partecipanti;
+  const c=document.getElementById('completoTable');
+  if(!fil.length){c.innerHTML='<div class="empty-state">Nessun partecipante</div>';return;}
+  const areaPresente=(partId)=>AREE.filter(a=>(checkinAree[a]||[]).some(x=>x.partecipanteId===partId)).map(a=>({ingresso:'🚪',vip:'⭐',espositori:'🏢',conferenze:'🎤',workshop:'🔧',catering:'🍽️'}[a]||a));
+  c.innerHTML='<table><thead><tr><th>Cognome</th><th>Nome</th><th>Ruolo</th><th>Azienda</th><th>Pagamento</th><th>Aree visitate</th></tr></thead><tbody>'+
+    fil.map(p=>{
+      const ri=RUOLI_INFO[p.ruolo||'visitatore']||RUOLI_INFO.visitatore;
+      const aree=areaPresente(p.id);
+      const pay={pagato:'✓',sede:'⏳',nonpagato:'✗',gratuito:'🎁'}[p.pagamento||'nonpagato']||'—';
+      const payCol={pagato:'var(--success)',sede:'var(--warn)',nonpagato:'var(--danger)',gratuito:'var(--text3)'}[p.pagamento||'nonpagato']||'—';
+      return `<tr><td style="font-weight:500">${esc(p.cognome||'')}</td><td>${esc(p.nome||'')}</td>
+        <td><span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:${ri.color}20;color:${ri.color}">${ri.icon} ${ri.label}</span></td>
+        <td style="color:var(--text2)">${esc(p.azienda||'—')}</td>
+        <td style="font-weight:600;color:${payCol}">${pay}</td>
+        <td style="font-size:16px">${aree.join(' ')||'—'}</td>
+      </tr>`;
+    }).join('')+'</tbody></table>';
+}
+
+function exportCompleto() {
+  if(!partecipanti.length){alert('Nessun dato.');return;}
+  const wb=XLSX.utils.book_new();
+  // Partecipanti
+  const rows=[['Cognome','Nome','Ruolo','Azienda','Email','Tel','CF','Pagamento','Dieta','Allergie','Note catering']];
+  partecipanti.forEach(p=>rows.push([p.cognome||'—',p.nome||'—',p.ruolo||'visitatore',p.azienda||'—',p.email||'—',p.tel||'—',p.cf||'—',p.pagamento||'nonpagato',p.dieta||'standard',(p.allergie||[]).join(', ')||'—',p.noteCatering||'—']));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'Partecipanti');
+  // Workshop
+  if(workshops.length){
+    const wsRows=[['Workshop','Data','Orario','Sala','Iscritti','Max','%']];
+    workshops.forEach(w=>{const isc=(w.iscritti||[]).length;const max=w.maxPosti||0;wsRows.push([w.titolo||'—',w.data||'—',w.oraInizio||'—',w.sala||'—',isc,max,max>0?Math.round(isc/max*100)+'%':'—']);});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(wsRows),'Workshop');
+  }
+  // Checkin per area
+  AREE.forEach(a=>{
+    const cks=checkinAree[a]||[];
+    if(!cks.length)return;
+    const aRows=[['Cognome','Nome','Azienda','Ruolo','Ora']];
+    cks.forEach(c=>{const p=partecipanti.find(x=>x.id===c.partecipanteId);aRows.push([p?.cognome||'—',p?.nome||'—',p?.azienda||'—',p?.ruolo||'—',c.ora||'—']);});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(aRows),('CI_'+a).slice(0,31));
+  });
+  XLSX.writeFile(wb,'convention_report_'+new Date().toISOString().split('T')[0]+'.xlsx');
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+initApp();
+</script>
+</body>
+</html>

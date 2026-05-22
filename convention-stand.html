@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Convention — Stand & Espositori</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
+<script src="ecm-layout.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F6F9;--surface:#FFF;--surface2:#F0F2F5;--border:#DDE1E9;--text:#1A1D2E;--text2:#5A5F7A;--text3:#9499B0;--conv:#0EA5E9;--conv-light:#F0F9FF;--conv-dark:#0369A1;--success:#059669;--success-light:#ECFDF5;--danger:#DC2626;--danger-light:#FEF2F2;--warn:#D97706;--warn-light:#FFFBEB;--radius:10px;--radius-lg:14px;--shadow:0 1px 3px rgba(0,0,0,.1),0 4px 12px rgba(0,0,0,.07)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+.ecm-content{padding:24px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none}
+.btn-conv{background:var(--conv);color:white}.btn-conv:hover{background:var(--conv-dark)}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{background:var(--surface2)}
+.btn-danger{background:var(--danger-light);color:var(--danger);border:1px solid rgba(220,38,38,.2)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.span2{grid-column:span 2}
+.field-label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%}
+.form-input:focus{border-color:var(--conv);background:white}
+textarea.form-input{resize:vertical;min-height:70px}
+/* Mappa stand */
+.mappa-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.stand-mappa{display:grid;gap:10px;margin-top:14px}
+.stand-row{display:flex;gap:10px;justify-content:center}
+.stand-cell{border:2px solid var(--border);border-radius:var(--radius);padding:10px 8px;text-align:center;cursor:pointer;transition:all .2s;min-width:100px;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;position:relative}
+.stand-cell:hover{border-color:var(--conv);box-shadow:0 0 0 3px rgba(14,165,233,.15)}
+.stand-cell.occupato{border-color:var(--warn);background:var(--warn-light)}
+.stand-cell.libero{border-color:var(--border);background:var(--surface2)}
+.stand-cell.selezionato{border-color:var(--conv);background:var(--conv-light);box-shadow:0 0 0 3px rgba(14,165,233,.2)}
+.stand-num{font-size:20px;font-weight:700;color:var(--conv)}
+.stand-cell.occupato .stand-num{color:var(--warn)}
+.stand-azienda{font-size:9px;color:var(--text2);text-align:center;line-height:1.3;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stand-tag{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%}
+/* Espositori lista */
+.esp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;transition:all .2s;box-shadow:var(--shadow)}
+.esp-card:hover{border-color:var(--conv)}
+.esp-stand-badge{width:48px;height:48px;background:var(--conv);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:white;font-size:18px;font-weight:700;flex-shrink:0}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius-lg);padding:26px;max-width:580px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.alert-error{background:var(--danger-light);color:var(--danger);border:1px solid rgba(220,38,38,.2);padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:12px;display:none}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:20px}
+.tab{padding:10px 20px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;background:none;border-left:none;border-right:none;border-top:none;font-family:'Inter',sans-serif}
+.tab.active{color:var(--conv);border-bottom-color:var(--conv)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+.empty-state{text-align:center;padding:40px;color:var(--text3)}
+@media(max-width:768px){.form-grid{grid-template-columns:1fr}.span2{grid-column:span 1}.stand-row{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+<div class="ecm-main">
+  <div class="ecm-topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="mobile-menu-btn" id="mobileMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar-title">Stand & Espositori</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-badge"><div class="topbar-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
+      <div id="userBarSlot"></div>
+    </div>
+  </div>
+  <div class="ecm-content">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div>
+        <div style="font-size:22px;font-weight:700">Stand & Espositori</div>
+        <div style="font-size:13px;color:var(--text3)" id="evNomeDisplay">Seleziona evento</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select class="form-input btn-sm" id="evSelect" style="min-width:200px"><option value="">— Evento —</option></select>
+        <button class="btn btn-conv" id="btnNuovoStand">+ Aggiungi stand</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)"><div style="font-size:26px;font-weight:700" id="sTotStand">0</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Stand totali</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)"><div style="font-size:26px;font-weight:700;color:var(--warn)" id="sOccupati">0</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Occupati</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)"><div style="font-size:26px;font-weight:700;color:var(--success)" id="sLiberi">0</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Liberi</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)"><div style="font-size:26px;font-weight:700;color:var(--conv)" id="sEspositori">0</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Espositori</div></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="mappa">🗺️ Mappa stand</button>
+      <button class="tab" data-tab="lista">📋 Lista espositori</button>
+    </div>
+
+    <div class="tab-pane active" id="tab-mappa">
+      <div class="mappa-wrap">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)">Mappa visiva stand</div>
+          <div style="display:flex;gap:10px;font-size:11px;color:var(--text3)">
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:var(--surface2);border:2px solid var(--border);border-radius:3px;display:inline-block"></span> Libero</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:var(--warn-light);border:2px solid var(--warn);border-radius:3px;display:inline-block"></span> Occupato</span>
+          </div>
+        </div>
+        <div id="mappaStand">
+          <div class="empty-state"><div style="font-size:32px;opacity:.3">🗺️</div><div style="margin-top:8px">Aggiungi stand per vedere la mappa</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="tab-lista">
+      <div id="listaEspositori">
+        <div class="empty-state"><div style="font-size:32px;opacity:.3">🏢</div><div style="margin-top:8px">Nessun espositore</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="ecm-version-footer" id="ecmVersionFooter"></div>
+</div>
+
+<!-- MODAL STAND -->
+<div class="modal-overlay" id="modalStand">
+  <div class="modal">
+    <div style="font-size:17px;font-weight:700;margin-bottom:4px" id="modalStandTitolo">Nuovo stand</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:20px">Configura uno stand espositivo</div>
+    <div class="alert-error" id="standErr"></div>
+    <div class="form-grid" style="margin-bottom:12px">
+      <div class="form-group">
+        <label class="field-label">Numero stand *</label>
+        <input type="text" class="form-input" id="sNumero" placeholder="Es. A1, B3, 15">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Dimensione</label>
+        <select class="form-input" id="sDim">
+          <option value="small">Small (3x3m)</option>
+          <option value="medium" selected>Medium (4x4m)</option>
+          <option value="large">Large (6x4m)</option>
+          <option value="xl">XL (8x6m)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="field-label">Posizione / Padiglione</label>
+        <input type="text" class="form-input" id="sPosizione" placeholder="Es. Padiglione A, Fila 1">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Colore mappa</label>
+        <input type="color" class="form-input" id="sColore" value="#0EA5E9" style="height:42px;cursor:pointer;padding:4px">
+      </div>
+      <div class="form-group span2" style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
+        <label class="field-label">Assegna a espositore (opzionale)</label>
+      </div>
+      <div class="form-group">
+        <label class="field-label">Azienda espositrice</label>
+        <input type="text" class="form-input" id="sAzienda" placeholder="Nome azienda">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Referente</label>
+        <input type="text" class="form-input" id="sReferente" placeholder="Nome cognome">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Email referente</label>
+        <input type="email" class="form-input" id="sEmail" placeholder="email@azienda.com">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Telefono</label>
+        <input type="text" class="form-input" id="sTel" placeholder="+39 000 000 0000">
+      </div>
+      <div class="form-group span2">
+        <label class="field-label">Prodotti / Settore</label>
+        <input type="text" class="form-input" id="sProdotti" placeholder="Es. Software gestionale, soluzioni cloud">
+      </div>
+      <div class="form-group span2">
+        <label class="field-label">Note stand</label>
+        <textarea class="form-input" id="sNote" placeholder="Richieste speciali, allestimento..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btnAnnullaStand">Annulla</button>
+      <button class="btn btn-conv" id="btnSalvaStand">💾 Salva stand</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof renderSidebar === 'function') renderSidebar('convention-stand');
+  if (typeof renderVersionFooter === 'function') renderVersionFooter();
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById('tab-'+t.dataset.tab).classList.add('active');
+    });
+  });
+  document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show')}));
+  document.getElementById('btnAnnullaStand').addEventListener('click',()=>document.getElementById('modalStand').classList.remove('show'));
+  document.getElementById('btnNuovoStand').addEventListener('click',apriNuovoStand);
+  document.getElementById('btnSalvaStand').addEventListener('click',salvaStand);
+});
+
+function apriNuovoStand() {
+  if(!window._convEvId){alert('Seleziona prima un evento.');return;}
+  window._editStandId=null;
+  document.getElementById('modalStandTitolo').textContent='Nuovo stand';
+  ['sNumero','sPosizione','sAzienda','sReferente','sEmail','sTel','sProdotti','sNote'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('sDim').value='medium';document.getElementById('sColore').value='#0EA5E9';
+  document.getElementById('standErr').style.display='none';
+  document.getElementById('modalStand').classList.add('show');
+  setTimeout(()=>document.getElementById('sNumero').focus(),100);
+}
+</script>
+
+<script type="module">
+import { requireAuth, injectUserBar } from './ecm-auth.js';
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc, setDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+const DIMS={small:'3×3m',medium:'4×4m',large:'6×4m',xl:'8×6m'};
+let db, stand=[];
+
+async function initApp() {
+  const app=getApps().length?getApps()[0]:initializeApp(FB);
+  db=getFirestore(app);const auth=getAuth(app);
+  try{await requireAuth();injectUserBar('userBarSlot');}catch(e){}
+  if(!auth.currentUser){try{await signInAnonymously(auth);}catch(e){}}
+  document.getElementById('fbDot').className='topbar-dot ok';
+  document.getElementById('fbStatus').textContent='Firebase connesso';
+  const evSnap=await getDocs(collection(db,'eventi'));
+  const evList=[];evSnap.forEach(d=>evList.push({id:d.id,...d.data()}));
+  evList.filter(e=>e.stato!=='archiviato').sort((a,b)=>new Date(b.data||0)-new Date(a.data||0)).forEach(ev=>{
+    const opt=document.createElement('option');opt.value=ev.id;
+    opt.textContent=(ev.nome||ev.id)+(ev.data?' ('+new Date(ev.data).toLocaleDateString('it-IT')+')':'');
+    document.getElementById('evSelect').appendChild(opt);
+  });
+  const savedId=localStorage.getItem('ecm_eventId');
+  const autoId=(savedId&&evList.find(e=>e.id===savedId))?savedId:evList[0]?.id;
+  if(autoId){document.getElementById('evSelect').value=autoId;await loadData(autoId,evList);}
+  document.getElementById('evSelect').addEventListener('change',async function(){if(this.value)await loadData(this.value,evList);});
+}
+
+async function loadData(evId,evList) {
+  window._convEvId=evId;localStorage.setItem('ecm_eventId',evId);
+  const ev=evList?.find(e=>e.id===evId);
+  document.getElementById('evNomeDisplay').textContent=ev?.nome||'—';
+  const snap=await getDocs(collection(db,'eventi',evId,'stand'));
+  stand=[];snap.forEach(d=>stand.push({id:d.id,...d.data()}));
+  stand.sort((a,b)=>String(a.numero||'').localeCompare(String(b.numero||''),undefined,{numeric:true}));
+  updateStats();renderMappa();renderLista();
+}
+
+function updateStats() {
+  const occ=stand.filter(s=>s.azienda).length;
+  document.getElementById('sTotStand').textContent=stand.length;
+  document.getElementById('sOccupati').textContent=occ;
+  document.getElementById('sLiberi').textContent=stand.length-occ;
+  document.getElementById('sEspositori').textContent=occ;
+}
+
+function renderMappa() {
+  const c=document.getElementById('mappaStand');
+  if(!stand.length){c.innerHTML='<div class="empty-state"><div style="font-size:32px;opacity:.3">🗺️</div><div style="margin-top:8px">Aggiungi stand per vedere la mappa</div></div>';return;}
+  const perRow=Math.ceil(Math.sqrt(stand.length));
+  const rows=[];
+  for(let i=0;i<stand.length;i+=perRow) rows.push(stand.slice(i,i+perRow));
+  c.innerHTML=rows.map(row=>`<div class="stand-row">${row.map(s=>{
+    const occ=!!s.azienda; const col=s.colore||'#0EA5E9';
+    return `<div class="stand-cell ${occ?'occupato':'libero'}" data-sid="${s.id}" onclick="apriEditStand('${s.id}')">
+      <div class="stand-num" style="${occ?'color:var(--warn)':'color:'+col}">${esc(s.numero||'?')}</div>
+      <div class="stand-azienda">${occ?esc(s.azienda):esc(DIMS[s.dim||'medium']||'')}</div>
+      ${occ?'<div class="stand-tag" style="background:var(--warn)"></div>':''}
+    </div>`;
+  }).join('')}</div>`).join('');
+}
+
+function renderLista() {
+  const c=document.getElementById('listaEspositori');
+  const esp=stand.filter(s=>s.azienda);
+  if(!esp.length){c.innerHTML='<div class="empty-state"><div style="font-size:32px;opacity:.3">🏢</div><div style="margin-top:8px">Nessun espositore assegnato</div></div>';return;}
+  c.innerHTML=esp.map(s=>`<div class="esp-card">
+    <div class="esp-stand-badge" style="background:${s.colore||'var(--conv)'}">
+      <span>${esc(s.numero||'?')}</span>
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px">${esc(s.azienda||'—')}</div>
+      <div style="font-size:12px;color:var(--text3);display:flex;gap:12px;flex-wrap:wrap">
+        ${s.referente?`<span>👤 ${esc(s.referente)}</span>`:''}
+        ${s.email?`<span>📧 ${esc(s.email)}</span>`:''}
+        ${s.tel?`<span>📞 ${esc(s.tel)}</span>`:''}
+        ${s.posizione?`<span>📍 ${esc(s.posizione)}</span>`:''}
+        <span>📐 ${DIMS[s.dim||'medium']||'—'}</span>
+      </div>
+      ${s.prodotti?`<div style="font-size:12px;color:var(--text2);margin-top:4px">🏷️ ${esc(s.prodotti)}</div>`:''}
+    </div>
+    <div style="display:flex;gap:5px;flex-shrink:0">
+      <button class="btn btn-outline btn-sm" data-editst="${s.id}">✏️</button>
+      <button class="btn btn-danger btn-sm" data-delst="${s.id}">✕</button>
+    </div>
+  </div>`).join('');
+  c.querySelectorAll('[data-editst]').forEach(b=>b.addEventListener('click',()=>apriEditStand(b.dataset.editst)));
+  c.querySelectorAll('[data-delst]').forEach(b=>b.addEventListener('click',()=>eliminaStand(b.dataset.delst)));
+}
+
+window.apriEditStand = function(sid) {
+  const s=stand.find(x=>x.id===sid);if(!s)return;
+  window._editStandId=sid;
+  document.getElementById('modalStandTitolo').textContent='Modifica stand '+s.numero;
+  document.getElementById('sNumero').value=s.numero||'';
+  document.getElementById('sDim').value=s.dim||'medium';
+  document.getElementById('sPosizione').value=s.posizione||'';
+  document.getElementById('sColore').value=s.colore||'#0EA5E9';
+  document.getElementById('sAzienda').value=s.azienda||'';
+  document.getElementById('sReferente').value=s.referente||'';
+  document.getElementById('sEmail').value=s.email||'';
+  document.getElementById('sTel').value=s.tel||'';
+  document.getElementById('sProdotti').value=s.prodotti||'';
+  document.getElementById('sNote').value=s.note||'';
+  document.getElementById('standErr').style.display='none';
+  document.getElementById('modalStand').classList.add('show');
+};
+
+window.salvaStand = async function() {
+  const numero=document.getElementById('sNumero').value.trim();
+  if(!numero){showErr('standErr','Inserisci il numero stand.');return;}
+  const btn=document.getElementById('btnSalvaStand');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
+  try {
+    const payload={numero,dim:document.getElementById('sDim').value,posizione:document.getElementById('sPosizione').value.trim(),colore:document.getElementById('sColore').value,azienda:document.getElementById('sAzienda').value.trim(),referente:document.getElementById('sReferente').value.trim(),email:document.getElementById('sEmail').value.trim(),tel:document.getElementById('sTel').value.trim(),prodotti:document.getElementById('sProdotti').value.trim(),note:document.getElementById('sNote').value.trim(),updatedAt:serverTimestamp()};
+    if(window._editStandId) await setDoc(doc(db,'eventi',window._convEvId,'stand',window._editStandId),payload,{merge:true});
+    else{payload.createdAt=serverTimestamp();await addDoc(collection(db,'eventi',window._convEvId,'stand'),payload);}
+    document.getElementById('modalStand').classList.remove('show');
+    const evList=(await getDocs(collection(db,'eventi'))).docs.map(d=>({id:d.id,...d.data()}));
+    await loadData(window._convEvId,evList);
+  }catch(e){showErr('standErr','Errore: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='💾 Salva stand';}
+};
+
+async function eliminaStand(sid){
+  if(!confirm('Eliminare questo stand?'))return;
+  try{await deleteDoc(doc(db,'eventi',window._convEvId,'stand',sid));const evList=(await getDocs(collection(db,'eventi'))).docs.map(d=>({id:d.id,...d.data()}));await loadData(window._convEvId,evList);}
+  catch(e){alert(e.message);}
+}
+
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block';setTimeout(()=>e.style.display='none',4000);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+initApp();
+</script>
+</body>
+</html>

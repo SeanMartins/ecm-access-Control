@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Convention — Navette & Parcheggi</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
+<script src="ecm-layout.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F6F9;--surface:#FFF;--surface2:#F0F2F5;--border:#DDE1E9;--text:#1A1D2E;--text2:#5A5F7A;--text3:#9499B0;--conv:#0EA5E9;--conv-light:#F0F9FF;--conv-dark:#0369A1;--success:#059669;--success-light:#ECFDF5;--danger:#DC2626;--danger-light:#FEF2F2;--warn:#D97706;--warn-light:#FFFBEB;--radius:10px;--radius-lg:14px;--shadow:0 1px 3px rgba(0,0,0,.1),0 4px 12px rgba(0,0,0,.07)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+.ecm-content{padding:24px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none}
+.btn-conv{background:var(--conv);color:white}.btn-conv:hover{background:var(--conv-dark)}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{background:var(--surface2)}
+.btn-success{background:var(--success);color:white}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%}
+.form-input:focus{border-color:var(--conv);background:white}
+select.form-input{cursor:pointer}
+.field-label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase;display:block;margin-bottom:5px}
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:20px}
+.tab{padding:10px 20px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;background:none;border-left:none;border-right:none;border-top:none;font-family:'Inter',sans-serif}
+.tab.active{color:var(--conv);border-bottom-color:var(--conv)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+/* Navetta card */
+.navetta-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.navetta-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.navetta-info{display:flex;align-items:center;gap:12px}
+.navetta-icon{font-size:32px;width:52px;height:52px;background:var(--conv-light);border-radius:var(--radius);display:flex;align-items:center;justify-content:center}
+.navetta-orario{font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:var(--conv)}
+.progress-bar{height:6px;background:var(--border);border-radius:100px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;border-radius:100px;background:var(--conv);transition:width .4s}
+/* Parcheggi griglia */
+.park-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:12px}
+.park-cell{border:2px solid var(--border);border-radius:var(--radius);padding:10px 6px;text-align:center;transition:all .2s;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.park-cell.libero{background:var(--success-light);border-color:rgba(5,150,105,.3);cursor:pointer}
+.park-cell.libero:hover{border-color:var(--success);transform:scale(1.05)}
+.park-cell.occupato{background:var(--surface2);border-color:var(--border);cursor:default}
+.park-cell.riservato{background:var(--warn-light);border-color:rgba(217,119,6,.3)}
+.park-num{font-size:16px;font-weight:700}
+.park-name{font-size:9px;color:var(--text2);line-height:1.2;text-align:center;max-width:80px;overflow:hidden;text-overflow:ellipsis}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius-lg);padding:24px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.alert-error{background:var(--danger-light);color:var(--danger);border:1px solid rgba(220,38,38,.2);padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:12px;display:none}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:40px;color:var(--text3)}
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--surface2)}
+th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+td{padding:10px 14px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+@media(max-width:768px){.navetta-header{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+<div class="ecm-main">
+  <div class="ecm-topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="mobile-menu-btn" id="mobileMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar-title">Navette & Parcheggi</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-badge"><div class="topbar-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
+      <div id="userBarSlot"></div>
+    </div>
+  </div>
+  <div class="ecm-content">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div>
+        <div style="font-size:22px;font-weight:700">Navette & Parcheggi</div>
+        <div style="font-size:13px;color:var(--text3)" id="evNomeDisplay">Seleziona evento</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select class="form-input btn-sm" id="evSelect" style="min-width:200px"><option value="">— Evento —</option></select>
+        <button class="btn btn-conv btn-sm" id="btnNuovaNavetta">+ Navetta</button>
+        <button class="btn btn-outline btn-sm" id="btnNuovoParcheggio">+ Parcheggio</button>
+        <button class="btn btn-success btn-sm" id="btnExport">📊 Export</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)"><div style="font-size:26px;font-weight:700" id="sTotNavette">0</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Corse navetta</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)"><div style="font-size:26px;font-weight:700;color:var(--conv)" id="sPostiNavetta">0</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Posti navetta</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)"><div style="font-size:26px;font-weight:700;color:var(--warn)" id="sTotParcheggi">0</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Posti parcheggio</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)"><div style="font-size:26px;font-weight:700;color:var(--success)" id="sParchLiberi">0</div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Parcheggi liberi</div></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="navette">🚌 Navette</button>
+      <button class="tab" data-tab="parcheggi">🅿️ Parcheggi</button>
+      <button class="tab" data-tab="prenotazioni">📋 Prenotazioni</button>
+    </div>
+
+    <div class="tab-pane active" id="tab-navette">
+      <div id="navetteContent"><div class="empty-state"><div class="spinner"></div></div></div>
+    </div>
+    <div class="tab-pane" id="tab-parcheggi">
+      <div id="parcheggioContent"><div class="empty-state">Seleziona evento</div></div>
+    </div>
+    <div class="tab-pane" id="tab-prenotazioni">
+      <div style="display:flex;gap:10px;margin-bottom:12px">
+        <input type="text" class="form-input" id="searchPren" placeholder="Cerca prenotazione..." style="max-width:280px">
+        <select class="form-input" id="filterTipo" style="max-width:160px">
+          <option value="">Tutte</option>
+          <option value="navetta">Navetta</option>
+          <option value="parcheggio">Parcheggio</option>
+        </select>
+      </div>
+      <div class="table-wrap" id="prenotazioniTable"><div class="empty-state">Seleziona evento</div></div>
+    </div>
+  </div>
+  <div class="ecm-version-footer" id="ecmVersionFooter"></div>
+</div>
+
+<!-- MODAL NAVETTA -->
+<div class="modal-overlay" id="modalNavetta">
+  <div class="modal">
+    <div style="font-size:17px;font-weight:700;margin-bottom:16px" id="modalNavTitolo">Nuova corsa navetta</div>
+    <div class="alert-error" id="navErr"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div><label class="field-label">Orario partenza *</label><input type="time" class="form-input" id="navOrario"></div>
+      <div><label class="field-label">Direzione *</label>
+        <select class="form-input" id="navDirezione">
+          <option value="andata">➡️ Andata (hotel → sede)</option>
+          <option value="ritorno">⬅️ Ritorno (sede → hotel)</option>
+        </select>
+      </div>
+      <div><label class="field-label">Fermata di partenza *</label><input type="text" class="form-input" id="navFermata" placeholder="Es. Hotel Excelsior"></div>
+      <div><label class="field-label">Destinazione *</label><input type="text" class="form-input" id="navDestinazione" placeholder="Es. Fiera"></div>
+      <div><label class="field-label">Posti totali *</label><input type="number" class="form-input" id="navPosti" value="20" min="1"></div>
+      <div><label class="field-label">Numero bus / Targa</label><input type="text" class="form-input" id="navBus" placeholder="Es. Bus 1 / AA000BB"></div>
+    </div>
+    <div><label class="field-label" style="margin-bottom:6px">Note</label><input type="text" class="form-input" id="navNote" placeholder="Es. Solo VIP, Gratuita..."></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btnAnnullaNav">Annulla</button>
+      <button class="btn btn-conv" id="btnSalvaNav">💾 Salva navetta</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PARCHEGGIO -->
+<div class="modal-overlay" id="modalParcheggio">
+  <div class="modal">
+    <div style="font-size:17px;font-weight:700;margin-bottom:16px">Configura parcheggi</div>
+    <div class="alert-error" id="parkErr"></div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Inserisci il numero totale di posti e il prefisso (es. "P" → P1, P2, P3...)</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div><label class="field-label">Prefisso posti</label><input type="text" class="form-input" id="parkPrefix" value="P" maxlength="3"></div>
+      <div><label class="field-label">Numero totale posti *</label><input type="number" class="form-input" id="parkTotale" value="50" min="1" max="500"></div>
+    </div>
+    <div><label class="field-label" style="margin-bottom:6px">Zona / Area</label><input type="text" class="form-input" id="parkZona" placeholder="Es. Parcheggio A, P1"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btnAnnullaPark">Annulla</button>
+      <button class="btn btn-conv" id="btnSalvaPark">💾 Genera parcheggi</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PRENOTA -->
+<div class="modal-overlay" id="modalPrenota">
+  <div class="modal">
+    <div style="font-size:17px;font-weight:700;margin-bottom:4px" id="modalPrenTitolo">Prenota posto</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:16px" id="modalPrenSub">—</div>
+    <div class="alert-error" id="prenErr"></div>
+    <div><label class="field-label" style="margin-bottom:6px">Partecipante</label>
+      <select class="form-input" id="prenPart"><option value="">— Seleziona partecipante —</option></select>
+    </div>
+    <div style="margin-top:12px"><label class="field-label" style="margin-bottom:6px">Note</label>
+      <input type="text" class="form-input" id="prenNote" placeholder="Es. Bagaglio ingombrante...">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btnAnnullaPren">Annulla</button>
+      <button class="btn btn-conv" id="btnSalvaPren">✓ Prenota</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof renderSidebar === 'function') renderSidebar('convention-navette');
+  if (typeof renderVersionFooter === 'function') renderVersionFooter();
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById('tab-'+t.dataset.tab).classList.add('active');
+      if(t.dataset.tab==='prenotazioni') renderPrenotazioni();
+    });
+  });
+  document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show')}));
+  document.getElementById('btnAnnullaNav').addEventListener('click',()=>document.getElementById('modalNavetta').classList.remove('show'));
+  document.getElementById('btnAnnullaPark').addEventListener('click',()=>document.getElementById('modalParcheggio').classList.remove('show'));
+  document.getElementById('btnAnnullaPren').addEventListener('click',()=>document.getElementById('modalPrenota').classList.remove('show'));
+  document.getElementById('btnNuovaNavetta').addEventListener('click',()=>{
+    if(!window._convEvId){alert('Seleziona prima un evento.');return;}
+    window._editNavId=null;
+    document.getElementById('modalNavTitolo').textContent='Nuova corsa navetta';
+    ['navOrario','navFermata','navDestinazione','navBus','navNote'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('navPosti').value='20';document.getElementById('navDirezione').value='andata';
+    document.getElementById('navErr').style.display='none';
+    document.getElementById('modalNavetta').classList.add('show');
+  });
+  document.getElementById('btnNuovoParcheggio').addEventListener('click',()=>{
+    if(!window._convEvId){alert('Seleziona prima un evento.');return;}
+    document.getElementById('modalParcheggio').classList.add('show');
+  });
+  document.getElementById('btnSalvaNav').addEventListener('click',salvaNavetta);
+  document.getElementById('btnSalvaPark').addEventListener('click',generaParcheggi);
+  document.getElementById('btnSalvaPren').addEventListener('click',salvaPrenotazione);
+  document.getElementById('searchPren').addEventListener('input', renderPrenotazioni);
+  document.getElementById('filterTipo').addEventListener('change', renderPrenotazioni);
+  document.getElementById('btnExport').addEventListener('click', exportExcel);
+});
+</script>
+
+<script type="module">
+import { requireAuth, injectUserBar } from './ecm-auth.js';
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc, setDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+
+let db, navette=[], parcheggi=[], partecipanti=[], prenotazioni=[];
+let pendingType=null, pendingId=null;
+
+async function initApp() {
+  const app=getApps().length?getApps()[0]:initializeApp(FB);
+  db=getFirestore(app);const auth=getAuth(app);
+  try{await requireAuth();injectUserBar('userBarSlot');}catch(e){}
+  if(!auth.currentUser){try{await signInAnonymously(auth);}catch(e){}}
+  document.getElementById('fbDot').className='topbar-dot ok';
+  document.getElementById('fbStatus').textContent='Firebase connesso';
+  const evSnap=await getDocs(collection(db,'eventi'));
+  const evList=[];evSnap.forEach(d=>evList.push({id:d.id,...d.data()}));
+  evList.filter(e=>e.stato!=='archiviato').sort((a,b)=>new Date(b.data||0)-new Date(a.data||0)).forEach(ev=>{
+    const opt=document.createElement('option');opt.value=ev.id;
+    opt.textContent=(ev.nome||ev.id)+(ev.data?' ('+new Date(ev.data).toLocaleDateString('it-IT')+')':'');
+    document.getElementById('evSelect').appendChild(opt);
+  });
+  const savedId=localStorage.getItem('ecm_eventId');
+  const autoId=(savedId&&evList.find(e=>e.id===savedId))?savedId:evList[0]?.id;
+  if(autoId){document.getElementById('evSelect').value=autoId;await loadData(autoId,evList);}
+  document.getElementById('evSelect').addEventListener('change',async function(){if(this.value)await loadData(this.value,evList);});
+}
+
+async function loadData(evId,evList) {
+  window._convEvId=evId;localStorage.setItem('ecm_eventId',evId);
+  const ev=evList?.find(e=>e.id===evId);
+  document.getElementById('evNomeDisplay').textContent=ev?.nome||'—';
+  const [navSnap,parkSnap,partSnap,prenSnap]=await Promise.all([
+    getDocs(collection(db,'eventi',evId,'navette')),
+    getDocs(collection(db,'eventi',evId,'parcheggi')),
+    getDocs(collection(db,'eventi',evId,'partecipanti')),
+    getDocs(collection(db,'eventi',evId,'prenotazioni_trasporto'))
+  ]);
+  navette=[];navSnap.forEach(d=>navette.push({id:d.id,...d.data()}));
+  navette.sort((a,b)=>(a.orario||'').localeCompare(b.orario||''));
+  parcheggi=[];parkSnap.forEach(d=>parcheggi.push({id:d.id,...d.data()}));
+  parcheggi.sort((a,b)=>String(a.numero||'').localeCompare(String(b.numero||''),undefined,{numeric:true}));
+  partecipanti=[];partSnap.forEach(d=>partecipanti.push({id:d.id,...d.data()}));
+  prenotazioni=[];prenSnap.forEach(d=>prenotazioni.push({id:d.id,...d.data()}));
+  updateStats();renderNavette();renderParcheggi();
+  // Popola select partecipante nel modal
+  const sel=document.getElementById('prenPart');
+  sel.innerHTML='<option value="">— Seleziona partecipante —</option>';
+  partecipanti.forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=(p.cognome||'')+' '+(p.nome||'')+(p.azienda?' ('+p.azienda+')':'');sel.appendChild(o);});
+}
+
+function updateStats() {
+  const totPostiNav=navette.reduce((s,n)=>s+(n.posti||0),0);
+  const occPark=parcheggi.filter(p=>p.partecipanteId).length;
+  document.getElementById('sTotNavette').textContent=navette.length;
+  document.getElementById('sPostiNavetta').textContent=totPostiNav;
+  document.getElementById('sTotParcheggi').textContent=parcheggi.length;
+  document.getElementById('sParchLiberi').textContent=parcheggi.length-occPark;
+}
+
+function renderNavette() {
+  const c=document.getElementById('navetteContent');
+  if(!navette.length){c.innerHTML='<div class="empty-state"><div style="font-size:32px;opacity:.3">🚌</div><div style="margin-top:8px">Nessuna navetta configurata</div></div>';return;}
+  c.innerHTML=navette.map(n=>{
+    const prenNav=prenotazioni.filter(p=>p.navetteId===n.id);
+    const liberi=Math.max(0,(n.posti||0)-prenNav.length);
+    const pct=n.posti>0?Math.round(prenNav.length/n.posti*100):0;
+    const barColor=pct>=90?'var(--danger)':pct>=70?'var(--warn)':'var(--conv)';
+    return `<div class="navetta-card">
+      <div class="navetta-header">
+        <div class="navetta-info">
+          <div class="navetta-icon">🚌</div>
+          <div>
+            <div class="navetta-orario">${n.orario||'--:--'}</div>
+            <div style="font-size:13px;font-weight:500;color:var(--text)">${n.direzione==='andata'?'➡️':'⬅️'} ${esc(n.fermata||'—')} → ${esc(n.destinazione||'—')}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">${n.bus?'🚌 '+esc(n.bus):''}${n.note?' · '+esc(n.note):''}</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:20px;font-weight:700;color:${barColor}">${prenNav.length}/${n.posti||0}</div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase">posti occupati</div>
+          <div class="progress-bar" style="min-width:100px"><div class="progress-fill" style="width:${pct}%;background:${barColor}"></div></div>
+          <div style="font-size:11px;margin-top:3px;color:${liberi>0?'var(--success)':'var(--danger)'};font-weight:600">${liberi>0?liberi+' posti liberi':'COMPLETO'}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;justify-content:flex-end">
+        <button class="btn btn-conv btn-sm" onclick="apriPrenota('navetta','${n.id}','${esc(n.orario||'')} ${esc(n.fermata||'')} → ${esc(n.destinazione||'')}')" ${liberi<=0?'disabled':''}>+ Prenota posto</button>
+        <button class="btn btn-outline btn-sm" onclick="apriEditNav('${n.id}')">✏️</button>
+        <button class="btn btn-outline btn-sm" style="color:var(--danger);border-color:rgba(220,38,38,.3)" onclick="eliminaNavetta('${n.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderParcheggi() {
+  const c=document.getElementById('parcheggioContent');
+  if(!parcheggi.length){c.innerHTML='<div class="empty-state"><div style="font-size:32px;opacity:.3">🅿️</div><div style="margin-top:8px">Nessun parcheggio configurato</div></div>';return;}
+  c.innerHTML='<div class="park-grid">'+parcheggi.map(p=>{
+    const occ=!!p.partecipanteId;
+    const partNome=occ?partecipanti.find(x=>x.id===p.partecipanteId):null;
+    return `<div class="park-cell ${occ?'occupato':'libero'}" onclick="${occ?'':'apriPrenota(\'parcheggio\',\''+p.id+'\',\'Posto '+esc(p.numero)+'\')'}">
+      <div class="park-num" style="color:${occ?'var(--text3)':'var(--success)'}">${esc(p.numero||'?')}</div>
+      <div class="park-name">${occ?(partNome?.cognome||'Occupato'):'Libero'}</div>
+      ${occ?'<button style="font-size:9px;background:var(--danger-light);color:var(--danger);border:none;border-radius:4px;padding:2px 4px;cursor:pointer;margin-top:2px" onclick="event.stopPropagation();liberaParcheggio(\''+p.id+'\')">✕</button>':''}
+    </div>`;
+  }).join('')+'</div>';
+}
+
+function renderPrenotazioni() {
+  const q=(document.getElementById('searchPren').value||'').toLowerCase();
+  const tipo=document.getElementById('filterTipo').value;
+  let fil=prenotazioni.filter(p=>{
+    if(tipo==='navetta'&&!p.navetteId)return false;
+    if(tipo==='parcheggio'&&!p.parcheggioId)return false;
+    if(q){const part=partecipanti.find(x=>x.id===p.partecipanteId);if(!((part?.cognome||'').toLowerCase().includes(q)||(part?.nome||'').toLowerCase().includes(q)))return false;}
+    return true;
+  });
+  const c=document.getElementById('prenotazioniTable');
+  if(!fil.length){c.innerHTML='<div class="empty-state">Nessuna prenotazione</div>';return;}
+  c.innerHTML='<table><thead><tr><th>Tipo</th><th>Dettaglio</th><th>Partecipante</th><th>Note</th><th></th></tr></thead><tbody>'+
+    fil.map(p=>{
+      const part=partecipanti.find(x=>x.id===p.partecipanteId);
+      const tipo=p.navetteId?'🚌 Navetta':'🅿️ Parcheggio';
+      const det=p.navetteId?(navette.find(n=>n.id===p.navetteId)?.orario||'—'):(p.parcheggioId||'—');
+      return `<tr><td>${tipo}</td><td style="font-family:'DM Mono',monospace;font-size:12px">${esc(det)}</td>
+        <td style="font-weight:500">${esc(part?.cognome||'—')} ${esc(part?.nome||'')}</td>
+        <td style="font-size:12px;color:var(--text3)">${esc(p.note||'—')}</td>
+        <td><button class="btn btn-outline btn-sm" style="color:var(--danger)" onclick="eliminaPrenotazione('${p.id}')">✕</button></td>
+      </tr>`;
+    }).join('')+'</tbody></table>';
+}
+
+window.apriPrenota=function(tipo,id,desc){pendingType=tipo;pendingId=id;document.getElementById('modalPrenTitolo').textContent=tipo==='navetta'?'Prenota navetta':'Assegna parcheggio';document.getElementById('modalPrenSub').textContent=desc;document.getElementById('prenPart').value='';document.getElementById('prenNote').value='';document.getElementById('prenErr').style.display='none';document.getElementById('modalPrenota').classList.add('show');};
+window.apriEditNav=function(nid){const n=navette.find(x=>x.id===nid);if(!n)return;window._editNavId=nid;document.getElementById('modalNavTitolo').textContent='Modifica navetta';document.getElementById('navOrario').value=n.orario||'';document.getElementById('navDirezione').value=n.direzione||'andata';document.getElementById('navFermata').value=n.fermata||'';document.getElementById('navDestinazione').value=n.destinazione||'';document.getElementById('navPosti').value=n.posti||20;document.getElementById('navBus').value=n.bus||'';document.getElementById('navNote').value=n.note||'';document.getElementById('navErr').style.display='none';document.getElementById('modalNavetta').classList.add('show');};
+window.liberaParcheggio=async function(pid){if(!confirm('Liberare questo posto?'))return;try{await setDoc(doc(db,'eventi',window._convEvId,'parcheggi',pid),{partecipanteId:null,partecipanteNome:null,note:''},{merge:true});await loadData(window._convEvId,null);}catch(e){alert(e.message);}};
+window.eliminaNavetta=async function(nid){if(!confirm('Eliminare questa navetta?'))return;try{await deleteDoc(doc(db,'eventi',window._convEvId,'navette',nid));await loadData(window._convEvId,null);}catch(e){alert(e.message);}};
+window.eliminaPrenotazione=async function(pid){if(!confirm('Annullare prenotazione?'))return;try{await deleteDoc(doc(db,'eventi',window._convEvId,'prenotazioni_trasporto',pid));await loadData(window._convEvId,null);}catch(e){alert(e.message);}};
+
+window.salvaNavetta=async function(){
+  const orario=document.getElementById('navOrario').value;
+  const fermata=document.getElementById('navFermata').value.trim();
+  const dest=document.getElementById('navDestinazione').value.trim();
+  if(!orario||!fermata||!dest){showErr('navErr','Compila orario, fermata e destinazione.');return;}
+  const btn=document.getElementById('btnSalvaNav');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
+  try{
+    const payload={orario,direzione:document.getElementById('navDirezione').value,fermata,destinazione:dest,posti:parseInt(document.getElementById('navPosti').value)||20,bus:document.getElementById('navBus').value.trim(),note:document.getElementById('navNote').value.trim(),updatedAt:serverTimestamp()};
+    if(window._editNavId)await setDoc(doc(db,'eventi',window._convEvId,'navette',window._editNavId),payload,{merge:true});
+    else{payload.createdAt=serverTimestamp();await addDoc(collection(db,'eventi',window._convEvId,'navette'),payload);}
+    document.getElementById('modalNavetta').classList.remove('show');
+    await loadData(window._convEvId,null);
+  }catch(e){showErr('navErr','Errore: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='💾 Salva navetta';}
+};
+
+window.generaParcheggi=async function(){
+  const tot=parseInt(document.getElementById('parkTotale').value)||50;
+  const prefix=document.getElementById('parkPrefix').value.trim()||'P';
+  const zona=document.getElementById('parkZona').value.trim();
+  if(tot<1||tot>500){showErr('parkErr','Numero tra 1 e 500.');return;}
+  const btn=document.getElementById('btnSalvaPark');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
+  try{
+    for(let i=1;i<=tot;i++){await addDoc(collection(db,'eventi',window._convEvId,'parcheggi'),{numero:prefix+i,zona,partecipanteId:null,createdAt:serverTimestamp()});}
+    document.getElementById('modalParcheggio').classList.remove('show');
+    await loadData(window._convEvId,null);
+  }catch(e){showErr('parkErr','Errore: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='💾 Genera parcheggi';}
+};
+
+window.salvaPrenotazione=async function(){
+  const partId=document.getElementById('prenPart').value;
+  if(!partId){showErr('prenErr','Seleziona un partecipante.');return;}
+  const btn=document.getElementById('btnSalvaPren');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
+  try{
+    const part=partecipanti.find(p=>p.id===partId);
+    const note=document.getElementById('prenNote').value.trim();
+    if(pendingType==='navetta'){
+      await addDoc(collection(db,'eventi',window._convEvId,'prenotazioni_trasporto'),{tipo:'navetta',navetteId:pendingId,partecipanteId:partId,note,createdAt:serverTimestamp()});
+    }else{
+      await setDoc(doc(db,'eventi',window._convEvId,'parcheggi',pendingId),{partecipanteId:partId,partecipanteNome:(part?.cognome||'')+ ' '+(part?.nome||''),note,aggiornato:serverTimestamp()},{merge:true});
+    }
+    document.getElementById('modalPrenota').classList.remove('show');
+    await loadData(window._convEvId,null);
+  }catch(e){showErr('prenErr','Errore: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='✓ Prenota';}
+};
+
+function exportExcel(){
+  const wb=XLSX.utils.book_new();
+  const navRows=[['Orario','Direzione','Fermata','Destinazione','Posti','Prenotati','Liberi','Bus']];
+  navette.forEach(n=>{const pren=prenotazioni.filter(p=>p.navetteId===n.id).length;navRows.push([n.orario||'—',n.direzione==='andata'?'Andata':'Ritorno',n.fermata||'—',n.destinazione||'—',n.posti||0,pren,Math.max(0,(n.posti||0)-pren),n.bus||'—']);});
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(navRows),'Navette');
+  const parkRows=[['Numero','Zona','Partecipante']];
+  parcheggi.forEach(p=>{const part=partecipanti.find(x=>x.id===p.partecipanteId);parkRows.push([p.numero||'—',p.zona||'—',part?(part.cognome+' '+part.nome):'Libero']);});
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(parkRows),'Parcheggi');
+  XLSX.writeFile(wb,'navette_parcheggi_'+new Date().toISOString().split('T')[0]+'.xlsx');
+}
+
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block';setTimeout(()=>e.style.display='none',4000);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+initApp();
+</script>
+</body>
+</html>
