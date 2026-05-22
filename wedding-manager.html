@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Wedding Manager</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
+<script src="ecm-layout.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FDF8F5;--surface:#FFF;--surface2:#FAF5F0;--border:#EDE0D4;--text:#2D1B0E;--text2:#6B4C35;--text3:#A08070;--wedding:#C9956B;--wedding-light:#FDF3EC;--wedding-dark:#A07040;--wedding2:#8B6355;--success:#059669;--success-light:#ECFDF5;--danger:#DC2626;--danger-light:#FEF2F2;--warn:#D97706;--warn-light:#FFFBEB;--gold:#C9A84C;--gold-light:#FEF9E7;--rose:#E8A0B4;--rose-light:#FDF2F6;--radius:10px;--radius-lg:14px;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 12px rgba(0,0,0,.06)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+.ecm-content{padding:24px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none}
+.btn-wedding{background:var(--wedding);color:white}.btn-wedding:hover{background:var(--wedding-dark)}
+.btn-gold{background:var(--gold);color:white}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{background:var(--surface2)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%}
+.form-input:focus{border-color:var(--wedding);background:white}
+select.form-input,textarea.form-input{cursor:pointer}
+textarea.form-input{resize:vertical;min-height:70px;cursor:text}
+.field-label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase;display:block;margin-bottom:5px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.span2{grid-column:span 2}
+/* Header stile matrimonio */
+.wedding-hero{background:linear-gradient(135deg,#8B6355 0%,#C9956B 50%,#C9A84C 100%);border-radius:var(--radius-lg);padding:28px;margin-bottom:20px;color:white;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(139,99,85,.3)}
+.wedding-hero::before{content:'💍';position:absolute;right:24px;top:50%;transform:translateY(-50%);font-size:80px;opacity:.15}
+.wedding-title{font-family:'Playfair Display',Georgia,serif;font-size:28px;font-style:italic;margin-bottom:4px}
+.wedding-sub{font-size:13px;opacity:.85}
+.wedding-date{font-size:14px;font-weight:600;margin-top:8px;opacity:.9}
+/* Tabs */
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:20px;flex-wrap:wrap}
+.tab{padding:10px 16px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;background:none;border-left:none;border-right:none;border-top:none;font-family:'Inter',sans-serif}
+.tab.active{color:var(--wedding);border-bottom-color:var(--wedding)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow);text-align:center}
+.stat-val{font-size:26px;font-weight:700}.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+/* Tavoli */
+.tavoli-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.tavolo-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow);transition:all .2s}
+.tavolo-card:hover{border-color:var(--wedding);transform:translateY(-1px)}
+.tavolo-num{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--wedding);margin-bottom:4px}
+.tavolo-nome{font-size:14px;font-weight:600;margin-bottom:8px}
+.tavolo-seats{display:flex;flex-wrap:wrap;gap:5px}
+.seat{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;cursor:pointer;transition:all .2s}
+.seat.occupato{background:var(--wedding);border-color:var(--wedding);color:white}
+.seat.libero{background:var(--surface2)}
+.seat:hover{border-color:var(--wedding)}
+/* Ospiti */
+.ospite-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);transition:background .15s}
+.ospite-item:hover{background:var(--surface2)}
+.ospite-item:last-child{border-bottom:none}
+.rsvp-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.rsvp-si{background:var(--success-light);color:var(--success)}
+.rsvp-no{background:var(--danger-light);color:var(--danger)}
+.rsvp-forse{background:var(--warn-light);color:var(--warn)}
+.rsvp-attesa{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+/* Fornitori */
+.fornitore-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;box-shadow:var(--shadow)}
+.fornitore-icon{font-size:28px;width:50px;height:50px;background:var(--wedding-light);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+/* Budget */
+.budget-bar{height:10px;background:var(--border);border-radius:100px;overflow:hidden;margin-top:8px}
+.budget-fill{height:100%;border-radius:100px;transition:width .5s}
+/* Timeline */
+.timeline-item{display:flex;gap:14px;margin-bottom:16px;position:relative}
+.timeline-item::before{content:'';position:absolute;left:19px;top:40px;bottom:-16px;width:2px;background:var(--border)}
+.timeline-item:last-child::before{display:none}
+.tl-dot{width:40px;height:40px;border-radius:50%;background:var(--wedding-light);border:2px solid var(--wedding);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;position:relative;z-index:1}
+.tl-time{font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--wedding)}
+.tl-desc{font-size:13px;color:var(--text2)}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius-lg);padding:26px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.alert-error{background:var(--danger-light);color:var(--danger);border:1px solid rgba(220,38,38,.2);padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:12px;display:none}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:40px;color:var(--text3)}
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--surface2)}
+th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+td{padding:10px 14px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+@media(max-width:768px){.stats-grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.span2{grid-column:span 1}.tavoli-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+<div class="ecm-main">
+  <div class="ecm-topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="mobile-menu-btn" id="mobileMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar-title">Wedding Manager</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-badge"><div class="topbar-dot" id="fbDot"></div><span id="fbStatus">Connessione...</span></div>
+      <div id="userBarSlot"></div>
+    </div>
+  </div>
+  <div class="ecm-content">
+    <!-- Selettore evento -->
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap">
+      <select class="form-input" id="evSelect" style="max-width:280px"><option value="">— Seleziona evento wedding —</option></select>
+      <button class="btn btn-wedding btn-sm" id="btnNuovoOspite">+ Ospite</button>
+      <button class="btn btn-outline btn-sm" id="btnNuovoTavolo">+ Tavolo</button>
+      <button class="btn btn-outline btn-sm" id="btnExport">📊 Export</button>
+    </div>
+
+    <!-- Hero -->
+    <div class="wedding-hero" id="weddingHero" style="display:none">
+      <div class="wedding-title" id="heroTitle">Il grande giorno</div>
+      <div class="wedding-sub" id="heroSposi">Sposi</div>
+      <div class="wedding-date" id="heroDate">📅 Data</div>
+      <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap" id="heroLinks"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val" id="sTotOspiti">0</div><div class="stat-label">Invitati</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--success)" id="sConferma">0</div><div class="stat-label">Confermati</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--danger)" id="sDecline">0</div><div class="stat-label">Declinati</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--warn)" id="sAttesa">0</div><div class="stat-label">In attesa</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--gold)" id="sTavoli">0</div><div class="stat-label">Tavoli</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--wedding)" id="sPosLiberi">0</div><div class="stat-label">Posti liberi</div></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="ospiti">💌 Ospiti & RSVP</button>
+      <button class="tab" data-tab="tavoli">🍽️ Tavoli</button>
+      <button class="tab" data-tab="timeline">⏰ Timeline</button>
+      <button class="tab" data-tab="fornitori">🤝 Fornitori</button>
+      <button class="tab" data-tab="budget">💰 Budget</button>
+      <button class="tab" data-tab="menu">🍷 Menu</button>
+    </div>
+
+    <!-- TAB OSPITI -->
+    <div class="tab-pane active" id="tab-ospiti">
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <input type="text" class="form-input" id="searchOspiti" placeholder="Cerca ospite..." style="max-width:240px">
+        <select class="form-input" id="filterRsvp" style="max-width:160px">
+          <option value="">Tutti gli RSVP</option>
+          <option value="si">✓ Confermati</option>
+          <option value="no">✗ Declinati</option>
+          <option value="forse">? Forse</option>
+          <option value="attesa">⏳ In attesa</option>
+        </select>
+        <select class="form-input" id="filterLato" style="max-width:160px">
+          <option value="">Tutti i lati</option>
+          <option value="sposo">👤 Lato sposo</option>
+          <option value="sposa">👤 Lato sposa</option>
+          <option value="entrambi">👥 Comune</option>
+        </select>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div id="ospiteList"><div class="empty-state"><div style="font-size:32px;opacity:.3">💌</div><div style="margin-top:8px">Seleziona un evento wedding</div></div></div>
+      </div>
+    </div>
+
+    <!-- TAB TAVOLI -->
+    <div class="tab-pane" id="tab-tavoli">
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <div style="font-size:12px;color:var(--text3);align-self:center">Clicca su un tavolo per gestire i posti</div>
+      </div>
+      <div class="tavoli-grid" id="tav Grid"><div class="empty-state"><div style="font-size:32px;opacity:.3">🍽️</div><div style="margin-top:8px">Nessun tavolo configurato</div></div></div>
+    </div>
+
+    <!-- TAB TIMELINE -->
+    <div class="tab-pane" id="tab-timeline">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+        <button class="btn btn-wedding btn-sm" id="btnNuovoTL">+ Aggiungi momento</button>
+      </div>
+      <div id="timelineContent"><div class="empty-state">Seleziona evento</div></div>
+    </div>
+
+    <!-- TAB FORNITORI -->
+    <div class="tab-pane" id="tab-fornitori">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+        <button class="btn btn-wedding btn-sm" id="btnNuovoFornitore">+ Aggiungi fornitore</button>
+      </div>
+      <div id="fornitoriContent"><div class="empty-state">Seleziona evento</div></div>
+    </div>
+
+    <!-- TAB BUDGET -->
+    <div class="tab-pane" id="tab-budget">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+        <button class="btn btn-wedding btn-sm" id="btnNuovaSpesa">+ Aggiungi voce</button>
+      </div>
+      <div id="budgetSommario" class="card" style="display:none;margin-bottom:16px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;text-align:center">
+          <div><div style="font-size:22px;font-weight:700;color:var(--text)">€ <span id="bTotale">0</span></div><div style="font-size:11px;color:var(--text3);text-transform:uppercase">Budget totale</div></div>
+          <div><div style="font-size:22px;font-weight:700;color:var(--danger)">€ <span id="bSpeso">0</span></div><div style="font-size:11px;color:var(--text3);text-transform:uppercase">Speso</div></div>
+          <div><div style="font-size:22px;font-weight:700;color:var(--success)">€ <span id="bRimasto">0</span></div><div style="font-size:11px;color:var(--text3);text-transform:uppercase">Rimanente</div></div>
+        </div>
+        <div class="budget-bar" style="margin-top:14px"><div class="budget-fill" id="bBar" style="width:0%;background:var(--wedding)"></div></div>
+        <div style="text-align:right;font-size:11px;color:var(--text3);margin-top:4px" id="bPct">0% del budget utilizzato</div>
+      </div>
+      <div id="budgetContent"><div class="empty-state">Seleziona evento</div></div>
+    </div>
+
+    <!-- TAB MENU -->
+    <div class="tab-pane" id="tab-menu">
+      <div id="menuContent">
+        <div class="card">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:14px">🍷 Configurazione menu</div>
+          <div class="form-grid">
+            <div class="form-group span2"><label class="field-label">Antipasti</label><textarea class="form-input" id="menuAntipasti" placeholder="Es. Carpaccio di tonno, Burrata con pomodori..."></textarea></div>
+            <div class="form-group span2"><label class="field-label">Primi</label><textarea class="form-input" id="menuPrimi" placeholder="Es. Risotto ai funghi porcini, Tagliolini al tartufo..."></textarea></div>
+            <div class="form-group span2"><label class="field-label">Secondi</label><textarea class="form-input" id="menuSecondi" placeholder="Es. Filetto al pepe verde, Branzino al forno..."></textarea></div>
+            <div class="form-group span2"><label class="field-label">Dolci & Torta nuziale</label><textarea class="form-input" id="menuDolci" placeholder="Es. Torta nuziale 5 piani, Tiramisù..."></textarea></div>
+            <div class="form-group"><label class="field-label">Vini & Bevande</label><textarea class="form-input" id="menuVini" placeholder="Es. Prosecco, Barolo, Acqua naturale..."></textarea></div>
+            <div class="form-group"><label class="field-label">Menu bambini</label><textarea class="form-input" id="menuBambini" placeholder="Es. Pasta al pomodoro, Cotoletta..."></textarea></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:14px">
+            <button class="btn btn-wedding" id="btnSalvaMenu">💾 Salva menu</button>
+          </div>
+        </div>
+        <!-- Riepilogo preferenze ospiti -->
+        <div class="card">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:14px">📊 Preferenze alimentari ospiti</div>
+          <div id="menuPreferenze"><div class="empty-state">Seleziona evento</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ecm-version-footer" id="ecmVersionFooter"></div>
+</div>
+
+<!-- MODAL OSPITE -->
+<div class="modal-overlay" id="modalOspite">
+  <div class="modal">
+    <div style="font-size:17px;font-weight:700;margin-bottom:4px" id="modalOspTitolo">Nuovo ospite</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:20px">Aggiungi un invitato al matrimonio</div>
+    <div class="alert-error" id="ospErr"></div>
+    <div class="form-grid" style="margin-bottom:12px">
+      <div class="form-group"><label class="field-label">Nome *</label><input type="text" class="form-input" id="oNome"></div>
+      <div class="form-group"><label class="field-label">Cognome *</label><input type="text" class="form-input" id="oCognome"></div>
+      <div class="form-group"><label class="field-label">Email</label><input type="email" class="form-input" id="oEmail" placeholder="email@esempio.com"></div>
+      <div class="form-group"><label class="field-label">Telefono</label><input type="text" class="form-input" id="oTel"></div>
+      <div class="form-group"><label class="field-label">Lato</label>
+        <select class="form-input" id="oLato">
+          <option value="sposo">👤 Lato sposo</option>
+          <option value="sposa">👤 Lato sposa</option>
+          <option value="entrambi">👥 Comune</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="field-label">RSVP</label>
+        <select class="form-input" id="oRsvp">
+          <option value="attesa">⏳ In attesa</option>
+          <option value="si">✓ Confermato</option>
+          <option value="no">✗ Declinato</option>
+          <option value="forse">? Forse</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="field-label">Dieta</label>
+        <select class="form-input" id="oDieta">
+          <option value="standard">Standard</option>
+          <option value="vegetariano">🥗 Vegetariano</option>
+          <option value="vegano">🌱 Vegano</option>
+          <option value="halal">☪️ Halal</option>
+          <option value="senzaglutine">🌾 Senza glutine</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="field-label">Bambino</label>
+        <select class="form-input" id="oBambino">
+          <option value="no">No</option>
+          <option value="si">Sì (menu bambini)</option>
+        </select>
+      </div>
+      <div class="form-group span2"><label class="field-label">Note / Allergie</label><input type="text" class="form-input" id="oNote" placeholder="Es. allergia ai crostacei, seggiolone richiesto..."></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btnAnnullaOsp">Annulla</button>
+      <button class="btn btn-wedding" id="btnSalvaOsp">💾 Salva ospite</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TAVOLO -->
+<div class="modal-overlay" id="modalTavolo">
+  <div class="modal">
+    <div style="font-size:17px;font-weight:700;margin-bottom:20px" id="modalTavTitolo">Nuovo tavolo</div>
+    <div class="alert-error" id="tavErr"></div>
+    <div class="form-grid" style="margin-bottom:12px">
+      <div class="form-group"><label class="field-label">Numero / Nome tavolo *</label><input type="text" class="form-input" id="tNumero" placeholder="Es. 1 oppure Tavolo degli sposi"></div>
+      <div class="form-group"><label class="field-label">Posti *</label><input type="number" class="form-input" id="tPosti" value="10" min="1" max="30"></div>
+      <div class="form-group"><label class="field-label">Tipo tavolo</label>
+        <select class="form-input" id="tTipo">
+          <option value="rotondo">⭕ Rotondo</option>
+          <option value="rettangolare">▭ Rettangolare</option>
+          <option value="imperiale">👑 Imperiale (sposi)</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="field-label">Posizione sala</label><input type="text" class="form-input" id="tPosizione" placeholder="Es. Centro, Finestra..."></div>
+      <div class="form-group span2"><label class="field-label">Note</label><input type="text" class="form-input" id="tNote" placeholder="Es. Tavolo famiglie, vicino pista..."></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btnAnnullaTav">Annulla</button>
+      <button class="btn btn-wedding" id="btnSalvaTav">💾 Salva tavolo</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FORNITORE -->
+<div class="modal-overlay" id="modalFornitore">
+  <div class="modal">
+    <div style="font-size:17px;font-weight:700;margin-bottom:20px">Fornitore / Servizio</div>
+    <div class="alert-error" id="forErr"></div>
+    <div class="form-grid" style="margin-bottom:12px">
+      <div class="form-group">
+        <label class="field-label">Categoria *</label>
+        <select class="form-input" id="fCategoria">
+          <option value="location">🏰 Location</option>
+          <option value="catering">🍽️ Catering</option>
+          <option value="fiori">💐 Fiorista</option>
+          <option value="foto">📸 Fotografo</option>
+          <option value="video">🎥 Videomaker</option>
+          <option value="musica">🎵 Musica</option>
+          <option value="torta">🎂 Pasticceria</option>
+          <option value="abiti">👗 Abiti</option>
+          <option value="auto">🚗 Auto</option>
+          <option value="makeup">💄 Make-up</option>
+          <option value="altro">📌 Altro</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="field-label">Nome fornitore *</label><input type="text" class="form-input" id="fNome" placeholder="Es. Studio Foto Rossi"></div>
+      <div class="form-group"><label class="field-label">Referente</label><input type="text" class="form-input" id="fReferente" placeholder="Nome cognome"></div>
+      <div class="form-group"><label class="field-label">Telefono</label><input type="text" class="form-input" id="fTel"></div>
+      <div class="form-group"><label class="field-label">Email</label><input type="email" class="form-input" id="fEmail"></div>
+      <div class="form-group"><label class="field-label">Costo pattuito (€)</label><input type="number" class="form-input" id="fCosto" placeholder="0" min="0"></div>
+      <div class="form-group"><label class="field-label">Acconto versato (€)</label><input type="number" class="form-input" id="fAcconto" placeholder="0" min="0"></div>
+      <div class="form-group"><label class="field-label">Stato</label>
+        <select class="form-input" id="fStato">
+          <option value="contattato">📞 Contattato</option>
+          <option value="confermato">✓ Confermato</option>
+          <option value="pagato">💰 Pagato</option>
+          <option value="annullato">✗ Annullato</option>
+        </select>
+      </div>
+      <div class="form-group span2"><label class="field-label">Note</label><textarea class="form-input" id="fNote" placeholder="Dettagli contratto, orari, richieste speciali..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btnAnnullaFor">Annulla</button>
+      <button class="btn btn-wedding" id="btnSalvaFor">💾 Salva fornitore</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL BUDGET -->
+<div class="modal-overlay" id="modalBudget">
+  <div class="modal">
+    <div style="font-size:17px;font-weight:700;margin-bottom:20px">Voce di budget</div>
+    <div class="alert-error" id="budErr"></div>
+    <div class="form-grid" style="margin-bottom:12px">
+      <div class="form-group span2"><label class="field-label">Descrizione *</label><input type="text" class="form-input" id="budDesc" placeholder="Es. Fotografo, Location, Fiori..."></div>
+      <div class="form-group"><label class="field-label">Importo previsto (€) *</label><input type="number" class="form-input" id="budPrev" min="0" step="0.01"></div>
+      <div class="form-group"><label class="field-label">Importo pagato (€)</label><input type="number" class="form-input" id="budPag" min="0" step="0.01" value="0"></div>
+      <div class="form-group"><label class="field-label">Categoria</label>
+        <select class="form-input" id="budCat">
+          <option value="location">🏰 Location</option>
+          <option value="catering">🍽️ Catering/Torta</option>
+          <option value="foto_video">📸 Foto & Video</option>
+          <option value="fiori">💐 Fiori & Allestimento</option>
+          <option value="musica">🎵 Musica & Intrattenimento</option>
+          <option value="abiti">👗 Abiti & Accessori</option>
+          <option value="auto">🚗 Trasporti</option>
+          <option value="viaggio">✈️ Viaggio di nozze</option>
+          <option value="altro">📌 Altro</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="field-label">Stato</label>
+        <select class="form-input" id="budStato">
+          <option value="pianificato">📋 Pianificato</option>
+          <option value="pagato">✓ Pagato</option>
+          <option value="parziale">⏳ Pagato parzialmente</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btnAnnullaBud">Annulla</button>
+      <button class="btn btn-wedding" id="btnSalvaBud">💾 Salva voce</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TIMELINE -->
+<div class="modal-overlay" id="modalTL">
+  <div class="modal">
+    <div style="font-size:17px;font-weight:700;margin-bottom:20px">Momento della giornata</div>
+    <div class="alert-error" id="tlErr"></div>
+    <div class="form-grid" style="margin-bottom:12px">
+      <div class="form-group"><label class="field-label">Orario *</label><input type="time" class="form-input" id="tlOrario"></div>
+      <div class="form-group"><label class="field-label">Icona</label>
+        <select class="form-input" id="tlIcona">
+          <option value="💍">💍 Cerimonia</option>
+          <option value="📸">📸 Foto</option>
+          <option value="🥂">🥂 Aperitivo</option>
+          <option value="🍽️">🍽️ Pranzo/Cena</option>
+          <option value="🎂">🎂 Torta</option>
+          <option value="🎵">🎵 Musica</option>
+          <option value="🚗">🚗 Trasferimento</option>
+          <option value="🎉">🎉 Lancio riso</option>
+          <option value="✨">✨ Altro</option>
+        </select>
+      </div>
+      <div class="form-group span2"><label class="field-label">Descrizione *</label><input type="text" class="form-input" id="tlDesc" placeholder="Es. Cerimonia in chiesa, Aperitivo in giardino..."></div>
+      <div class="form-group span2"><label class="field-label">Note / Dettagli</label><input type="text" class="form-input" id="tlNote" placeholder="Es. Location, chi è coinvolto..."></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btnAnnullaTL">Annulla</button>
+      <button class="btn btn-wedding" id="btnSalvaTL">💾 Salva</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof renderSidebar === 'function') renderSidebar('wedding');
+  if (typeof renderVersionFooter === 'function') renderVersionFooter();
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById('tab-'+t.dataset.tab).classList.add('active');
+    });
+  });
+  document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show')}));
+  ['btnAnnullaOsp','btnAnnullaTav','btnAnnullaFor','btnAnnullaBud','btnAnnullaTL'].forEach(id=>{
+    document.getElementById(id).addEventListener('click',()=>document.querySelectorAll('.modal-overlay').forEach(o=>o.classList.remove('show')));
+  });
+  document.getElementById('btnNuovoOspite').addEventListener('click',apriNuovoOspite);
+  document.getElementById('btnNuovoTavolo').addEventListener('click',apriNuovoTavolo);
+  document.getElementById('btnNuovoFornitore').addEventListener('click',apriNuovoFornitore);
+  document.getElementById('btnNuovaSpesa').addEventListener('click',()=>{
+    if(!window._weddEvId){alert('Seleziona un evento.');return;}
+    ['budDesc','budPrev','budPag'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('budCat').value='location';document.getElementById('budStato').value='pianificato';
+    document.getElementById('budErr').style.display='none';
+    document.getElementById('modalBudget').classList.add('show');
+  });
+  document.getElementById('btnNuovoTL').addEventListener('click',()=>{
+    if(!window._weddEvId){alert('Seleziona un evento.');return;}
+    ['tlOrario','tlDesc','tlNote'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('tlIcona').value='✨';document.getElementById('tlErr').style.display='none';
+    document.getElementById('modalTL').classList.add('show');
+  });
+  document.getElementById('btnSalvaOsp').addEventListener('click',()=>window._salvaOsp&&window._salvaOsp());
+  document.getElementById('btnSalvaTav').addEventListener('click',()=>window._salvaTav&&window._salvaTav());
+  document.getElementById('btnSalvaFor').addEventListener('click',()=>window._salvaFor&&window._salvaFor());
+  document.getElementById('btnSalvaBud').addEventListener('click',()=>window._salvaBud&&window._salvaBud());
+  document.getElementById('btnSalvaTL').addEventListener('click',()=>window._salvaTL&&window._salvaTL());
+  document.getElementById('btnSalvaMenu').addEventListener('click',()=>window._salvaMenu&&window._salvaMenu());
+  document.getElementById('searchOspiti').addEventListener('input',()=>window._renderOspiti&&window._renderOspiti());
+  document.getElementById('filterRsvp').addEventListener('change',()=>window._renderOspiti&&window._renderOspiti());
+  document.getElementById('filterLato').addEventListener('change',()=>window._renderOspiti&&window._renderOspiti());
+  document.getElementById('btnExport').addEventListener('click',()=>window._exportWedding&&window._exportWedding());
+});
+
+function apriNuovoOspite() {
+  if(!window._weddEvId){alert('Seleziona un evento.');return;}
+  window._editOspId=null;
+  ['oNome','oCognome','oEmail','oTel','oNote'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('oLato').value='sposo';document.getElementById('oRsvp').value='attesa';
+  document.getElementById('oDieta').value='standard';document.getElementById('oBambino').value='no';
+  document.getElementById('ospErr').style.display='none';
+  document.getElementById('modalOspite').classList.add('show');
+  setTimeout(()=>document.getElementById('oNome').focus(),100);
+}
+function apriNuovoTavolo() {
+  if(!window._weddEvId){alert('Seleziona un evento.');return;}
+  window._editTavId=null;
+  ['tNumero','tPosizione','tNote'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('tPosti').value='10';document.getElementById('tTipo').value='rotondo';
+  document.getElementById('tavErr').style.display='none';
+  document.getElementById('modalTavolo').classList.add('show');
+}
+function apriNuovoFornitore() {
+  if(!window._weddEvId){alert('Seleziona un evento.');return;}
+  window._editForId=null;
+  ['fNome','fReferente','fTel','fEmail','fNote'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fCosto').value='0';document.getElementById('fAcconto').value='0';
+  document.getElementById('fCategoria').value='location';document.getElementById('fStato').value='contattato';
+  document.getElementById('forErr').style.display='none';
+  document.getElementById('modalFornitore').classList.add('show');
+}
+</script>
+
+<script type="module">
+import { requireAuth, injectUserBar } from './ecm-auth.js';
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc, setDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+const RSVP={si:{lbl:'✓ Confermato',cls:'rsvp-si'},no:{lbl:'✗ Declinato',cls:'rsvp-no'},forse:{lbl:'? Forse',cls:'rsvp-forse'},attesa:{lbl:'⏳ In attesa',cls:'rsvp-attesa'}};
+const CAT_ICON={location:'🏰',catering:'🍽️',fiori:'💐',foto:'📸',video:'🎥',musica:'🎵',torta:'🎂',abiti:'👗',auto:'🚗',makeup:'💄',altro:'📌'};
+const DIETE={standard:'Standard',vegetariano:'🥗 Vegetariano',vegano:'🌱 Vegano',halal:'☪️ Halal',senzaglutine:'🌾 Senza glutine'};
+
+let db, ospiti=[], tavoli=[], fornitori=[], budget=[], timeline=[], menuData={};
+
+async function initApp() {
+  const app=getApps().length?getApps()[0]:initializeApp(FB);
+  db=getFirestore(app);const auth=getAuth(app);
+  try{await requireAuth();injectUserBar('userBarSlot');}catch(e){}
+  if(!auth.currentUser){try{await signInAnonymously(auth);}catch(e){}}
+  document.getElementById('fbDot').className='topbar-dot ok';
+  document.getElementById('fbStatus').textContent='Firebase connesso';
+
+  const evSnap=await getDocs(collection(db,'eventi'));
+  const evList=[];evSnap.forEach(d=>evList.push({id:d.id,...d.data()}));
+  // Mostra tutti gli eventi (il wedding potrebbe non avere tipo impostato)
+  evList.filter(e=>e.stato!=='archiviato').sort((a,b)=>new Date(b.data||0)-new Date(a.data||0)).forEach(ev=>{
+    const opt=document.createElement('option');opt.value=ev.id;
+    opt.textContent=(ev.nome||ev.id)+(ev.tipo==='wedding'?' 💍':'')+(ev.data?' ('+new Date(ev.data).toLocaleDateString('it-IT')+')':'');
+    document.getElementById('evSelect').appendChild(opt);
+  });
+  const savedId=localStorage.getItem('ecm_eventId');
+  const autoId=(savedId&&evList.find(e=>e.id===savedId))?savedId:evList.find(e=>e.tipo==='wedding')?.id||evList[0]?.id;
+  if(autoId){document.getElementById('evSelect').value=autoId;await loadData(autoId,evList);}
+  document.getElementById('evSelect').addEventListener('change',async function(){if(this.value)await loadData(this.value,evList);});
+}
+
+async function loadData(evId,evList) {
+  window._weddEvId=evId;localStorage.setItem('ecm_eventId',evId);
+  const ev=evList?.find(e=>e.id===evId);
+  // Hero
+  if(ev){
+    document.getElementById('weddingHero').style.display='block';
+    document.getElementById('heroTitle').textContent=ev.nome||'Il grande giorno';
+    document.getElementById('heroSposi').textContent=ev.sposi||ev.luogo||'—';
+    document.getElementById('heroDate').textContent=ev.data?'📅 '+new Date(ev.data).toLocaleDateString('it-IT',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}):'Data da definire';
+  }
+  const [ospSnap,tavSnap,forSnap,budSnap,tlSnap,menuSnap]=await Promise.all([
+    getDocs(collection(db,'eventi',evId,'ospiti')),
+    getDocs(collection(db,'eventi',evId,'tavoli')),
+    getDocs(collection(db,'eventi',evId,'fornitori')),
+    getDocs(collection(db,'eventi',evId,'budget')),
+    getDocs(collection(db,'eventi',evId,'timeline')),
+    getDocs(collection(db,'eventi',evId,'menu')).catch(()=>({docs:[],forEach:()=>{}}))
+  ]);
+  ospiti=[];ospSnap.forEach(d=>ospiti.push({id:d.id,...d.data()}));
+  tavoli=[];tavSnap.forEach(d=>tavoli.push({id:d.id,...d.data()}));
+  tavoli.sort((a,b)=>String(a.numero||'').localeCompare(String(b.numero||''),undefined,{numeric:true}));
+  fornitori=[];forSnap.forEach(d=>fornitori.push({id:d.id,...d.data()}));
+  budget=[];budSnap.forEach(d=>budget.push({id:d.id,...d.data()}));
+  timeline=[];tlSnap.forEach(d=>timeline.push({id:d.id,...d.data()}));
+  timeline.sort((a,b)=>(a.orario||'').localeCompare(b.orario||''));
+  menuData={};menuSnap.forEach(d=>Object.assign(menuData,d.data()));
+  updateStats();
+  window._renderOspiti=renderOspiti;
+  renderOspiti();renderTavoli();renderTimeline();renderFornitori();renderBudget();renderMenu();
+  // Esponi funzioni salvataggio
+  window._salvaOsp=salvaOspite;window._salvaTav=salvaTavolo;window._salvaFor=salvaFornitore;
+  window._salvaBud=salvaBudget;window._salvaTL=salvaTL;window._salvaMenu=salvaMenu;
+  window._exportWedding=exportExcel;
+}
+
+function updateStats() {
+  document.getElementById('sTotOspiti').textContent=ospiti.length;
+  document.getElementById('sConferma').textContent=ospiti.filter(o=>o.rsvp==='si').length;
+  document.getElementById('sDecline').textContent=ospiti.filter(o=>o.rsvp==='no').length;
+  document.getElementById('sAttesa').textContent=ospiti.filter(o=>!o.rsvp||o.rsvp==='attesa'||o.rsvp==='forse').length;
+  document.getElementById('sTavoli').textContent=tavoli.length;
+  const totPosti=tavoli.reduce((s,t)=>s+(t.posti||0),0);
+  const occPosti=tavoli.reduce((s,t)=>s+(t.ospiti||[]).length,0);
+  document.getElementById('sPosLiberi').textContent=totPosti-occPosti;
+}
+
+function renderOspiti() {
+  const q=(document.getElementById('searchOspiti').value||'').toLowerCase();
+  const fr=document.getElementById('filterRsvp').value;
+  const fl=document.getElementById('filterLato').value;
+  const fil=ospiti.filter(o=>{
+    if(q&&!(o.nome?.toLowerCase().includes(q)||o.cognome?.toLowerCase().includes(q)))return false;
+    if(fr&&(o.rsvp||'attesa')!==fr)return false;
+    if(fl&&o.lato!==fl)return false;
+    return true;
+  });
+  const c=document.getElementById('ospiteList');
+  if(!fil.length){c.innerHTML='<div class="empty-state"><div style="font-size:28px;opacity:.3">💌</div><div style="margin-top:8px">Nessun ospite</div></div>';return;}
+  c.innerHTML=fil.map(o=>{
+    const rsvp=RSVP[o.rsvp||'attesa']||RSVP.attesa;
+    const lato={sposo:'👤 Sposo',sposa:'👤 Sposa',entrambi:'👥 Comune'}[o.lato||'sposo']||'—';
+    return `<div class="ospite-item">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:500">${esc(o.cognome||'')} ${esc(o.nome||'')} ${o.bambino==='si'?'<span style="font-size:10px">👶</span>':''}</div>
+        <div style="font-size:11px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap">
+          <span>${lato}</span>
+          ${o.dieta&&o.dieta!=='standard'?`<span>${DIETE[o.dieta]||o.dieta}</span>`:''}
+          ${o.note?`<span>📝 ${esc(o.note.slice(0,30))}</span>`:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+        <span class="rsvp-badge ${rsvp.cls}">${rsvp.lbl}</span>
+        <button class="btn btn-outline btn-sm" data-edit-osp="${o.id}">✏️</button>
+        <button class="btn btn-outline btn-sm" style="color:var(--danger)" data-del-osp="${o.id}">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+  c.querySelectorAll('[data-edit-osp]').forEach(b=>b.addEventListener('click',()=>editOspite(b.dataset.editOsp)));
+  c.querySelectorAll('[data-del-osp]').forEach(b=>b.addEventListener('click',()=>eliminaOspite(b.dataset.delOsp)));
+}
+
+function renderTavoli() {
+  const c=document.getElementById('tavGrid')||document.querySelector('.tavoli-grid');
+  if(!c)return;
+  if(!tavoli.length){c.innerHTML='<div class="empty-state"><div style="font-size:32px;opacity:.3">🍽️</div><div style="margin-top:8px">Nessun tavolo</div></div>';return;}
+  c.innerHTML=tavoli.map(t=>{
+    const ospitiTav=(t.ospiti||[]).map(oid=>ospiti.find(o=>o.id===oid)).filter(Boolean);
+    const liberi=Math.max(0,(t.posti||10)-ospitiTav.length);
+    const tipoIcon={rotondo:'⭕',rettangolare:'▭',imperiale:'👑'}[t.tipo||'rotondo']||'⭕';
+    return `<div class="tavolo-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div>
+          <div class="tavolo-num">${tipoIcon} ${esc(t.numero||'?')}</div>
+          ${t.nome?`<div class="tavolo-nome">${esc(t.nome)}</div>`:''}
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:18px;font-weight:700;color:${liberi>0?'var(--success)':'var(--danger)'}">${ospitiTav.length}/${t.posti||10}</div>
+          <div style="font-size:10px;color:var(--text3)">${liberi>0?liberi+' liberi':'Completo'}</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">${ospitiTav.map(o=>esc(o.cognome||'')+' '+esc(o.nome||'')).join(', ')||'Nessun ospite assegnato'}</div>
+      <div style="display:flex;gap:5px;justify-content:flex-end">
+        <button class="btn btn-outline btn-sm" data-edit-tav="${t.id}">✏️</button>
+        <button class="btn btn-outline btn-sm" style="color:var(--danger)" data-del-tav="${t.id}">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+  c.querySelectorAll('[data-edit-tav]').forEach(b=>b.addEventListener('click',()=>editTavolo(b.dataset.editTav)));
+  c.querySelectorAll('[data-del-tav]').forEach(b=>b.addEventListener('click',()=>eliminaTavolo(b.dataset.delTav)));
+}
+
+function renderTimeline() {
+  const c=document.getElementById('timelineContent');
+  if(!timeline.length){c.innerHTML='<div class="empty-state"><div style="font-size:32px;opacity:.3">⏰</div><div style="margin-top:8px">Nessun momento aggiunto</div></div>';return;}
+  c.innerHTML=timeline.map(t=>`
+    <div class="timeline-item">
+      <div class="tl-dot">${t.icona||'✨'}</div>
+      <div style="flex:1;padding-top:6px">
+        <div class="tl-time">${t.orario||'--:--'}</div>
+        <div style="font-size:14px;font-weight:500;margin:2px 0">${esc(t.descrizione||'—')}</div>
+        ${t.note?`<div class="tl-desc">${esc(t.note)}</div>`:''}
+      </div>
+      <div style="display:flex;gap:4px;padding-top:6px">
+        <button class="btn btn-outline btn-sm" data-del-tl="${t.id}" style="color:var(--danger)">✕</button>
+      </div>
+    </div>`).join('');
+  c.querySelectorAll('[data-del-tl]').forEach(b=>b.addEventListener('click',()=>eliminaTL(b.dataset.delTl)));
+}
+
+function renderFornitori() {
+  const c=document.getElementById('fornitoriContent');
+  if(!fornitori.length){c.innerHTML='<div class="empty-state"><div style="font-size:32px;opacity:.3">🤝</div><div style="margin-top:8px">Nessun fornitore</div></div>';return;}
+  const statoColor={contattato:'var(--warn)',confermato:'var(--conv)',pagato:'var(--success)',annullato:'var(--danger)'};
+  c.innerHTML=fornitori.map(f=>{
+    const icon=CAT_ICON[f.categoria||'altro']||'📌';
+    const saldo=Math.max(0,(f.costo||0)-(f.acconto||0));
+    return `<div class="fornitore-card">
+      <div class="fornitore-icon">${icon}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <div style="font-size:15px;font-weight:600">${esc(f.nome||'—')}</div>
+          <span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:${statoColor[f.stato]||'var(--text3)'}20;color:${statoColor[f.stato]||'var(--text3)'}">
+            ${f.stato||'contattato'}
+          </span>
+        </div>
+        <div style="font-size:12px;color:var(--text3);display:flex;gap:10px;flex-wrap:wrap">
+          ${f.referente?`<span>👤 ${esc(f.referente)}</span>`:''}
+          ${f.tel?`<span>📞 ${esc(f.tel)}</span>`:''}
+          ${f.email?`<span>📧 ${esc(f.email)}</span>`:''}
+        </div>
+        ${f.costo?`<div style="font-size:12px;margin-top:6px;display:flex;gap:12px">
+          <span>Totale: <strong>€ ${f.costo}</strong></span>
+          <span>Acconto: <strong style="color:var(--success)">€ ${f.acconto||0}</strong></span>
+          <span>Saldo: <strong style="color:${saldo>0?'var(--danger)':'var(--success)'}">€ ${saldo}</strong></span>
+        </div>`:''}
+        ${f.note?`<div style="font-size:11px;color:var(--text2);margin-top:4px">${esc(f.note.slice(0,80))}</div>`:''}
+      </div>
+      <div style="display:flex;gap:5px;flex-shrink:0">
+        <button class="btn btn-outline btn-sm" data-del-for="${f.id}" style="color:var(--danger)">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+  c.querySelectorAll('[data-del-for]').forEach(b=>b.addEventListener('click',()=>eliminaFor(b.dataset.delFor)));
+}
+
+function renderBudget() {
+  const c=document.getElementById('budgetContent');
+  if(!budget.length){c.innerHTML='<div class="empty-state"><div style="font-size:32px;opacity:.3">💰</div><div style="margin-top:8px">Nessuna voce di budget</div></div>';document.getElementById('budgetSommario').style.display='none';return;}
+  const totPrev=budget.reduce((s,b)=>s+(b.importoPrev||0),0);
+  const totPag=budget.reduce((s,b)=>s+(b.importoPag||0),0);
+  const pct=totPrev>0?Math.round(totPag/totPrev*100):0;
+  document.getElementById('budgetSommario').style.display='block';
+  document.getElementById('bTotale').textContent=totPrev.toLocaleString('it-IT');
+  document.getElementById('bSpeso').textContent=totPag.toLocaleString('it-IT');
+  document.getElementById('bRimasto').textContent=(totPrev-totPag).toLocaleString('it-IT');
+  document.getElementById('bBar').style.width=pct+'%';
+  document.getElementById('bBar').style.background=pct>=90?'var(--danger)':pct>=70?'var(--warn)':'var(--wedding)';
+  document.getElementById('bPct').textContent=pct+'% del budget utilizzato';
+  c.innerHTML='<div class="table-wrap"><table><thead><tr><th>Descrizione</th><th>Categoria</th><th>Previsto €</th><th>Pagato €</th><th>Stato</th><th></th></tr></thead><tbody>'+
+    budget.map(b=>{
+      const ss={pianificato:'📋',pagato:'✓ Pagato',parziale:'⏳'}[b.stato||'pianificato']||'—';
+      const sc={pianificato:'var(--text3)',pagato:'var(--success)',parziale:'var(--warn)'}[b.stato||'pianificato']||'var(--text3)';
+      return `<tr><td style="font-weight:500">${esc(b.descrizione||'—')}</td>
+        <td style="font-size:11px;color:var(--text3)">${b.categoria||'—'}</td>
+        <td style="font-family:'DM Mono',monospace;font-weight:600">€ ${(b.importoPrev||0).toLocaleString('it-IT')}</td>
+        <td style="font-family:'DM Mono',monospace;color:var(--success)">€ ${(b.importoPag||0).toLocaleString('it-IT')}</td>
+        <td><span style="color:${sc};font-weight:600">${ss}</span></td>
+        <td><button class="btn btn-outline btn-sm" data-del-bud="${b.id}" style="color:var(--danger)">✕</button></td>
+      </tr>`;
+    }).join('')+'</tbody></table></div>';
+  c.querySelectorAll('[data-del-bud]').forEach(b=>b.addEventListener('click',()=>eliminaBud(b.dataset.delBud)));
+}
+
+function renderMenu() {
+  ['menuAntipasti','menuPrimi','menuSecondi','menuDolci','menuVini','menuBambini'].forEach(id=>{
+    document.getElementById(id).value=menuData[id]||'';
+  });
+  // Preferenze ospiti
+  const pref={};ospiti.forEach(o=>{const d=o.dieta||'standard';pref[d]=(pref[d]||0)+1;});
+  const bambini=ospiti.filter(o=>o.bambino==='si').length;
+  document.getElementById('menuPreferenze').innerHTML=Object.entries(pref).map(([d,n])=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="min-width:160px;font-size:13px">${DIETE[d]||d}</div>
+      <div style="flex:1;height:8px;background:var(--border);border-radius:100px;overflow:hidden">
+        <div style="width:${ospiti.length>0?Math.round(n/ospiti.length*100):0}%;height:100%;background:var(--wedding);border-radius:100px"></div>
+      </div>
+      <div style="font-weight:700;min-width:30px;text-align:right">${n}</div>
+    </div>`).join('')+
+    (bambini?`<div style="margin-top:10px;padding:8px;background:var(--wedding-light);border-radius:var(--radius);font-size:13px">👶 <strong>${bambini}</strong> bambini con menu dedicato</div>`:'');
+}
+
+// ── SALVATAGGI ──────────────────────────────────────────
+async function salvaOspite() {
+  const nome=document.getElementById('oNome').value.trim();
+  const cognome=document.getElementById('oCognome').value.trim();
+  if(!nome||!cognome){showErr('ospErr','Inserisci nome e cognome.');return;}
+  const btn=document.getElementById('btnSalvaOsp');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
+  try {
+    const payload={nome,cognome,email:document.getElementById('oEmail').value.trim(),tel:document.getElementById('oTel').value.trim(),lato:document.getElementById('oLato').value,rsvp:document.getElementById('oRsvp').value,dieta:document.getElementById('oDieta').value,bambino:document.getElementById('oBambino').value,note:document.getElementById('oNote').value.trim(),updatedAt:serverTimestamp()};
+    if(window._editOspId)await setDoc(doc(db,'eventi',window._weddEvId,'ospiti',window._editOspId),payload,{merge:true});
+    else{payload.createdAt=serverTimestamp();await addDoc(collection(db,'eventi',window._weddEvId,'ospiti'),payload);}
+    document.getElementById('modalOspite').classList.remove('show');
+    await reloadAll();
+  }catch(e){showErr('ospErr','Errore: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='💾 Salva ospite';}
+}
+
+async function salvaTavolo() {
+  const numero=document.getElementById('tNumero').value.trim();
+  if(!numero){showErr('tavErr','Inserisci numero/nome tavolo.');return;}
+  const btn=document.getElementById('btnSalvaTav');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
+  try {
+    const payload={numero,posti:parseInt(document.getElementById('tPosti').value)||10,tipo:document.getElementById('tTipo').value,posizione:document.getElementById('tPosizione').value.trim(),note:document.getElementById('tNote').value.trim(),updatedAt:serverTimestamp()};
+    if(window._editTavId)await setDoc(doc(db,'eventi',window._weddEvId,'tavoli',window._editTavId),payload,{merge:true});
+    else{payload.ospiti=[];payload.createdAt=serverTimestamp();await addDoc(collection(db,'eventi',window._weddEvId,'tavoli'),payload);}
+    document.getElementById('modalTavolo').classList.remove('show');
+    await reloadAll();
+  }catch(e){showErr('tavErr','Errore: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='💾 Salva tavolo';}
+}
+
+async function salvaFornitore() {
+  const nome=document.getElementById('fNome').value.trim();
+  if(!nome){showErr('forErr','Inserisci il nome del fornitore.');return;}
+  const btn=document.getElementById('btnSalvaFor');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
+  try {
+    const payload={nome,categoria:document.getElementById('fCategoria').value,referente:document.getElementById('fReferente').value.trim(),tel:document.getElementById('fTel').value.trim(),email:document.getElementById('fEmail').value.trim(),costo:parseFloat(document.getElementById('fCosto').value)||0,acconto:parseFloat(document.getElementById('fAcconto').value)||0,stato:document.getElementById('fStato').value,note:document.getElementById('fNote').value.trim(),updatedAt:serverTimestamp()};
+    await addDoc(collection(db,'eventi',window._weddEvId,'fornitori'),{...payload,createdAt:serverTimestamp()});
+    document.getElementById('modalFornitore').classList.remove('show');
+    await reloadAll();
+  }catch(e){showErr('forErr','Errore: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='💾 Salva fornitore';}
+}
+
+async function salvaBudget() {
+  const desc=document.getElementById('budDesc').value.trim();
+  const prev=parseFloat(document.getElementById('budPrev').value)||0;
+  if(!desc||!prev){showErr('budErr','Inserisci descrizione e importo.');return;}
+  const btn=document.getElementById('btnSalvaBud');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
+  try {
+    await addDoc(collection(db,'eventi',window._weddEvId,'budget'),{descrizione:desc,importoPrev:prev,importoPag:parseFloat(document.getElementById('budPag').value)||0,categoria:document.getElementById('budCat').value,stato:document.getElementById('budStato').value,createdAt:serverTimestamp()});
+    document.getElementById('modalBudget').classList.remove('show');
+    await reloadAll();
+  }catch(e){showErr('budErr','Errore: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='💾 Salva voce';}
+}
+
+async function salvaTL() {
+  const orario=document.getElementById('tlOrario').value;
+  const desc=document.getElementById('tlDesc').value.trim();
+  if(!orario||!desc){showErr('tlErr','Inserisci orario e descrizione.');return;}
+  const btn=document.getElementById('btnSalvaTL');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
+  try {
+    await addDoc(collection(db,'eventi',window._weddEvId,'timeline'),{orario,icona:document.getElementById('tlIcona').value,descrizione:desc,note:document.getElementById('tlNote').value.trim(),createdAt:serverTimestamp()});
+    document.getElementById('modalTL').classList.remove('show');
+    await reloadAll();
+  }catch(e){showErr('tlErr','Errore: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='💾 Salva';}
+}
+
+async function salvaMenu() {
+  const data={menuAntipasti:document.getElementById('menuAntipasti').value,menuPrimi:document.getElementById('menuPrimi').value,menuSecondi:document.getElementById('menuSecondi').value,menuDolci:document.getElementById('menuDolci').value,menuVini:document.getElementById('menuVini').value,menuBambini:document.getElementById('menuBambini').value,updatedAt:serverTimestamp()};
+  const btn=document.getElementById('btnSalvaMenu');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';
+  try{
+    const mSnap=await getDocs(collection(db,'eventi',window._weddEvId,'menu'));
+    if(mSnap.size>0)await setDoc(doc(db,'eventi',window._weddEvId,'menu',mSnap.docs[0].id),data,{merge:true});
+    else await addDoc(collection(db,'eventi',window._weddEvId,'menu'),data);
+    btn.innerHTML='✓ Salvato!';setTimeout(()=>{btn.disabled=false;btn.textContent='💾 Salva menu';},2000);
+  }catch(e){alert('Errore: '+e.message);btn.disabled=false;btn.textContent='💾 Salva menu';}
+}
+
+function editOspite(oid){const o=ospiti.find(x=>x.id===oid);if(!o)return;window._editOspId=oid;document.getElementById('oNome').value=o.nome||'';document.getElementById('oCognome').value=o.cognome||'';document.getElementById('oEmail').value=o.email||'';document.getElementById('oTel').value=o.tel||'';document.getElementById('oLato').value=o.lato||'sposo';document.getElementById('oRsvp').value=o.rsvp||'attesa';document.getElementById('oDieta').value=o.dieta||'standard';document.getElementById('oBambino').value=o.bambino||'no';document.getElementById('oNote').value=o.note||'';document.getElementById('ospErr').style.display='none';document.getElementById('modalOspite').classList.add('show');}
+function editTavolo(tid){const t=tavoli.find(x=>x.id===tid);if(!t)return;window._editTavId=tid;document.getElementById('tNumero').value=t.numero||'';document.getElementById('tPosti').value=t.posti||10;document.getElementById('tTipo').value=t.tipo||'rotondo';document.getElementById('tPosizione').value=t.posizione||'';document.getElementById('tNote').value=t.note||'';document.getElementById('tavErr').style.display='none';document.getElementById('modalTavolo').classList.add('show');}
+async function eliminaOspite(oid){if(!confirm('Eliminare ospite?'))return;await deleteDoc(doc(db,'eventi',window._weddEvId,'ospiti',oid));await reloadAll();}
+async function eliminaTavolo(tid){if(!confirm('Eliminare tavolo?'))return;await deleteDoc(doc(db,'eventi',window._weddEvId,'tavoli',tid));await reloadAll();}
+async function eliminaFor(fid){if(!confirm('Eliminare fornitore?'))return;await deleteDoc(doc(db,'eventi',window._weddEvId,'fornitori',fid));await reloadAll();}
+async function eliminaBud(bid){if(!confirm('Eliminare voce?'))return;await deleteDoc(doc(db,'eventi',window._weddEvId,'budget',bid));await reloadAll();}
+async function eliminaTL(tid){if(!confirm('Eliminare momento?'))return;await deleteDoc(doc(db,'eventi',window._weddEvId,'timeline',tid));await reloadAll();}
+
+async function reloadAll(){
+  const snap=await getDocs(collection(db,'eventi'));
+  const evList=[];snap.forEach(d=>evList.push({id:d.id,...d.data()}));
+  await loadData(window._weddEvId,evList);
+}
+
+function exportExcel(){
+  if(!ospiti.length){alert('Nessun dato.');return;}
+  const wb=XLSX.utils.book_new();
+  const rows=[['Cognome','Nome','Lato','RSVP','Dieta','Bambino','Email','Tel','Note']];
+  ospiti.forEach(o=>rows.push([o.cognome||'—',o.nome||'—',o.lato||'—',o.rsvp||'attesa',o.dieta||'standard',o.bambino||'no',o.email||'—',o.tel||'—',o.note||'—']));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'Ospiti');
+  if(budget.length){const br=[['Descrizione','Categoria','Previsto €','Pagato €','Stato']];budget.forEach(b=>br.push([b.descrizione||'—',b.categoria||'—',b.importoPrev||0,b.importoPag||0,b.stato||'—']));XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(br),'Budget');}
+  if(fornitori.length){const fr=[['Nome','Categoria','Referente','Tel','Costo €','Acconto €','Stato']];fornitori.forEach(f=>fr.push([f.nome||'—',f.categoria||'—',f.referente||'—',f.tel||'—',f.costo||0,f.acconto||0,f.stato||'—']));XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(fr),'Fornitori');}
+  XLSX.writeFile(wb,'wedding_'+new Date().toISOString().split('T')[0]+'.xlsx');
+}
+
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block';setTimeout(()=>e.style.display='none',4000);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+initApp();
+</script>
+</body>
+</html>

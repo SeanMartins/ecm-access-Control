@@ -34,6 +34,8 @@
       nav_congress_checkin:'Check-in sessioni',
       nav_congress_prog:'Programma sessioni',
       nav_congress_speakers:'Relatori',
+      nav_wedding:'Wedding',
+      nav_wedding_home:'Wedding Manager',
       nav_convention:'Convention',
       nav_conv_home:'Dashboard',
       nav_conv_prog:'Programma',
