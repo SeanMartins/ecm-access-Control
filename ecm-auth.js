@@ -1,6 +1,7 @@
-// ─── ECM Auth Guard ─────────────────────────────────────────
+// ecm-auth.js — Sistema autenticazione con controllo moduli e scadenza
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut as fbSignOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const FB = {
   apiKey: "AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",
@@ -11,127 +12,188 @@ const FB = {
   appId: "1:727782311741:web:4aaf570b1a05caf4192754"
 };
 
-const app = getApps().length ? getApps()[0] : initializeApp(FB);
-const auth = getAuth(app);
+const SUPER_ADMIN_EMAIL = 'martinsosem@gmail.com';
+const PAGINA_LOGIN = 'ecm-login.html';
+const PAGINA_BLOCCATA = 'ecm-bloccato.html';
 
-const ADMIN_EMAIL = 'martinsosem@gmail.com';
+let _app, _db, _auth, _currentUser = null, _profilo = null;
 
-// Legge sessione operatore da localStorage
-function getOpSession() {
-  try {
-    const raw = localStorage.getItem('ecm_op_user');
-    if (!raw) return null;
-    const op = JSON.parse(raw);
-    if (new Date(op.scadenza) < new Date()) {
-      localStorage.removeItem('ecm_op_user');
-      return null;
-    }
-    return op;
-  } catch { return null; }
+function getApp() {
+  if (!_app) _app = getApps().length ? getApps()[0] : initializeApp(FB);
+  return _app;
+}
+function getDB() { if (!_db) _db = getFirestore(getApp()); return _db; }
+function getAuthInstance() { if (!_auth) _auth = getAuth(getApp()); return _auth; }
+
+// Determina il modulo corrente dalla pagina
+function getModuloCorrente() {
+  const path = window.location.pathname;
+  const page = path.split('/').pop().replace('.html','');
+  const mappa = {
+    'ecm-blocco2':'blocco2','ecm-blocco3':'blocco3','ecm-blocco4':'blocco4',
+    'ecm-blocco5':'blocco5','ecm-blocco6':'blocco6','ecm-blocco7':'blocco7',
+    'congress-programma':'congress','congress-checkin':'congress','congress-agenda':'congress',
+    'congress-report':'congress','congress-certificato':'congress','congress-archivio':'congress',
+    'convention-manager':'convention','convention-programma':'convention','convention-stand':'convention',
+    'convention-checkin':'convention','convention-catering':'convention','convention-navette':'convention',
+    'convention-report':'convention','wedding-manager':'wedding','ecm-pagamenti':'pagamenti',
+    'ecm-admin':'admin','ecm-superadmin':'superadmin'
+  };
+  return mappa[page] || 'ecm';
 }
 
-// Controlla se è admin Google
-function isAdminUser(user) {
-  return user && user.email === ADMIN_EMAIL;
+// Verifica scadenza account
+function isScaduto(profilo) {
+  if (!profilo?.dataFine) return false;
+  const fine = new Date(profilo.dataFine);
+  fine.setHours(23,59,59);
+  return fine < new Date();
 }
 
-// requireAuth: accetta Google Auth (admin) OPPURE sessione operatore
-export function requireAuth(onReady) {
-  return new Promise((resolve) => {
-    // Prima controlla sessione operatore
-    const op = getOpSession();
-    if (op) {
-      if (onReady) onReady(null, op);
-      resolve({ googleUser: null, opUser: op });
-      return;
-    }
-    // Altrimenti controlla Google Auth
-    const unsub = onAuthStateChanged(auth, user => {
+// Verifica permesso modulo
+function hasModuloPermesso(profilo, modulo) {
+  if (!profilo) return false;
+  if (profilo.email === SUPER_ADMIN_EMAIL) return true;
+  if (profilo.stato === 'sospeso' || profilo.stato === 'in_attesa') return false;
+  if (isScaduto(profilo)) return false;
+  const moduli = profilo.moduli || ['tutti'];
+  if (moduli.includes('tutti') || moduli.includes(modulo)) return true;
+  // ecm è sempre permesso di base
+  if (modulo === 'ecm') return true;
+  return false;
+}
+
+// requireAuth — aspetta login, verifica profilo e moduli
+export async function requireAuth() {
+  return new Promise((resolve, reject) => {
+    const auth = getAuthInstance();
+    const unsub = onAuthStateChanged(auth, async (user) => {
       unsub();
       if (!user) {
-        // Salva pagina corrente per tornare dopo login
-        const currentPage = window.location.pathname.split('/').pop();
-        if (currentPage && currentPage !== 'ecm-login-op.html') {
-          sessionStorage.setItem('ecm_redirect_after_login', currentPage);
+        window.location.href = PAGINA_LOGIN;
+        reject(new Error('Non autenticato'));
+        return;
+      }
+      _currentUser = user;
+
+      // Super admin — accesso completo
+      if (user.email === SUPER_ADMIN_EMAIL) {
+        _profilo = { uid: user.uid, email: user.email, ruolo: 'superadmin', nome: 'Martins', cognome: 'Osemwengie', moduli: ['tutti'] };
+        resolve(user);
+        return;
+      }
+
+      // Carica profilo da Firestore
+      try {
+        const db = getDB();
+        const uDoc = await getDoc(doc(db, 'utenti', user.uid));
+        if (uDoc.exists()) {
+          _profilo = { uid: user.uid, ...uDoc.data() };
+        } else {
+          // Utente Firebase Auth ma non in Firestore (es. Google login senza profilo)
+          _profilo = { uid: user.uid, email: user.email, ruolo: 'viewer', moduli: ['ecm'] };
         }
-        window.location.href = 'ecm-login-op.html';
-      } else {
-        if (onReady) onReady(user, null);
-        resolve({ googleUser: user, opUser: null });
+
+        // Controlla stato e scadenza
+        if (_profilo.stato === 'sospeso') {
+          await signOut(auth);
+          window.location.href = PAGINA_LOGIN + '?errore=sospeso';
+          reject(new Error('Account sospeso'));
+          return;
+        }
+        if (_profilo.stato === 'in_attesa') {
+          await signOut(auth);
+          window.location.href = PAGINA_LOGIN + '?errore=attesa';
+          reject(new Error('Account in attesa di approvazione'));
+          return;
+        }
+        if (isScaduto(_profilo)) {
+          await signOut(auth);
+          window.location.href = PAGINA_LOGIN + '?errore=scaduto';
+          reject(new Error('Account scaduto'));
+          return;
+        }
+
+        // Verifica permesso modulo corrente
+        const modulo = getModuloCorrente();
+        if (!hasModuloPermesso(_profilo, modulo)) {
+          window.location.href = PAGINA_LOGIN + '?errore=permesso';
+          reject(new Error('Accesso al modulo non consentito: ' + modulo));
+          return;
+        }
+
+        resolve(user);
+      } catch(e) {
+        console.warn('Auth: errore caricamento profilo', e);
+        resolve(user); // Permetti accesso di base in caso di errore Firestore
       }
     });
   });
 }
 
-// requireRole: admin Google bypassa sempre, operatori vengono controllati
-export function requireRole(allowedRoles) {
-  const op = getOpSession();
-  // Se non c'è sessione operatore = è admin Google = accesso completo
-  if (!op) return;
-  // Se è operatore, controlla il ruolo
-  if (!allowedRoles.includes(op.ruolo)) {
-    const dest = op.ruolo === 'scanner' ? 'ecm-blocco3.html' : 'ecm-eventi.html';
-    document.body.innerHTML = `
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'DM Sans',sans-serif;color:#FF4D4D;font-size:16px;text-align:center;padding:20px;background:#0D0F14">
-        ⛔ Non hai i permessi per questa sezione.<br><br>
-        <span style="color:#8B93B8;font-size:13px">Ruolo: <strong style="color:#F0F2FF">${op.ruolo}</strong></span><br><br>
-        <a href="${dest}" style="color:#4D6EFF;font-size:14px">← Torna indietro</a>
-      </div>`;
-    throw new Error('Accesso negato: ' + op.ruolo);
-  }
-}
-
-export function getCurrentUser() {
-  const op = getOpSession();
-  if (op) return { tipo: 'operatore', ...op };
-  const gu = auth.currentUser;
-  if (gu) return { tipo: 'admin', email: gu.email, nome: gu.displayName, uid: gu.uid };
-  return null;
-}
-
-export async function signOut() {
-  localStorage.removeItem('ecm_op_user');
-  sessionStorage.removeItem('ecm_redirect_after_login');
-  try { await fbSignOut(auth); } catch {}
-  window.location.href = 'ecm-login-op.html';
-}
-
-export function injectUserBar(containerId = 'userBarSlot') {
-  const slot = document.getElementById(containerId);
+// injectUserBar — barra utente con nome e ruolo
+export function injectUserBar(slotId) {
+  const slot = document.getElementById(slotId);
   if (!slot) return;
+  const auth = getAuthInstance();
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+    let profilo = _profilo;
+    if (!profilo) {
+      try {
+        const uDoc = await getDoc(doc(getDB(), 'utenti', user.uid));
+        profilo = uDoc.exists() ? { uid: user.uid, ...uDoc.data() } : { uid: user.uid, email: user.email };
+      } catch(e) { profilo = { uid: user.uid, email: user.email }; }
+    }
 
-  const op = getOpSession();
-  if (op) {
-    const icon = op.ruolo === 'scanner' ? '📷' : op.ruolo === 'report' ? '📊' : '🔧';
-    const roleLabel = op.ruolo === 'scanner' ? 'Scanner' : op.ruolo === 'report' ? 'Report' : 'Operatore';
-    const scad = new Date(op.scadenza).toLocaleDateString('it-IT');
-    slot.innerHTML = `
-      <div style="display:flex;align-items:center;gap:8px">
-        <div style="display:flex;flex-direction:column;align-items:flex-end">
-          <span style="font-size:12px;color:rgba(255,255,255,.7);font-weight:500">${icon} ${op.nome||op.username}</span>
-          <span style="font-size:10px;color:rgba(255,255,255,.35)">${roleLabel} · scade ${scad}</span>
-        </div>
-        <button onclick="window.__ecmSignOut()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Esci</button>
-      </div>`;
-    window.__ecmSignOut = () => signOut();
-    return;
-  }
+    const isSuper = user.email === SUPER_ADMIN_EMAIL || profilo?.ruolo === 'superadmin';
+    const ruolo = isSuper ? 'Super Admin' : (profilo?.ruolo || 'utente');
+    const nome = profilo?.nome ? profilo.nome.split(' ')[0] : (user.displayName||'Utente').split(' ')[0];
+    const initiali = ((profilo?.nome||'?')[0]+(profilo?.cognome||'?')[0]).toUpperCase();
+    const ruoloColor = {superadmin:'#3730A3',admin:'#2563EB',operatore:'#059669',scanner:'#D97706',viewer:'#9499B0'}[profilo?.ruolo||'viewer']||'#9499B0';
 
-  onAuthStateChanged(auth, user => {
-    if (!user || !slot) return;
-    const initial = (user.displayName || user.email || '?')[0].toUpperCase();
-    const isAdmin = isAdminUser(user);
     slot.innerHTML = `
-      <div style="display:flex;align-items:center;gap:8px">
-        ${user.photoURL
-          ? `<img src="${user.photoURL}" style="width:28px;height:28px;border-radius:50%;border:2px solid ${isAdmin?'#FFB547':'rgba(255,255,255,.2)'}" alt="">`
-          : `<div style="width:28px;height:28px;border-radius:50%;background:${isAdmin?'#FFB547':'var(--accent)'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#0D0F14">${initial}</div>`}
-        <div style="display:flex;flex-direction:column">
-          <span style="font-size:11px;color:rgba(255,255,255,.6)">${user.displayName||user.email}</span>
-          ${isAdmin?`<span style="font-size:10px;color:#FFB547">👑 Admin</span>`:`<span style="font-size:10px;color:var(--accent)">Utente Google</span>`}
+      <div style="display:flex;align-items:center;gap:8px;cursor:pointer" id="userBarToggle">
+        <div style="width:34px;height:34px;border-radius:50%;background:${ruoloColor};display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:700">${initiali}</div>
+        <div style="display:flex;flex-direction:column;line-height:1.2">
+          <span style="font-size:13px;font-weight:600">${esc(nome)}</span>
+          <span style="font-size:10px;opacity:.7;text-transform:capitalize">${isSuper?'⭐ Super Admin':esc(ruolo)}</span>
         </div>
-        <button onclick="window.__ecmSignOut()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Esci</button>
+      </div>
+      <div id="userDropdown" style="display:none;position:absolute;top:calc(100% + 8px);right:0;background:white;border:1px solid #DDE1E9;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.15);min-width:200px;z-index:200;overflow:hidden">
+        <div style="padding:12px 14px;border-bottom:1px solid #DDE1E9;background:#F4F6F9">
+          <div style="font-size:13px;font-weight:600">${esc(profilo?.nome||'')} ${esc(profilo?.cognome||'')}</div>
+          <div style="font-size:11px;color:#9499B0">${esc(user.email||'')}</div>
+        </div>
+        ${isSuper?'<a href="ecm-superadmin.html" style="display:flex;align-items:center;gap:8px;padding:10px 14px;text-decoration:none;color:#1A1D2E;font-size:13px;transition:background .15s" onmouseover="this.style.background=\'#F4F6F9\'" onmouseout="this.style.background=\'\'">⭐ Super Admin Panel</a>':''}
+        <a href="ecm-home.html" style="display:flex;align-items:center;gap:8px;padding:10px 14px;text-decoration:none;color:#1A1D2E;font-size:13px;transition:background .15s" onmouseover="this.style.background=\'#F4F6F9\'" onmouseout="this.style.background=\'\'">🏠 Home</a>
+        <div style="border-top:1px solid #DDE1E9"></div>
+        <button onclick="window._logoutECM()" style="display:flex;align-items:center;gap:8px;padding:10px 14px;width:100%;border:none;background:none;cursor:pointer;color:#DC2626;font-size:13px;font-family:inherit;transition:background .15s" onmouseover="this.style.background=\'#FEF2F2\'" onmouseout="this.style.background=\'\'">🚪 Esci</button>
       </div>`;
-    window.__ecmSignOut = () => signOut();
+
+    slot.style.position = 'relative';
+    document.getElementById('userBarToggle')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const dd = document.getElementById('userDropdown');
+      dd.style.display = dd.style.display==='none' ? 'block' : 'none';
+    });
+    document.addEventListener('click', () => {
+      const dd = document.getElementById('userDropdown');
+      if(dd) dd.style.display = 'none';
+    }, { once: false });
+
+    window._logoutECM = async () => {
+      try {
+        await addDoc(collection(getDB(),'log_attivita'),{tipo:'logout',email:user.email,dettaglio:'Logout: '+user.email,ts:serverTimestamp(),data:new Date().toISOString()});
+      } catch(e) {}
+      await signOut(auth);
+      window.location.href = PAGINA_LOGIN;
+    };
   });
 }
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+export function getCurrentUser() { return _currentUser; }
+export function getCurrentProfilo() { return _profilo; }
+export function canAccess(modulo) { return hasModuloPermesso(_profilo, modulo); }

@@ -248,7 +248,7 @@
     if (!el) return;
     el.innerHTML =
       'ECM Access Control &nbsp;&middot;&nbsp; <strong>' + VERSION + '</strong>' +
-      ' &nbsp;&middot;&nbsp; &copy; 2026 Multimedia Meeting Group &nbsp;&middot;&nbsp; All rights reserved';
+      ' &nbsp;&middot;&nbsp; &copy; 2026 <strong>Martins Osemwengie</strong> &nbsp;&middot;&nbsp; All rights reserved';
   }
 
   // ── AGGIORNA UTENTE GOOGLE ──────────────────────────

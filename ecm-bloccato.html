@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Accesso bloccato</title>
+<link rel="icon" type="image/png" href="logo.png">
+<style>
+body{font-family:'Inter',system-ui,sans-serif;background:#F4F6F9;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px}
+.card{background:white;border-radius:16px;padding:40px 32px;max-width:420px;width:100%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.1)}
+.icon{font-size:56px;margin-bottom:16px}
+.title{font-size:20px;font-weight:700;margin-bottom:8px;color:#1A1D2E}
+.msg{font-size:14px;color:#5A5F7A;line-height:1.6;margin-bottom:24px}
+.btn{display:inline-block;padding:10px 20px;background:#2563EB;color:white;border-radius:10px;text-decoration:none;font-size:13px;font-weight:500}
+.footer{margin-top:24px;font-size:11px;color:#9499B0}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icon" id="icon">🔒</div>
+  <div class="title" id="title">Accesso bloccato</div>
+  <div class="msg" id="msg">Il tuo account non ha i permessi necessari per accedere a questa pagina.</div>
+  <a href="ecm-login.html" class="btn">← Torna al login</a>
+  <div class="footer">© 2026 Martins Osemwengie · ECM Access Control</div>
+</div>
+<script>
+const params = new URLSearchParams(window.location.search);
+const errore = params.get('errore');
+const msgs = {
+  sospeso: {icon:'⏸', title:'Account sospeso', msg:'Il tuo account è stato sospeso. Contatta l\'amministratore per maggiori informazioni.'},
+  attesa:  {icon:'⏳', title:'In attesa di approvazione', msg:'Il tuo account è in attesa di approvazione da parte dell\'amministratore. Riprova più tardi.'},
+  scaduto: {icon:'⏰', title:'Account scaduto', msg:'Il periodo di validità del tuo account è terminato. Contatta l\'amministratore per il rinnovo.'},
+  permesso:{icon:'🚫', title:'Accesso non consentito', msg:'Non hai i permessi per accedere a questa sezione. Contatta il tuo amministratore.'}
+};
+if(errore && msgs[errore]) {
+  document.getElementById('icon').textContent = msgs[errore].icon;
+  document.getElementById('title').textContent = msgs[errore].title;
+  document.getElementById('msg').textContent = msgs[errore].msg;
+}
+</script>
+</body>
+</html>

@@ -20,62 +20,75 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .btn-accent{background:var(--accent);color:white}
 .btn-success{background:var(--success);color:white}
 .btn-danger{background:var(--danger-light);color:var(--danger);border:1px solid rgba(220,38,38,.2)}
+.btn-warn{background:var(--warn-light);color:var(--warn);border:1px solid rgba(217,119,6,.2)}
 .btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{background:var(--surface2)}
 .btn-sm{padding:5px 12px;font-size:12px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
-.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%}
-.form-input:focus{border-color:var(--accent);background:white}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%;transition:all .2s}
+.form-input:focus{border-color:var(--accent);background:white;box-shadow:0 0 0 3px rgba(37,99,235,.08)}
 select.form-input{cursor:pointer}
 .field-label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase;display:block;margin-bottom:5px}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .span2{grid-column:span 2}
-/* Super admin hero */
-.super-hero{background:linear-gradient(135deg,#1E1B4B 0%,#3730A3 100%);color:white;border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+/* Hero */
+.super-hero{background:linear-gradient(135deg,#1E1B4B 0%,#3730A3 100%);color:white;border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:0 8px 32px rgba(30,27,75,.3)}
 .super-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.06em}
-/* Tabs */
-.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:20px;flex-wrap:wrap}
-.tab{padding:10px 18px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;background:none;border-left:none;border-right:none;border-top:none;font-family:'Inter',sans-serif}
-.tab.active{color:var(--super);border-bottom-color:var(--super)}
-.tab-pane{display:none}.tab-pane.active{display:block}
 /* Stats */
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:20px}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow);text-align:center}
 .stat-val{font-size:28px;font-weight:700}.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
-/* Utenti */
-.user-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow);transition:all .2s}
-.user-card:hover{border-color:var(--accent)}
-.user-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:white;flex-shrink:0}
-.role-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+/* Tabs */
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:20px;flex-wrap:wrap}
+.tab{padding:10px 16px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;background:none;border-left:none;border-right:none;border-top:none;font-family:'Inter',sans-serif}
+.tab.active{color:var(--super);border-bottom-color:var(--super)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+/* User card */
+.user-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:12px;box-shadow:var(--shadow);transition:all .2s}
+.user-card:hover{border-color:rgba(37,99,235,.3)}
+.user-card.sospeso{opacity:.6;border-color:var(--danger);background:#fff8f8}
+.user-card.in-attesa{border-color:var(--warn);background:var(--warn-light)}
+.user-avatar{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:white;flex-shrink:0}
+.role-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700}
 .role-superadmin{background:#EEF2FF;color:#3730A3;border:1px solid rgba(55,48,163,.2)}
 .role-admin{background:var(--accent-light);color:var(--accent);border:1px solid rgba(37,99,235,.2)}
 .role-operatore{background:var(--success-light);color:var(--success);border:1px solid rgba(5,150,105,.2)}
 .role-scanner{background:var(--warn-light);color:var(--warn);border:1px solid rgba(217,119,6,.2)}
 .role-viewer{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
-/* Log attività */
-.log-item{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;transition:background .15s}
-.log-item:hover{background:var(--surface2)}
+/* Moduli checkbox grid */
+.moduli-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-top:10px}
+.modulo-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);cursor:pointer;transition:all .2s}
+.modulo-item:hover{border-color:var(--accent);background:var(--accent-light)}
+.modulo-item.checked{border-color:var(--accent);background:var(--accent-light)}
+.modulo-item input{accent-color:var(--accent);width:16px;height:16px}
+.modulo-icon{font-size:18px}
+.modulo-name{font-size:12px;font-weight:500}
+/* Log */
+.log-item{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px}
 .log-item:last-child{border-bottom:none}
 .log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
-.log-dot.login{background:var(--success)}
-.log-dot.logout{background:var(--text3)}
-.log-dot.create{background:var(--accent)}
-.log-dot.delete{background:var(--danger)}
-.log-dot.update{background:var(--warn)}
-.log-time{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0}
-/* Tabella eventi */
+/* Status badges */
+.status-attivo{background:var(--success-light);color:var(--success);border:1px solid rgba(5,150,105,.2)}
+.status-sospeso{background:var(--danger-light);color:var(--danger);border:1px solid rgba(220,38,38,.2)}
+.status-inattesa{background:var(--warn-light);color:var(--warn);border:1px solid rgba(217,119,6,.2)}
+.status-scaduto{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+/* Date range */
+.date-range{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:4px}
+.date-range span{background:var(--surface2);padding:2px 6px;border-radius:4px}
+/* Tabella */
 .table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead{background:var(--surface2)}
 th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);white-space:nowrap}
-td{padding:10px 14px;border-bottom:1px solid var(--border)}
+td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--surface2)}
-.mono{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)}
 /* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.show{display:flex}
-.modal{background:var(--surface);border-radius:var(--radius-lg);padding:26px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal{background:var(--surface);border-radius:var(--radius-lg);padding:26px;max-width:620px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:4px}
+.modal-sub{font-size:13px;color:var(--text3);margin-bottom:20px}
 .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
 .alert{padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:12px;display:none}
 .alert-error{background:var(--danger-light);color:var(--danger);border:1px solid rgba(220,38,38,.2)}
@@ -83,10 +96,9 @@ tr:hover td{background:var(--surface2)}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty-state{text-align:center;padding:40px;color:var(--text3)}
-/* Online indicator */
-.online-dot{width:10px;height:10px;border-radius:50%;background:var(--success);display:inline-block;box-shadow:0 0 0 2px rgba(5,150,105,.3);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 2px rgba(5,150,105,.3)}50%{box-shadow:0 0 0 5px rgba(5,150,105,.1)}}
-@media(max-width:768px){.stats-grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.span2{grid-column:span 1}}
+.online-dot{width:8px;height:8px;border-radius:50%;background:var(--success);display:inline-block;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 2px rgba(5,150,105,.2)}50%{box-shadow:0 0 0 5px rgba(5,150,105,.05)}}
+@media(max-width:768px){.stats-grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.span2{grid-column:span 1}.moduli-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -105,82 +117,96 @@ tr:hover td{background:var(--surface2)}
   </div>
   <div class="ecm-content">
 
-    <!-- Hero Super Admin -->
     <div class="super-hero">
       <div>
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-          <span class="super-badge">🔑 SUPER ADMIN</span>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span class="super-badge">⭐ SUPER ADMIN</span>
+          <span style="font-size:12px;opacity:.7">Martins Osemwengie</span>
         </div>
         <div style="font-size:20px;font-weight:700">Pannello di controllo globale</div>
-        <div style="font-size:13px;opacity:.75;margin-top:2px">Gestione utenti, permessi, attività e assistenza remota</div>
+        <div style="font-size:12px;opacity:.75;margin-top:2px">Gestione utenti · Permessi moduli · Attività · Assistenza remota</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.3)" id="btnNuovoAdmin">+ Nuovo Admin</button>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.3)" id="btnNuovoUtente">+ Nuovo utente</button>
         <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.3)" id="btnRefreshAll">↻ Aggiorna</button>
       </div>
     </div>
 
-    <!-- Stats globali -->
+    <!-- Stats -->
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-val" id="sTotUtenti">0</div><div class="stat-label">Utenti totali</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--accent)" id="sTotAdmin">0</div><div class="stat-label">Admin</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--warn)" id="sInAttesa">0</div><div class="stat-label">In attesa</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--accent)" id="sTotAdmin">0</div><div class="stat-label">Admin attivi</div></div>
       <div class="stat-card"><div class="stat-val" style="color:var(--success)" id="sTotOp">0</div><div class="stat-label">Operatori</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--warn)" id="sTotEventi">0</div><div class="stat-label">Eventi totali</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--super)" id="sTotLog">0</div><div class="stat-label">Attività oggi</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--danger)" id="sSospesi">0</div><div class="stat-label">Sospesi</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--super)" id="sTotEventi">0</div><div class="stat-label">Eventi totali</div></div>
     </div>
 
     <div class="tabs">
-      <button class="tab active" data-tab="utenti">👥 Utenti & Ruoli</button>
-      <button class="tab" data-tab="attivita">📊 Attività in tempo reale</button>
+      <button class="tab active" data-tab="utenti">👥 Utenti & Permessi</button>
+      <button class="tab" data-tab="richieste">🔔 Richieste accesso</button>
+      <button class="tab" data-tab="attivita">📊 Log attività</button>
       <button class="tab" data-tab="eventi">🗓️ Tutti gli eventi</button>
-      <button class="tab" data-tab="assistenza">🛠️ Assistenza remota</button>
-      <button class="tab" data-tab="impostazioni">⚙️ Impostazioni sistema</button>
+      <button class="tab" data-tab="sistema">⚙️ Sistema</button>
     </div>
 
     <!-- TAB UTENTI -->
     <div class="tab-pane active" id="tab-utenti">
       <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-        <input type="text" class="form-input" id="searchUtenti" placeholder="Cerca utente..." style="max-width:250px">
-        <select class="form-input" id="filterRuolo" style="max-width:180px">
+        <input type="text" class="form-input" id="searchUtenti" placeholder="Cerca nome, email..." style="max-width:240px">
+        <select class="form-input" id="filterRuolo" style="max-width:160px">
           <option value="">Tutti i ruoli</option>
-          <option value="superadmin">Super Admin</option>
           <option value="admin">Admin</option>
           <option value="operatore">Operatore</option>
           <option value="scanner">Scanner</option>
           <option value="viewer">Viewer</option>
         </select>
+        <select class="form-input" id="filterStato" style="max-width:160px">
+          <option value="">Tutti gli stati</option>
+          <option value="attivo">Attivi</option>
+          <option value="sospeso">Sospesi</option>
+          <option value="scaduto">Scaduti</option>
+        </select>
       </div>
-      <div id="utentiList"><div class="empty-state"><div style="font-size:32px;opacity:.3">👥</div><div style="margin-top:8px">Caricamento...</div></div></div>
+      <div id="utentiList"><div class="empty-state"><div class="spinner" style="width:32px;height:32px;border-width:3px"></div></div></div>
     </div>
 
-    <!-- TAB ATTIVITA -->
+    <!-- TAB RICHIESTE -->
+    <div class="tab-pane" id="tab-richieste">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:14px">
+        Gli utenti che si auto-registrano appaiono qui in attesa di approvazione.
+      </div>
+      <div id="richiesteList"><div class="empty-state"><div style="font-size:32px;opacity:.3;margin-bottom:8px">🔔</div><div>Nessuna richiesta in attesa</div></div></div>
+    </div>
+
+    <!-- TAB LOG -->
     <div class="tab-pane" id="tab-attivita">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
         <div style="display:flex;align-items:center;gap:8px">
           <span class="online-dot"></span>
-          <span style="font-size:13px;font-weight:500">Live — aggiornamento automatico</span>
+          <span style="font-size:13px;font-weight:500">Aggiornamento in tempo reale</span>
         </div>
         <div style="display:flex;gap:8px">
           <select class="form-input btn-sm" id="filterLogTipo" style="max-width:160px">
             <option value="">Tutte le attività</option>
             <option value="login">Login</option>
-            <option value="logout">Logout</option>
-            <option value="checkin">Check-in</option>
             <option value="create">Creazioni</option>
             <option value="update">Modifiche</option>
+            <option value="delete">Eliminazioni</option>
+            <option value="assistenza">Assistenza</option>
           </select>
-          <button class="btn btn-outline btn-sm" id="btnClearLog">🗑️ Svuota log</button>
+          <button class="btn btn-outline btn-sm" id="btnExportLog">📊 Export CSV</button>
         </div>
       </div>
       <div class="card" style="padding:0;overflow:hidden;max-height:500px;overflow-y:auto">
-        <div id="logList"><div class="empty-state">Nessuna attività registrata</div></div>
+        <div id="logList"><div class="empty-state">Caricamento log...</div></div>
       </div>
     </div>
 
     <!-- TAB EVENTI -->
     <div class="tab-pane" id="tab-eventi">
       <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-        <input type="text" class="form-input" id="searchEventi" placeholder="Cerca evento..." style="max-width:250px">
+        <input type="text" class="form-input" id="searchEventi" placeholder="Cerca evento..." style="max-width:240px">
         <select class="form-input" id="filterTipoEv" style="max-width:160px">
           <option value="">Tutti i tipi</option>
           <option value="ecm">ECM</option>
@@ -192,61 +218,33 @@ tr:hover td{background:var(--surface2)}
       <div class="table-wrap" id="eventiTable"><div class="empty-state">Caricamento...</div></div>
     </div>
 
-    <!-- TAB ASSISTENZA -->
-    <div class="tab-pane" id="tab-assistenza">
-      <div class="card" style="background:var(--accent-light);border-color:rgba(37,99,235,.2);margin-bottom:16px">
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="font-size:32px">🛠️</div>
-          <div>
-            <div style="font-size:14px;font-weight:600;color:var(--accent)">Modalità Assistenza Remota</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:2px">Accedi come qualsiasi utente per verificare problemi. Tutte le azioni vengono registrate nel log.</div>
-          </div>
-          <button class="btn btn-accent btn-sm" id="btnAttivaAssistenza" style="margin-left:auto">Attiva</button>
-        </div>
-      </div>
-      <div id="assistenzaPanel">
-        <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px">Seleziona utente da assistere</div>
-        <div id="utentiAssistenza"><div class="empty-state">Attiva la modalità assistenza</div></div>
-      </div>
-    </div>
-
-    <!-- TAB IMPOSTAZIONI -->
-    <div class="tab-pane" id="tab-impostazioni">
+    <!-- TAB SISTEMA -->
+    <div class="tab-pane" id="tab-sistema">
       <div class="card">
         <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:16px">⚙️ Configurazione sistema</div>
         <div class="form-grid">
-          <div class="form-group">
-            <label class="field-label">Nome organizzazione</label>
-            <input type="text" class="form-input" id="sysNomeOrg" placeholder="Multimedia Meeting Group">
-          </div>
-          <div class="form-group">
-            <label class="field-label">Email supporto</label>
-            <input type="email" class="form-input" id="sysSupportEmail" placeholder="support@esempio.com">
-          </div>
-          <div class="form-group">
-            <label class="field-label">Max admin consentiti</label>
-            <input type="number" class="form-input" id="sysMaxAdmin" value="10" min="1">
-          </div>
-          <div class="form-group">
-            <label class="field-label">Max operatori per admin</label>
-            <input type="number" class="form-input" id="sysMaxOp" value="20" min="1">
-          </div>
+          <div class="form-group"><label class="field-label">Nome organizzazione</label><input type="text" class="form-input" id="sysNomeOrg" placeholder="Es. Multimedia Meeting Group"></div>
+          <div class="form-group"><label class="field-label">Email supporto</label><input type="email" class="form-input" id="sysSupportEmail" placeholder="support@esempio.com"></div>
+          <div class="form-group"><label class="field-label">Max admin</label><input type="number" class="form-input" id="sysMaxAdmin" value="10" min="1"></div>
+          <div class="form-group"><label class="field-label">Max operatori per admin</label><input type="number" class="form-input" id="sysMaxOp" value="20" min="1"></div>
+          <div class="form-group span2"><label class="field-label">Messaggio benvenuto (pagina login)</label><input type="text" class="form-input" id="sysWelcome" placeholder="Benvenuto in ECM Access Control"></div>
           <div class="form-group span2">
-            <label class="field-label">Messaggio di benvenuto (login)</label>
-            <input type="text" class="form-input" id="sysWelcome" placeholder="Benvenuto in ECM Access Control">
+            <label class="field-label">Auto-approvazione nuove registrazioni</label>
+            <select class="form-input" id="sysAutoApprova">
+              <option value="no">No — richiede approvazione manuale</option>
+              <option value="si">Sì — approva automaticamente</option>
+            </select>
           </div>
         </div>
         <div style="display:flex;justify-content:flex-end;margin-top:14px">
-          <button class="btn btn-super" id="btnSalvaImpostazioni">💾 Salva impostazioni</button>
+          <button class="btn btn-super" id="btnSalvaSistema">💾 Salva impostazioni</button>
         </div>
       </div>
-
-      <!-- Zona pericolosa -->
-      <div class="card" style="border-color:rgba(220,38,38,.3);background:var(--danger-light)">
+      <div class="card" style="border-color:rgba(220,38,38,.3)">
         <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--danger);margin-bottom:12px">⚠️ Zona pericolosa</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn btn-danger btn-sm" id="btnResetLog">🗑️ Reset log attività</button>
-          <button class="btn btn-danger btn-sm" id="btnExportBackup">📦 Export backup completo</button>
+          <button class="btn btn-outline btn-sm" id="btnExportBackup">📦 Export backup utenti</button>
         </div>
       </div>
     </div>
@@ -255,31 +253,23 @@ tr:hover td{background:var(--surface2)}
   <div class="ecm-version-footer" id="ecmVersionFooter"></div>
 </div>
 
-<!-- MODAL NUOVO ADMIN/UTENTE -->
+<!-- MODAL UTENTE (crea/modifica) -->
 <div class="modal-overlay" id="modalUtente">
   <div class="modal">
-    <div style="font-size:17px;font-weight:700;margin-bottom:4px" id="modalUtenteTitolo">Nuovo Admin</div>
-    <div style="font-size:13px;color:var(--text3);margin-bottom:20px" id="modalUtenteSub">Crea un nuovo account amministratore</div>
+    <div class="modal-title" id="modalUtenteTitolo">Nuovo utente</div>
+    <div class="modal-sub" id="modalUtenteSub">Crea account con email e password</div>
     <div class="alert alert-error" id="utenteErr"></div>
     <div class="alert alert-success" id="utenteOk"></div>
-    <div class="form-grid" style="margin-bottom:12px">
-      <div class="form-group">
-        <label class="field-label">Nome *</label>
-        <input type="text" class="form-input" id="uNome" placeholder="Mario">
-      </div>
-      <div class="form-group">
-        <label class="field-label">Cognome *</label>
-        <input type="text" class="form-input" id="uCognome" placeholder="Rossi">
-      </div>
-      <div class="form-group">
-        <label class="field-label">Email *</label>
-        <input type="email" class="form-input" id="uEmail" placeholder="mario@esempio.com">
-      </div>
-      <div class="form-group">
+
+    <div class="form-grid" style="margin-bottom:14px">
+      <div class="form-group"><label class="field-label">Nome *</label><input type="text" class="form-input" id="uNome"></div>
+      <div class="form-group"><label class="field-label">Cognome *</label><input type="text" class="form-input" id="uCognome"></div>
+      <div class="form-group"><label class="field-label">Email *</label><input type="email" class="form-input" id="uEmail"></div>
+      <div class="form-group" id="pwdGroup">
         <label class="field-label">Password *</label>
         <div style="position:relative">
           <input type="password" class="form-input" id="uPassword" placeholder="Min. 8 caratteri">
-          <button type="button" id="togglePwd" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--text3)">👁</button>
+          <button type="button" onclick="const i=document.getElementById('uPassword');i.type=i.type==='password'?'text':'password'" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:14px">👁</button>
         </div>
       </div>
       <div class="form-group">
@@ -292,41 +282,92 @@ tr:hover td{background:var(--surface2)}
         </select>
       </div>
       <div class="form-group">
-        <label class="field-label">Organizzazione / Ente</label>
-        <input type="text" class="form-input" id="uOrg" placeholder="Nome organizzazione">
-      </div>
-      <div class="form-group">
-        <label class="field-label">Telefono</label>
-        <input type="text" class="form-input" id="uTel" placeholder="+39 000 000 0000">
-      </div>
-      <div class="form-group">
-        <label class="field-label">Stato account</label>
+        <label class="field-label">Stato</label>
         <select class="form-input" id="uStato">
           <option value="attivo">✓ Attivo</option>
           <option value="sospeso">⏸ Sospeso</option>
         </select>
       </div>
-      <div class="form-group span2">
-        <label class="field-label">Note interne</label>
-        <input type="text" class="form-input" id="uNote" placeholder="Evento assegnato, note...">
+      <div class="form-group">
+        <label class="field-label">Accesso valido dal</label>
+        <input type="date" class="form-input" id="uDataInizio">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Accesso valido fino al</label>
+        <input type="date" class="form-input" id="uDataFine">
+      </div>
+      <div class="form-group"><label class="field-label">Organizzazione</label><input type="text" class="form-input" id="uOrg" placeholder="Nome ente/organizzazione"></div>
+      <div class="form-group"><label class="field-label">Telefono</label><input type="text" class="form-input" id="uTel"></div>
+      <div class="form-group span2"><label class="field-label">Note interne</label><input type="text" class="form-input" id="uNote" placeholder="Evento assegnato, note..."></div>
+    </div>
+
+    <!-- PERMESSI MODULI -->
+    <div style="border-top:1px solid var(--border);padding-top:16px;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">🔑 Moduli accessibili</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Seleziona quali sezioni dell'app può usare questo utente</div>
+      <div class="moduli-grid" id="moduliGrid">
+        <!-- Popolato dinamicamente -->
+      </div>
+      <div style="margin-top:8px;display:flex;gap:8px">
+        <button type="button" class="btn btn-outline btn-sm" onclick="toggleTuttiModuli(true)">✓ Tutti</button>
+        <button type="button" class="btn btn-outline btn-sm" onclick="toggleTuttiModuli(false)">✗ Nessuno</button>
       </div>
     </div>
+
     <div style="padding:10px 14px;background:var(--accent-light);border-radius:var(--radius);font-size:12px;color:var(--accent);margin-bottom:14px">
-      ℹ️ Verrà creato un account Firebase Auth con le credenziali inserite. L'utente potrà accedere con email e password.
+      ℹ️ Se imposti date di validità, l'accesso verrà automaticamente bloccato dopo la data di fine.
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" id="btnAnnullaUtente">Annulla</button>
-      <button class="btn btn-super" id="btnSalvaUtente">✓ Crea account</button>
+      <button class="btn btn-super" id="btnSalvaUtente">✓ Salva</button>
     </div>
   </div>
 </div>
 
 <script>
+// Definizione moduli
+const MODULI = [
+  {id:'ecm',        icon:'🏥', nome:'ECM (base)'},
+  {id:'blocco2',    icon:'🎫', nome:'Badge & QR'},
+  {id:'blocco3',    icon:'📷', nome:'Controllo accessi'},
+  {id:'blocco4',    icon:'📊', nome:'Report ECM'},
+  {id:'blocco5',    icon:'📋', nome:'Survey'},
+  {id:'blocco6',    icon:'📝', nome:'Registrazione'},
+  {id:'blocco7',    icon:'❓', nome:'Quiz ECM'},
+  {id:'congress',   icon:'🎤', nome:'Congress'},
+  {id:'convention', icon:'🏢', nome:'Convention'},
+  {id:'wedding',    icon:'💍', nome:'Wedding'},
+  {id:'pagamenti',  icon:'💳', nome:'Pagamenti'},
+  {id:'admin',      icon:'⚙️', nome:'Gestione utenti'},
+];
+
+function buildModuliGrid(selezionati) {
+  const grid = document.getElementById('moduliGrid');
+  grid.innerHTML = MODULI.map(m => {
+    const checked = !selezionati || selezionati.includes(m.id) || selezionati.includes('tutti');
+    return `<label class="modulo-item ${checked?'checked':''}" onclick="this.classList.toggle('checked')">
+      <input type="checkbox" name="modulo" value="${m.id}" ${checked?'checked':''} style="accent-color:var(--accent);width:15px;height:15px">
+      <span class="modulo-icon">${m.icon}</span>
+      <span class="modulo-name">${m.nome}</span>
+    </label>`;
+  }).join('');
+}
+
+window.toggleTuttiModuli = function(val) {
+  document.querySelectorAll('#moduliGrid input[type=checkbox]').forEach(cb => {
+    cb.checked = val;
+    cb.closest('label').classList.toggle('checked', val);
+  });
+};
+
+function getModuliSelezionati() {
+  return [...document.querySelectorAll('#moduliGrid input[type=checkbox]:checked')].map(cb => cb.value);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof applyTranslations === 'function') applyTranslations();
   if (typeof renderSidebar === 'function') renderSidebar('superadmin');
   if (typeof renderVersionFooter === 'function') renderVersionFooter();
-
   document.querySelectorAll('.tab').forEach(t => {
     t.addEventListener('click', () => {
       document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
@@ -337,56 +378,64 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show')}));
   document.getElementById('btnAnnullaUtente').addEventListener('click',()=>document.getElementById('modalUtente').classList.remove('show'));
-  document.getElementById('btnNuovoAdmin').addEventListener('click',apriNuovoUtente);
+  document.getElementById('btnNuovoUtente').addEventListener('click',apriNuovoUtente);
   document.getElementById('btnSalvaUtente').addEventListener('click',()=>window._salvaUtente&&window._salvaUtente());
   document.getElementById('btnRefreshAll').addEventListener('click',()=>window._reloadAll&&window._reloadAll());
   document.getElementById('searchUtenti').addEventListener('input',()=>window._renderUtenti&&window._renderUtenti());
   document.getElementById('filterRuolo').addEventListener('change',()=>window._renderUtenti&&window._renderUtenti());
-  document.getElementById('togglePwd').addEventListener('click',function(){const i=document.getElementById('uPassword');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'👁':'🙈';});
-  document.getElementById('btnAttivaAssistenza').addEventListener('click',attivaAssistenza);
-  document.getElementById('btnSalvaImpostazioni').addEventListener('click',()=>window._salvaImpostazioni&&window._salvaImpostazioni());
-  document.getElementById('btnResetLog').addEventListener('click',()=>{if(confirm('Svuotare il log attività?'))window._resetLog&&window._resetLog();});
+  document.getElementById('filterStato').addEventListener('change',()=>window._renderUtenti&&window._renderUtenti());
+  document.getElementById('filterLogTipo').addEventListener('change',()=>window._renderLogs&&window._renderLogs());
+  document.getElementById('btnSalvaSistema').addEventListener('click',()=>window._salvaSistema&&window._salvaSistema());
+  document.getElementById('btnResetLog').addEventListener('click',()=>{if(confirm('Svuotare il log?'))window._resetLog&&window._resetLog();});
+  document.getElementById('btnExportLog').addEventListener('click',()=>window._exportLog&&window._exportLog());
+  document.getElementById('btnExportBackup').addEventListener('click',()=>window._exportBackup&&window._exportBackup());
+  document.getElementById('searchEventi').addEventListener('input',()=>window._renderEventi&&window._renderEventi());
+  document.getElementById('filterTipoEv').addEventListener('change',()=>window._renderEventi&&window._renderEventi());
+  buildModuliGrid(null);
 });
 
 function apriNuovoUtente() {
-  document.getElementById('modalUtenteTitolo').textContent='Nuovo utente';
-  document.getElementById('modalUtenteSub').textContent='Crea account con email e password';
-  ['uNome','uCognome','uEmail','uPassword','uOrg','uTel','uNote'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('uRuolo').value='admin';
-  document.getElementById('uStato').value='attivo';
+  window._editUid = null;
+  document.getElementById('modalUtenteTitolo').textContent = 'Nuovo utente';
+  document.getElementById('modalUtenteSub').textContent = 'Crea account con email e password';
+  document.getElementById('pwdGroup').style.display = 'block';
+  ['uNome','uCognome','uEmail','uPassword','uOrg','uTel','uNote','uDataInizio','uDataFine'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('uRuolo').value = 'admin';
+  document.getElementById('uStato').value = 'attivo';
   document.getElementById('utenteErr').style.display='none';
   document.getElementById('utenteOk').style.display='none';
+  buildModuliGrid(null);
   document.getElementById('modalUtente').classList.add('show');
   setTimeout(()=>document.getElementById('uNome').focus(),100);
-}
-
-function attivaAssistenza() {
-  document.getElementById('assistenzaPanel').innerHTML='<div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px">Seleziona utente da assistere</div><div id="utentiAssistenza"></div>';
-  window._renderAssistenza&&window._renderAssistenza();
-  document.getElementById('btnAttivaAssistenza').textContent='Attiva ✓';
-  document.getElementById('btnAttivaAssistenza').style.background='var(--success)';
 }
 </script>
 
 <script type="module">
 import { requireAuth, injectUserBar } from './ecm-auth.js';
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, setDoc, getDoc, addDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth, createUserWithEmailAndPassword, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, doc, setDoc, getDoc, addDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
-const SUPER_ADMIN_EMAIL = 'martinsosem@gmail.com';
+const SUPER_EMAIL = 'martinsosem@gmail.com';
 
 const RUOLO_INFO = {
-  superadmin:{lbl:'Super Admin',cls:'role-superadmin',icon:'🔑',color:'#3730A3'},
+  superadmin:{lbl:'Super Admin',cls:'role-superadmin',icon:'⭐',color:'#3730A3'},
   admin:{lbl:'Admin',cls:'role-admin',icon:'👔',color:'#2563EB'},
   operatore:{lbl:'Operatore',cls:'role-operatore',icon:'🔧',color:'#059669'},
   scanner:{lbl:'Scanner',cls:'role-scanner',icon:'📷',color:'#D97706'},
   viewer:{lbl:'Viewer',cls:'role-viewer',icon:'👁',color:'#9499B0'}
 };
 
-let db, auth, utenti=[], eventi=[], logs=[];
-let unsubLogs=null;
+let db, auth, utenti=[], eventi=[], logs=[], unsubLogs=null;
+
+function checkScadenza(u) {
+  if(!u.dataFine) return u.stato||'attivo';
+  const fine = new Date(u.dataFine);
+  fine.setHours(23,59,59);
+  if(fine < new Date()) return 'scaduto';
+  return u.stato||'attivo';
+}
 
 async function initApp() {
   try {
@@ -395,223 +444,179 @@ async function initApp() {
     auth = getAuth(app);
     await requireAuth();
     injectUserBar('userBarSlot');
-
-    // Verifica super admin
-    const user = auth.currentUser;
-    if (!user || user.email !== SUPER_ADMIN_EMAIL) {
-      document.querySelector('.ecm-content').innerHTML = `
-        <div style="text-align:center;padding:80px 20px">
-          <div style="font-size:48px;margin-bottom:16px">🔒</div>
-          <div style="font-size:20px;font-weight:700;margin-bottom:8px">Accesso negato</div>
-          <div style="font-size:14px;color:var(--text2)">Questa pagina è riservata al Super Amministratore.</div>
-          <a href="ecm-home.html" style="display:inline-block;margin-top:20px;padding:10px 20px;background:var(--accent);color:white;border-radius:var(--radius);text-decoration:none;font-size:13px">← Torna alla home</a>
-        </div>`;
+    if(!auth.currentUser || auth.currentUser.email !== SUPER_EMAIL) {
+      document.querySelector('.ecm-content').innerHTML = `<div style="text-align:center;padding:80px 20px"><div style="font-size:48px;margin-bottom:16px">🔒</div><div style="font-size:20px;font-weight:700;margin-bottom:8px">Accesso negato</div><div style="font-size:14px;color:var(--text2)">Riservato al Super Amministratore.</div><a href="ecm-home.html" style="display:inline-flex;margin-top:20px;padding:10px 20px;background:var(--accent);color:white;border-radius:var(--radius);text-decoration:none;font-size:13px">← Home</a></div>`;
       return;
     }
-
     document.getElementById('fbDot').className = 'topbar-dot ok';
-    document.getElementById('fbStatus').textContent = 'Super Admin connesso';
-
+    document.getElementById('fbStatus').textContent = 'Super Admin ✓';
     await loadAll();
     startLiveLog();
-
     window._reloadAll = loadAll;
     window._renderUtenti = renderUtenti;
+    window._renderLogs = renderLogs;
+    window._renderEventi = renderEventi;
     window._salvaUtente = salvaUtente;
-    window._renderAssistenza = renderAssistenza;
-    window._salvaImpostazioni = salvaImpostazioni;
+    window._salvaSistema = salvaSistema;
     window._resetLog = resetLog;
-  } catch(e) {
-    console.error(e);
-    document.getElementById('fbStatus').textContent = 'Errore: ' + e.message;
-  }
+    window._exportLog = exportLog;
+    window._exportBackup = exportBackup;
+    window.approvaUtente = approvaUtente;
+    window.rifiutaUtente = rifiutaUtente;
+    window.editUtente = editUtente;
+    window.cambiaStato = cambiaStato;
+    window.eliminaUtente = eliminaUtente;
+  } catch(e) { console.error(e); }
 }
 
 async function loadAll() {
   const [utSnap, evSnap] = await Promise.all([
-    getDocs(collection(db, 'utenti')),
-    getDocs(collection(db, 'eventi'))
+    getDocs(collection(db,'utenti')),
+    getDocs(collection(db,'eventi'))
   ]);
-  utenti = []; utSnap.forEach(d => utenti.push({id:d.id,...d.data()}));
-  eventi = []; evSnap.forEach(d => eventi.push({id:d.id,...d.data()}));
+  utenti=[]; utSnap.forEach(d=>utenti.push({id:d.id,...d.data()}));
+  eventi=[]; evSnap.forEach(d=>eventi.push({id:d.id,...d.data()}));
 
-  // Stats
-  document.getElementById('sTotUtenti').textContent = utenti.length;
-  document.getElementById('sTotAdmin').textContent = utenti.filter(u=>u.ruolo==='admin').length;
-  document.getElementById('sTotOp').textContent = utenti.filter(u=>u.ruolo==='operatore'||u.ruolo==='scanner').length;
+  // Aggiorna scadenze automaticamente
+  const oggi = new Date();
+  for(const u of utenti) {
+    if(u.dataFine && u.stato==='attivo') {
+      const fine = new Date(u.dataFine); fine.setHours(23,59,59);
+      if(fine < oggi) {
+        await setDoc(doc(db,'utenti',u.id),{stato:'scaduto'},{merge:true});
+        u.stato = 'scaduto';
+      }
+    }
+  }
+
+  const inAttesa = utenti.filter(u=>u.stato==='in_attesa').length;
+  document.getElementById('sTotUtenti').textContent = utenti.filter(u=>u.email!==SUPER_EMAIL).length;
+  document.getElementById('sInAttesa').textContent = inAttesa;
+  document.getElementById('sTotAdmin').textContent = utenti.filter(u=>u.ruolo==='admin'&&u.stato==='attivo').length;
+  document.getElementById('sTotOp').textContent = utenti.filter(u=>['operatore','scanner'].includes(u.ruolo)&&u.stato==='attivo').length;
+  document.getElementById('sSospesi').textContent = utenti.filter(u=>u.stato==='sospeso').length;
   document.getElementById('sTotEventi').textContent = eventi.length;
 
-  renderUtenti();
-  renderEventi();
-  renderAssistenza();
-
-  // Carica impostazioni
-  try {
-    const sysDoc = await getDoc(doc(db,'sistema','config'));
-    if (sysDoc.exists()) {
-      const d = sysDoc.data();
-      if(d.nomeOrg) document.getElementById('sysNomeOrg').value = d.nomeOrg;
-      if(d.supportEmail) document.getElementById('sysSupportEmail').value = d.supportEmail;
-      if(d.maxAdmin) document.getElementById('sysMaxAdmin').value = d.maxAdmin;
-      if(d.maxOp) document.getElementById('sysMaxOp').value = d.maxOp;
-      if(d.welcome) document.getElementById('sysWelcome').value = d.welcome;
-    }
-  } catch(e) {}
+  renderUtenti(); renderRichieste(); renderEventi();
 }
 
 function renderUtenti() {
   const q = (document.getElementById('searchUtenti').value||'').toLowerCase();
   const fr = document.getElementById('filterRuolo').value;
+  const fs = document.getElementById('filterStato').value;
   const fil = utenti.filter(u => {
+    if(u.email===SUPER_EMAIL) return false;
+    if(u.stato==='in_attesa') return false; // mostrati in tab richieste
     if(q && !((u.nome||'').toLowerCase().includes(q)||(u.cognome||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q))) return false;
-    if(fr && u.ruolo !== fr) return false;
+    if(fr && u.ruolo!==fr) return false;
+    if(fs && checkScadenza(u)!==fs) return false;
     return true;
   });
 
   const c = document.getElementById('utentiList');
-  if(!fil.length) { c.innerHTML='<div class="empty-state"><div style="font-size:32px;opacity:.3">👥</div><div style="margin-top:8px">Nessun utente trovato</div></div>'; return; }
+  if(!fil.length){c.innerHTML='<div class="empty-state"><div style="font-size:32px;opacity:.3">👥</div><div style="margin-top:8px">Nessun utente trovato</div></div>';return;}
 
   c.innerHTML = fil.map(u => {
-    const ri = RUOLO_INFO[u.ruolo||'viewer'] || RUOLO_INFO.viewer;
+    const ri = RUOLO_INFO[u.ruolo||'viewer']||RUOLO_INFO.viewer;
+    const stato = checkScadenza(u);
     const initiali = ((u.nome||'?')[0]+(u.cognome||'?')[0]).toUpperCase();
-    const isSuperAdmin = u.email === SUPER_ADMIN_EMAIL;
-    return `<div class="user-card">
-      <div class="user-avatar" style="background:${ri.color}">${initiali}</div>
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap">
-          <div style="font-size:14px;font-weight:600">${esc(u.nome||'')} ${esc(u.cognome||'')}</div>
-          <span class="role-badge ${ri.cls}">${ri.icon} ${ri.lbl}</span>
-          ${u.stato==='sospeso'?'<span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:var(--danger-light);color:var(--danger)">⏸ Sospeso</span>':''}
+    const moduliCount = (u.moduli||[]).length;
+    const todayStr = new Date().toISOString().split('T')[0];
+    const scadeProsto = u.dataFine && u.dataFine > todayStr && u.dataFine <= new Date(Date.now()+7*86400000).toISOString().split('T')[0];
+
+    return `<div class="user-card ${stato==='sospeso'?'sospeso':''}">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <div class="user-avatar" style="background:${stato==='sospeso'?'#ccc':ri.color}">${stato==='sospeso'?'⏸':initiali}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+            <span style="font-size:14px;font-weight:600">${esc(u.nome||'')} ${esc(u.cognome||'')}</span>
+            <span class="role-badge ${ri.cls}">${ri.icon} ${ri.lbl}</span>
+            <span class="role-badge status-${stato}">${stato==='attivo'?'✓ Attivo':stato==='sospeso'?'⏸ Sospeso':'⏰ Scaduto'}</span>
+            ${scadeProsto?'<span class="role-badge" style="background:var(--warn-light);color:var(--warn)">⚠️ Scade presto</span>':''}
+          </div>
+          <div style="font-size:12px;color:var(--text3);display:flex;gap:10px;flex-wrap:wrap;margin-bottom:4px">
+            <span>📧 ${esc(u.email||'—')}</span>
+            ${u.org?`<span>🏢 ${esc(u.org)}</span>`:''}
+            ${u.tel?`<span>📞 ${esc(u.tel)}</span>`:''}
+          </div>
+          ${u.dataInizio||u.dataFine?`<div class="date-range">
+            ${u.dataInizio?`Dal <span>${u.dataInizio}</span>`:''}
+            ${u.dataFine?`Al <span>${u.dataFine}</span>`:''}
+          </div>`:''}
+          ${u.moduli?.length?`<div style="font-size:11px;color:var(--text3);margin-top:4px">🔑 ${moduliCount} moduli: ${(u.moduli||[]).join(', ')}</div>`:'<div style="font-size:11px;color:var(--text3);margin-top:4px">🔑 Accesso completo</div>'}
+          ${u.note?`<div style="font-size:11px;color:var(--text2);margin-top:2px">📝 ${esc(u.note)}</div>`:''}
         </div>
-        <div style="font-size:12px;color:var(--text3);display:flex;gap:10px;flex-wrap:wrap">
-          <span>📧 ${esc(u.email||'—')}</span>
-          ${u.org?`<span>🏢 ${esc(u.org)}</span>`:''}
-          ${u.tel?`<span>📞 ${esc(u.tel)}</span>`:''}
-        </div>
-        ${u.note?`<div style="font-size:11px;color:var(--text3);margin-top:2px">📝 ${esc(u.note)}</div>`:''}
-      </div>
-      <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap">
-        ${!isSuperAdmin?`
-          <button class="btn btn-outline btn-sm" data-toggle-stato="${u.id}" data-stato="${u.stato||'attivo'}">
-            ${u.stato==='sospeso'?'▶ Attiva':'⏸ Sospendi'}
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+          <button class="btn btn-outline btn-sm" onclick="editUtente('${u.id}')">✏️ Modifica</button>
+          <button class="btn btn-sm ${stato==='sospeso'?'btn-success':'btn-warn'}" onclick="cambiaStato('${u.id}','${stato}')">
+            ${stato==='sospeso'?'▶ Riattiva':'⏸ Sospendi'}
           </button>
-          <button class="btn btn-outline btn-sm" data-impersona="${u.id}">🛠️ Assisti</button>
-          <button class="btn btn-danger btn-sm" data-del-utente="${u.id}">✕</button>
-        `:'<span style="font-size:12px;color:var(--text3)">Account principale</span>'}
+          <button class="btn btn-danger btn-sm" onclick="eliminaUtente('${u.id}')">✕ Elimina</button>
+        </div>
       </div>
     </div>`;
   }).join('');
+}
 
-  // Listener bottoni
-  c.querySelectorAll('[data-toggle-stato]').forEach(b => b.addEventListener('click', () => toggleStato(b.dataset.toggleStato, b.dataset.stato)));
-  c.querySelectorAll('[data-del-utente]').forEach(b => b.addEventListener('click', () => eliminaUtente(b.dataset.delUtente)));
-  c.querySelectorAll('[data-impersona]').forEach(b => b.addEventListener('click', () => {
-    const uid = b.dataset.impersona;
-    const u = utenti.find(x=>x.id===uid);
-    if(u) mostraInfoAssistenza(u);
-  }));
+function renderRichieste() {
+  const richieste = utenti.filter(u=>u.stato==='in_attesa');
+  const c = document.getElementById('richiesteList');
+  if(!richieste.length){c.innerHTML='<div class="empty-state"><div style="font-size:32px;opacity:.3;margin-bottom:8px">✅</div><div>Nessuna richiesta in attesa</div></div>';return;}
+  c.innerHTML = richieste.map(u=>`
+    <div class="user-card in-attesa">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--warn);display:flex;align-items:center;justify-content:center;color:white;font-size:16px;font-weight:700;flex-shrink:0">
+          ${((u.nome||'?')[0]+(u.cognome||'?')[0]).toUpperCase()}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:600;margin-bottom:2px">${esc(u.nome||'')} ${esc(u.cognome||'')}</div>
+          <div style="font-size:12px;color:var(--text3);display:flex;gap:10px;flex-wrap:wrap">
+            <span>📧 ${esc(u.email||'—')}</span>
+            ${u.org?`<span>🏢 ${esc(u.org)}</span>`:''}
+          </div>
+          <div style="font-size:11px;color:var(--warn);margin-top:3px;font-weight:500">⏳ Richiesta del ${u.createdAt?new Date(u.createdAt.seconds*1000).toLocaleDateString('it-IT'):'—'}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button class="btn btn-success btn-sm" onclick="approvaUtente('${u.id}')">✓ Approva</button>
+          <button class="btn btn-danger btn-sm" onclick="rifiutaUtente('${u.id}')">✗ Rifiuta</button>
+          <button class="btn btn-outline btn-sm" onclick="editUtente('${u.id}')">✏️ Modifica</button>
+        </div>
+      </div>
+    </div>`).join('');
 }
 
 function renderEventi() {
   const q = (document.getElementById('searchEventi').value||'').toLowerCase();
   const ft = document.getElementById('filterTipoEv').value;
-  const fil = eventi.filter(e => {
-    if(q && !(e.nome||'').toLowerCase().includes(q)) return false;
-    if(ft && e.tipo !== ft) return false;
+  const fil = eventi.filter(e=>{
+    if(q&&!(e.nome||'').toLowerCase().includes(q))return false;
+    if(ft&&e.tipo!==ft)return false;
     return true;
   });
-  const tipoIcon = {ecm:'🏥',congress:'🎤',convention:'🏢',wedding:'💍',altro:'📌'};
+  const tipoIcon={ecm:'🏥',congress:'🎤',convention:'🏢',wedding:'💍',altro:'📌'};
   const c = document.getElementById('eventiTable');
   if(!fil.length){c.innerHTML='<div class="empty-state">Nessun evento</div>';return;}
-  c.innerHTML = '<table><thead><tr><th>Nome evento</th><th>Tipo</th><th>Data</th><th>Stato</th><th>Partecipanti</th><th>Azioni</th></tr></thead><tbody>'+
-    fil.map(ev => `<tr>
+  c.innerHTML='<table><thead><tr><th>Nome evento</th><th>Tipo</th><th>Data</th><th>Pagamento</th><th>Stato</th></tr></thead><tbody>'+
+    fil.map(ev=>`<tr>
       <td style="font-weight:500">${esc(ev.nome||'—')}</td>
-      <td>${tipoIcon[ev.tipo||'ecm']||'📌'} ${esc(ev.tipo||'ecm')}</td>
-      <td class="mono">${ev.data?new Date(ev.data).toLocaleDateString('it-IT'):' —'}</td>
+      <td>${tipoIcon[ev.tipo||'altro']||'📌'} ${esc(ev.tipo||'—')}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px">${ev.data?new Date(ev.data).toLocaleDateString('it-IT'):'—'}</td>
+      <td>${ev.pagamento&&ev.pagamento!=='no'?'💳 '+esc(ev.pagamento):'Gratuito'}</td>
       <td><span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:${ev.stato==='archiviato'?'var(--surface2)':'var(--success-light)'};color:${ev.stato==='archiviato'?'var(--text3)':'var(--success)'}">
-        ${ev.stato==='archiviato'?'Archiviato':'Attivo'}
-      </span></td>
-      <td>—</td>
-      <td>
-        <button class="btn btn-outline btn-sm" onclick="window.open('ecm-blocco3.html')">👁 Vedi</button>
-      </td>
-    </tr>`).join('') + '</tbody></table>';
-
-  document.getElementById('searchEventi').addEventListener('input', renderEventi);
-  document.getElementById('filterTipoEv').addEventListener('change', renderEventi);
+        ${ev.stato==='archiviato'?'Archiviato':'Attivo'}</span></td>
+    </tr>`).join('')+'</tbody></table>';
 }
-
-function renderAssistenza() {
-  const c = document.getElementById('utentiAssistenza');
-  if(!c) return;
-  if(!utenti.length){c.innerHTML='<div class="empty-state">Nessun utente</div>';return;}
-  c.innerHTML = utenti.filter(u=>u.email!==SUPER_ADMIN_EMAIL).map(u => {
-    const ri = RUOLO_INFO[u.ruolo||'viewer']||RUOLO_INFO.viewer;
-    return `<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--border);transition:background .15s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
-      <div style="width:36px;height:36px;border-radius:50%;background:${ri.color};display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:700;flex-shrink:0">
-        ${((u.nome||'?')[0]+(u.cognome||'?')[0]).toUpperCase()}
-      </div>
-      <div style="flex:1">
-        <div style="font-size:13px;font-weight:500">${esc(u.nome||'')} ${esc(u.cognome||'')}</div>
-        <div style="font-size:11px;color:var(--text3)">${esc(u.email||'—')} · ${ri.icon} ${ri.lbl}</div>
-      </div>
-      <button class="btn btn-accent btn-sm" onclick="mostraInfoAssistenza(${JSON.stringify(u).replace(/"/g,'&quot;')})">🛠️ Assisti</button>
-    </div>`;
-  }).join('');
-}
-
-window.mostraInfoAssistenza = function(u) {
-  const ri = RUOLO_INFO[u.ruolo||'viewer']||RUOLO_INFO.viewer;
-  const info = `
-    <div style="margin-top:16px;padding:16px;background:var(--accent-light);border-radius:var(--radius-lg);border:1px solid rgba(37,99,235,.2)">
-      <div style="font-size:14px;font-weight:600;color:var(--accent);margin-bottom:8px">🛠️ Modalità assistenza: ${esc(u.nome||'')} ${esc(u.cognome||'')}</div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:10px">
-        <strong>Email:</strong> ${esc(u.email||'—')}<br>
-        <strong>Ruolo:</strong> ${ri.icon} ${ri.lbl}<br>
-        <strong>Org:</strong> ${esc(u.org||'—')}
-      </div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
-        ℹ️ Per assistere questo utente, accedi con le sue credenziali o chiedigli di condividere lo schermo. 
-        Come Super Admin puoi modificare tutti i dati direttamente dalla Firebase Console.
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-accent btn-sm" onclick="logAssistenza('${esc(u.email||'')}')">📝 Registra sessione assistenza</button>
-        <button class="btn btn-outline btn-sm" onclick="this.closest('div').parentElement.remove()">✕ Chiudi</button>
-      </div>
-    </div>`;
-  const panel = document.getElementById('assistenzaPanel');
-  const existing = panel.querySelector('.assist-info');
-  if(existing) existing.remove();
-  const div = document.createElement('div');
-  div.className = 'assist-info';
-  div.innerHTML = info;
-  panel.appendChild(div);
-};
-
-window.logAssistenza = async function(email) {
-  try {
-    await addDoc(collection(db,'log_attivita'), {
-      tipo:'assistenza', email:SUPER_ADMIN_EMAIL,
-      dettaglio:'Sessione assistenza per: '+email,
-      ts:serverTimestamp(), data:new Date().toISOString()
-    });
-    alert('Sessione assistenza registrata nel log.');
-  } catch(e) { alert('Errore: '+e.message); }
-};
 
 function startLiveLog() {
   if(unsubLogs) unsubLogs();
   try {
-    const q = query(collection(db,'log_attivita'), orderBy('ts','desc'), limit(100));
-    unsubLogs = onSnapshot(q, snap => {
-      logs = [];
-      snap.forEach(d => logs.push({id:d.id,...d.data()}));
+    const q = query(collection(db,'log_attivita'), orderBy('ts','desc'), limit(150));
+    unsubLogs = onSnapshot(q, snap=>{
+      logs=[];
+      snap.forEach(d=>logs.push({id:d.id,...d.data()}));
       renderLogs();
-      const oggi = new Date().toDateString();
-      const logOggi = logs.filter(l => l.data && new Date(l.data).toDateString()===oggi).length;
-      document.getElementById('sTotLog').textContent = logOggi;
     });
-  } catch(e) { console.warn('Log:', e.message); }
+  } catch(e) {}
 }
 
 function renderLogs() {
@@ -619,94 +624,132 @@ function renderLogs() {
   const fil = tipo ? logs.filter(l=>l.tipo===tipo) : logs;
   const c = document.getElementById('logList');
   if(!fil.length){c.innerHTML='<div class="empty-state">Nessuna attività</div>';return;}
-  c.innerHTML = fil.map(l => {
-    const dotCls = {login:'login',logout:'logout',checkin:'create',create:'create',update:'update',delete:'delete',assistenza:'update'}[l.tipo||'update']||'update';
-    const ts = l.data ? new Date(l.data).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) : '—';
-    const dt = l.data ? new Date(l.data).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'}) : '—';
+  const dotColor={login:'var(--success)',logout:'var(--text3)',create:'var(--accent)',update:'var(--warn)',delete:'var(--danger)',assistenza:'#7C3AED'};
+  c.innerHTML = fil.map(l=>{
+    const ts = l.data ? new Date(l.data).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
     return `<div class="log-item">
-      <div class="log-dot ${dotCls}" style="margin-top:5px"></div>
+      <div class="log-dot" style="background:${dotColor[l.tipo||'update']||'var(--text3)'}"></div>
       <div style="flex:1;min-width:0">
         <div style="font-size:13px">${esc(l.dettaglio||l.tipo||'—')}</div>
-        <div style="font-size:11px;color:var(--text3)">${esc(l.email||'—')}</div>
+        <div style="font-size:11px;color:var(--text3)">${esc(l.email||'sistema')}</div>
       </div>
-      <div style="text-align:right;flex-shrink:0">
-        <div class="log-time">${ts}</div>
-        <div style="font-size:10px;color:var(--text3)">${dt}</div>
-      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0;text-align:right">${ts}</div>
     </div>`;
   }).join('');
-  document.getElementById('filterLogTipo').addEventListener('change', renderLogs);
 }
+
+// ── AZIONI UTENTI ─────────────────────────────────────
+window.approvaUtente = async function(uid) {
+  const moduli = getModuliSelezionati();
+  await setDoc(doc(db,'utenti',uid),{stato:'attivo',approvatoDA:SUPER_EMAIL,approvatoIl:serverTimestamp()},{merge:true});
+  await logAzione('update','Account approvato: '+uid);
+  await loadAll();
+};
+
+window.rifiutaUtente = async function(uid) {
+  if(!confirm('Rifiutare questa richiesta? Il profilo verrà eliminato.'))return;
+  await deleteDoc(doc(db,'utenti',uid));
+  await logAzione('delete','Richiesta rifiutata: '+uid);
+  await loadAll();
+};
+
+window.editUtente = function(uid) {
+  const u = utenti.find(x=>x.id===uid); if(!u) return;
+  window._editUid = uid;
+  document.getElementById('modalUtenteTitolo').textContent = 'Modifica utente';
+  document.getElementById('modalUtenteSub').textContent = esc(u.nome||'')+' '+esc(u.cognome||'');
+  document.getElementById('pwdGroup').style.display = 'none'; // Non mostrare password in modifica
+  document.getElementById('uNome').value = u.nome||'';
+  document.getElementById('uCognome').value = u.cognome||'';
+  document.getElementById('uEmail').value = u.email||'';
+  document.getElementById('uPassword').value = '';
+  document.getElementById('uRuolo').value = u.ruolo||'admin';
+  document.getElementById('uStato').value = u.stato||'attivo';
+  document.getElementById('uDataInizio').value = u.dataInizio||'';
+  document.getElementById('uDataFine').value = u.dataFine||'';
+  document.getElementById('uOrg').value = u.org||'';
+  document.getElementById('uTel').value = u.tel||'';
+  document.getElementById('uNote').value = u.note||'';
+  document.getElementById('utenteErr').style.display='none';
+  document.getElementById('utenteOk').style.display='none';
+  buildModuliGrid(u.moduli||[]);
+  document.getElementById('modalUtente').classList.add('show');
+};
+
+window.cambiaStato = async function(uid, statoCorrente) {
+  const nuovoStato = statoCorrente==='sospeso' ? 'attivo' : 'sospeso';
+  if(!confirm(`${nuovoStato==='sospeso'?'Sospendere':'Riattivare'} questo account?`))return;
+  await setDoc(doc(db,'utenti',uid),{stato:nuovoStato,updatedAt:serverTimestamp()},{merge:true});
+  await logAzione('update','Account '+nuovoStato+': '+uid);
+  await loadAll();
+};
+
+window.eliminaUtente = async function(uid) {
+  const u = utenti.find(x=>x.id===uid);
+  if(!confirm('Eliminare definitivamente '+((u?.nome||'')+' '+(u?.cognome||'')).trim()+'? Questa azione non può essere annullata.'))return;
+  await deleteDoc(doc(db,'utenti',uid));
+  await logAzione('delete','Eliminato account: '+(u?.email||uid));
+  await loadAll();
+};
 
 async function salvaUtente() {
   const nome = document.getElementById('uNome').value.trim();
   const cognome = document.getElementById('uCognome').value.trim();
   const email = document.getElementById('uEmail').value.trim();
-  const password = document.getElementById('uPassword').value;
-  if(!nome||!cognome||!email||!password){showErr('utenteErr','Compila tutti i campi obbligatori.');return;}
-  if(password.length<8){showErr('utenteErr','La password deve avere almeno 8 caratteri.');return;}
+  if(!nome||!cognome||!email){showErr('utenteErr','Compila nome, cognome ed email.');return;}
+
+  const moduli = getModuliSelezionati();
+  const payload = {
+    nome, cognome, email,
+    ruolo: document.getElementById('uRuolo').value,
+    stato: document.getElementById('uStato').value,
+    dataInizio: document.getElementById('uDataInizio').value||null,
+    dataFine: document.getElementById('uDataFine').value||null,
+    org: document.getElementById('uOrg').value.trim(),
+    tel: document.getElementById('uTel').value.trim(),
+    note: document.getElementById('uNote').value.trim(),
+    moduli: moduli.length===MODULI.length ? ['tutti'] : moduli,
+    updatedAt: serverTimestamp()
+  };
 
   const btn = document.getElementById('btnSalvaUtente');
-  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Creazione...';
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
   try {
-    // Crea utente Firebase Auth — usa una seconda app per non scollegare il superadmin
-    const secondApp = initializeApp({...FB,appId:'temp_create_'+Date.now()}, 'tempApp_'+Date.now());
-    const secondAuth = getAuth(secondApp);
-    const cred = await createUserWithEmailAndPassword(secondAuth, email, password);
-    const uid = cred.user.uid;
-    // Disconnette subito il secondo app
-    await secondAuth.signOut();
-
-    // Salva profilo in Firestore
-    await setDoc(doc(db,'utenti',uid), {
-      uid, nome, cognome, email,
-      ruolo: document.getElementById('uRuolo').value,
-      org: document.getElementById('uOrg').value.trim(),
-      tel: document.getElementById('uTel').value.trim(),
-      note: document.getElementById('uNote').value.trim(),
-      stato: document.getElementById('uStato').value,
-      createdBy: SUPER_ADMIN_EMAIL,
-      createdAt: serverTimestamp()
-    });
-
-    // Log attività
-    await addDoc(collection(db,'log_attivita'), {
-      tipo:'create',email:SUPER_ADMIN_EMAIL,
-      dettaglio:'Creato account: '+email+' ('+document.getElementById('uRuolo').value+')',
-      ts:serverTimestamp(),data:new Date().toISOString()
-    });
-
-    showOk('utenteOk','✓ Account creato! Email: '+email);
-    await loadAll();
-    setTimeout(()=>document.getElementById('modalUtente').classList.remove('show'), 2000);
+    if(window._editUid) {
+      // Modifica esistente
+      await setDoc(doc(db,'utenti',window._editUid), payload, {merge:true});
+      await logAzione('update','Modificato account: '+email);
+      showOk('utenteOk','✓ Account aggiornato.');
+    } else {
+      // Nuovo utente — crea in Firebase Auth
+      const pwd = document.getElementById('uPassword').value;
+      if(!pwd||pwd.length<8){showErr('utenteErr','Password min. 8 caratteri.');return;}
+      const secondApp = initializeApp({...FB}, 'createApp_'+Date.now());
+      const secondAuth = getAuth(secondApp);
+      try {
+        const cred = await createUserWithEmailAndPassword(secondAuth, email, pwd);
+        payload.uid = cred.user.uid;
+        payload.createdBy = SUPER_EMAIL;
+        payload.createdAt = serverTimestamp();
+        await setDoc(doc(db,'utenti',cred.user.uid), payload);
+        await secondAuth.signOut();
+        await logAzione('create','Creato account: '+email+' ('+payload.ruolo+')');
+        showOk('utenteOk','✓ Account creato! Email: '+email);
+        await loadAll();
+        setTimeout(()=>document.getElementById('modalUtente').classList.remove('show'),1800);
+      } finally {
+        try { await secondAuth.signOut(); } catch(e) {}
+      }
+    }
+    if(window._editUid) { await loadAll(); setTimeout(()=>document.getElementById('modalUtente').classList.remove('show'),1800); }
   } catch(e) {
-    const msg = e.code==='auth/email-already-in-use' ? 'Email già registrata.' : e.code==='auth/weak-password' ? 'Password troppo debole.' : 'Errore: '+e.message;
-    showErr('utenteErr', msg);
+    const msg={'auth/email-already-in-use':'Email già registrata.','auth/weak-password':'Password troppo debole.','auth/invalid-email':'Email non valida.'}[e.code]||'Errore: '+e.message;
+    showErr('utenteErr',msg);
   }
-  finally { btn.disabled=false; btn.textContent='✓ Crea account'; }
+  finally { btn.disabled=false; btn.textContent='✓ Salva'; }
 }
 
-async function toggleStato(uid, statoCorrente) {
-  const nuovoStato = statoCorrente==='sospeso' ? 'attivo' : 'sospeso';
-  if(!confirm(`${nuovoStato==='sospeso'?'Sospendere':'Riattivare'} questo account?`)) return;
-  try {
-    await setDoc(doc(db,'utenti',uid),{stato:nuovoStato,updatedAt:serverTimestamp()},{merge:true});
-    await addDoc(collection(db,'log_attivita'),{tipo:'update',email:SUPER_ADMIN_EMAIL,dettaglio:'Account '+nuovoStato+': '+uid,ts:serverTimestamp(),data:new Date().toISOString()});
-    await loadAll();
-  } catch(e) { alert('Errore: '+e.message); }
-}
-
-async function eliminaUtente(uid) {
-  const u = utenti.find(x=>x.id===uid);
-  if(!confirm(`Eliminare l'account di ${u?.nome||''} ${u?.cognome||''}? Questa azione non può essere annullata.`)) return;
-  try {
-    await deleteDoc(doc(db,'utenti',uid));
-    await addDoc(collection(db,'log_attivita'),{tipo:'delete',email:SUPER_ADMIN_EMAIL,dettaglio:'Eliminato account: '+(u?.email||uid),ts:serverTimestamp(),data:new Date().toISOString()});
-    await loadAll();
-  } catch(e) { alert('Errore: '+e.message); }
-}
-
-async function salvaImpostazioni() {
+async function salvaSistema() {
   try {
     await setDoc(doc(db,'sistema','config'),{
       nomeOrg:document.getElementById('sysNomeOrg').value,
@@ -714,20 +757,38 @@ async function salvaImpostazioni() {
       maxAdmin:parseInt(document.getElementById('sysMaxAdmin').value)||10,
       maxOp:parseInt(document.getElementById('sysMaxOp').value)||20,
       welcome:document.getElementById('sysWelcome').value,
+      autoApprova:document.getElementById('sysAutoApprova').value,
       updatedAt:serverTimestamp()
     },{merge:true});
-    const btn=document.getElementById('btnSalvaImpostazioni');
+    const btn=document.getElementById('btnSalvaSistema');
     btn.textContent='✓ Salvato!';btn.style.background='var(--success)';
     setTimeout(()=>{btn.textContent='💾 Salva impostazioni';btn.style.background='';},2000);
-  } catch(e) { alert('Errore: '+e.message); }
+  } catch(e){alert('Errore: '+e.message);}
 }
 
 async function resetLog() {
-  try {
-    const snap = await getDocs(collection(db,'log_attivita'));
-    for(const d of snap.docs) await deleteDoc(doc(db,'log_attivita',d.id));
-    alert('Log svuotato.');
-  } catch(e) { alert('Errore: '+e.message); }
+  const snap=await getDocs(collection(db,'log_attivita'));
+  for(const d of snap.docs) await deleteDoc(doc(db,'log_attivita',d.id));
+}
+
+function exportLog() {
+  const rows=[['Data','Email','Tipo','Dettaglio']];
+  logs.forEach(l=>rows.push([l.data||'—',l.email||'—',l.tipo||'—',l.dettaglio||'—']));
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='log_attivita_'+new Date().toISOString().split('T')[0]+'.csv';a.click();
+}
+
+function exportBackup() {
+  const rows=[['Nome','Cognome','Email','Ruolo','Stato','Org','Data inizio','Data fine','Moduli','Note']];
+  utenti.forEach(u=>rows.push([u.nome||'—',u.cognome||'—',u.email||'—',u.ruolo||'—',u.stato||'—',u.org||'—',u.dataInizio||'—',u.dataFine||'—',(u.moduli||[]).join(';')||'tutti',u.note||'—']));
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='utenti_backup_'+new Date().toISOString().split('T')[0]+'.csv';a.click();
+}
+
+async function logAzione(tipo, dettaglio) {
+  try { await addDoc(collection(db,'log_attivita'),{tipo,email:SUPER_EMAIL,dettaglio,ts:serverTimestamp(),data:new Date().toISOString()}); } catch(e){}
 }
 
 function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block';setTimeout(()=>e.style.display='none',5000);}
