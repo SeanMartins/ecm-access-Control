@@ -442,7 +442,7 @@ async function initApp() {
     const app = getApps().length ? getApps()[0] : initializeApp(FB);
     db = getFirestore(app);
     auth = getAuth(app);
-    try { await requireAuth(); } catch(e) { console.warn('Auth redirect:', e.message); }
+    try { await requireAuth(); injectUserBar('userBarSlot'); } catch(e) { console.warn('Auth:', e.message); }
     injectUserBar('userBarSlot');
     if(!auth.currentUser || auth.currentUser.email !== SUPER_EMAIL) {
       document.querySelector('.ecm-content').innerHTML = `<div style="text-align:center;padding:80px 20px"><div style="font-size:48px;margin-bottom:16px">🔒</div><div style="font-size:20px;font-weight:700;margin-bottom:8px">Accesso negato</div><div style="font-size:14px;color:var(--text2)">Riservato al Super Amministratore.</div><a href="ecm-home.html" style="display:inline-flex;margin-top:20px;padding:10px 20px;background:var(--accent);color:white;border-radius:var(--radius);text-decoration:none;font-size:13px">← Home</a></div>`;

@@ -222,21 +222,26 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
 </footer>
 <script type="module">
 import { requireAuth, injectUserBar } from './ecm-auth.js';
-try { await requireAuth(); } catch(e) { console.warn('Auth redirect:', e.message); }
-requireRole(['operatore','report','admin']);
-injectUserBar('userBarSlot');
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
-const app=initializeApp(FB); const db=getFirestore(app);
+const app = getApps().length ? getApps()[0] : initializeApp(FB);
+const db  = getFirestore(app);
+
 let evento=null, parts=[], allLogs=[], report=[], sortField='cognome', sortAsc=true, pg=0;
 const PER=25;
 
-document.getElementById('fbDot').className='fb-dot ok';
+async function initApp() {
+  try { await requireAuth(); injectUserBar('userBarSlot'); } catch(e) { console.warn('Auth:', e.message); }
+  const auth = getAuth(app);
+  if (!auth.currentUser) { try { await signInAnonymously(auth); } catch(e) {} }
+  document.getElementById('fbDot').className='fb-dot ok';
 
-const evId=localStorage.getItem('ecm_eventId');
-if(!evId){document.getElementById('loadingState').style.display='none';document.getElementById('alertNoData').style.display='block';}
-else{
+  const evId = localStorage.getItem('ecm_eventId');
+  if(!evId){document.getElementById('loadingState').style.display='none';document.getElementById('alertNoData').style.display='block';}
+  else{
   try{
     const evSnap=await getDoc(doc(db,'eventi',evId));
     if(!evSnap.exists()){document.getElementById('loadingState').style.display='none';document.getElementById('alertNoData').style.display='block';}
@@ -379,6 +384,8 @@ function exportExcel(tipo){
   XLSX.writeFile(wb,`ECM_${(evento.nome||'evento').replace(/\s+/g,'_')}_${tipo}_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+initApp();
 </script>
 <style>
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#13161F;border-top:1px solid #2A2E45;display:flex;align-items:stretch;z-index:200;padding-bottom:env(safe-area-inset-bottom)}

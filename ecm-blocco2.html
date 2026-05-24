@@ -213,53 +213,119 @@ input[type=color]{padding:4px 8px;height:40px;cursor:pointer}
 
 
 <script type="module">
+// ── IMPORT ──────────────────────────────────────────────────────
 import { requireAuth, injectUserBar } from './ecm-auth.js';
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, collection, getDocs, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
+// ── CONFIG ───────────────────────────────────────────────────────
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
-const app=getApps().length?getApps()[0]:initializeApp(FB);
-const db=getFirestore(app);
+const app = getApps().length ? getApps()[0] : initializeApp(FB);
+const db  = getFirestore(app);
+const ADMIN_EMAIL = 'martinsosem@gmail.com';
 
-try { await requireAuth(); } catch(e) { console.warn('Auth redirect:', e.message); }
-requireRole(['operatore','report','admin']);
-injectUserBar('userBarSlot');
+// ── VARIABILI GLOBALI ────────────────────────────────────────────
+let evento = null, parts = [];
+let settings = {color:'#2B4EFF', size:'normal', showCF:true, showProf:true};
+let prevQRInit = false;
 
-// Admin navbar
-const ADMIN_EMAIL='martinsosem@gmail.com';
-onAuthStateChanged(getAuth(app),user=>{if(user&&user.email===ADMIN_EMAIL){const el=document.getElementById('adminNavItem');if(el)el.style.display='flex';}});
+// ── INIT ─────────────────────────────────────────────────────────
+async function initApp() {
+  // 1. Autenticazione
+  try { await requireAuth(); injectUserBar('userBarSlot'); } catch(e) { console.warn('Auth:', e.message); }
 
-let evento=null, parts=[], settings={color:'#2B4EFF',size:'normal',showCF:true,showProf:true}, prevQRInit=false;
-const evId=localStorage.getItem('ecm_eventId');
+  // 2. Assicura accesso Firebase (anche anonimo)
+  const auth = getAuth(app);
+  if (!auth.currentUser) {
+    try { await signInAnonymously(auth); } catch(e) {}
+  }
 
-document.getElementById('fbDot').className='fb-dot ok';
-document.getElementById('fbStatus').textContent='Firebase connesso';
+  // 3. Mostra link Admin se superadmin
+  onAuthStateChanged(auth, user => {
+    if (user && user.email === ADMIN_EMAIL) {
+      const el = document.getElementById('adminNavItem');
+      if (el) el.style.display = 'flex';
+    }
+  });
 
-if(!evId){
-  document.getElementById('alertNoData').style.display='block';
-}else{
-  const evSnap=await getDoc(doc(db,'eventi',evId));
-  if(!evSnap.exists()){document.getElementById('alertNoData').style.display='block';}
-  else{
-    evento=evSnap.data();
-    const snap=await getDocs(collection(db,'eventi',evId,'partecipanti'));
-    snap.forEach(d=>parts.push({id:d.id,...d.data()}));
-    parts.sort((a,b)=>a.id.localeCompare(b.id));
-    document.getElementById('mainContent').style.display='block';
-    document.getElementById('sTot').textContent=parts.length;
-    document.getElementById('sEvento').textContent=evento.nome||'—';
-    document.getElementById('headerTot').textContent=parts.length;
-    const hasQR=parts.filter(p=>p.qr).length;
-    if(hasQR>0){
-      document.getElementById('sQR').textContent=hasQR;
-      document.getElementById('sPronto').textContent=hasQR;
-      document.getElementById('headerGen').textContent=hasQR;
-      document.getElementById('printBtn').disabled=false;
-      document.getElementById('gridCard').style.display='block';
+  document.getElementById('fbDot').className = 'fb-dot ok';
+  document.getElementById('fbStatus').textContent = 'Firebase connesso';
+
+  // 4. Carica evento da localStorage
+  const evId = localStorage.getItem('ecm_eventId');
+
+  if (!evId) {
+    showNoData('Nessun evento selezionato. Torna alla lista eventi e selezionane uno.');
+    return;
+  }
+
+  try {
+    const evSnap = await getDoc(doc(db,'eventi',evId));
+    if (!evSnap.exists()) {
+      showNoData('Evento non trovato su Firebase. Potrebbe essere stato eliminato.');
+      return;
+    }
+    evento = evSnap.data();
+
+    const snap = await getDocs(collection(db,'eventi',evId,'partecipanti'));
+    snap.forEach(d => parts.push({id:d.id,...d.data()}));
+    parts.sort((a,b) => a.id.localeCompare(b.id));
+
+    document.getElementById('mainContent').style.display = 'block';
+    document.getElementById('sTot').textContent = parts.length;
+    document.getElementById('sEvento').textContent = evento.nome || '—';
+    document.getElementById('headerTot').textContent = parts.length;
+
+    const hasQR = parts.filter(p => p.qr).length;
+    if (hasQR > 0) {
+      document.getElementById('sQR').textContent = hasQR;
+      document.getElementById('sPronto').textContent = hasQR;
+      document.getElementById('headerGen').textContent = hasQR;
+      document.getElementById('printBtn').disabled = false;
+      document.getElementById('gridCard').style.display = 'block';
       renderGrid(parts);
     }
-    initPreview(); updatePreview();
+    initPreview();
+    updatePreview();
+  } catch(err) {
+    console.error('Blocco2 init error:', err);
+    showNoData('Errore caricamento evento: ' + err.message);
+  }
+
+  // 5. Listener UI
+  document.getElementById('genBtn')?.addEventListener('click', generateAll);
+  document.getElementById('printBtn')?.addEventListener('click', () => window.print());
+  document.getElementById('clearSearch')?.addEventListener('click', () => {
+    document.getElementById('searchInput').value = '';
+    renderGrid(parts);
+  });
+  document.getElementById('searchInput')?.addEventListener('input', () => {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    renderGrid(q ? parts.filter(p =>
+      (p.cognome||'').toLowerCase().includes(q) ||
+      (p.nome||'').toLowerCase().includes(q) ||
+      (p.cf||'').toLowerCase().includes(q)
+    ) : parts);
+  });
+  ['colorPick','sizeSel','showCF','showProf'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', () => {
+      settings.color  = document.getElementById('colorPick')?.value || '#2B4EFF';
+      settings.size   = document.getElementById('sizeSel')?.value  || 'normal';
+      settings.showCF = document.getElementById('showCF')?.checked ?? true;
+      settings.showProf = document.getElementById('showProf')?.checked ?? true;
+      updatePreview();
+      if (parts.some(p => p.qr)) renderGrid(parts);
+    });
+  });
+}
+
+function showNoData(msg) {
+  const el = document.getElementById('alertNoData');
+  if (el) {
+    el.style.display = 'block';
+    const sub = el.querySelector('.alert-sub') || el;
+    sub.textContent = msg || 'Nessun dato disponibile.';
   }
 }
 
@@ -407,6 +473,8 @@ function printSingle(id){
   w.document.close();
 }
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+initApp();
 </script>
   </div>
   <div class="ecm-version-footer" id="ecmVersionFooter"></div>

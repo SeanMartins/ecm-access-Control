@@ -277,7 +277,7 @@ footer{border-top:1px solid var(--border);background:rgba(13,15,20,.9);padding:1
 
 <script type="module">
 import { requireAuth, injectUserBar } from './ecm-auth.js';
-try { await requireAuth(); } catch(e) { console.warn('Auth redirect:', e.message); }
+try { await requireAuth(); injectUserBar('userBarSlot'); } catch(e) { console.warn('Auth:', e.message); }
 injectUserBar('userBarSlot');
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
