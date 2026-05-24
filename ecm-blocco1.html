@@ -230,6 +230,45 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
               <div style="font-size:11px;color:var(--text3);margin-top:3px">buy.stripe.com/... (Payment Link)</div>
             </div>
           </div>
+
+          <!-- BONIFICO BANCARIO -->
+          <div style="margin-top:12px">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:10px">
+              <input type="checkbox" id="evBonificoAbilitato" style="accent-color:var(--accent);width:16px;height:16px">
+              <span style="font-size:13px;font-weight:500">🏦 Abilita pagamento con bonifico bancario</span>
+            </label>
+            <div id="bonificoWrap" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;display:none">
+              <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Coordinate bancarie</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div>
+                  <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Intestatario conto</label>
+                  <input type="text" id="evBonificoIntesta" placeholder="Es. Associazione Medica..." style="background:white;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;width:100%;outline:none">
+                </div>
+                <div>
+                  <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Banca</label>
+                  <input type="text" id="evBonificoBanca" placeholder="Es. Intesa Sanpaolo" style="background:white;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;width:100%;outline:none">
+                </div>
+                <div style="grid-column:span 2">
+                  <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">IBAN *</label>
+                  <input type="text" id="evBonificoIban" placeholder="IT60 X054 2811 1010 0000 0123 456" maxlength="34" style="background:white;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'DM Mono',monospace;font-size:13px;width:100%;outline:none;text-transform:uppercase">
+                </div>
+                <div>
+                  <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">BIC/SWIFT</label>
+                  <input type="text" id="evBonificoBic" placeholder="Es. BCITITMM" style="background:white;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'DM Mono',monospace;font-size:13px;width:100%;outline:none;text-transform:uppercase">
+                </div>
+                <div>
+                  <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Causale consigliata</label>
+                  <input type="text" id="evBonificoCausale" placeholder="Es. Iscrizione convegno 2026" style="background:white;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;width:100%;outline:none">
+                </div>
+                <div style="grid-column:span 2">
+                  <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Note aggiuntive</label>
+                  <input type="text" id="evBonificoNote" placeholder="Es. Inviare copia del bonifico a..." style="background:white;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;width:100%;outline:none">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          </div>
           <div style="margin-top:10px;padding:10px 14px;background:#FFF8E1;border:1px solid #FFD54F;border-radius:var(--radius);font-size:12px;color:#6D4C00">
             💡 <strong>Come ottenere i link:</strong>
             PayPal: <a href="https://paypal.me" target="_blank" style="color:var(--accent)">paypal.me</a> → crea link |
@@ -378,6 +417,17 @@ async function initApp() {
         document.getElementById('oreMin').value    = ev.oreMin||6;
         document.getElementById('percMin').value   = ev.percMin||90;
         if (ev.logo) { logoData = ev.logo; showLogoPreview(ev.logoName||'logo', ev.logo); }
+        // Carica bonifico bancario
+        if (ev.bonifico?.abilitato) {
+          const bonChk = document.getElementById('evBonificoAbilitato');
+          if (bonChk) { bonChk.checked = true; bonChk.dispatchEvent(new Event('change')); }
+          if (document.getElementById('evBonificoIntesta')) document.getElementById('evBonificoIntesta').value = ev.bonifico.intestatario||'';
+          if (document.getElementById('evBonificoBanca'))   document.getElementById('evBonificoBanca').value   = ev.bonifico.banca||'';
+          if (document.getElementById('evBonificoIban'))    document.getElementById('evBonificoIban').value    = ev.bonifico.iban||'';
+          if (document.getElementById('evBonificoBic'))     document.getElementById('evBonificoBic').value     = ev.bonifico.bic||'';
+          if (document.getElementById('evBonificoCausale')) document.getElementById('evBonificoCausale').value = ev.bonifico.causale||'';
+          if (document.getElementById('evBonificoNote'))    document.getElementById('evBonificoNote').value    = ev.bonifico.note||'';
+        }
         // Carica categorie prezzi salvate
         if (ev.categoriePrezzi && ev.categoriePrezzi.length > 0) {
           ev.categoriePrezzi.forEach(cat => addCategoriaRow(cat.nome, cat.prezzo));
@@ -439,6 +489,15 @@ async function initApp() {
       if (pw)  pw.style.display  = isPag ? 'block' : 'none';
       if (plw) plw.style.display = isPag ? 'block' : 'none';
       if (cpw) cpw.style.display = isPag ? 'block' : 'none';
+    });
+  }
+
+  // Toggle bonifico bancario
+  const bonificoChk = document.getElementById('evBonificoAbilitato');
+  if (bonificoChk) {
+    bonificoChk.addEventListener('change', function() {
+      const bw = document.getElementById('bonificoWrap');
+      if (bw) bw.style.display = this.checked ? 'block' : 'none';
     });
   }
 
@@ -638,6 +697,15 @@ window.salvaEvento = async function salvaEvento(){
       tipo:document.getElementById('evTipo').value||'ecm',
       pagamento:document.getElementById('evPagamento')?.value||'no',
       categoriePrezzi: (typeof getCategoriePrezzi === 'function' ? getCategoriePrezzi() : []),
+      bonifico: {
+        abilitato: document.getElementById('evBonificoAbilitato')?.checked || false,
+        intestatario: document.getElementById('evBonificoIntesta')?.value?.trim() || '',
+        banca: document.getElementById('evBonificoBanca')?.value?.trim() || '',
+        iban: document.getElementById('evBonificoIban')?.value?.trim().replace(/\s/g,'') || '',
+        bic: document.getElementById('evBonificoBic')?.value?.trim() || '',
+        causale: document.getElementById('evBonificoCausale')?.value?.trim() || '',
+        note: document.getElementById('evBonificoNote')?.value?.trim() || '',
+      },
       prezzo:parseFloat(document.getElementById('evPrezzo')?.value)||0,
       linkPaypal:document.getElementById('evPaypal')?.value?.trim()||'',
       linkStripe:document.getElementById('evStripe')?.value?.trim()||'',

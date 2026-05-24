@@ -273,7 +273,7 @@ async function initApp() {
     snap.forEach(d => parts.push({id:d.id,...d.data()}));
     parts.sort((a,b) => a.id.localeCompare(b.id));
 
-    document.getElementById('mainContent')?.style.display = 'block';
+    document.getElementById('mainContent').style.display = 'block';
     document.getElementById('sTot').textContent = parts.length;
     document.getElementById('sEvento').textContent = evento.nome || '—';
     // headerTot rimosso — usare sTot
@@ -285,7 +285,7 @@ async function initApp() {
       document.getElementById('sPronto').textContent = hasQR;
       // headerGen rimosso
       document.getElementById('printBtn').disabled = false;
-      document.getElementById('gridCard')?.style.display = 'block';
+      document.getElementById('gridCard').style.display = 'block';
       renderGrid(parts);
     }
     initPreview();
@@ -337,8 +337,8 @@ function initPreview(){
   document.getElementById('prevMeta').textContent =(evento.data?fmt(evento.data):'')+(evento.luogo?' · '+evento.luogo:'');
   if(evento.logo){
     document.getElementById('prevLogo').src =evento.logo;
-    document.getElementById('prevLogo')?.style.display='block';
-    document.getElementById('prevLogoPH')?.style.display='none';
+    document.getElementById('prevLogo').style.display='block';
+    document.getElementById('prevLogoPH').style.display='none';
   }
   if(!prevQRInit){prevQRInit=true;const el=document.getElementById('prevQR');if(el&&typeof QRCode!=='undefined'){el.innerHTML='';new QRCode(el,{text:'ECM-PREVIEW',width:100,height:100,correctLevel:QRCode.CorrectLevel.M});}}
 }
@@ -351,13 +351,13 @@ function updatePreview(){
   // Aggiorna colore banner placeholder
   const ph=document.getElementById('prevLogoPH');
   if(ph&&ph.style.display!=='none') ph.style.background=c;
-  document.getElementById('prevCognome')?.style.color=c;
-  document.getElementById('prevCF')?.style.display=cf?'block':'none';
-  document.getElementById('prevProf')?.style.display=pr?'block':'none';
+  document.getElementById('prevCognome').style.color=c;
+  document.getElementById('prevCF').style.display=cf?'block':'none';
+  document.getElementById('prevProf').style.display=pr?'block':'none';
   const ns=sz==='large'?'17px':sz==='small'?'13px':'15px';
   const ss=sz==='large'?'26px':sz==='small'?'18px':'22px';
-  document.getElementById('prevNome')?.style.fontSize=ns;
-  document.getElementById('prevCognome')?.style.fontSize=ss;
+  document.getElementById('prevNome').style.fontSize=ns;
+  document.getElementById('prevCognome').style.fontSize=ss;
 }
 ['badgeColor','badgeSize','showCF','showProf'].forEach(id=>document.getElementById(id).addEventListener('change',updatePreview));
 document.getElementById('genBtn')?.addEventListener('click',generateAll);
@@ -370,14 +370,14 @@ document.getElementById('searchInput')?.addEventListener('input',()=>{
 
 async function generateAll(){
   const btn=document.getElementById('genBtn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Generazione QR...';
-  document.getElementById('gridCard')?.style.display='block';
-  document.getElementById('progressWrap')?.style.display='block';
+  document.getElementById('gridCard').style.display='block';
+  document.getElementById('progressWrap').style.display='block';
   document.getElementById('badgeGrid').innerHTML ='';
   const tot=parts.length;
   for(let i=0;i<tot;i++){
     parts[i].qr=await genQRUrl(`ECM|${parts[i].id}|${parts[i].cf}|${parts[i].cognome}|${parts[i].nome}`);
     const pct=Math.round((i+1)/tot*50);
-    document.getElementById('progressFill')?.style.width=pct+'%';
+    document.getElementById('progressFill').style.width=pct+'%';
     document.getElementById('progressLabel').textContent =`QR generati: ${i+1} / ${tot}`;
     if(i%10===0) await sleep(0);
   }
@@ -388,9 +388,9 @@ async function generateAll(){
     parts.slice(b*BS,(b+1)*BS).forEach(p=>batch.update(doc(db,'eventi',evId,'partecipanti',p.id),{qr:p.qr,updatedAt:serverTimestamp()}));
     await batch.commit();
     const pct=50+Math.round((b+1)/batches*50);
-    document.getElementById('progressFill')?.style.width=pct+'%';
+    document.getElementById('progressFill').style.width=pct+'%';
   }
-  document.getElementById('progressWrap')?.style.display='none';
+  document.getElementById('progressWrap').style.display='none';
   renderGrid(parts);
   document.getElementById('sQR').textContent =tot;
   document.getElementById('sPronto').textContent =tot;

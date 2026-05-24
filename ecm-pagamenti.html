@@ -152,6 +152,11 @@ tr:hover td{background:var(--surface2)}
       <div style="font-size:11px;opacity:.7;margin-top:10px">
         Quota: <strong id="quotaDisplay">€ 0</strong> &nbsp;·&nbsp; I pagamenti vengono verificati manualmente dall'operatore
       </div>
+      <!-- Info bonifico pubblico -->
+      <div id="bonificoPublicBox" style="display:none;margin-top:12px;padding:12px;background:rgba(255,255,255,.15);border-radius:8px">
+        <div style="font-size:11px;font-weight:700;opacity:.9;margin-bottom:6px">🏦 Bonifico bancario</div>
+        <div id="bonificoPublicContent" style="font-size:11px;font-family:'DM Mono',monospace;line-height:1.8;opacity:.9"></div>
+      </div>
     </div>
 
     <!-- Filtri e ricerca -->
@@ -212,6 +217,11 @@ tr:hover td{background:var(--surface2)}
     <div>
       <label style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;display:block;margin-bottom:6px">Note / Riferimento transazione</label>
       <input type="text" class="form-input" id="notePag" placeholder="Es. TXN123456789 / Pagato il 20/05">
+    </div>
+    <!-- Info bonifico (appare solo se disponibile) -->
+    <div id="bonificoInfoBox" style="display:none;margin-top:12px;padding:12px 14px;background:#EFF6FF;border:1px solid rgba(37,99,235,.2);border-radius:var(--radius)">
+      <div style="font-size:11px;font-weight:700;color:#2563EB;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">🏦 Coordinate bancarie evento</div>
+      <div id="bonificoInfoContent" style="font-size:12px;color:#1A1D2E;line-height:1.8;font-family:'DM Mono',monospace"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" id="btnAnnullaPag">Annulla</button>
@@ -417,6 +427,24 @@ function renderTabella() {
 }
 
 window.apriModalPag = function(partId) {
+  // Mostra/nascondi info bonifico
+  document.getElementById('metodoPag').addEventListener('change', function() {
+    const box = document.getElementById('bonificoInfoBox');
+    if (this.value === 'bonifico' && currentEv?.bonifico?.abilitato) {
+      const b = currentEv.bonifico;
+      document.getElementById('bonificoInfoContent').innerHTML =
+        (b.intestatario ? `<div>Intestatario: <strong>${b.intestatario}</strong></div>` : '') +
+        (b.banca ? `<div>Banca: ${b.banca}</div>` : '') +
+        (b.iban ? `<div>IBAN: <strong>${b.iban}</strong></div>` : '') +
+        (b.bic ? `<div>BIC: ${b.bic}</div>` : '') +
+        (b.causale ? `<div>Causale: ${b.causale}</div>` : '') +
+        (b.note ? `<div style="color:#5A5F7A;font-size:11px;margin-top:4px">${b.note}</div>` : '');
+      box.style.display = 'block';
+    } else {
+      box.style.display = 'none';
+    }
+  }, {once: false});
+
   const p = partecipanti.find(x=>x.id===partId); if(!p) return;
   editingPartId = partId;
   document.getElementById('modalPagNome').textContent = esc(p.cognome||'')+' '+esc(p.nome||'');
