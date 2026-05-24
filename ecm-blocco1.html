@@ -306,6 +306,39 @@ const ALIASES = {
 };
 
 // ── INIT (async — autenticazione + caricamento evento) ──────────
+
+// ── CATEGORIE PREZZI (scope modulo — accessibili da initApp e salvaEvento) ─────
+const CATEGORIE_PREDEF = [
+  'Medico Chirurgo','Infermiere / Infermiera','Specializzando',
+  'Ricercatore','Tecnico di Laboratorio','Fisioterapista',
+  'Farmacista','Biologo','Psicologo','OSS / Operatore Socio-Sanitario',
+  'Medico di Medicina Generale','Chirurgo','Radiologo',
+  'Anestesista','Cardiologo'
+];
+
+function addCategoriaRow(nome='', prezzo='') {
+  const list = document.getElementById('categoriePrezzoList');
+  if (!list) return;
+  const row = document.createElement('div');
+  row.className = 'cat-row';
+  row.innerHTML = `
+    <input type="text"   class="cat-nome"   value="${escAttr(nome)}"   placeholder="Es. Medico Chirurgo" list="catPredefList">
+    <input type="number" class="cat-prezzo" value="${escAttr(String(prezzo))}" placeholder="€ 0.00" min="0" step="0.01" style="text-align:right">
+    <button type="button" class="cat-del" title="Rimuovi">✕</button>`;
+  row.querySelector('.cat-del').addEventListener('click', () => row.remove());
+  list.appendChild(row);
+  row.querySelector('.cat-nome').focus();
+}
+
+function getCategoriePrezzi() {
+  return [...document.querySelectorAll('#categoriePrezzoList .cat-row')].map(row => ({
+    nome:   row.querySelector('.cat-nome').value.trim(),
+    prezzo: parseFloat(row.querySelector('.cat-prezzo').value) || 0
+  })).filter(r => r.nome);
+}
+
+function escAttr(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
 async function initApp() {
   try { await requireAuth(); injectUserBar('userBarSlot'); } catch(e) { console.warn('Auth:', e.message); }
   try { await signInAnonymously(getAuth(app)); } catch(e) {}
@@ -409,52 +442,26 @@ async function initApp() {
   }
 
   // ── CATEGORIE PREZZI ──────────────────────────────────────────
-  const CATEGORIE_PREDEF = [
-    'Medico Chirurgo','Infermiere / Infermiera','Specializzando',
-    'Ricercatore','Tecnico di Laboratorio','Fisioterapista',
-    'Farmacista','Biologo','Psicologo','OSS / Operatore Socio-Sanitario',
-    'Medico di Medicina Generale','Chirurgo','Radiologo',
-    'Anestesista','Cardiologo'
-  ];
 
-  function addCategoriaRow(nome='', prezzo='') {
-    const list = document.getElementById('categoriePrezzoList');
-    const row  = document.createElement('div');
-    row.className = 'cat-row';
-    row.innerHTML = `
-      <input type="text"   class="cat-nome"   value="${esc(nome)}"   placeholder="Es. Medico Chirurgo" list="catPredefList">
-      <input type="number" class="cat-prezzo" value="${esc(String(prezzo))}" placeholder="€ 0.00" min="0" step="0.01" style="text-align:right">
-      <button type="button" class="cat-del" title="Rimuovi">✕</button>`;
-    row.querySelector('.cat-del').addEventListener('click', () => row.remove());
-    list.appendChild(row);
-    row.querySelector('.cat-nome').focus();
+  // ── LISTENER CATEGORIE ─────────────────────────────────────────────────────
+  // Datalist per suggerimenti autocompletamento
+  if (!document.getElementById('catPredefList')) {
+    const dl = document.createElement('datalist');
+    dl.id = 'catPredefList';
+    CATEGORIE_PREDEF.forEach(n => { const opt=document.createElement('option'); opt.value=n; dl.appendChild(opt); });
+    document.body.appendChild(dl);
   }
-
-  function getCategoriePrezzi() {
-    return [...document.querySelectorAll('#categoriePrezzoList .cat-row')].map(row => ({
-      nome:   row.querySelector('.cat-nome').value.trim(),
-      prezzo: parseFloat(row.querySelector('.cat-prezzo').value) || 0
-    })).filter(r => r.nome);
-  }
-
-  // Datalist per suggerimenti
-  const dl = document.createElement('datalist');
-  dl.id = 'catPredefList';
-  CATEGORIE_PREDEF.forEach(n => { const opt=document.createElement('option'); opt.value=n; dl.appendChild(opt); });
-  document.body.appendChild(dl);
 
   document.getElementById('btnAddCatPredef')?.addEventListener('click', () => {
-    // Mostra un picker modale con le categorie predefinite
-    const existing = getCategoriePrezzi().map(r=>r.nome);
+    const existing = getCategoriePrezzi().map(r => r.nome);
     const remaining = CATEGORIE_PREDEF.filter(n => !existing.includes(n));
     if (!remaining.length) { alert('Tutte le categorie predefinite sono gia aggiunte.'); return; }
-    // Crea un mini-modal inline
     const overlay = document.createElement('div');
     overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px';
     overlay.innerHTML=`<div style="background:white;border-radius:14px;padding:22px;max-width:420px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)">
       <div style="font-size:15px;font-weight:700;margin-bottom:14px">Seleziona categorie da aggiungere</div>
-      ${remaining.map((n,i)=>`<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:4px;border:1px solid #DDE1E9;border-radius:8px;cursor:pointer;font-size:13px">
-        <input type="checkbox" value="${n}" style="accent-color:#2B4EFF;width:15px;height:15px"> ${n}
+      ${remaining.map(n=>`<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:4px;border:1px solid #DDE1E9;border-radius:8px;cursor:pointer;font-size:13px">
+        <input type="checkbox" value="${escAttr(n)}" style="accent-color:#2B4EFF;width:15px;height:15px"> ${escAttr(n)}
       </label>`).join('')}
       <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid #DDE1E9">
         <button id="btnCancelCat" style="padding:8px 16px;border:1px solid #DDE1E9;background:white;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px">Annulla</button>
@@ -473,6 +480,7 @@ async function initApp() {
   document.getElementById('btnAddCatCustom')?.addEventListener('click', () => {
     addCategoriaRow('', '');
   });
+
 }
 
 // ── FUNZIONI LOGO ───────────────────────────────────────────────
