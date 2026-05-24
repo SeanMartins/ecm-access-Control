@@ -116,6 +116,13 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
   .stats-row{grid-template-columns:1fr!important}
   .page-title{font-size:22px}
 }
+
+.ecm-btn-sm{background:var(--accent-light);color:var(--accent);border:1px solid rgba(43,78,255,.2);border-radius:6px;padding:5px 10px;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s}
+.ecm-btn-sm:hover{background:var(--accent);color:white}
+.cat-row{display:grid;grid-template-columns:1fr 110px 32px;gap:6px;align-items:center;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px}
+.cat-row input{background:white;border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-family:inherit;font-size:13px;outline:none;width:100%}
+.cat-row input:focus{border-color:var(--accent)}
+.cat-del{width:28px;height:28px;border:none;background:#FEE2E2;color:#DC2626;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
 </style>
 <link rel="stylesheet" href="ecm-layout.css">
 <script src="ecm-i18n.js"></script>
@@ -195,7 +202,22 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
             <input type="number" id="evPrezzo" placeholder="Es. 150" min="0" step="0.01" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:inherit;font-size:14px;outline:none;width:100%">
           </div>
         </div>
-        <div id="paymentLinksWrap" style="display:none;margin-top:12px">
+        <!-- CATEGORIE CON PREZZI DIFFERENZIATI -->
+      <div id="categoriePrezzoWrap" style="display:none;margin-top:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+          <label style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text2)">
+            🏷️ Categorie con prezzi differenziati
+          </label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button type="button" id="btnAddCatPredef" class="ecm-btn-sm" style="font-size:11px">+ Categorie predefinite</button>
+            <button type="button" id="btnAddCatCustom" class="ecm-btn-sm" style="font-size:11px">+ Categoria personalizzata</button>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Imposta un prezzo diverso per ogni categoria professionale. Lascia vuoto per usare la quota standard.</div>
+        <div id="categoriePrezzoList" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+
+      <div id="paymentLinksWrap" style="display:none;margin-top:12px">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <div class="form-group">
               <label>Link PayPal</label>
@@ -322,6 +344,14 @@ async function initApp() {
         document.getElementById('oreMin').value    = ev.oreMin||6;
         document.getElementById('percMin').value   = ev.percMin||90;
         if (ev.logo) { logoData = ev.logo; showLogoPreview(ev.logoName||'logo', ev.logo); }
+        // Carica categorie prezzi salvate
+        if (ev.categoriePrezzi && ev.categoriePrezzi.length > 0) {
+          ev.categoriePrezzi.forEach(cat => addCategoriaRow(cat.nome, cat.prezzo));
+          if (ev.pagamento && ev.pagamento !== 'no') {
+            const cpw = document.getElementById('categoriePrezzoWrap');
+            if (cpw) cpw.style.display = 'block';
+          }
+        }
         if (ev.totPartecipanti > 0) {
           showAlert('success',`✓ Evento caricato: ${ev.totPartecipanti} partecipanti su Firebase.`);
           document.getElementById('btnSalva').disabled = false;
@@ -369,18 +399,107 @@ async function initApp() {
   if (evPagEl) {
     evPagEl.addEventListener('change', function() {
       const isPag = this.value !== 'no';
-      const pw = document.getElementById('prezzoWrap');
-      const plw = document.getElementById('paymentLinksWrap');
+      const pw   = document.getElementById('prezzoWrap');
+      const plw  = document.getElementById('paymentLinksWrap');
+      const cpw  = document.getElementById('categoriePrezzoWrap');
       if (pw)  pw.style.display  = isPag ? 'block' : 'none';
       if (plw) plw.style.display = isPag ? 'block' : 'none';
+      if (cpw) cpw.style.display = isPag ? 'block' : 'none';
     });
   }
+
+  // ── CATEGORIE PREZZI ──────────────────────────────────────────
+  const CATEGORIE_PREDEF = [
+    'Medico Chirurgo','Infermiere / Infermiera','Specializzando',
+    'Ricercatore','Tecnico di Laboratorio','Fisioterapista',
+    'Farmacista','Biologo','Psicologo','OSS / Operatore Socio-Sanitario',
+    'Medico di Medicina Generale','Chirurgo','Radiologo',
+    'Anestesista','Cardiologo'
+  ];
+
+  function addCategoriaRow(nome='', prezzo='') {
+    const list = document.getElementById('categoriePrezzoList');
+    const row  = document.createElement('div');
+    row.className = 'cat-row';
+    row.innerHTML = `
+      <input type="text"   class="cat-nome"   value="${esc(nome)}"   placeholder="Es. Medico Chirurgo" list="catPredefList">
+      <input type="number" class="cat-prezzo" value="${esc(String(prezzo))}" placeholder="€ 0.00" min="0" step="0.01" style="text-align:right">
+      <button type="button" class="cat-del" title="Rimuovi">✕</button>`;
+    row.querySelector('.cat-del').addEventListener('click', () => row.remove());
+    list.appendChild(row);
+    row.querySelector('.cat-nome').focus();
+  }
+
+  function getCategoriePrezzi() {
+    return [...document.querySelectorAll('#categoriePrezzoList .cat-row')].map(row => ({
+      nome:   row.querySelector('.cat-nome').value.trim(),
+      prezzo: parseFloat(row.querySelector('.cat-prezzo').value) || 0
+    })).filter(r => r.nome);
+  }
+
+  // Datalist per suggerimenti
+  const dl = document.createElement('datalist');
+  dl.id = 'catPredefList';
+  CATEGORIE_PREDEF.forEach(n => { const opt=document.createElement('option'); opt.value=n; dl.appendChild(opt); });
+  document.body.appendChild(dl);
+
+  document.getElementById('btnAddCatPredef')?.addEventListener('click', () => {
+    // Mostra un picker modale con le categorie predefinite
+    const existing = getCategoriePrezzi().map(r=>r.nome);
+    const remaining = CATEGORIE_PREDEF.filter(n => !existing.includes(n));
+    if (!remaining.length) { alert('Tutte le categorie predefinite sono gia aggiunte.'); return; }
+    // Crea un mini-modal inline
+    const overlay = document.createElement('div');
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.innerHTML=`<div style="background:white;border-radius:14px;padding:22px;max-width:420px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+      <div style="font-size:15px;font-weight:700;margin-bottom:14px">Seleziona categorie da aggiungere</div>
+      ${remaining.map((n,i)=>`<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:4px;border:1px solid #DDE1E9;border-radius:8px;cursor:pointer;font-size:13px">
+        <input type="checkbox" value="${n}" style="accent-color:#2B4EFF;width:15px;height:15px"> ${n}
+      </label>`).join('')}
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid #DDE1E9">
+        <button id="btnCancelCat" style="padding:8px 16px;border:1px solid #DDE1E9;background:white;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px">Annulla</button>
+        <button id="btnConfirmCat" style="padding:8px 16px;background:#2B4EFF;color:white;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600">Aggiungi selezionate</button>
+      </div>
+    </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#btnCancelCat').addEventListener('click', ()=>overlay.remove());
+    overlay.querySelector('#btnConfirmCat').addEventListener('click', ()=>{
+      overlay.querySelectorAll('input[type=checkbox]:checked').forEach(cb=>addCategoriaRow(cb.value,''));
+      overlay.remove();
+    });
+    overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+  });
+
+  document.getElementById('btnAddCatCustom')?.addEventListener('click', () => {
+    addCategoriaRow('', '');
+  });
 }
 
 // ── FUNZIONI LOGO ───────────────────────────────────────────────
 function handleLogoFile(f){
-  if(f.size>2097152){alert('Max 2MB');return;}
-  const r=new FileReader(); r.onload=e=>{logoData=e.target.result;showLogoPreview(f.name,logoData);}; r.readAsDataURL(f);
+  if(f.size>5242880){alert('Max 5MB per il logo.');return;}
+  const r=new FileReader();
+  r.onload=e=>{
+    // Comprimi il logo via Canvas prima di salvarlo
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=400; // max dimensione in px
+      let w=img.width, h=img.height;
+      if(w>MAX||h>MAX){
+        if(w>h){h=Math.round(h*MAX/w);w=MAX;}
+        else{w=Math.round(w*MAX/h);h=MAX;}
+      }
+      const canvas=document.createElement('canvas');
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      logoData=canvas.toDataURL('image/jpeg',0.80); // jpeg compresso
+      showLogoPreview(f.name,logoData);
+      const kb=Math.round(logoData.length*0.75/1024);
+      console.log(`Logo compresso: ${w}x${h}px, ~${kb}KB`);
+    };
+    img.src=e.target.result;
+  };
+  r.readAsDataURL(f);
 }
 function showLogoPreview(name,src){
   document.getElementById('logoImg').src=src;
@@ -509,6 +628,7 @@ async function salvaEvento(){
       nome,
       tipo:document.getElementById('evTipo').value||'ecm',
       pagamento:document.getElementById('evPagamento')?.value||'no',
+      categoriePrezzi: getCategoriePrezzi(),
       prezzo:parseFloat(document.getElementById('evPrezzo')?.value)||0,
       linkPaypal:document.getElementById('evPaypal')?.value?.trim()||'',
       linkStripe:document.getElementById('evStripe')?.value?.trim()||'',

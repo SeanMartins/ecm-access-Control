@@ -346,17 +346,24 @@ async function loadEvento(evId, evList) {
 }
 
 function updateStats() {
-  const prezzo = currentEv?.prezzo || 0;
-  const pagati = partecipanti.filter(p => p.pagamento === 'pagato').length;
-  const sede = partecipanti.filter(p => p.pagamento === 'sede').length;
-  const nonPag = partecipanti.filter(p => !p.pagamento || p.pagamento === 'nonpagato').length;
+  const catPrezzi = currentEv?.categoriePrezzi || [];
+  function getPrezzoP(p) {
+    if(!catPrezzi.length) return currentEv?.prezzo || 0;
+    const match = catPrezzi.find(cp => cp.nome && (p.professione||'').toLowerCase().includes(cp.nome.toLowerCase()));
+    return match ? match.prezzo : (currentEv?.prezzo || 0);
+  }
+  const pagati = partecipanti.filter(p => p.pagamento === 'pagato');
+  const sede   = partecipanti.filter(p => p.pagamento === 'sede');
+  const nonPag = partecipanti.filter(p => !p.pagamento || p.pagamento === 'nonpagato');
+  const incasso = pagati.reduce((s,p) => s + getPrezzoP(p), 0);
+  const atteso  = [...sede,...nonPag].reduce((s,p) => s + getPrezzoP(p), 0);
 
   document.getElementById('sTot').textContent = partecipanti.length;
-  document.getElementById('sPagati').textContent = pagati;
-  document.getElementById('sSede').textContent = sede;
-  document.getElementById('sNonPagati').textContent = nonPag;
-  document.getElementById('sIncasso').textContent = prezzo ? (pagati * prezzo).toFixed(2) : '—';
-  document.getElementById('sAtteso').textContent = prezzo ? ((sede + nonPag) * prezzo).toFixed(2) : '—';
+  document.getElementById('sPagati').textContent = pagati.length;
+  document.getElementById('sSede').textContent = sede.length;
+  document.getElementById('sNonPagati').textContent = nonPag.length;
+  document.getElementById('sIncasso').textContent = incasso > 0 ? incasso.toFixed(2) : '—';
+  document.getElementById('sAtteso').textContent  = atteso > 0  ? atteso.toFixed(2)  : '—';
 
   document.getElementById('cntTutti').textContent = '('+partecipanti.length+')';
   document.getElementById('cntPagati').textContent = '('+pagati+')';
@@ -397,6 +404,9 @@ function renderTabella() {
         '<td style="font-weight:500">'+esc(p.cognome||'')+'</td>'+
         '<td>'+esc(p.nome||'')+'</td>'+
         '<td style="color:var(--text2)">'+esc(p.professione||'—')+'</td>'+
+        '<td style="font-weight:600;color:var(--conv);font-family:'DM Mono',monospace">'+
+          (getPrezzoCategoria(p.professione)?'€ '+getPrezzoCategoria(p.professione).toFixed(2):'—')+
+        '</td>'+
         '<td><span class="pay-badge '+badgeCls+'" onclick="apriModalPag(\''+p.id+'\')">'+badgeTxt+'</span></td>'+
         '<td>'+(p.metodoPag?'<span class="method-badge '+methCls+'">'+methTxt+'</span>':'<span style="color:var(--text3);font-size:12px">—</span>')+'</td>'+
         '<td class="mono" style="max-width:120px;overflow:hidden;text-overflow:ellipsis" title="'+(p.notePag||'')+'">'+esc((p.notePag||'').slice(0,20))+(p.notePag&&p.notePag.length>20?'...':'')+'</td>'+
