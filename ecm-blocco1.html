@@ -336,6 +336,7 @@ function getCategoriePrezzi() {
     prezzo: parseFloat(row.querySelector('.cat-prezzo').value) || 0
   })).filter(r => r.nome);
 }
+window.getCategoriePrezzi = getCategoriePrezzi; // accessibile globalmente
 
 function escAttr(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
@@ -611,7 +612,7 @@ function showAlert(t,m){
   const id=t==='error'?'alertError':t==='warn'?'alertWarn':'alertSuccess';
   const e=document.getElementById(id); e.textContent=m; e.classList.add('show'); e.style.display='block';
 }
-async function salvaEvento(){
+window.salvaEvento = async function salvaEvento(){
   const nome=document.getElementById('evNome').value.trim();
   if(!nome){alert('Inserisci il nome dell\'evento.');return;}
   if(!document.getElementById('evData').value){alert('Inserisci la data.');return;}
@@ -636,7 +637,7 @@ async function salvaEvento(){
       nome,
       tipo:document.getElementById('evTipo').value||'ecm',
       pagamento:document.getElementById('evPagamento')?.value||'no',
-      categoriePrezzi: getCategoriePrezzi(),
+      categoriePrezzi: (typeof getCategoriePrezzi === 'function' ? getCategoriePrezzi() : []),
       prezzo:parseFloat(document.getElementById('evPrezzo')?.value)||0,
       linkPaypal:document.getElementById('evPaypal')?.value?.trim()||'',
       linkStripe:document.getElementById('evStripe')?.value?.trim()||'',
