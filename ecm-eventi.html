@@ -127,6 +127,15 @@ header{border-bottom:1px solid var(--border);background:var(--surface);position:
 .ep-stat-label{font-size:11px;color:var(--text2)}
 .ep-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
 @media(max-width:400px){.ep-grid{grid-template-columns:1fr}.ep-stats{grid-template-columns:1fr 1fr}}
+
+/* Modal link registrazione */
+.link-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;display:none;align-items:center;justify-content:center;padding:20px}
+.link-modal-overlay.show{display:flex}
+.link-modal{background:white;border-radius:16px;padding:28px;max-width:560px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.link-box{background:#F4F6F9;border:1px solid #DDE1E9;border-radius:10px;padding:12px 16px;font-family:'DM Mono',monospace;font-size:12px;word-break:break-all;color:#2D3561;margin:12px 0;user-select:all}
+.copy-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#2563EB;color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;font-family:inherit;transition:all .2s}
+.copy-btn:hover{background:#1d4ed8}
+.copy-btn.copied{background:#059669}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link rel="stylesheet" href="ecm-layout.css">
@@ -563,6 +572,7 @@ function renderEvents(){
           ${(isAdminMode||isOperatoreMode)?`<button class="btn btn-outline btn-sm" onclick="openAssegnaUtenti('${ev.id}','${esc(ev.nome||'')}')">👥</button>`:''}
           ${isAdminMode&&!isArchiviato?`<button class="btn btn-warn btn-sm" onclick="openModal('${ev.id}','archivio')">📦</button>`:''}
           ${isAdminMode&&isArchiviato?`<button class="btn btn-outline btn-sm" onclick="openModal('${ev.id}','ripristina')">↩</button>`:''}
+          ${!isArchiviato?`<button class="btn btn-outline btn-sm" title="Link iscrizione per sito esterno" onclick="apriLinkRegistrazione('${ev.id}','${esc(ev.nome||'')}')">🔗</button>`:''}
         </div>
         ${ev.creatoDA?`<div style="font-size:10px;color:var(--text3);margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">👤 Creato da: ${esc(ev.creatoDA)}</div>`:''}
       </div>
@@ -721,6 +731,80 @@ async function loadPanelStats(evId){
   }catch(e){}
 }
 
+
+// ── LINK REGISTRAZIONE ──────────────────────────────────────────
+let _linkQRInstance = null;
+
+window.apriLinkRegistrazione = function(evId, evNome) {
+  const base = window.location.protocol + '//' + window.location.host +
+               window.location.pathname.split('/').slice(0,-1).join('/') + '/';
+  const regUrl = base + 'ecm-blocco6.html?evId=' + encodeURIComponent(evId);
+  
+  document.getElementById('linkRegEvNome').textContent = evNome || evId;
+  document.getElementById('linkRegUrl').textContent = regUrl;
+  document.getElementById('btnOpenReg').href = regUrl;
+  
+  // Codice embed
+  const embedCode = `<a href="${regUrl}" target="_blank" rel="noopener" style="display:inline-block;padding:12px 24px;background:#2563EB;color:white;border-radius:8px;text-decoration:none;font-family:sans-serif;font-size:14px;font-weight:600">📝 Iscriviti all'evento</a>`;
+  document.getElementById('linkEmbedCode').textContent = embedCode;
+  
+  // Genera QR
+  const qrEl = document.getElementById('linkQRCode');
+  qrEl.innerHTML = '';
+  if (_linkQRInstance) { try { _linkQRInstance.clear(); } catch(e) {} }
+  if (typeof QRCode !== 'undefined') {
+    _linkQRInstance = new QRCode(qrEl, {
+      text: regUrl, width: 100, height: 100,
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }
+  
+  document.getElementById('linkRegModal').classList.add('show');
+  document.getElementById('linkRegModal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('show');
+  }, { once: true });
+};
+
+window.copyLink = function(elId, btnId) {
+  const text = document.getElementById(elId)?.textContent || '';
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById(btnId);
+    if (btn) {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✓ Copiato!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
+    }
+  }).catch(() => {
+    // Fallback per browser che non supportano clipboard API
+    const el = document.getElementById(elId);
+    const range = document.createRange();
+    range.selectNode(el);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    document.execCommand('copy');
+    window.getSelection().removeAllRanges();
+    alert('Link copiato!');
+  });
+};
+
+window.downloadQR = function() {
+  const qrEl = document.getElementById('linkQRCode');
+  const img = qrEl?.querySelector('img');
+  const canvas = qrEl?.querySelector('canvas');
+  if (canvas) {
+    const a = document.createElement('a');
+    a.download = 'qr-registrazione.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  } else if (img) {
+    const a = document.createElement('a');
+    a.download = 'qr-registrazione.png';
+    a.href = img.src;
+    a.click();
+  }
+};
+
 loadEvents();
 </script>
   </div>
@@ -736,6 +820,66 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+
+
+<!-- MODAL LINK REGISTRAZIONE -->
+<div class="link-modal-overlay" id="linkRegModal">
+  <div class="link-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-size:17px;font-weight:700">🔗 Link iscrizione evento</div>
+      <button onclick="document.getElementById('linkRegModal').classList.remove('show')" 
+        style="background:none;border:none;cursor:pointer;font-size:20px;color:#9499B0">✕</button>
+    </div>
+    <div style="font-size:13px;color:#5A5F7A;margin-bottom:16px">
+      Evento: <strong id="linkRegEvNome">—</strong>
+    </div>
+
+    <!-- Link pagina registrazione -->
+    <div style="margin-bottom:20px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#5A5F7A;margin-bottom:6px">
+        📝 Pagina registrazione autonoma
+      </div>
+      <div class="link-box" id="linkRegUrl">—</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="copy-btn" id="btnCopyReg" onclick="copyLink('linkRegUrl','btnCopyReg')">
+          📋 Copia link
+        </button>
+        <a id="btnOpenReg" href="#" target="_blank" 
+          style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#F0F2F5;color:#1A1D2E;border-radius:8px;text-decoration:none;font-size:13px;font-weight:500;border:1px solid #DDE1E9">
+          🔗 Apri pagina
+        </a>
+      </div>
+    </div>
+
+    <!-- Codice embed -->
+    <div style="margin-bottom:20px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#5A5F7A;margin-bottom:6px">
+        🖥️ Codice embed per il sito web
+      </div>
+      <div class="link-box" id="linkEmbedCode" style="font-size:11px">—</div>
+      <button class="copy-btn" id="btnCopyEmbed" onclick="copyLink('linkEmbedCode','btnCopyEmbed')">
+        📋 Copia codice embed
+      </button>
+      <div style="font-size:11px;color:#9499B0;margin-top:8px">
+        💡 Incolla questo codice nell'HTML del tuo sito. Al click porta i partecipanti direttamente alla pagina di iscrizione.
+      </div>
+    </div>
+
+    <!-- Link QR code (per locandine) -->
+    <div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#5A5F7A;margin-bottom:8px">
+        📱 QR Code per locandine
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;padding:12px;background:#F4F6F9;border-radius:10px">
+        <div id="linkQRCode" style="width:100px;height:100px;flex-shrink:0"></div>
+        <div style="font-size:12px;color:#5A5F7A;line-height:1.6">
+          Scarica o fotografa il QR code da inserire su locandine e materiali cartacei.<br>
+          <button onclick="downloadQR()" style="margin-top:8px;padding:6px 12px;background:#2563EB;color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit">⬇ Scarica QR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>

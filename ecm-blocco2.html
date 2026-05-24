@@ -250,8 +250,8 @@ async function initApp() {
     }
   });
 
-  document.getElementById('fbDot')?.className = 'fb-dot ok';
-  document.getElementById('fbStatus')?.textContent = 'Firebase connesso';
+  document.getElementById('fbDot').className = 'fb-dot ok';
+  document.getElementById('fbStatus').textContent = 'Firebase connesso';
 
   // 4. Carica evento da localStorage
   evId = localStorage.getItem('ecm_eventId');
@@ -274,17 +274,17 @@ async function initApp() {
     parts.sort((a,b) => a.id.localeCompare(b.id));
 
     document.getElementById('mainContent')?.style.display = 'block';
-    document.getElementById('sTot')?.textContent = parts.length;
-    document.getElementById('sEvento')?.textContent = evento.nome || '—';
+    document.getElementById('sTot').textContent = parts.length;
+    document.getElementById('sEvento').textContent = evento.nome || '—';
     // headerTot rimosso — usare sTot
-    document.getElementById('sTot')?.textContent = parts.length;
+    document.getElementById('sTot').textContent = parts.length;
 
     const hasQR = parts.filter(p => p.qr).length;
     if (hasQR > 0) {
-      document.getElementById('sQR')?.textContent = hasQR;
-      document.getElementById('sPronto')?.textContent = hasQR;
+      document.getElementById('sQR').textContent = hasQR;
+      document.getElementById('sPronto').textContent = hasQR;
       // headerGen rimosso
-      document.getElementById('printBtn')?.disabled = false;
+      document.getElementById('printBtn').disabled = false;
       document.getElementById('gridCard')?.style.display = 'block';
       renderGrid(parts);
     }
@@ -299,7 +299,7 @@ async function initApp() {
   document.getElementById('genBtn')?.addEventListener('click', generateAll);
   document.getElementById('printBtn')?.addEventListener('click', () => window.print());
   document.getElementById('clearSearch')?.addEventListener('click', () => {
-    document.getElementById('searchInput')?.value = '';
+    document.getElementById('searchInput').value = '';
     renderGrid(parts);
   });
   document.getElementById('searchInput')?.addEventListener('input', () => {
@@ -333,10 +333,10 @@ function showNoData(msg) {
 
 function initPreview(){
   const fmt=d=>d?new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}):'—';
-  document.getElementById('prevEvName')?.textContent=evento.nome||'—';
-  document.getElementById('prevMeta')?.textContent=(evento.data?fmt(evento.data):'')+(evento.luogo?' · '+evento.luogo:'');
+  document.getElementById('prevEvName').textContent =evento.nome||'—';
+  document.getElementById('prevMeta').textContent =(evento.data?fmt(evento.data):'')+(evento.luogo?' · '+evento.luogo:'');
   if(evento.logo){
-    document.getElementById('prevLogo')?.src=evento.logo;
+    document.getElementById('prevLogo').src =evento.logo;
     document.getElementById('prevLogo')?.style.display='block';
     document.getElementById('prevLogoPH')?.style.display='none';
   }
@@ -362,7 +362,7 @@ function updatePreview(){
 ['badgeColor','badgeSize','showCF','showProf'].forEach(id=>document.getElementById(id).addEventListener('change',updatePreview));
 document.getElementById('genBtn')?.addEventListener('click',generateAll);
 document.getElementById('printBtn')?.addEventListener('click',()=>window.print());
-document.getElementById('clearSearch')?.addEventListener('click',()=>{document.getElementById('searchInput')?.value='';renderGrid(parts);});
+document.getElementById('clearSearch')?.addEventListener('click',()=>{document.getElementById('searchInput').value ='';renderGrid(parts);});
 document.getElementById('searchInput')?.addEventListener('input',()=>{
   const q=document.getElementById('searchInput')?.value.toLowerCase();
   renderGrid(q?parts.filter(p=>p.nome.toLowerCase().includes(q)||p.cognome.toLowerCase().includes(q)||(p.cf||'').toLowerCase().includes(q)):parts);
@@ -372,16 +372,16 @@ async function generateAll(){
   const btn=document.getElementById('genBtn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Generazione QR...';
   document.getElementById('gridCard')?.style.display='block';
   document.getElementById('progressWrap')?.style.display='block';
-  document.getElementById('badgeGrid')?.innerHTML='';
+  document.getElementById('badgeGrid').innerHTML ='';
   const tot=parts.length;
   for(let i=0;i<tot;i++){
     parts[i].qr=await genQRUrl(`ECM|${parts[i].id}|${parts[i].cf}|${parts[i].cognome}|${parts[i].nome}`);
     const pct=Math.round((i+1)/tot*50);
     document.getElementById('progressFill')?.style.width=pct+'%';
-    document.getElementById('progressLabel')?.textContent=`QR generati: ${i+1} / ${tot}`;
+    document.getElementById('progressLabel').textContent =`QR generati: ${i+1} / ${tot}`;
     if(i%10===0) await sleep(0);
   }
-  document.getElementById('progressLabel')?.textContent='Salvataggio su Firebase...';
+  document.getElementById('progressLabel').textContent ='Salvataggio su Firebase...';
   const BS=400,batches=Math.ceil(tot/BS);
   for(let b=0;b<batches;b++){
     const batch=writeBatch(db);
@@ -392,10 +392,10 @@ async function generateAll(){
   }
   document.getElementById('progressWrap')?.style.display='none';
   renderGrid(parts);
-  document.getElementById('sQR')?.textContent=tot;
-  document.getElementById('sPronto')?.textContent=tot;
+  document.getElementById('sQR').textContent =tot;
+  document.getElementById('sPronto').textContent =tot;
   // headerGen rimosso
-  document.getElementById('printBtn')?.disabled=false;
+  document.getElementById('printBtn').disabled =false;
   btn.innerHTML='✓ Rigenerati';btn.style.background='var(--success)';
   setTimeout(()=>{btn.innerHTML='⚡ Rigenera tutti';btn.style.background='';btn.disabled=false;},2500);
 }
@@ -412,7 +412,7 @@ function renderGrid(list){
   const fmt=d=>d?new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}):'—';
   const ns=settings.size==='large'?'17px':settings.size==='small'?'13px':'15px';
   const ss=settings.size==='large'?'26px':settings.size==='small'?'18px':'22px';
-  document.getElementById('badgeGrid')?.innerHTML=list.map(p=>`
+  document.getElementById('badgeGrid').innerHTML =list.map(p=>`
     <div class="badge-item">
       <div class="badge-card">
         <div class="badge-banner">
