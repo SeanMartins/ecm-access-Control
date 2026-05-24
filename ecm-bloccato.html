@@ -27,9 +27,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:#F4F6F9;display:flex;al
 const params = new URLSearchParams(window.location.search);
 const errore = params.get('errore');
 const msgs = {
-  sospeso: {icon:'⏸', title:'Account sospeso', msg:'Il tuo account è stato sospeso. Contatta l\'amministratore per maggiori informazioni.'},
-  attesa:  {icon:'⏳', title:'In attesa di approvazione', msg:'Il tuo account è in attesa di approvazione da parte dell\'amministratore. Riprova più tardi.'},
-  scaduto: {icon:'⏰', title:'Account scaduto', msg:'Il periodo di validità del tuo account è terminato. Contatta l\'amministratore per il rinnovo.'},
+  sospeso: {icon:'⏸', title:'Account sospeso', msg:'Il tuo account e stato sospeso. Contatta l amministratore per maggiori informazioni.'},
+  attesa:  {icon:'⏳', title:'In attesa di approvazione', msg:'Il tuo account e in attesa di approvazione. Riprova piu tardi.'},
+  scaduto: {icon:'⏰', title:'Account scaduto', msg:'Il periodo di validita del tuo account e terminato. Contatta l amministratore.'},
   permesso:{icon:'🚫', title:'Accesso non consentito', msg:'Non hai i permessi per accedere a questa sezione. Contatta il tuo amministratore.'}
 };
 if(errore && msgs[errore]) {

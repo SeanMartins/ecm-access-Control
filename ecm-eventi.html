@@ -323,7 +323,7 @@ header{border-bottom:1px solid var(--border);background:var(--surface);position:
 import { requireAuth, injectUserBar } from './ecm-auth.js';
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, updateDoc, getDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
 const app=getApps().length?getApps()[0]:initializeApp(FB);
@@ -441,29 +441,59 @@ async function loadEvents(){
   document.getElementById('eventsGrid').style.display='none';
   document.getElementById('emptyState').style.display='none';
   try{
-    const snap=await getDocs(collection(db,'eventi'));
-    let allEventsRaw=[];
-    snap.forEach(d=>allEventsRaw.push({id:d.id,...d.data()}));
+    // Assicura autenticazione anonima per leggere Firestore
+    const auth = getAuth(app);
+    if (!auth.currentUser) {
+      try { await signInAnonymously(auth); } catch(e) {}
+    }
+
+    const snap = await getDocs(collection(db,'eventi'));
+    let allEventsRaw = [];
+    snap.forEach(d => allEventsRaw.push({id:d.id,...d.data()}));
     allEventsRaw.sort((a,b)=>new Date(b.data||0)-new Date(a.data||0));
 
-    const op=JSON.parse(localStorage.getItem('ecm_op_user')||'null');
-    if(!op){
-      // Admin Google → vede tutto
-      allEvents=allEventsRaw;
-    } else if(op.ruolo==='operatore'){
-      // Operatore completo → eventi creati da lui + eventi assegnati
-      const assegnatiIds=(op.eventiAssegnati||[]).map(e=>e.id);
-      allEvents=allEventsRaw.filter(ev=>
-        ev.creatoDAUid===op.uid || assegnatiIds.includes(ev.id)
-      );
+    // Filtra in base al profilo utente corrente
+    const uid = auth.currentUser?.uid;
+    const email = auth.currentUser?.email;
+    const isSuperAdmin = email === ADMIN_EMAIL;
+
+    if (isSuperAdmin) {
+      // Super Admin vede tutto
+      allEvents = allEventsRaw;
+    } else if (uid) {
+      // Carica profilo da Firestore
+      try {
+        const profSnap = await getDoc(doc(db,'utenti',uid));
+        if (profSnap.exists()) {
+          const prof = profSnap.data();
+          if (prof.ruolo === 'admin') {
+            // Admin vede i suoi eventi
+            allEvents = allEventsRaw.filter(ev =>
+              ev.creatoDAUid === uid || !ev.creatoDAUid
+            );
+          } else {
+            // Operatore/scanner vede solo eventi assegnati
+            const assegnati = (prof.eventiAssegnati||[]).map(e=>typeof e==='string'?e:e.id);
+            allEvents = allEventsRaw.filter(ev => assegnati.includes(ev.id));
+          }
+        } else {
+          allEvents = allEventsRaw; // profilo non trovato → mostra tutto
+        }
+      } catch(e) {
+        allEvents = allEventsRaw; // errore profilo → mostra tutto
+      }
     } else {
-      // Scanner/report → solo eventi assegnati
-      const assegnatiIds=(op.eventiAssegnati||[]).map(e=>e.id);
-      allEvents=allEventsRaw.filter(ev=>assegnatiIds.includes(ev.id));
+      allEvents = allEventsRaw;
     }
+
     renderEvents();
   }catch(err){
-    document.getElementById('loadingState').innerHTML=`<div style="color:var(--danger)">Errore: ${err.message}</div>`;
+    console.error('loadEvents error:', err);
+    document.getElementById('loadingState').innerHTML=
+      '<div style="text-align:center;padding:40px"><div style="font-size:32px;margin-bottom:12px">⚠️</div>' +
+      '<div style="font-size:15px;font-weight:600;margin-bottom:8px">Errore caricamento</div>' +
+      '<div style="font-size:13px;color:var(--text2);margin-bottom:16px">' + err.message + '</div>' +
+      '<button onclick="loadEvents()" style="padding:8px 20px;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;font-family:inherit">↻ Riprova</button></div>';
   }
 }
 
@@ -589,12 +619,12 @@ window.openModal=function(evId,action){
   const btn=document.getElementById('archiveConfirmBtn');
   if(action==='archivio'){
     title.textContent='📦 Archivia evento';
-    sub.textContent='L\'evento verrà spostato nell\'archivio. Tutti i dati restano su Firebase e sono consultabili.';
+    sub.textContent="L'evento verra spostato nell'archivio. I dati restano su Firebase.";
     btn.textContent='Archivia';btn.className='btn btn-warn';
     btn.onclick=()=>doArchive(evId,'archiviato');
   }else{
     title.textContent='↩ Ripristina evento';
-    sub.textContent='L\`L'evento tornera' tra quelli attivi.`;
+    sub.textContent="L'evento tornera tra quelli attivi.";
     btn.textContent='Ripristina';btn.className='btn btn-success';
     btn.onclick=()=>doArchive(evId,'attivo');
   }

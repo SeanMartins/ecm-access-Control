@@ -518,7 +518,7 @@ function exportExcelCompleto() {
     const sheetData = [['CF','Cognome','Nome','Presente','Ora check-in']];
     partecipanti.forEach(p => {
       const ci = (checkinMap[s.id]||[]).find(c=>c.partecipanteId===p.id||c.id===p.id);
-      sheetData.push([p.cf||'—', p.cognome||'—', p.nome||'—', ci?'Sì':'No', ci?.ora||'—']);
+      sheetData.push([p.cf||'—', p.cognome||'—', p.nome||'—', ci?'Si':'No', ci?.ora||'—']);
     });
     const sheetName = (s.titolo||'Sessione').slice(0,28).replace(/[\\\/\?\*\[\]:]/g,'');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetData), sheetName);
@@ -551,7 +551,7 @@ window.exportExcelSessione = function(sid, titolo) {
   const rows = [['CF','Cognome','Nome','Professione','Presente','Ora check-in']];
   partecipanti.forEach(p => {
     const ci = checkins.find(c=>c.partecipanteId===p.id||c.id===p.id);
-    rows.push([p.cf||'—', p.cognome||'—', p.nome||'—', p.professione||'—', ci?'Sì':'No', ci?.ora||'—']);
+    rows.push([p.cf||'—', p.cognome||'—', p.nome||'—', p.professione||'—', ci?'Si':'No', ci?.ora||'—']);
   });
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Presenze');

@@ -390,7 +390,7 @@ window.doRegistra=async function(){
       // Già iscritto — mostra badge esistente
       const existSnap=await getDoc(doc(db,'eventi',evId,'partecipanti',existingId));
       const ex=existSnap.data();
-      warnEl.textContent='Sei già iscritto a questo evento. Ecco il tuo badge.';
+      warnEl.textContent='Sei gia iscritto a questo evento. Ecco il tuo badge.';
       warnEl.classList.add('show');
       partId=existingId;
       qrData=ex.qr||await genQRUrl(`ECM|${existingId}|${cf}|${cognome}|${nome}`);

@@ -461,7 +461,7 @@ async function registraAccesso(p) {
   const u = (p.log||[]).filter(l=>l.tipo==='uscita').length;
   const inside = e > u;
   if (mode === 'in') {
-    if (inside) { showResult('warn', p.nome+' '+p.cognome, p.cf, '⚠️ Già in sala', t); vibra('warn'); return; }
+    if (inside) { showResult('warn', p.nome+' '+p.cognome, p.cf, 'Gia in sala', t); vibra('warn'); return; }
     await addDoc(collection(db,'eventi',evId,'logs'), {partecipanteId:p.id,tipo:'entrata',ora:t,tsISO:now.toISOString(),ts:serverTimestamp(),nome:p.cognome+' '+p.nome,cf:p.cf||''});
     showResult('ok-in', p.nome+' '+p.cognome, p.cf, '✓ Entrata registrata', t);
     document.getElementById('tickerTxt').textContent = p.cognome+' '+p.nome+' — entrata '+t;
@@ -647,7 +647,7 @@ async function salvaNP() {
   if (!cognome) { showNPMsg('Inserisci il cognome', 'error'); return; }
   if (!evId) { showNPMsg('Nessun evento selezionato', 'error'); return; }
   if (!db) { showNPMsg('Firebase non pronto, riprova tra qualche secondo', 'error'); return; }
-  if (parts.find(p=>p.cf===cf)) { showNPMsg('CF già presente — cercalo nella ricerca manuale', 'warn'); return; }
+  if (parts.find(p=>p.cf===cf)) { showNPMsg('CF gia presente - cercalo nella ricerca manuale', 'warn'); return; }
   const btn = document.getElementById('btnSalvaNP');
   btn.disabled = true; btn.textContent = 'Salvataggio...';
   try {

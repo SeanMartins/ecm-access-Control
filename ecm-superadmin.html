@@ -743,7 +743,7 @@ async function salvaUtente() {
     }
     if(window._editUid) { await loadAll(); setTimeout(()=>document.getElementById('modalUtente').classList.remove('show'),1800); }
   } catch(e) {
-    const msg={'auth/email-already-in-use':'Email già registrata.','auth/weak-password':'Password troppo debole.','auth/invalid-email':'Email non valida.'}[e.code]||'Errore: '+e.message;
+    const msg={'auth/email-already-in-use':'Email gia registrata.','auth/weak-password':'Password troppo debole.','auth/invalid-email':'Email non valida.'}[e.code]||'Errore: '+e.message;
     showErr('utenteErr',msg);
   }
   finally { btn.disabled=false; btn.textContent='✓ Salva'; }

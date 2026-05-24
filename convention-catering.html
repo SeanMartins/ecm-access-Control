@@ -295,7 +295,7 @@ function exportExcel() {
   const rows=[['Cognome','Nome','Ruolo','Dieta','Colazione','Pranzo','Cena','Allergie','Note catering']];
   partecipanti.forEach(p=>{
     const pa=p.pasti||{colazione:true,pranzo:true,cena:false};
-    rows.push([p.cognome||'—',p.nome||'—',p.ruolo||'visitatore',DIETE[p.dieta||'standard']?.label||'Standard',pa.colazione?'Sì':'No',pa.pranzo?'Sì':'No',pa.cena?'Sì':'No',(p.allergie||[]).join(', ')||'—',p.noteCatering||'—']);
+    rows.push([p.cognome||'—',p.nome||'—',p.ruolo||'visitatore',DIETE[p.dieta||'standard']?.label||'Standard',pa.colazione?'Si':'No',pa.pranzo?'Si':'No',pa.cena?'Si':'No',(p.allergie||[]).join(', ')||'—',p.noteCatering||'—']);
   });
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'Dettaglio partecipanti');
   XLSX.writeFile(wb,'catering_'+new Date().toISOString().split('T')[0]+'.xlsx');
