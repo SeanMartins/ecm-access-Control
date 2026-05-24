@@ -239,7 +239,9 @@ async function initApp() {
   if (!auth.currentUser) { try { await signInAnonymously(auth); } catch(e) {} }
   document.getElementById('fbDot').className='fb-dot ok';
 
-  const evId = localStorage.getItem('ecm_eventId');
+  const const _urlP=new URLSearchParams(window.location.search);
+  evId=_urlP.get('evId')||localStorage.getItem('ecm_eventId');
+  if(evId) localStorage.setItem('ecm_eventId',evId);
   if(!evId){document.getElementById('loadingState').style.display='none';document.getElementById('alertNoData').style.display='block';}
   else{
   try{

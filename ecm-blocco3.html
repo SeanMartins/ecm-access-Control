@@ -305,7 +305,9 @@ const FB_CFG={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-a
 // ── INIT UI subito — prima di qualsiasi await ─────────
 let mode = 'in';
 let parts = [];
-let evId = localStorage.getItem('ecm_eventId');
+const _p2=new URLSearchParams(window.location.search);
+  let evId=_p2.get('evId')||localStorage.getItem('ecm_eventId');
+  if(evId) localStorage.setItem('ecm_eventId',evId);
 let html5QrCode = null;
 let cooldown = false;
 let db, auth;

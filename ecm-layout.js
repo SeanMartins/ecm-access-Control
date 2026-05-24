@@ -275,3 +275,27 @@
   window.ECM_VERSION = VERSION;
 
 })(window);
+
+// Aggiunge evId ai link dei blocchi nella sidebar e nella pagina
+function updateBlockLinks() {
+  var evId = localStorage.getItem('ecm_eventId');
+  if (!evId) return;
+  var blocchi = ['ecm-blocco1.html','ecm-blocco2.html','ecm-blocco3.html','ecm-blocco4.html'];
+  document.querySelectorAll('a[href]').forEach(function(a) {
+    var href = a.getAttribute('href');
+    if (!href) return;
+    for (var i = 0; i < blocchi.length; i++) {
+      if (href.indexOf(blocchi[i]) !== -1 && href.indexOf('evId') === -1) {
+        var sep = href.indexOf('?') !== -1 ? '&' : '?';
+        a.setAttribute('href', href + sep + 'evId=' + encodeURIComponent(evId));
+        break;
+      }
+    }
+  });
+}
+// Chiama dopo il DOM pronto
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() { setTimeout(updateBlockLinks, 300); });
+} else {
+  setTimeout(updateBlockLinks, 300);
+}

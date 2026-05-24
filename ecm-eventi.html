@@ -671,7 +671,11 @@ window.apriPannelloEvento = async function(evId){
   document.getElementById('epDentro').textContent = '…';
 
   // Aggiorna link con evId
-  document.getElementById('epSetup').href = `ecm-blocco1.html?evId=${evId}`;
+  // Aggiorna TUTTI i link con evId per persistere dopo logout/login
+  document.getElementById('epSetup').href   = `ecm-blocco1.html?evId=${evId}`;
+  document.getElementById('epBadge').href   = `ecm-blocco2.html?evId=${evId}`;
+  document.getElementById('epScanner').href = `ecm-blocco3.html?evId=${evId}`;
+  document.getElementById('epReport').href  = `ecm-blocco4.html?evId=${evId}`;
 
   // Mostra/nascondi sezione gestione per scanner
   const op = JSON.parse(localStorage.getItem('ecm_op_user')||'null');

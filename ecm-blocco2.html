@@ -253,18 +253,64 @@ async function initApp() {
   document.getElementById('fbDot').className = 'fb-dot ok';
   document.getElementById('fbStatus').textContent = 'Firebase connesso';
 
-  // 4. Carica evento da localStorage
-  evId = localStorage.getItem('ecm_eventId');
+  // 4. Carica evento: prima dall'URL, poi dal localStorage
+  const _urlParams = new URLSearchParams(window.location.search);
+  evId = _urlParams.get('evId') || localStorage.getItem('ecm_eventId');
 
-  if (!evId) {
-    showNoData('Nessun evento selezionato. Torna alla lista eventi e selezionane uno.');
+  if (evId) {
+    // Aggiorna sempre il localStorage con l'evId corrente
+    localStorage.setItem('ecm_eventId', evId);
+  } else {
+    // Mostra messaggio con link agli eventi
+    const alertEl = document.getElementById('alertNoData');
+    if (alertEl) {
+      alertEl.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-size:28px">📋</span>
+          <div>
+            <div style="font-weight:600;margin-bottom:4px">Nessun evento selezionato</div>
+            <div style="font-size:13px;opacity:.8">Vai alla lista eventi, seleziona un evento e poi torna qui.</div>
+            <a href="ecm-eventi.html" style="display:inline-block;margin-top:10px;padding:8px 16px;background:#2563EB;color:white;border-radius:8px;text-decoration:none;font-size:13px;font-weight:500">
+              📋 Vai ai miei eventi
+            </a>
+          </div>
+        </div>`;
+      alertEl.style.display = 'block';
+      alertEl.style.background = '#EFF6FF';
+      alertEl.style.border = '1px solid rgba(37,99,235,.2)';
+      alertEl.style.borderRadius = '12px';
+      alertEl.style.padding = '16px 20px';
+      alertEl.style.color = '#1A1D2E';
+    }
     return;
   }
 
   try {
     const evSnap = await getDoc(doc(db,'eventi',evId));
     if (!evSnap.exists()) {
-      showNoData('Evento non trovato su Firebase. Potrebbe essere stato eliminato.');
+      // Evento non trovato — potrebbe essere evId sbagliato nel localStorage
+      // Pulisci e mostra link agli eventi
+      localStorage.removeItem('ecm_eventId');
+      const alertEl2 = document.getElementById('alertNoData');
+      if (alertEl2) {
+        alertEl2.innerHTML = `
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:28px">⚠️</span>
+            <div>
+              <div style="font-weight:600;margin-bottom:4px">Evento non trovato</div>
+              <div style="font-size:13px;opacity:.8">L'evento potrebbe essere stato eliminato o non sei autorizzato. Torna alla lista e selezionane uno.</div>
+              <a href="ecm-eventi.html" style="display:inline-block;margin-top:10px;padding:8px 16px;background:#2563EB;color:white;border-radius:8px;text-decoration:none;font-size:13px;font-weight:500">
+                📋 Vai ai miei eventi
+              </a>
+            </div>
+          </div>`;
+        alertEl2.style.display = 'block';
+        alertEl2.style.background = '#FEF2F2';
+        alertEl2.style.border = '1px solid rgba(220,38,38,.2)';
+        alertEl2.style.borderRadius = '12px';
+        alertEl2.style.padding = '16px 20px';
+        alertEl2.style.color = '#1A1D2E';
+      }
       return;
     }
     evento = evSnap.data();
