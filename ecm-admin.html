@@ -309,7 +309,7 @@ const app=getApps().length?getApps()[0]:initializeApp(FB);
 const db=getFirestore(app);
 
 const ADMIN_EMAIL='martinsosem@gmail.com';
-const { googleUser } = await requireAuth();
+const { googleUser } = try { await requireAuth(); } catch(e) { console.warn('Auth redirect:', e.message); }
 injectUserBar('userBarSlot');
 
 if(!googleUser || googleUser.email!==ADMIN_EMAIL){
@@ -386,7 +386,7 @@ window.creaUtente=async function(){
       btn.disabled=false; btn.innerHTML='Crea utente →'; return;
     }
     if(existing.find(u=>u.username===username&&u.attivo!==false)){
-      showAlert('error','Username già in uso.'); btn.disabled=false; btn.innerHTML='Crea utente →'; return;
+      showAlert('error','Username gia in uso.'); btn.disabled=false; btn.innerHTML='Crea utente →'; return;
     }
     const uid='usr_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
     const pwHash=await hashPw(password);

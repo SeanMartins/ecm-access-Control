@@ -440,7 +440,7 @@ async function salvaPagamento() {
 
 async function marcaTutti() {
   if (!currentEvId) return;
-  if (!confirm('Marcare TUTTI i partecipanti come PAGATO? Questa azione può essere annullata singolarmente.')) return;
+  if (!confirm(`Marcare TUTTI i partecipanti come PAGATO? Questa azione puo' essere annullata singolarmente.`)) return;
   for (const p of partecipanti) {
     if (p.pagamento !== 'pagato') {
       await setDoc(doc(db,'eventi',currentEvId,'partecipanti',p.id), {pagamento:'pagato',pagamentoAggiornato:serverTimestamp()},{merge:true});

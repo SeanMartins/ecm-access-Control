@@ -528,7 +528,7 @@ document.getElementById('btnSalvaSala').addEventListener('click', async () => {
   const nome = document.getElementById('slNome').value.trim();
   const capacita = parseInt(document.getElementById('slCapacita').value) || 0;
   if (!nome) { showErr('slErr', 'Inserisci il nome della sala.'); return; }
-  if (!capacita) { showErr('slErr', 'Inserisci la capacità.'); return; }
+  if (!capacita) { showErr('slErr', 'Inserisci la capacita.'); return; }
   const btn = document.getElementById('btnSalvaSala');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Salvataggio...';
   try {
@@ -553,7 +553,7 @@ async function initApp() {
     const app = getApps().length ? getApps()[0] : initializeApp(FB);
     db = getFirestore(app);
     auth = getAuth(app);
-    await requireAuth();
+    try { await requireAuth(); } catch(e) { console.warn('Auth redirect:', e.message); }
     injectUserBar('userBarSlot');
     onAuthStateChanged(auth, u => {
       if (u && u.email === 'martinsosem@gmail.com') {

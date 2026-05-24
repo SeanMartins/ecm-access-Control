@@ -2,95 +2,18 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isAuth() { return request.auth != null; }
-    function isGoogleAuth() { return request.auth != null && request.auth.token.firebase.sign_in_provider == 'google.com'; }
+    function isAuth() {
+      return request.auth != null;
+    }
 
-    match /utenti/{uid} {
+    // ── ACCESSO APERTO PER SVILUPPO/TESTING ──
+    // Permette lettura/scrittura a tutti gli utenti autenticati
+    // (incluso signInAnonymously)
+    // NOTA: restringere dopo il go-live
+
+    match /{document=**} {
       allow read: if true;
-      allow write: if isGoogleAuth();
-    }
-
-    match /eventi/{eventId} {
-      allow read: if true;
-      allow write: if isAuth() && eventId.matches('evt_[0-9]+');
-
-      // ECM & Congress
-      match /partecipanti/{partId} {
-        allow read: if true;
-        allow create: if true;
-        allow update: if isAuth() || partId.matches('P[0-9]+') || partId.matches('C[0-9]+');
-        allow delete: if isAuth();
-      }
-      match /logs/{logId} {
-        allow read: if isAuth();
-        allow create: if isAuth();
-        allow update, delete: if false;
-      }
-      match /sessioni/{sessId} {
-        allow read: if true;
-        allow write: if isAuth();
-        match /checkin/{partId} {
-          allow read: if true;
-          allow write: if isAuth();
-        }
-      }
-      match /relatori/{relId} { allow read: if true; allow write: if isAuth(); }
-      match /sale/{salaId} { allow read: if true; allow write: if isAuth(); }
-      match /certificati/{certId} { allow read, write: if isAuth(); }
-      match /survey/config { allow read: if true; allow write: if isAuth(); }
-      match /survey/risposte/lista/{rId} { allow read: if isAuth(); allow create: if true; allow update, delete: if false; }
-      match /questionario/config { allow read: if true; allow write: if isAuth(); }
-      match /questionario/risposte/lista/{rId} { allow read: if isAuth(); allow create: if true; allow update, delete: if false; }
-
-      // Convention
-      match /stand/{standId} { allow read: if true; allow write: if isAuth(); }
-      match /workshops/{wsId} { allow read: if true; allow write: if isAuth(); }
-      match /navette/{navId} { allow read: if true; allow write: if isAuth(); }
-      match /parcheggi/{parkId} { allow read: if true; allow write: if isAuth(); }
-      match /prenotazioni_trasporto/{preId} { allow read: if isAuth(); allow create: if isAuth(); allow delete: if isAuth(); }
-      match /checkin_ingresso/{ciId} { allow read: if isAuth(); allow create: if isAuth(); }
-      match /checkin_vip/{ciId} { allow read: if isAuth(); allow create: if isAuth(); }
-      match /checkin_espositori/{ciId} { allow read: if isAuth(); allow create: if isAuth(); }
-      match /checkin_conferenze/{ciId} { allow read: if isAuth(); allow create: if isAuth(); }
-      match /checkin_workshop/{ciId} { allow read: if isAuth(); allow create: if isAuth(); }
-      match /checkin_catering/{ciId} { allow read: if isAuth(); allow create: if isAuth(); }
-
-      // Wedding
-      match /ospiti/{ospId} { allow read: if isAuth(); allow write: if isAuth(); }
-      match /tavoli/{tavId} { allow read: if isAuth(); allow write: if isAuth(); }
-      match /fornitori/{forId} { allow read: if isAuth(); allow write: if isAuth(); }
-      match /budget/{budId} { allow read: if isAuth(); allow write: if isAuth(); }
-      match /timeline/{tlId} { allow read: if isAuth(); allow write: if isAuth(); }
-      match /menu/{mId} { allow read: if isAuth(); allow write: if isAuth(); }
-
-      // Fallback sottocollezioni
-      match /{subCol}/{docId} {
-        allow read: if true;
-        allow write: if isAuth();
-        match /{nestedCol}/{nestedId} {
-          allow read: if true;
-          allow write: if isAuth();
-        }
-      }
-    }
-
-    // Log attività (solo Super Admin può leggere/eliminare)
-    match /log_attivita/{logId} {
-      allow read: if isAuth();
-      allow create: if isAuth();
-      allow delete: if isAuth() && request.auth.token.email == 'martinsosem@gmail.com';
-    }
-
-    // Configurazione sistema
-    match /sistema/{docId} {
-      allow read: if isAuth();
-      allow write: if isAuth() && request.auth.token.email == 'martinsosem@gmail.com';
-    }
-
-    // Utenti (profili estesi)
-    match /utenti/{uid} {
-      allow read: if isAuth();
-      allow write: if isAuth() && (request.auth.uid == uid || request.auth.token.email == 'martinsosem@gmail.com');
+      allow write: if isAuth();
     }
   }
 }

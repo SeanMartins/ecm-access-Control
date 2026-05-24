@@ -259,8 +259,9 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
   <div class="footer-info">Partecipanti: <strong id="footerPart">0</strong></div>
 </footer>
 <script type="module">
-import { requireAuth, injectUserBar, requireRole } from './ecm-auth.js';
-await requireAuth();
+import { requireAuth, injectUserBar, getCurrentUser } from './ecm-auth.js';
+let logoData = null; // logo base64 caricato dall'utente
+try { await requireAuth(); } catch(e) { console.warn('Auth redirect:', e.message); }
 requireRole(['operatore','report','admin']);
 injectUserBar('userBarSlot');
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -459,7 +460,6 @@ async function salvaEvento(){
     await setDoc(doc(db,'eventi',id),{
       nome,
       tipo:document.getElementById('evTipo').value||'ecm',
-      logo:_logoEventoBase64||null,
       pagamento:document.getElementById('evPagamento')?.value||'no',
       prezzo:parseFloat(document.getElementById('evPrezzo')?.value)||0,
       linkPaypal:document.getElementById('evPaypal')?.value?.trim()||'',

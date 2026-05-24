@@ -219,7 +219,7 @@ function renderTabella() {
 }
 
 window.eliminaCert = async function(certId) {
-  if (!confirm('Revocare questo certificato? Non sarà più valido.')) return;
+  if (!confirm(`Revocare questo certificato? Non sara' piu' valido.`)) return;
   try {
     const evId = document.getElementById('evSelect').value;
     await deleteDoc(doc(db,'eventi',evId,'certificati',certId));

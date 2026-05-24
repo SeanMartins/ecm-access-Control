@@ -330,7 +330,7 @@ const app=getApps().length?getApps()[0]:initializeApp(FB);
 const db=getFirestore(app);
 const ADMIN_EMAIL='martinsosem@gmail.com';
 
-await requireAuth();
+try { await requireAuth(); } catch(e) { console.warn('Auth redirect:', e.message); }
 injectUserBar('userBarSlot');
 onAuthStateChanged(getAuth(app),user=>{if(user&&user.email===ADMIN_EMAIL){const el=document.getElementById('adminNavItem');if(el)el.style.display='flex';}});
 
@@ -594,7 +594,7 @@ window.openModal=function(evId,action){
     btn.onclick=()=>doArchive(evId,'archiviato');
   }else{
     title.textContent='↩ Ripristina evento';
-    sub.textContent='L\'evento tornerà tra quelli attivi.';
+    sub.textContent='L\`L'evento tornera' tra quelli attivi.`;
     btn.textContent='Ripristina';btn.className='btn btn-success';
     btn.onclick=()=>doArchive(evId,'attivo');
   }

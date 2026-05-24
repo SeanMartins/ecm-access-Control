@@ -197,3 +197,16 @@ function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'
 export function getCurrentUser() { return _currentUser; }
 export function getCurrentProfilo() { return _profilo; }
 export function canAccess(modulo) { return hasModuloPermesso(_profilo, modulo); }
+
+export async function signOutUser() {
+  const auth = getAuthInstance();
+  try {
+    await addDoc(collection(getDB(),'log_attivita'),{
+      tipo:'logout', email: auth.currentUser?.email||'—',
+      dettaglio:'Logout: '+(auth.currentUser?.email||'—'),
+      ts: serverTimestamp(), data: new Date().toISOString()
+    });
+  } catch(e) {}
+  await signOut(auth);
+  window.location.href = PAGINA_LOGIN;
+}

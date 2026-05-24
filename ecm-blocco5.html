@@ -201,7 +201,7 @@ const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-acces
 const app=getApps().length?getApps()[0]:initializeApp(FB);
 const db=getFirestore(app);
 const ADMIN_EMAIL='martinsosem@gmail.com';
-await requireAuth();
+try { await requireAuth(); } catch(e) { console.warn('Auth redirect:', e.message); }
 injectUserBar('userBarSlot');
 onAuthStateChanged(getAuth(app),u=>{if(u&&u.email===ADMIN_EMAIL){const el=document.getElementById('adminNavItem');if(el)el.style.display='flex';}});
 

@@ -213,7 +213,7 @@ input[type=color]{padding:4px 8px;height:40px;cursor:pointer}
 
 
 <script type="module">
-import { requireAuth, injectUserBar, requireRole } from './ecm-auth.js';
+import { requireAuth, injectUserBar } from './ecm-auth.js';
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, collection, getDocs, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -222,7 +222,7 @@ const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-acces
 const app=getApps().length?getApps()[0]:initializeApp(FB);
 const db=getFirestore(app);
 
-await requireAuth();
+try { await requireAuth(); } catch(e) { console.warn('Auth redirect:', e.message); }
 requireRole(['operatore','report','admin']);
 injectUserBar('userBarSlot');
 

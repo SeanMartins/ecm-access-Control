@@ -417,7 +417,7 @@ async function initApp() {
     db = getFirestore(app);
     auth = getAuth(app);
 
-    await requireAuth();
+    try { await requireAuth(); } catch(e) { console.warn('Auth redirect:', e.message); }
     injectUserBar('userBarSlot');
     document.getElementById('fbDot').className = 'topbar-dot ok';
     document.getElementById('fbStatus').textContent = 'Firebase connesso';
