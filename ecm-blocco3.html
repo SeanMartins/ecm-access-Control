@@ -117,6 +117,19 @@ footer{position:fixed;bottom:56px;left:0;right:0;background:var(--surface);borde
 #html5qr-scanner>div:first-child{display:none!important}
 @media(max-width:880px){.layout{grid-template-columns:1fr}}
 @media(max-width:600px){.stats-bar{grid-template-columns:1fr 1fr}.cam-btns{grid-template-columns:1fr 1fr}}
+.pay-toggle-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;margin-top:8px;display:none}
+.pay-toggle-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:8px}
+.pay-status-row{display:flex;gap:8px;flex-wrap:wrap}
+.pay-btn{flex:1;padding:8px 12px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;text-align:center;transition:all .2s;min-width:80px}
+.pay-btn:hover{transform:scale(1.02)}
+.pay-btn.selected-pagato{background:#ECFDF5;border-color:var(--success);color:var(--success)}
+.pay-btn.selected-sede{background:#FFFBEB;border-color:var(--warn);color:var(--warn)}
+.pay-btn.selected-non{background:#FEF2F2;border-color:var(--danger);color:var(--danger)}
+.pay-info-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-top:6px}
+.pib-pagato{background:#ECFDF5;color:var(--success);border:1px solid rgba(5,150,105,.3)}
+.pib-sede{background:#FFFBEB;color:var(--warn);border:1px solid rgba(217,119,6,.3)}
+.pib-non{background:#FEF2F2;color:var(--danger);border:1px solid rgba(220,38,38,.3)}
+.pib-verifica{background:#EEF2FF;color:#3730A3;border:1px solid rgba(55,48,163,.3)}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#1A1714;border-top:1px solid #2A2420;display:flex;align-items:stretch;z-index:200;padding-bottom:env(safe-area-inset-bottom)}
 .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 2px;text-decoration:none;color:#6B6560;font-family:'DM Sans',sans-serif;font-size:9px;font-weight:500;transition:all .2s;border:none;background:none}
 .bn-item.active{color:#4D6EFF}.bn-item.active .bn-icon{background:rgba(77,110,255,.15);border-radius:10px}
@@ -194,6 +207,20 @@ footer{position:fixed;bottom:56px;left:0;right:0;background:var(--surface);borde
             <div id="resEmoji" style="font-size:28px;margin-left:10px"></div>
           </div>
         </div>
+
+        <!-- PANNELLO PAGAMENTO (visibile solo se evento a pagamento e abilitato) -->
+        <div class="pay-toggle-wrap" id="payToggleWrap">
+          <div class="pay-toggle-title">💳 Stato pagamento</div>
+          <div id="payCurrentBadge" style="margin-bottom:8px"></div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:8px" id="payPartName"></div>
+          <div class="pay-status-row">
+            <button class="pay-btn" id="payBtnPagato" onclick="aggiornaPagamento('pagato')">✓ Pagato</button>
+            <button class="pay-btn" id="payBtnSede" onclick="aggiornaPagamento('sede')">⏳ Paga in sede</button>
+            <button class="pay-btn" id="payBtnNon" onclick="aggiornaPagamento('nonpagato')">✗ Non pagato</button>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:8px">Tocca per aggiornare lo stato</div>
+        </div>
+
         <!-- RICERCA MANUALE -->
         <div class="manual-wrap">
           <div class="card-title" style="margin-bottom:8px">🔍 Ricerca manuale</div>
@@ -286,7 +313,13 @@ footer{position:fixed;bottom:56px;left:0;right:0;background:var(--surface);borde
 </main>
 <footer>
   <div class="footer-info">Evento: <strong id="footerEv">—</strong> · Modo: <strong id="footerMode" style="color:var(--success)">ENTRATA</strong></div>
-  <div class="live-clock" id="clk">--:--:--</div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="live-clock" id="clk">--:--:--</div>
+    <label id="payToggleLabel" style="display:none;align-items:center;gap:6px;cursor:pointer;font-size:11px;color:var(--text3)">
+      <input type="checkbox" id="payToggleCheck" style="accent-color:#2563EB;width:14px;height:14px">
+      💳 Verifica pagamento
+    </label>
+  </div>
 </footer>
 
 
@@ -305,6 +338,9 @@ const FB_CFG={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-a
 // ── INIT UI subito — prima di qualsiasi await ─────────
 let mode = 'in';
 let parts = [];
+let eventoData = null;        // dati evento completi (per verificare se è a pagamento)
+let payToggleAbilitato = false; // toggle verifica pagamento attivato dall'operatore
+let currentPartId = null;     // partecipante attualmente mostrato nel result card
 const _p2=new URLSearchParams(window.location.search);
   let evId=_p2.get('evId')||localStorage.getItem('ecm_eventId');
   if(evId) localStorage.setItem('ecm_eventId',evId);
@@ -463,21 +499,21 @@ async function registraAccesso(p) {
   const u = (p.log||[]).filter(l=>l.tipo==='uscita').length;
   const inside = e > u;
   if (mode === 'in') {
-    if (inside) { showResult('warn', p.nome+' '+p.cognome, p.cf, 'Gia in sala', t); vibra('warn'); return; }
+    if (inside) { showResult('warn', p.nome+' '+p.cognome, p.cf, 'Gia in sala', t, p.id); vibra('warn'); return; }
     await addDoc(collection(db,'eventi',evId,'logs'), {partecipanteId:p.id,tipo:'entrata',ora:t,tsISO:now.toISOString(),ts:serverTimestamp(),nome:p.cognome+' '+p.nome,cf:p.cf||''});
-    showResult('ok-in', p.nome+' '+p.cognome, p.cf, '✓ Entrata registrata', t);
+    showResult('ok-in', p.nome+' '+p.cognome, p.cf, '✓ Entrata registrata', t, p.id);
     document.getElementById('tickerTxt').textContent = p.cognome+' '+p.nome+' — entrata '+t;
     vibra('in');
   } else {
-    if (!inside) { showResult('warn', p.nome+' '+p.cognome, p.cf, '⚠️ Non risulta in sala', t); vibra('warn'); return; }
+    if (!inside) { showResult('warn', p.nome+' '+p.cognome, p.cf, '⚠️ Non risulta in sala', t, p.id); vibra('warn'); return; }
     await addDoc(collection(db,'eventi',evId,'logs'), {partecipanteId:p.id,tipo:'uscita',ora:t,tsISO:now.toISOString(),ts:serverTimestamp(),nome:p.cognome+' '+p.nome,cf:p.cf||''});
-    showResult('ok-out', p.nome+' '+p.cognome, p.cf, '✓ Uscita registrata', t);
+    showResult('ok-out', p.nome+' '+p.cognome, p.cf, '✓ Uscita registrata', t, p.id);
     document.getElementById('tickerTxt').textContent = p.cognome+' '+p.nome+' — uscita '+t;
     vibra('out');
   }
 }
 
-function showResult(type, name, cf, status, time) {
+function showResult(type, name, cf, status, time, partId) {
   const card = document.getElementById('resCard');
   card.className = 'result-card show rc-' + type;
   document.getElementById('resName').textContent = name;
@@ -486,6 +522,35 @@ function showResult(type, name, cf, status, time) {
   document.getElementById('resStatus').style.color = type==='ok-in'?'var(--success)':type==='ok-out'?'var(--danger)':type==='warn'?'var(--warn)':'var(--danger)';
   document.getElementById('resTime').textContent = time ? 'Ore '+time : '';
   document.getElementById('resEmoji').textContent = {'ok-in':'✅','ok-out':'🚪','warn':'⚠️','err':'❌'}[type]||'';
+
+  // Pannello pagamento — mostra solo se toggle attivo e partecipante valido
+  const payWrap = document.getElementById('payToggleWrap');
+  if (payToggleAbilitato && partId && (type === 'ok-in' || type === 'ok-out' || type === 'warn')) {
+    currentPartId = partId;
+    const part = parts.find(p => p.id === partId);
+    const statoPag = part?.pagamento || 'nonpagato';
+    // Aggiorna badge stato corrente
+    const badgeMap = {
+      pagato:    { cls:'pib-pagato',  lbl:'✓ Pagato' },
+      sede:      { cls:'pib-sede',    lbl:'⏳ Paga in sede' },
+      nonpagato: { cls:'pib-non',     lbl:'✗ Non pagato' },
+    };
+    const badge = badgeMap[statoPag] || { cls:'pib-verifica', lbl:'? Sconosciuto' };
+    document.getElementById('payCurrentBadge').innerHTML =
+      `<span class="pay-info-badge ${badge.cls}">${badge.lbl}</span>`;
+    document.getElementById('payPartName').textContent = name;
+    // Evidenzia bottone corrente
+    ['payBtnPagato','payBtnSede','payBtnNon'].forEach(id => {
+      document.getElementById(id).className = 'pay-btn';
+    });
+    if (statoPag === 'pagato')    document.getElementById('payBtnPagato').className = 'pay-btn selected-pagato';
+    if (statoPag === 'sede')      document.getElementById('payBtnSede').className   = 'pay-btn selected-sede';
+    if (statoPag === 'nonpagato') document.getElementById('payBtnNon').className    = 'pay-btn selected-non';
+    payWrap.style.display = 'block';
+  } else {
+    if (payWrap) payWrap.style.display = 'none';
+    currentPartId = partId || null;
+  }
 }
 
 function vibra(t) {
@@ -720,7 +785,22 @@ async function initFirebase() {
 
     const evSnap = await getDoc(doc(db,'eventi',evId));
     if (!evSnap.exists()) { document.getElementById('noEvAlert').style.display='block'; return; }
-    document.getElementById('footerEv').textContent = evSnap.data().nome||'—';
+    eventoData = evSnap.data();
+    document.getElementById('footerEv').textContent = eventoData.nome||'—';
+
+    // Se l'evento è a pagamento, mostra il toggle verifica pagamento
+    const isEventoPag = eventoData.pagamento && eventoData.pagamento !== 'no';
+    const payToggleLabel = document.getElementById('payToggleLabel');
+    if (isEventoPag && payToggleLabel) {
+      payToggleLabel.style.display = 'flex';
+      document.getElementById('payToggleCheck').addEventListener('change', function() {
+        payToggleAbilitato = this.checked;
+        // Aggiorna l'interfaccia
+        if (!payToggleAbilitato) {
+          document.getElementById('payToggleWrap').style.display = 'none';
+        }
+      });
+    }
 
     const partsSnap = await getDocs(collection(db,'eventi',evId,'partecipanti'));
     parts = [];
@@ -740,6 +820,41 @@ async function initFirebase() {
 }
 
 initFirebase();
+
+// ── AGGIORNA PAGAMENTO DALLO SCANNER ──────────────────────────────
+window.aggiornaPagamento = async function(stato) {
+  if (!currentPartId || !evId) return;
+  const btnMap = {pagato:'payBtnPagato', sede:'payBtnSede', nonpagato:'payBtnNon'};
+  const clsMap = {pagato:'selected-pagato', sede:'selected-sede', nonpagato:'selected-non'};
+  const badgeMap = {
+    pagato:    {cls:'pib-pagato',  lbl:'✓ Pagato'},
+    sede:      {cls:'pib-sede',    lbl:'⏳ Paga in sede'},
+    nonpagato: {cls:'pib-non',     lbl:'✗ Non pagato'},
+  };
+  try {
+    await setDoc(doc(db,'eventi',evId,'partecipanti',currentPartId),
+      {pagamento:stato, pagamentoAggiornato:serverTimestamp()},
+      {merge:true}
+    );
+    // Aggiorna in memoria
+    const part = parts.find(p=>p.id===currentPartId);
+    if (part) part.pagamento = stato;
+    // Aggiorna UI
+    ['payBtnPagato','payBtnSede','payBtnNon'].forEach(id=>{
+      document.getElementById(id).className='pay-btn';
+    });
+    if (btnMap[stato]) document.getElementById(btnMap[stato]).className='pay-btn '+clsMap[stato];
+    const badge = badgeMap[stato]||{cls:'pib-verifica',lbl:'?'};
+    document.getElementById('payCurrentBadge').innerHTML=
+      `<span class="pay-info-badge ${badge.cls}">${badge.lbl} ✓ Salvato</span>`;
+    setTimeout(()=>{
+      const b = badgeMap[(parts.find(p=>p.id===currentPartId)||{}).pagamento||'nonpagato']||badge;
+      document.getElementById('payCurrentBadge').innerHTML=
+        `<span class="pay-info-badge ${b.cls}">${b.lbl}</span>`;
+    },1500);
+  } catch(e) { alert('Errore: '+e.message); }
+};
+
 </script>
   </div>
   <div class="ecm-version-footer" id="ecmVersionFooter"></div>
