@@ -259,77 +259,125 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
   <div class="footer-info">Partecipanti: <strong id="footerPart">0</strong></div>
 </footer>
 <script type="module">
+// ── IMPORT (devono stare SEMPRE in cima) ───────────────────────
 import { requireAuth, injectUserBar, getCurrentUser } from './ecm-auth.js';
-let logoData = null; // logo base64 caricato dall'utente
-try { await requireAuth(); } catch(e) { console.warn('Auth redirect:', e.message); }
-requireRole(['operatore','report','admin']);
-injectUserBar('userBarSlot');
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+// ── CONFIG FIREBASE ─────────────────────────────────────────────
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
-const app=initializeApp(FB); const db=getFirestore(app);
-let parts=[],logoData=null,rawHeaders=[],rawRows=[],colMap2={};
-const PER=20; let pg=0;
-const FIELDS=['cf','cognome','nome','professione'];
-const LABELS={cf:'Codice Fiscale',cognome:'Cognome',nome:'Nome',professione:'Professione'};
-const ALIASES={cf:['codice fiscale','cf','codicefiscale'],cognome:['cognome','surname','lastname'],nome:['nome','name','firstname'],professione:['professione','profession','categoria','disciplina','qualifica']};
+const app = getApps().length ? getApps()[0] : initializeApp(FB);
+const db  = getFirestore(app);
 
-document.getElementById('fbDot').className='fb-dot ok';
-document.getElementById('fbStatus').textContent='Firebase connesso';
+// ── VARIABILI GLOBALI ───────────────────────────────────────────
+let logoData = null;   // base64 del logo caricato
+let parts = [], rawHeaders = [], rawRows = [], colMap2 = {};
+const PER = 20; let pg = 0;
+const FIELDS  = ['cf','cognome','nome','professione'];
+const LABELS  = {cf:'Codice Fiscale',cognome:'Cognome',nome:'Nome',professione:'Professione'};
+const ALIASES = {
+  cf:['codice fiscale','cf','codicefiscale'],
+  cognome:['cognome','surname','lastname'],
+  nome:['nome','name','firstname'],
+  professione:['professione','profession','categoria','disciplina','qualifica']
+};
 
-// Gestione multi-evento
-const params=new URLSearchParams(window.location.search);
-const evIdFromUrl=params.get('evId');
-const isNuovo=params.get('nuovo')==='1';
-let evId=isNuovo?'evt_'+Date.now():evIdFromUrl||localStorage.getItem('ecm_eventId');
-if(evId)localStorage.setItem('ecm_eventId',evId);
-if(evId){
-  getDoc(doc(db,'eventi',evId)).then(s=>{
-    if(!s.exists()) return;
-    const ev=s.data();
-    document.getElementById('evNome').value=ev.nome||'';
-    if(document.getElementById('evTipo'))document.getElementById('evTipo').value=ev.tipo||'ecm';
-    if(ev.pagamento&&document.getElementById('evPagamento')){
-      document.getElementById('evPagamento').value=ev.pagamento||'no';
-      document.getElementById('evPagamento').dispatchEvent(new Event('change'));
-    }
-    if(document.getElementById('evPrezzo'))document.getElementById('evPrezzo').value=ev.prezzo||'';
-    if(document.getElementById('evPaypal'))document.getElementById('evPaypal').value=ev.linkPaypal||'';
-    if(document.getElementById('evStripe'))document.getElementById('evStripe').value=ev.linkStripe||'';
-    document.getElementById('evData').value=ev.data||'';
-    document.getElementById('evDataFine').value=ev.dataFine||'';
-    document.getElementById('evLuogo').value=ev.luogo||'';
-    document.getElementById('evDesc').value=ev.desc||'';
-    document.getElementById('creditiTot').value=ev.creditiTot||4;
-    document.getElementById('oreMin').value=ev.oreMin||6;
-    document.getElementById('percMin').value=ev.percMin||90;
-    if(ev.logo){logoData=ev.logo; showLogoPreview(ev.logoName||'logo',ev.logo);}
-    if(ev.totPartecipanti>0){
-      showAlert('success',`✓ Evento caricato: ${ev.totPartecipanti} partecipanti su Firebase. Puoi aggiornare i dati o procedere ai badge.`);
-      document.getElementById('btnSalva').disabled=false;
-      document.getElementById('footerPart').textContent=ev.totPartecipanti;
-    }
-    updateFooter();
-  }).catch(console.error);
+// ── INIT (async — autenticazione + caricamento evento) ──────────
+async function initApp() {
+  try { await requireAuth(); injectUserBar('userBarSlot'); } catch(e) { console.warn('Auth:', e.message); }
+  try { await signInAnonymously(getAuth(app)); } catch(e) {}
+
+  document.getElementById('fbDot').className='fb-dot ok';
+  document.getElementById('fbStatus').textContent='Firebase connesso';
+
+  // Gestione parametri URL
+  const params     = new URLSearchParams(window.location.search);
+  const evIdFromUrl = params.get('evId');
+  const isNuovo    = params.get('nuovo')==='1';
+  let evId = isNuovo ? 'evt_'+Date.now() : evIdFromUrl || localStorage.getItem('ecm_eventId');
+  if (evId) localStorage.setItem('ecm_eventId', evId);
+
+  // Carica evento esistente
+  if (evId && !isNuovo) {
+    try {
+      const s = await getDoc(doc(db,'eventi',evId));
+      if (s.exists()) {
+        const ev = s.data();
+        document.getElementById('evNome').value  = ev.nome||'';
+        const evTipoEl = document.getElementById('evTipo');
+        if (evTipoEl) evTipoEl.value = ev.tipo||'ecm';
+        if (ev.pagamento && document.getElementById('evPagamento')) {
+          document.getElementById('evPagamento').value = ev.pagamento||'no';
+          document.getElementById('evPagamento').dispatchEvent(new Event('change'));
+        }
+        if (document.getElementById('evPrezzo'))  document.getElementById('evPrezzo').value  = ev.prezzo||'';
+        if (document.getElementById('evPaypal'))  document.getElementById('evPaypal').value  = ev.linkPaypal||'';
+        if (document.getElementById('evStripe'))  document.getElementById('evStripe').value  = ev.linkStripe||'';
+        document.getElementById('evData').value    = ev.data||'';
+        document.getElementById('evDataFine').value= ev.dataFine||'';
+        document.getElementById('evLuogo').value   = ev.luogo||'';
+        document.getElementById('evDesc').value    = ev.desc||'';
+        document.getElementById('creditiTot').value= ev.creditiTot||4;
+        document.getElementById('oreMin').value    = ev.oreMin||6;
+        document.getElementById('percMin').value   = ev.percMin||90;
+        if (ev.logo) { logoData = ev.logo; showLogoPreview(ev.logoName||'logo', ev.logo); }
+        if (ev.totPartecipanti > 0) {
+          showAlert('success',`✓ Evento caricato: ${ev.totPartecipanti} partecipanti su Firebase.`);
+          document.getElementById('btnSalva').disabled = false;
+          document.getElementById('footerPart').textContent = ev.totPartecipanti;
+        }
+        updateFooter();
+      }
+    } catch(e) { console.error('Caricamento evento:', e); }
+  }
+
+  // ── LISTENER UPLOAD (dentro initApp così hanno accesso a logoData) ──
+  // Drag & drop
+  ['logoArea','excelArea'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('dragover',  e => { e.preventDefault(); el.classList.add('drag'); });
+    el.addEventListener('dragleave', () => el.classList.remove('drag'));
+    el.addEventListener('drop',      e => {
+      e.preventDefault(); el.classList.remove('drag');
+      const f = e.dataTransfer.files[0];
+      if (f) id === 'logoArea' ? handleLogoFile(f) : handleExcelFile(f);
+    });
+  });
+
+  const logoInput  = document.getElementById('logoInput');
+  const excelInput = document.getElementById('excelInput');
+  const logoArea   = document.getElementById('logoArea');
+  const excelArea  = document.getElementById('excelArea');
+
+  if (logoInput)  logoInput.addEventListener('change',  e => { if(e.target.files[0]) handleLogoFile(e.target.files[0]); });
+  if (excelInput) excelInput.addEventListener('change', e => { if(e.target.files[0]) handleExcelFile(e.target.files[0]); });
+  if (logoArea)   logoArea.addEventListener('click',  () => logoInput?.click());
+  if (excelArea)  excelArea.addEventListener('click', () => excelInput?.click());
+
+  document.getElementById('removeLogoBtn')?.addEventListener('click', removeLogo);
+  document.getElementById('applyMapBtn')?.addEventListener('click', applyMapping);
+  document.getElementById('clearSearch')?.addEventListener('click', () => { document.getElementById('searchInput').value=''; renderTable(); });
+  document.getElementById('searchInput')?.addEventListener('input', renderTable);
+  document.getElementById('evNome')?.addEventListener('input', updateFooter);
+  document.getElementById('templateBtn')?.addEventListener('click', downloadTemplate);
+  document.getElementById('btnSalva')?.addEventListener('click', salvaEvento);
+
+  // Toggle pagamento
+  const evPagEl = document.getElementById('evPagamento');
+  if (evPagEl) {
+    evPagEl.addEventListener('change', function() {
+      const isPag = this.value !== 'no';
+      const pw = document.getElementById('prezzoWrap');
+      const plw = document.getElementById('paymentLinksWrap');
+      if (pw)  pw.style.display  = isPag ? 'block' : 'none';
+      if (plw) plw.style.display = isPag ? 'block' : 'none';
+    });
+  }
 }
 
-// Drag & drop
-['logoArea','excelArea'].forEach(id=>{
-  const el=document.getElementById(id);
-  el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('drag');});
-  el.addEventListener('dragleave',()=>el.classList.remove('drag'));
-  el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('drag');const f=e.dataTransfer.files[0];if(f) id==='logoArea'?handleLogoFile(f):handleExcelFile(f);});
-});
-document.getElementById('logoInput').addEventListener('change',e=>{if(e.target.files[0])handleLogoFile(e.target.files[0]);});
-document.getElementById('excelInput').addEventListener('change',e=>{if(e.target.files[0])handleExcelFile(e.target.files[0]);});
-document.getElementById('removeLogoBtn').addEventListener('click',removeLogo);
-document.getElementById('applyMapBtn').addEventListener('click',applyMapping);
-document.getElementById('clearSearch').addEventListener('click',()=>{document.getElementById('searchInput').value='';renderTable();});
-document.getElementById('searchInput').addEventListener('input',renderTable);
-document.getElementById('evNome').addEventListener('input',updateFooter);
-document.getElementById('templateBtn').addEventListener('click',downloadTemplate);
-document.getElementById('btnSalva').addEventListener('click',salvaEvento);
-
+// ── FUNZIONI LOGO ───────────────────────────────────────────────
 function handleLogoFile(f){
   if(f.size>2097152){alert('Max 2MB');return;}
   const r=new FileReader(); r.onload=e=>{logoData=e.target.result;showLogoPreview(f.name,logoData);}; r.readAsDataURL(f);
@@ -512,6 +560,8 @@ function updateFooter(){
   document.getElementById('footerPart').textContent=parts.length;
 }
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+initApp();
 </script>
 <style>
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#13161F;border-top:1px solid #2A2E45;display:flex;align-items:stretch;z-index:200;padding-bottom:env(safe-area-inset-bottom)}
@@ -548,6 +598,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (typeof renderSidebar === 'function') renderSidebar('setup');
   if (typeof renderVersionFooter === 'function') renderVersionFooter();
 });
+
 </script>
 
 
