@@ -1,4 +1,4 @@
-<!-- ECM-blocco2 v20260525120543 -->
+<!-- ECM-blocco2 v20260525FINAL -->
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -433,7 +433,7 @@ async function initApp() {
       updatePreview();
       if (parts.some(p => p.qr)) renderGrid(parts);
     });
-  }
+  });
 
   // ── TOGGLE FRONTE/RETRO ──────────────────────────────────────
   document.querySelectorAll('input[name="printMode"]').forEach(radio => {
@@ -497,7 +497,6 @@ async function initApp() {
     aggiornaRetroNelGrid();
   });
 
-);
 }
 
 function showNoData(msg) {
