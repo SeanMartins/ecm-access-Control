@@ -119,6 +119,32 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
 @media(max-width:480px){
   .summary-grid{grid-template-columns:1fr 1fr!important}
 }
+
+/* Modal info partecipante */
+.part-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:800;display:none;align-items:center;justify-content:center;padding:16px}
+.part-modal-overlay.show{display:flex}
+.part-modal{background:white;border-radius:16px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.pm-header{padding:20px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.pm-name{font-size:18px;font-weight:700;color:var(--text)}
+.pm-sub{font-size:12px;color:var(--text3);margin-top:3px}
+.pm-body{padding:18px 22px}
+.pm-section{margin-bottom:18px}
+.pm-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:10px}
+.pm-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
+.pm-row:last-child{border-bottom:none}
+.pm-label{font-size:12px;color:var(--text2)}
+.pm-value{font-size:13px;font-weight:500;color:var(--text);text-align:right}
+.pm-log-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;margin-bottom:4px;font-size:12px}
+.pm-log-in{background:#ECFDF5;color:#065F46}
+.pm-log-out{background:#FEF2F2;color:#991B1B}
+.pm-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.pm-badge-ok{background:#ECFDF5;color:#065F46}
+.pm-badge-parz{background:#FFFBEB;color:#92400E}
+.pm-badge-assente{background:#F3F4F6;color:#6B7280}
+.pm-badge-pagato{background:#EFF6FF;color:#1D4ED8}
+.pm-badge-nonpag{background:#FEF2F2;color:#991B1B}
+.pm-badge-sede{background:#FFFBEB;color:#92400E}
+.pm-close-btn{background:none;border:none;cursor:pointer;font-size:20px;color:var(--text3);padding:4px;line-height:1}
 </style>
 <link rel="stylesheet" href="ecm-layout.css">
 <script src="ecm-i18n.js"></script>
@@ -258,10 +284,13 @@ async function initApp() {
     if(!evSnap.exists()){document.getElementById('loadingState').style.display='none';document.getElementById('alertNoData').style.display='block';}
     else{
       evento=evSnap.data();
-      const [ps,ls]=await Promise.all([
+      const [ps,lsRaw]=await Promise.all([
         getDocs(collection(db,'eventi',evId,'partecipanti')),
+        // Prova con orderBy, fallback senza (evita errore indice mancante)
         getDocs(query(collection(db,'eventi',evId,'logs'),orderBy('tsISO','asc')))
+          .catch(() => getDocs(collection(db,'eventi',evId,'logs')))
       ]);
+      const ls = lsRaw;
       ps.forEach(d=>parts.push({id:d.id,...d.data(),log:[]}));
       parts.sort((a,b)=>a.id.localeCompare(b.id));
       ls.forEach(d=>{const l={id:d.id,...d.data()};allLogs.push(l);const p=parts.find(x=>x.id===l.partecipanteId);if(p)p.log.push(l);});
@@ -271,7 +300,14 @@ async function initApp() {
       fillInfo(); buildReport(); fillSummary(); renderTable(); renderCharts();
     }
   }catch(err){
-    document.getElementById('loadingState').innerHTML=`<div style="color:var(--danger)">Errore Firebase: ${err.message}</div>`;
+    console.error('blocco4 initApp error:', err);
+    const ls = document.getElementById('loadingState');
+    if(ls) ls.innerHTML = '<div style="padding:20px;color:var(--danger);text-align:center">' +
+      '<div style="font-size:24px;margin-bottom:8px">⚠️</div>' +
+      '<div style="font-weight:600;margin-bottom:6px">Errore caricamento</div>' +
+      '<div style="font-size:13px;opacity:.8">' + err.message + '</div>' +
+      '<button onclick="location.reload()" style="margin-top:14px;padding:8px 20px;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;font-family:inherit">↻ Riprova</button>' +
+    '</div>';
   }
 }
 
@@ -348,7 +384,13 @@ function renderTable(){
       <td><div style="display:flex;align-items:center;gap:7px"><div class="pbar"><div class="pfill ${fc}" style="width:${r.percPresenza}%"></div></div><span style="font-size:11px;color:var(--text2)">${r.percPresenza>0?r.percPresenza+'%':'—'}</span></div></td>
       <td>${r.crediti>0?'<span style="font-weight:600;color:var(--success)">'+r.crediti+'</span>':'—'}</td>
       <td><span class="pill ${pc}">${pl}</span></td>
-      <td style="color:var(--text3);font-size:11px">▾</td>
+      <td style="color:var(--text3);font-size:11px;white-space:nowrap">
+        <span>▾</span>
+        <button onclick="event.stopPropagation();apriInfoPartecipante('${r.id}')" 
+          style="margin-left:6px;background:var(--accent-light);color:var(--accent);border:none;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:inherit">
+          ℹ️
+        </button>
+      </td>
     </tr>
     <tr class="detail-row" id="det_${r.id}"><td colspan="9"><div class="detail-inner"><div style="font-size:12px;color:var(--text2);margin-bottom:5px">Sessioni: <strong>${r.sessions.length}</strong> · Entrate: <strong>${r.entrate}</strong> · Uscite: <strong>${r.uscite}</strong></div><div style="display:flex;flex-wrap:wrap;gap:5px">${logPills||'<span style="font-size:12px;color:var(--text3)">Nessuna sessione registrata</span>'}</div></div></td></tr>`;
   }).join('');
@@ -421,8 +463,126 @@ document.addEventListener('DOMContentLoaded', function() {
   if (typeof renderSidebar === 'function') renderSidebar('report');
   if (typeof renderVersionFooter === 'function') renderVersionFooter();
 });
+
+// ── INFO PARTECIPANTE ────────────────────────────────────────────
+window.apriInfoPartecipante = function(partId) {
+  const r = report.find(x => x.id === partId);
+  const p = parts.find(x => x.id === partId);
+  if (!r || !p) return;
+
+  // Nome e dati base
+  document.getElementById('pmName').textContent = (p.cognome||'') + ' ' + (p.nome||'');
+  document.getElementById('pmSub').textContent = (p.professione||'') + (p.cf ? ' · ' + p.cf : '');
+  document.getElementById('pmCF').textContent = p.cf || '—';
+  document.getElementById('pmProf').textContent = p.professione || '—';
+  document.getElementById('pmId').textContent = p.id || '—';
+
+  // Stato ECM
+  const statoMap = {
+    ok:     '<span class="pm-badge pm-badge-ok">✓ Idoneo</span>',
+    parz:   '<span class="pm-badge pm-badge-parz">~ Parziale</span>',
+    assente:'<span class="pm-badge pm-badge-assente">✗ Assente</span>',
+    no:     '<span class="pm-badge pm-badge-assente">✗ Non idoneo</span>',
+  };
+  document.getElementById('pmStato').innerHTML = statoMap[r.stato] || r.stato;
+  document.getElementById('pmOre').textContent = r.orePresenza + ' h';
+  document.getElementById('pmPerc').textContent = r.percPresenza + '%';
+  document.getElementById('pmCrediti').textContent = r.crediti > 0 ? r.crediti + ' crediti ECM' : '0';
+
+  // Pagamento
+  const isEventoPag = evento?.pagamento && evento.pagamento !== 'no';
+  const pmPagSection = document.getElementById('pmPagSection');
+  if (isEventoPag && pmPagSection) {
+    pmPagSection.style.display = 'block';
+    const pagStato = p.pagamento || 'nonpagato';
+    const pagMap = {
+      pagato:    '<span class="pm-badge pm-badge-pagato">💳 Pagato</span>',
+      sede:      '<span class="pm-badge pm-badge-sede">⏳ Paga in sede</span>',
+      nonpagato: '<span class="pm-badge pm-badge-nonpag">✗ Non pagato</span>',
+    };
+    document.getElementById('pmPagStato').innerHTML = pagMap[pagStato] || pagStato;
+    // Quota per categoria
+    const cats = evento.categoriePrezzi || [];
+    const catMatch = cats.find(cp => cp.nome && (p.professione||'').toLowerCase().includes(cp.nome.toLowerCase()));
+    const quota = catMatch ? catMatch.prezzo : (evento.prezzo || 0);
+    document.getElementById('pmQuota').textContent = quota ? '€ ' + parseFloat(quota).toFixed(2) : '—';
+  } else if (pmPagSection) {
+    pmPagSection.style.display = 'none';
+  }
+
+  // Log accessi
+  const logEl = document.getElementById('pmLog');
+  const logs = (p.log || []).sort((a,b) => (a.tsISO||'').localeCompare(b.tsISO||''));
+  if (logs.length === 0) {
+    logEl.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0">Nessun accesso registrato</div>';
+  } else {
+    logEl.innerHTML = logs.map(l => {
+      const isIn = l.tipo === 'entrata';
+      const icon = isIn ? '▶' : '■';
+      const label = isIn ? 'Entrata' : 'Uscita';
+      const time = l.ora || (l.tsISO ? l.tsISO.slice(11,16) : '—');
+      const date = l.tsISO ? new Date(l.tsISO).toLocaleDateString('it-IT', {day:'2-digit',month:'short'}) : '';
+      return '<div class="pm-log-item ' + (isIn ? 'pm-log-in' : 'pm-log-out') + '">' +
+        '<span style="font-size:10px;width:16px">' + icon + '</span>' +
+        '<span style="font-weight:600;min-width:50px">' + label + '</span>' +
+        '<span style="font-family:monospace">' + time + '</span>' +
+        (date ? '<span style="opacity:.7;margin-left:4px">' + date + '</span>' : '') +
+      '</div>';
+    }).join('');
+  }
+
+  // Apri modal
+  const modal = document.getElementById('partModal');
+  modal.classList.add('show');
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) modal.classList.remove('show');
+  }, { once: true });
+};
+
 </script>
 
+
+
+<!-- MODAL INFO PARTECIPANTE -->
+<div class="part-modal-overlay" id="partModal">
+  <div class="part-modal">
+    <div class="pm-header">
+      <div>
+        <div class="pm-name" id="pmName">—</div>
+        <div class="pm-sub" id="pmSub">—</div>
+      </div>
+      <button class="pm-close-btn" onclick="document.getElementById('partModal').classList.remove('show')">✕</button>
+    </div>
+    <div class="pm-body">
+      <!-- Stato idoneità -->
+      <div class="pm-section">
+        <div class="pm-section-title">📊 Stato ECM</div>
+        <div class="pm-row"><span class="pm-label">Idoneità</span><span class="pm-value" id="pmStato">—</span></div>
+        <div class="pm-row"><span class="pm-label">Ore presenti</span><span class="pm-value" id="pmOre">—</span></div>
+        <div class="pm-row"><span class="pm-label">% presenze</span><span class="pm-value" id="pmPerc">—</span></div>
+        <div class="pm-row"><span class="pm-label">Crediti maturati</span><span class="pm-value" id="pmCrediti">—</span></div>
+      </div>
+      <!-- Pagamento -->
+      <div class="pm-section" id="pmPagSection" style="display:none">
+        <div class="pm-section-title">💳 Pagamento</div>
+        <div class="pm-row"><span class="pm-label">Stato</span><span class="pm-value" id="pmPagStato">—</span></div>
+        <div class="pm-row"><span class="pm-label">Quota</span><span class="pm-value" id="pmQuota">—</span></div>
+      </div>
+      <!-- Dati anagrafici -->
+      <div class="pm-section">
+        <div class="pm-section-title">👤 Dati</div>
+        <div class="pm-row"><span class="pm-label">Codice Fiscale</span><span class="pm-value mono" id="pmCF">—</span></div>
+        <div class="pm-row"><span class="pm-label">Professione</span><span class="pm-value" id="pmProf">—</span></div>
+        <div class="pm-row"><span class="pm-label">ID partecipante</span><span class="pm-value mono" id="pmId" style="font-size:11px">—</span></div>
+      </div>
+      <!-- Log accessi -->
+      <div class="pm-section">
+        <div class="pm-section-title">🕐 Log accessi</div>
+        <div id="pmLog"><div style="color:var(--text3);font-size:13px">Nessun accesso registrato</div></div>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
