@@ -382,10 +382,11 @@ function updateStats() {
   document.getElementById('sAtteso').textContent  = atteso > 0  ? atteso.toFixed(2)  : '—';
 
   document.getElementById('cntTutti').textContent = '('+partecipanti.length+')';
-  document.getElementById('cntPagati').textContent = '('+pagati+')';
-  document.getElementById('cntSede').textContent = '('+sede+')';
-  document.getElementById('cntNon').textContent = '('+nonPag+')';
+  document.getElementById('cntPagati').textContent = '('+pagati.length+')';
+  document.getElementById('cntSede').textContent = '('+sede.length+')';
+  document.getElementById('cntNon').textContent = '('+nonPag.length+')';
 }
+window.updateStats = updateStats;
 
 function renderTabella() {
   const q = (document.getElementById('searchPart').value||'').toLowerCase();
@@ -431,6 +432,7 @@ function renderTabella() {
     }).join('')+
     '</tbody></table></div>';
 }
+window.renderTabella = renderTabella;
 
 window.apriModalPag = function(partId) {
   // Mostra/nascondi info bonifico
@@ -481,6 +483,7 @@ async function salvaPagamento() {
   } catch(e) { alert('Errore: '+e.message); }
   finally { btn.disabled=false; btn.textContent='💾 Salva pagamento'; }
 }
+window.salvaPagamento = salvaPagamento;
 
 async function marcaTutti() {
   if (!currentEvId) return;
@@ -493,6 +496,7 @@ async function marcaTutti() {
   }
   updateStats(); renderTabella();
 }
+window.marcaTutti = marcaTutti;
 
 function exportExcel() {
   const rows = [['CF','Cognome','Nome','Professione','Stato pagamento','Metodo','Note','Data aggiornamento']];
@@ -507,12 +511,6 @@ function exportExcel() {
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-// Esponi funzioni al scope globale
-window.renderTabella = renderTabella;
-window.salvaPagamento = salvaPagamento;
-window.marcaTutti = marcaTutti;
-window.updateStats = updateStats;
 
 initApp();
 </script>
