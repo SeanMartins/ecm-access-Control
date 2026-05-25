@@ -1,4 +1,4 @@
-<!-- ECM-blocco2 v20260525CROP -->
+<!-- ECM-blocco2 v20260525PRINT -->
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -90,13 +90,25 @@ input[type=color]{padding:4px 8px;height:40px;cursor:pointer}
   body{background:white!important;padding-bottom:0!important;margin:0!important}
   .ecm-main{margin:0!important;padding:0!important}
   .card.print-card{box-shadow:none!important;border:none!important;padding:4px!important}
-  .badge-grid{grid-template-columns:repeat(2,1fr)!important;gap:8mm!important}
+
+  /* SOLO FRONTE: griglia 2 colonne normale */
+  .badge-grid{grid-template-columns:repeat(2,1fr)!important;gap:6mm!important}
   .badge-item{break-inside:avoid!important;page-break-inside:avoid!important}
-  .badge-card{break-inside:avoid;box-shadow:none!important;border:1px solid #ccc!important}
+  .badge-card{break-inside:avoid;box-shadow:none!important;border:1px solid #ddd!important}
   .badge-item-overlay{display:none!important}
-  /* Fronte/retro: il retro viene subito dopo il fronte */
-  .badge-retro{display:block!important;break-before:avoid!important}
-  .badge-item.with-retro{break-inside:avoid!important}
+
+  /* FRONTE/RETRO: ogni coppia occupa tutta la larghezza, una per riga */
+  .badge-grid.print-fronte-retro{grid-template-columns:1fr 1fr!important;gap:6mm!important}
+  .badge-grid.print-fronte-retro .badge-item{
+    display:flex!important;
+    flex-direction:column!important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+  }
+  .badge-grid.print-fronte-retro .badge-retro{
+    display:block!important;
+    margin-top:2mm!important;
+  }
 }
 /* Badge retro */
 .badge-retro{
@@ -644,7 +656,12 @@ function renderGrid(list){
     '</div>';
   }).join('');
 
-  // Applica visibilità retro
+  // Applica visibilità retro e classe griglia
+  const grid = document.getElementById('badgeGrid');
+  if (grid) {
+    if (printMode === 'fronte-retro') grid.classList.add('print-fronte-retro');
+    else grid.classList.remove('print-fronte-retro');
+  }
   document.querySelectorAll('.badge-retro').forEach(el => {
     el.style.display = printMode === 'fronte-retro' ? 'block' : 'none';
   });
@@ -655,14 +672,21 @@ function renderGrid(list){
 
 // Aggiorna il retro in tutti i badge già nella griglia
 function aggiornaRetroNelGrid() {
+  const grid = document.getElementById('badgeGrid');
+  const isFR = printMode === 'fronte-retro';
+
+  // Aggiunge/rimuove classe per CSS stampa
+  if (grid) {
+    if (isFR) grid.classList.add('print-fronte-retro');
+    else grid.classList.remove('print-fronte-retro');
+  }
+
   document.querySelectorAll('.badge-retro').forEach(el => {
-    el.style.display = printMode === 'fronte-retro' ? 'block' : 'none';
-    if (printMode === 'fronte-retro') {
-      if (retroData) {
-        el.innerHTML = `<img src="${retroData}" alt="retro">`;
-      } else {
-        el.innerHTML = `<div class="badge-retro-blank">Retro — nessuna locandina caricata</div>`;
-      }
+    el.style.display = isFR ? 'block' : 'none';
+    if (isFR) {
+      el.innerHTML = retroData
+        ? '<img src="'+retroData+'" alt="retro" style="width:100%;display:block">'
+        : '<div class="badge-retro-blank">Retro non caricato</div>';
     }
   });
 }
