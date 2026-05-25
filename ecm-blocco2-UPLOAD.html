@@ -1,0 +1,735 @@
+<!-- ECM-blocco2 v20260525FINAL3 -->
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+  <!-- App Icons / PWA -->
+  <link rel="icon" type="image/png" sizes="512x512" href="logo.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="logo-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="logo.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="logo-192.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ECM Access">
+  <meta name="application-name" content="ECM Access Control">
+  <meta name="theme-color" content="#8B0000">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta name="bingbot" content="noindex, nofollow"><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ECM — Generazione Badge</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F5F3EE;--surface:#FFF;--surface2:#F0EDE6;--border:#E0DAD0;--border2:#C8C0B4;--text:#1A1714;--text2:#6B6560;--text3:#9B948C;--accent:#2B4EFF;--accent-light:#EEF1FF;--accent2:#FF6B35;--success:#1A7A4A;--success-light:#E8F5EE;--danger:#C13B2A;--danger-light:#FDEEE9;--warn:#B07A10;--radius:10px;--radius-lg:16px;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06)}
+body{font-family:Inter,'DM Sans',system-ui,sans-serif}
+header{background:var(--text);color:white;padding:0 22px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{font-size:14px;font-weight:600;letter-spacing:.04em;display:flex;align-items:center;gap:8px}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:#FF6B35}
+.fb-badge{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,.5);background:rgba(255,255,255,.08);padding:4px 12px;border-radius:20px}
+.fb-dot{width:7px;height:7px;border-radius:50%;background:#888}
+.fb-dot.ok{background:#22C97A;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+main{max-width:1100px;margin:0;padding:32px 20px 20px}
+.page-title{font-size:26px;font-weight:600;letter-spacing:-.02em;margin-bottom:4px}
+.page-sub{color:var(--text2);font-size:14px;margin-bottom:24px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;margin-bottom:18px;box-shadow:var(--shadow)}
+.card-title{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.step-badge{width:22px;height:22px;border-radius:50%;background:var(--text);color:white;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center}
+.stat-num{font-size:24px;font-weight:600}.stat-label{font-size:10px;color:var(--text3);margin-top:2px}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text2);text-transform:uppercase}
+input[type=color],select{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:DM Sans,sans-serif;font-size:14px;color:var(--text);outline:none;width:100%}
+input[type=color]{padding:4px 8px;height:40px;cursor:pointer}
+.badge-card{width:330px;background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.12);overflow:hidden;border:1px solid var(--border);font-family:DM Sans,sans-serif;display:flex;flex-direction:column}
+.badge-banner{width:100%;height:90px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.badge-banner img{width:100%;height:100%;object-fit:cover}
+.badge-banner-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;letter-spacing:.04em;color:white;text-align:center;padding:0 12px;line-height:1.3}
+.badge-body{padding:14px 16px;display:flex;flex-direction:row;align-items:center;gap:12px;flex:1}
+.badge-qr{flex:0 0 100px;width:100px;height:100px;display:flex;align-items:center;justify-content:center;border-radius:8px;padding:3px;background:white;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.badge-qr canvas,.badge-qr img{width:100px!important;height:100px!important}
+.badge-info{flex:1;text-align:left;min-width:0}
+.badge-name{font-size:13px;font-weight:400;color:var(--text2);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge-surname{font-size:19px;font-weight:700;letter-spacing:-.01em;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge-prof{font-size:10px;color:var(--text2);font-weight:500;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge-cf{font-family:DM Mono,monospace;font-size:8px;color:var(--text3);margin-top:4px}
+.badge-id{font-family:DM Mono,monospace;font-size:7px;color:var(--text3);margin-top:3px}
+.badge-footer{padding:12px 16px;border-top:1px solid var(--border);text-align:center;background:var(--surface2)}
+.badge-footer-title{font-size:12px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:2px}
+.badge-footer-meta{font-size:9px;color:var(--text3)}
+.preview-wrap{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
+.preview-actions{flex:1;min-width:200px;display:flex;flex-direction:column;gap:10px}
+.badge-grid{display:grid;grid-template-columns:repeat(auto-fill,330px);gap:18px;margin-top:18px}
+.badge-item{position:relative}
+.badge-item-overlay{position:absolute;top:8px;right:8px;display:flex;gap:5px;opacity:0;transition:opacity .2s}
+.badge-item:hover .badge-item-overlay{opacity:1}
+.ov-btn{background:rgba(0,0,0,.7);color:white;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:DM Sans,sans-serif}
+.search-bar{display:flex;gap:8px;margin-bottom:14px}
+.search-bar input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;font-family:DM Sans,sans-serif;font-size:14px;color:var(--text);outline:none}
+.search-bar input:focus{border-color:var(--accent);background:white}
+.progress-wrap{display:none;margin:12px 0}
+.progress-bar{background:var(--surface2);border-radius:100px;height:7px;overflow:hidden;margin:7px 0}
+.progress-fill{height:100%;background:var(--accent);border-radius:100px;transition:width .3s}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:var(--radius);font-family:DM Sans,sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .18s;border:none;text-decoration:none;justify-content:center}
+.btn-primary{background:var(--accent);color:white}.btn-primary:hover{background:#1a3ce0;transform:translateY(-1px)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:var(--border)}
+.btn-success{background:var(--success);color:white}.btn-success:hover{background:#145e38}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-outline:hover{background:var(--surface2)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.spinner{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.alert-no{padding:12px 16px;border-radius:var(--radius);background:var(--danger-light);color:var(--danger);border:1px solid rgba(193,59,42,.25);font-size:13px;margin-bottom:16px}
+
+@media print{
+  header,footer,.card:not(.print-card),.search-bar,.preview-actions,.btn,.stats-row,.page-title,.page-sub,#settingsCard,.bottom-nav,
+  .ecm-sidebar,.ecm-topbar,.ecm-version-footer,.no-print{display:none!important}
+  body{background:white!important;padding-bottom:0!important;margin:0!important}
+  .ecm-main{margin:0!important;padding:0!important}
+  .card.print-card{box-shadow:none!important;border:none!important;padding:4px!important}
+  .badge-grid{grid-template-columns:repeat(2,1fr)!important;gap:8mm!important}
+  .badge-item{break-inside:avoid!important;page-break-inside:avoid!important}
+  .badge-card{break-inside:avoid;box-shadow:none!important;border:1px solid #ccc!important}
+  .badge-item-overlay{display:none!important}
+  /* Fronte/retro: il retro viene subito dopo il fronte */
+  .badge-retro{display:block!important;break-before:avoid!important}
+  .badge-item.with-retro{break-inside:avoid!important}
+}
+/* Badge retro */
+.badge-retro{
+  display:none; /* nascosto di default, mostrato solo in modalità fronte/retro */
+  width:100%;
+  aspect-ratio:85/54;
+  border-radius:8px;
+  overflow:hidden;
+  margin-top:2px;
+  border:1px solid #e0e0e0;
+  background:#f8f8f8;
+}
+.badge-retro img{width:100%;height:100%;object-fit:cover;display:block}
+.badge-retro-blank{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  color:#ddd;font-size:11px;
+  font-family:Inter,sans-serif;
+}
+@media(max-width:600px){.settings-grid{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}}
+
+/* RESPONSIVE AUTO-SIZING */
+
+@media(max-width:768px){
+  .settings-grid{grid-template-columns:1fr!important}
+  .stats-row{grid-template-columns:1fr 1fr!important}
+  .preview-wrap{flex-direction:column}
+  .badge-grid{grid-template-columns:1fr!important;justify-items:center}
+  .preview-actions{width:100%}
+  .preview-actions .btn{width:100%;justify-content:center}
+  header{padding:0 14px}
+  main{padding:24px 14px 80px}
+}
+@media(max-width:480px){
+  .stats-row{grid-template-columns:1fr!important}
+  .badge-card{width:100%!important;max-width:330px}
+  .page-title{font-size:22px}
+}
+</style>
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
+<script src="ecm-layout.js"></script>
+</head>
+<body>
+
+<!-- OVERLAY MOBILE -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<!-- SIDEBAR -->
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+
+<!-- MAIN -->
+<div class="ecm-main">
+  
+<div class="ecm-topbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="mobile-menu-btn" id="mobileMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <div class="topbar-title" data-i18n="nav_badge">Generazione badge</div>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-badge">
+      <div class="topbar-dot" id="fbDot"></div>
+      <span id="fbStatus" data-i18n="fb_connecting">Connessione...</span>
+    </div>
+    <div id="userBarSlot"></div>
+  </div>
+</div>
+
+  <div class="ecm-content">
+<main>
+  <div class="page-title" data-i18n="nav_badge">Generazione badge</div>
+  <div class="page-sub">QR code univoci salvati su Firebase — disponibili su tutti i dispositivi connessi</div>
+  <div class="alert-no" id="alertNoData" style="display:none">⚠️ Nessun evento trovato. <a href="ecm-blocco1.html" style="color:inherit;font-weight:600">Torna al Setup</a>.</div>
+
+  <div id="mainContent" style="display:none">
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num" id="sTot">0</div><div class="stat-label">Partecipanti</div></div>
+      <div class="stat-box"><div class="stat-num" id="sQR" style="color:var(--accent)">0</div><div class="stat-label">QR generati</div></div>
+      <div class="stat-box"><div class="stat-num" id="sPronto" style="color:var(--success)">0</div><div class="stat-label">Pronti stampa</div></div>
+      <div class="stat-box"><div class="stat-num" id="sEvento" style="font-size:13px;color:var(--text2);line-height:1.3;margin-top:4px">—</div><div class="stat-label">Evento</div></div>
+    </div>
+
+    <div class="card" id="settingsCard">
+      <div class="card-title"><span class="step-badge" style="background:var(--accent)">1</span>Impostazioni badge</div>
+      <!-- OPZIONE STAMPA FRONTE/RETRO -->
+      <div style="margin-bottom:14px;padding:12px 16px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border)">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:3px">🖨️ Modalità stampa</div>
+            <div style="font-size:11px;color:var(--text3)">Scegli se stampare solo fronte o aggiungere il retro con la locandina</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:2px solid var(--border);border-radius:8px;cursor:pointer;transition:all .2s" id="lblFronte">
+              <input type="radio" name="printMode" value="fronte" checked style="accent-color:var(--accent)">
+              <span style="font-size:13px;font-weight:500">Solo fronte</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:2px solid var(--border);border-radius:8px;cursor:pointer;transition:all .2s" id="lblFronteRetro">
+              <input type="radio" name="printMode" value="fronte-retro" style="accent-color:var(--accent)">
+              <span style="font-size:13px;font-weight:500">Fronte/retro</span>
+            </label>
+          </div>
+        </div>
+        <!-- Upload locandina retro -->
+        <div id="retroWrap" style="display:none;margin-top:12px;padding:12px;background:white;border-radius:8px;border:1px dashed var(--border)">
+          <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px">📸 Locandina / Immagine retro badge</div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <label style="cursor:pointer">
+              <input type="file" id="retroInput" accept="image/*" style="display:none">
+              <div style="padding:8px 14px;background:var(--accent-light,#EFF6FF);color:var(--accent,#2563EB);border:1px solid rgba(37,99,235,.2);border-radius:8px;font-size:12px;font-weight:500">
+                📁 Carica immagine retro
+              </div>
+            </label>
+            <div id="retroPreviewWrap" style="display:none;align-items:center;gap:8px">
+              <img id="retroPreviewImg" style="height:50px;width:auto;border-radius:6px;border:1px solid var(--border)" alt="retro">
+              <span id="retroFileName" style="font-size:11px;color:var(--text2)">—</span>
+              <button type="button" id="removeRetroBtn" style="background:none;border:none;cursor:pointer;color:var(--danger,#DC2626);font-size:16px">✕</button>
+            </div>
+            <div style="font-size:11px;color:var(--text3)">Se non carichi nulla verra stampato il retro bianco</div>
+          </div>
+          <div style="margin-top:8px;padding:8px 10px;background:#FFF8E1;border-radius:6px;font-size:11px;color:#6D4C00">
+            💡 <strong>Consiglio:</strong> usa un'immagine in formato orizzontale (landscape) 85×54mm oppure verticale (portrait) 54×85mm per adattarsi perfettamente al badge.
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <div class="form-group"><label>Colore principale</label><input type="color" id="badgeColor" value="#2B4EFF"></div>
+        <div class="form-group"><label>Dimensione nome</label><select id="badgeSize"><option value="normal">Normale</option><option value="large">Grande</option><option value="small">Piccolo</option></select></div>
+        <div class="form-group"><label>Mostra codice fiscale</label><select id="showCF"><option value="yes">Sì</option><option value="no">No</option></select></div>
+        <div class="form-group"><label>Mostra professione</label><select id="showProf"><option value="yes">Sì</option><option value="no">No</option></select></div>
+      </div>
+      <div style="margin-top:22px">
+        <div class="card-title" style="margin-bottom:14px"><span class="step-badge" style="background:var(--accent2)">2</span>Anteprima</div>
+        <div class="preview-wrap">
+          <div class="badge-card" id="prevBadge">
+            <div class="badge-banner" id="prevBanner">
+              <div class="badge-banner-ph" id="prevLogoPH" style="background:#2B4EFF">Logo / Immagine evento</div>
+              <img id="prevLogo" src="" style="display:none;width:100%;height:100%;object-fit:cover" alt="">
+            </div>
+            <div class="badge-body">
+              <div class="badge-qr" id="prevQR"></div>
+              <div class="badge-info">
+                <div class="badge-name" id="prevNome">Mario</div>
+                <div class="badge-surname" id="prevCognome" style="color:#2B4EFF">ROSSI</div>
+                <div class="badge-prof" id="prevProf">Medico Chirurgo</div>
+                <div class="badge-cf" id="prevCF">RSSMRA80A01H501Z</div>
+                <div class="badge-id">ID: P0001</div>
+              </div>
+            </div>
+            <div class="badge-footer">
+              <div class="badge-footer-title" id="prevEvName">Nome evento ECM</div>
+              <div class="badge-footer-meta" id="prevMeta">—</div>
+            </div>
+          </div>
+          <div class="preview-actions">
+            <p style="font-size:13px;color:var(--text2);line-height:1.5">Il QR è univoco per ogni partecipante e viene salvato su Firebase, accessibile da qualsiasi dispositivo.</p>
+            <button class="btn btn-primary" id="genBtn">⚡ Genera e salva tutti i QR</button>
+            <button class="btn btn-outline" id="printBtn" disabled>🖨️ Stampa / Salva PDF</button>
+            <p style="font-size:11px;color:var(--text3)">Nella finestra di stampa scegli "Salva come PDF".</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card print-card" id="gridCard" style="display:none">
+      <div class="card-title" style="margin-bottom:14px"><span class="step-badge" style="background:var(--success)">3</span>Badge generati</div>
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Cerca partecipante...">
+        <button class="btn btn-secondary" style="padding:9px 14px" id="clearSearch">✕</button>
+      </div>
+      <div class="progress-wrap" id="progressWrap">
+        <div style="font-size:13px;color:var(--text2)" id="progressLabel">Generazione in corso...</div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      </div>
+      <div class="badge-grid" id="badgeGrid"></div>
+    </div>
+  </div>
+</main>
+
+<!-- NAVBAR -->
+
+
+<script type="module">
+// ── IMPORT ──────────────────────────────────────────────────────
+import { requireAuth, injectUserBar } from './ecm-auth.js';
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, collection, getDocs, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+// ── CONFIG ───────────────────────────────────────────────────────
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+const app = getApps().length ? getApps()[0] : initializeApp(FB);
+const db  = getFirestore(app);
+const ADMIN_EMAIL = 'martinsosem@gmail.com';
+
+// ── VARIABILI GLOBALI ────────────────────────────────────────────
+let evento = null, parts = [];
+let settings = {color:'#2B4EFF', size:'normal', showCF:true, showProf:true};
+let prevQRInit = false;
+let evId = null;           // ID evento corrente
+let retroData = null;      // base64 immagine retro badge
+let printMode = 'fronte';  // 'fronte' o 'fronte-retro'
+
+// ── INIT ─────────────────────────────────────────────────────────
+async function initApp() {
+  // 1. Autenticazione
+  try { await requireAuth(); injectUserBar('userBarSlot'); } catch(e) { console.warn('Auth:', e.message); }
+
+  // 2. Assicura accesso Firebase (anche anonimo)
+  const auth = getAuth(app);
+  if (!auth.currentUser) {
+    try { await signInAnonymously(auth); } catch(e) {}
+  }
+
+  // 3. Mostra link Admin se superadmin
+  onAuthStateChanged(auth, user => {
+    if (user && user.email === ADMIN_EMAIL) {
+      const el = document.getElementById('adminNavItem');
+      if (el) el.style.display = 'flex';
+    }
+  });
+
+  document.getElementById('fbDot').className = 'fb-dot ok';
+  document.getElementById('fbStatus').textContent = 'Firebase connesso';
+
+  // 4. Carica evento: prima dall'URL, poi dal localStorage
+  const _urlParams = new URLSearchParams(window.location.search);
+  evId = _urlParams.get('evId') || localStorage.getItem('ecm_eventId');
+
+  if (evId) {
+    // Aggiorna sempre il localStorage con l'evId corrente
+    localStorage.setItem('ecm_eventId', evId);
+  } else {
+    // Mostra messaggio con link agli eventi
+    const alertEl = document.getElementById('alertNoData');
+    if (alertEl) {
+      alertEl.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-size:28px">📋</span>
+          <div>
+            <div style="font-weight:600;margin-bottom:4px">Nessun evento selezionato</div>
+            <div style="font-size:13px;opacity:.8">Vai alla lista eventi, seleziona un evento e poi torna qui.</div>
+            <a href="ecm-eventi.html" style="display:inline-block;margin-top:10px;padding:8px 16px;background:#2563EB;color:white;border-radius:8px;text-decoration:none;font-size:13px;font-weight:500">
+              📋 Vai ai miei eventi
+            </a>
+          </div>
+        </div>`;
+      alertEl.style.display = 'block';
+      alertEl.style.background = '#EFF6FF';
+      alertEl.style.border = '1px solid rgba(37,99,235,.2)';
+      alertEl.style.borderRadius = '12px';
+      alertEl.style.padding = '16px 20px';
+      alertEl.style.color = '#1A1D2E';
+    }
+    return;
+  }
+
+  try {
+    const evSnap = await getDoc(doc(db,'eventi',evId));
+    if (!evSnap.exists()) {
+      // Evento non trovato — potrebbe essere evId sbagliato nel localStorage
+      // Pulisci e mostra link agli eventi
+      localStorage.removeItem('ecm_eventId');
+      const alertEl2 = document.getElementById('alertNoData');
+      if (alertEl2) {
+        alertEl2.innerHTML = `
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:28px">⚠️</span>
+            <div>
+              <div style="font-weight:600;margin-bottom:4px">Evento non trovato</div>
+              <div style="font-size:13px;opacity:.8">L'evento potrebbe essere stato eliminato o non sei autorizzato. Torna alla lista e selezionane uno.</div>
+              <a href="ecm-eventi.html" style="display:inline-block;margin-top:10px;padding:8px 16px;background:#2563EB;color:white;border-radius:8px;text-decoration:none;font-size:13px;font-weight:500">
+                📋 Vai ai miei eventi
+              </a>
+            </div>
+          </div>`;
+        alertEl2.style.display = 'block';
+        alertEl2.style.background = '#FEF2F2';
+        alertEl2.style.border = '1px solid rgba(220,38,38,.2)';
+        alertEl2.style.borderRadius = '12px';
+        alertEl2.style.padding = '16px 20px';
+        alertEl2.style.color = '#1A1D2E';
+      }
+      return;
+    }
+    evento = evSnap.data();
+
+    const snap = await getDocs(collection(db,'eventi',evId,'partecipanti'));
+    snap.forEach(d => parts.push({id:d.id,...d.data()}));
+    parts.sort((a,b) => a.id.localeCompare(b.id));
+
+    document.getElementById('mainContent').style.display = 'block';
+    document.getElementById('sTot').textContent = parts.length;
+    document.getElementById('sEvento').textContent = evento.nome || '—';
+    // headerTot rimosso — usare sTot
+    document.getElementById('sTot').textContent = parts.length;
+
+    const hasQR = parts.filter(p => p.qr).length;
+    if (hasQR > 0) {
+      document.getElementById('sQR').textContent = hasQR;
+      document.getElementById('sPronto').textContent = hasQR;
+      // headerGen rimosso
+      document.getElementById('printBtn').disabled = false;
+      document.getElementById('gridCard').style.display = 'block';
+      renderGrid(parts);
+    }
+    initPreview();
+    updatePreview();
+  } catch(err) {
+    console.error('Blocco2 init error:', err);
+    showNoData('Errore caricamento evento: ' + err.message);
+  }
+
+  // 5. Listener UI
+  document.getElementById('genBtn')?.addEventListener('click', generateAll);
+  document.getElementById('printBtn')?.addEventListener('click', () => window.print());
+  document.getElementById('clearSearch')?.addEventListener('click', () => {
+    document.getElementById('searchInput').value = '';
+    renderGrid(parts);
+  });
+  document.getElementById('searchInput')?.addEventListener('input', () => {
+    const q = document.getElementById('searchInput')?.value.toLowerCase();
+    renderGrid(q ? parts.filter(p =>
+      (p.cognome||'').toLowerCase().includes(q) ||
+      (p.nome||'').toLowerCase().includes(q) ||
+      (p.cf||'').toLowerCase().includes(q)
+    ) : parts);
+  });
+  ['badgeColor','badgeSize','showCF','showProf'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', () => {
+      settings.color  = document.getElementById('badgeColor')?.value || '#2B4EFF';
+      settings.size   = document.getElementById('badgeSize')?.value || 'normal';
+      settings.showCF = document.getElementById('showCF')?.checked ?? true;
+      settings.showProf = document.getElementById('showProf')?.checked ?? true;
+      updatePreview();
+      if (parts.some(p => p.qr)) renderGrid(parts);
+    });
+  });
+
+  // ── TOGGLE FRONTE/RETRO ──────────────────────────────────────
+  document.querySelectorAll('input[name="printMode"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      printMode = this.value;
+      const rw = document.getElementById('retroWrap');
+      if (rw) rw.style.display = this.value === 'fronte-retro' ? 'block' : 'none';
+      // Aggiorna label styling
+      document.getElementById('lblFronte').style.borderColor = printMode==='fronte' ? 'var(--accent)' : 'var(--border)';
+      document.getElementById('lblFronteRetro').style.borderColor = printMode==='fronte-retro' ? 'var(--accent)' : 'var(--border)';
+      // Mostra/nascondi retro nei badge già generati
+      document.querySelectorAll('.badge-retro').forEach(el => {
+        el.style.display = printMode === 'fronte-retro' ? 'block' : 'none';
+      });
+    });
+  });
+
+  // Upload locandina retro
+  const retroInput = document.getElementById('retroInput');
+  if (retroInput) {
+    retroInput.addEventListener('change', function() {
+      const f = this.files[0];
+      if (!f) return;
+      if (f.size > 5242880) { alert('Max 5MB per la locandina retro.'); return; }
+      const reader = new FileReader();
+      reader.onload = e => {
+        // Comprimi locandina via canvas
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX = 600;
+          let w = img.width, h = img.height;
+          if (w > MAX || h > MAX) {
+            if (w > h) { h = Math.round(h*MAX/w); w = MAX; }
+            else { w = Math.round(w*MAX/h); h = MAX; }
+          }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          retroData = canvas.toDataURL('image/jpeg', 0.82);
+          // Mostra preview
+          const pw = document.getElementById('retroPreviewWrap');
+          const pi = document.getElementById('retroPreviewImg');
+          const pn = document.getElementById('retroFileName');
+          if (pw) pw.style.display = 'flex';
+          if (pi) pi.src = retroData;
+          if (pn) pn.textContent = f.name + ' (' + w + 'x' + h + 'px)';
+          // Aggiorna badge già generati
+          aggiornaRetroNelGrid();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(f);
+    });
+  }
+
+  document.getElementById('removeRetroBtn')?.addEventListener('click', () => {
+    retroData = null;
+    const pw = document.getElementById('retroPreviewWrap');
+    if (pw) pw.style.display = 'none';
+    document.getElementById('retroInput').value = '';
+    aggiornaRetroNelGrid();
+  });
+
+}
+
+function showNoData(msg) {
+  const el = document.getElementById('alertNoData');
+  if (el) {
+    el.style.display = 'block';
+    const sub = el.querySelector('.alert-sub') || el;
+    sub.textContent = msg || 'Nessun dato disponibile.';
+  }
+}
+
+function initPreview(){
+  const fmt=d=>d?new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}):'—';
+  document.getElementById('prevEvName').textContent =evento.nome||'—';
+  document.getElementById('prevMeta').textContent =(evento.data?fmt(evento.data):'')+(evento.luogo?' · '+evento.luogo:'');
+  if(evento.logo){
+    document.getElementById('prevLogo').src =evento.logo;
+    document.getElementById('prevLogo').style.display='block';
+    document.getElementById('prevLogoPH').style.display='none';
+  }
+  if(!prevQRInit){prevQRInit=true;const el=document.getElementById('prevQR');if(el&&typeof QRCode!=='undefined'){el.innerHTML='';new QRCode(el,{text:'ECM-PREVIEW',width:100,height:100,correctLevel:QRCode.CorrectLevel.M});}}
+}
+function updatePreview(){
+  const c=document.getElementById('badgeColor')?.value;
+  const sz=document.getElementById('badgeSize')?.value;
+  const cf=document.getElementById('showCF')?.value==='yes';
+  const pr=document.getElementById('showProf')?.value==='yes';
+  settings={color:c,size:sz,showCF:cf,showProf:pr};
+  // Aggiorna colore banner placeholder
+  const ph=document.getElementById('prevLogoPH');
+  if(ph&&ph.style.display!=='none') ph.style.background=c;
+  document.getElementById('prevCognome').style.color=c;
+  document.getElementById('prevCF').style.display=cf?'block':'none';
+  document.getElementById('prevProf').style.display=pr?'block':'none';
+  const ns=sz==='large'?'17px':sz==='small'?'13px':'15px';
+  const ss=sz==='large'?'26px':sz==='small'?'18px':'22px';
+  document.getElementById('prevNome').style.fontSize=ns;
+  document.getElementById('prevCognome').style.fontSize=ss;
+}
+['badgeColor','badgeSize','showCF','showProf'].forEach(id=>document.getElementById(id).addEventListener('change',updatePreview));
+document.getElementById('genBtn')?.addEventListener('click',generateAll);
+document.getElementById('printBtn')?.addEventListener('click',()=>window.print());
+document.getElementById('clearSearch')?.addEventListener('click',()=>{document.getElementById('searchInput').value ='';renderGrid(parts);});
+document.getElementById('searchInput')?.addEventListener('input',()=>{
+  const q=document.getElementById('searchInput')?.value.toLowerCase();
+  renderGrid(q?parts.filter(p=>p.nome.toLowerCase().includes(q)||p.cognome.toLowerCase().includes(q)||(p.cf||'').toLowerCase().includes(q)):parts);
+});
+
+async function generateAll(){
+  const btn=document.getElementById('genBtn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Generazione QR...';
+  document.getElementById('gridCard').style.display='block';
+  document.getElementById('progressWrap').style.display='block';
+  document.getElementById('badgeGrid').innerHTML ='';
+  const tot=parts.length;
+  for(let i=0;i<tot;i++){
+    parts[i].qr=await genQRUrl(`ECM|${parts[i].id}|${parts[i].cf}|${parts[i].cognome}|${parts[i].nome}`);
+    const pct=Math.round((i+1)/tot*50);
+    document.getElementById('progressFill').style.width=pct+'%';
+    document.getElementById('progressLabel').textContent =`QR generati: ${i+1} / ${tot}`;
+    if(i%10===0) await sleep(0);
+  }
+  document.getElementById('progressLabel').textContent ='Salvataggio su Firebase...';
+  const BS=400,batches=Math.ceil(tot/BS);
+  for(let b=0;b<batches;b++){
+    const batch=writeBatch(db);
+    parts.slice(b*BS,(b+1)*BS).forEach(p=>batch.update(doc(db,'eventi',evId,'partecipanti',p.id),{qr:p.qr,updatedAt:serverTimestamp()}));
+    await batch.commit();
+    const pct=50+Math.round((b+1)/batches*50);
+    document.getElementById('progressFill').style.width=pct+'%';
+  }
+  document.getElementById('progressWrap').style.display='none';
+  renderGrid(parts);
+  document.getElementById('sQR').textContent =tot;
+  document.getElementById('sPronto').textContent =tot;
+  // headerGen rimosso
+  document.getElementById('printBtn').disabled =false;
+  btn.innerHTML='✓ Rigenerati';btn.style.background='var(--success)';
+  setTimeout(()=>{btn.innerHTML='⚡ Rigenera tutti';btn.style.background='';btn.disabled=false;},2500);
+}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function genQRUrl(text){
+  return new Promise(resolve=>{
+    const div=document.createElement('div');div.style.cssText='position:absolute;left:-9999px;top:-9999px';document.body.appendChild(div);
+    new QRCode(div,{text,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});
+    setTimeout(()=>{const c=div.querySelector('canvas');const url=c?c.toDataURL('image/png'):'';document.body.removeChild(div);resolve(url);},60);
+  });
+}
+function renderGrid(list){
+  const ev=evento; const clr=settings.color;
+  const fmt=d=>d?new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}):'—';
+  const ns=settings.size==='large'?'17px':settings.size==='small'?'13px':'15px';
+  const ss=settings.size==='large'?'26px':settings.size==='small'?'18px':'22px';
+
+  document.getElementById('badgeGrid').innerHTML = list.map(p => {
+    // Calcola i blocchi HTML senza backtick annidati
+    const bannerHtml = ev.logo
+      ? '<img src="'+ev.logo+'" style="width:100%;height:100%;object-fit:cover" alt="banner">'
+      : '<div class="badge-banner-ph" style="background:'+clr+'">'+esc(ev.nome||'Evento ECM')+'</div>';
+    const profHtml = settings.showProf
+      ? '<div class="badge-prof">'+esc(p.professione||'')+'</div>' : '';
+    const cfHtml = settings.showCF
+      ? '<div class="badge-cf">'+esc(p.cf||'')+'</div>' : '';
+    const retroHtml = retroData
+      ? '<img src="'+retroData+'" alt="retro" style="width:100%;display:block">'
+      : '<div class="badge-retro-blank">Retro non caricato</div>';
+    const metaHtml = fmt(ev.data)+(ev.luogo?' &middot; '+esc(ev.luogo):'');
+
+    return '<div class="badge-item">' +
+      '<div class="badge-card">' +
+        '<div class="badge-banner">'+bannerHtml+'</div>' +
+        '<div class="badge-body">' +
+          '<div class="badge-qr"><img src="'+(p.qr||'')+'" width="100" height="100" alt="QR"></div>' +
+          '<div class="badge-info">' +
+            '<div class="badge-name" style="font-size:'+ns+'">'+esc(p.nome)+'</div>' +
+            '<div class="badge-surname" style="font-size:'+ss+';color:'+clr+'">'+esc(p.cognome)+'</div>' +
+            profHtml + cfHtml +
+            '<div class="badge-id">ID: '+p.id+'</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="badge-footer">' +
+          '<div class="badge-footer-title">'+esc(ev.nome||'')+'</div>' +
+          '<div class="badge-footer-meta">'+metaHtml+'</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="badge-item-overlay"><button class="ov-btn" data-pid="'+p.id+'">🖨️ Stampa</button></div>' +
+      '<div class="badge-retro" id="retro_'+p.id+'" style="display:none">'+retroHtml+'</div>' +
+    '</div>';
+  }).join('');
+
+  // Applica visibilità retro
+  document.querySelectorAll('.badge-retro').forEach(el => {
+    el.style.display = printMode === 'fronte-retro' ? 'block' : 'none';
+  });
+  document.querySelectorAll('[data-pid]').forEach(btn =>
+    btn.addEventListener('click', () => printSingle(btn.dataset.pid))
+  );
+}
+
+// Aggiorna il retro in tutti i badge già nella griglia
+function aggiornaRetroNelGrid() {
+  document.querySelectorAll('.badge-retro').forEach(el => {
+    el.style.display = printMode === 'fronte-retro' ? 'block' : 'none';
+    if (printMode === 'fronte-retro') {
+      if (retroData) {
+        el.innerHTML = `<img src="${retroData}" alt="retro">`;
+      } else {
+        el.innerHTML = `<div class="badge-retro-blank">Retro — nessuna locandina caricata</div>`;
+      }
+    }
+  });
+}
+function printSingle(id){
+  const p=parts.find(x=>x.id===id); if(!p) return;
+  const ev=evento; const clr=settings.color;
+  const fmt=d=>d?new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}):'---';
+
+  const bannerHtml = ev.logo
+    ? '<img src="'+ev.logo+'" style="width:100%;height:90px;object-fit:cover;display:block" alt="">'
+    : '<div style="width:100%;height:90px;background:'+clr+';display:flex;align-items:center;justify-content:center;padding:0 12px;box-sizing:border-box"><span style="color:white;font-size:13px;font-weight:700;text-align:center">'+esc(ev.nome||'Evento ECM')+'</span></div>';
+
+  const retroHtml = (printMode === 'fronte-retro')
+    ? '<div style="margin-top:8px;page-break-inside:avoid">'
+        + '<div style="width:330px;border-radius:12px;overflow:hidden;border:1px solid #E0DAD0">'
+          + (retroData
+            ? '<img src="'+retroData+'" style="width:100%;display:block" alt="retro">'
+            : '<div style="height:180px;background:#f8f8f8;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:11px">Retro non caricato</div>'
+          )
+        + '</div>'
+      + '</div>'
+    : '';
+
+  const profHtml = p.professione ? '<div style="font-size:10px;color:#6B6560;margin-top:3px">'+esc(p.professione)+'</div>' : '';
+  const cfHtml   = p.cf ? '<div style="font-family:monospace;font-size:8px;color:#9B948C;margin-top:4px">'+esc(p.cf)+'</div>' : '';
+  const luogoHtml = ev.luogo ? ' - '+esc(ev.luogo) : '';
+  const qrHtml = p.qr ? '<img src="'+p.qr+'" width="90" height="90" alt="QR">' : '';
+
+  // Costruisci HTML come array e poi join per evitare concatenazioni problematiche
+  const htmlParts = [
+    '<!DOCTYPE html><html><head>',
+    '<meta charset="UTF-8"><title>Badge</title>',
+    '<style>',
+    'body{margin:20px;font-family:sans-serif;background:white}',
+    '.bc{width:330px;background:white;border-radius:12px;border:1px solid #E0DAD0;overflow:hidden;display:flex;flex-direction:column}',
+    '.bb{display:flex;gap:10px;padding:10px;flex:1}',
+    '.bq{width:90px;height:90px;flex-shrink:0}',
+    '.bq img{width:90px;height:90px}',
+    '.bi{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}',
+    '.bf{padding:6px 10px;background:#F5F1EB;border-top:1px solid #E0DAD0}',
+    '</style></head><body>',
+    '<div class="bc">',
+      bannerHtml,
+      '<div class="bb">',
+        '<div class="bq">'+qrHtml+'</div>',
+        '<div class="bi">',
+          '<div style="font-size:14px;font-weight:400;color:#1A1714">'+esc(p.nome)+'</div>',
+          '<div style="font-size:19px;font-weight:700;color:'+clr+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(p.cognome)+'</div>',
+          profHtml,
+          cfHtml,
+          '<div style="font-family:monospace;font-size:7px;color:#9B948C;margin-top:3px">ID: '+p.id+'</div>',
+        '</div>',
+      '</div>',
+      '<div class="bf">',
+        '<div style="font-size:11px;font-weight:600;color:#1A1714;line-height:1.3">'+esc(ev.nome||'')+'</div>',
+        '<div style="font-size:9px;color:#9B948C;margin-top:2px">'+fmt(ev.data)+luogoHtml+'</div>',
+      '</div>',
+    '</div>',
+    retroHtml,
+    '<sc'+'ript>window.onload=function(){window.print();}<'+'/sc'+'ript>',
+    '</body></html>'
+  ];
+
+  const w = window.open('','_blank');
+  w.document.open();
+  w.document.write(htmlParts.join(''));
+  w.document.close();
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+initApp();
+</script>
+  </div>
+  <div class="ecm-version-footer" id="ecmVersionFooter"></div>
+</div>
+
+<!-- Sidebar init -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof renderSidebar === 'function') renderSidebar('badge');
+  if (typeof renderVersionFooter === 'function') renderVersionFooter();
+});
+</script>
+
+
+</body>
+</html>
