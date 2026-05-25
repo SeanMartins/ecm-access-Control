@@ -203,6 +203,7 @@ footer{position:fixed;bottom:56px;left:0;right:0;background:var(--surface);borde
               <div class="mono" id="resCF"></div>
               <div class="result-status" id="resStatus"></div>
               <div class="mono" style="margin-top:3px" id="resTime"></div>
+              <div id="resPagBadge" style="margin-top:6px;display:none"></div>
             </div>
             <div id="resEmoji" style="font-size:28px;margin-left:10px"></div>
           </div>
@@ -522,6 +523,24 @@ function showResult(type, name, cf, status, time, partId) {
   document.getElementById('resStatus').style.color = type==='ok-in'?'var(--success)':type==='ok-out'?'var(--danger)':type==='warn'?'var(--warn)':'var(--danger)';
   document.getElementById('resTime').textContent = time ? 'Ore '+time : '';
   document.getElementById('resEmoji').textContent = {'ok-in':'✅','ok-out':'🚪','warn':'⚠️','err':'❌'}[type]||'';
+
+  // Badge pagamento — visibile SEMPRE se evento è a pagamento
+  const resPagBadge = document.getElementById('resPagBadge');
+  const isEventoPag = eventoData && eventoData.pagamento && eventoData.pagamento !== 'no';
+  if (resPagBadge && isEventoPag && partId && type !== 'err') {
+    const part = parts.find(p => p.id === partId);
+    const statoPag = part?.pagamento || 'nonpagato';
+    const pagMap = {
+      pagato:    { cls:'pib-pagato', lbl:'✓ Pagato',         icon:'💳' },
+      sede:      { cls:'pib-sede',   lbl:'Paga in sede',      icon:'⏳' },
+      nonpagato: { cls:'pib-non',    lbl:'Non pagato',        icon:'✗'  },
+    };
+    const pag = pagMap[statoPag] || { cls:'pib-verifica', lbl:'Da verificare', icon:'?' };
+    resPagBadge.innerHTML = '<span class="pay-info-badge ' + pag.cls + '">' + pag.icon + ' ' + pag.lbl + '</span>';
+    resPagBadge.style.display = 'block';
+  } else if (resPagBadge) {
+    resPagBadge.style.display = 'none';
+  }
 
   // Pannello pagamento — mostra solo se toggle attivo e partecipante valido
   const payWrap = document.getElementById('payToggleWrap');
