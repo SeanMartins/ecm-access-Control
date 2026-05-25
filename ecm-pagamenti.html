@@ -298,7 +298,11 @@ async function initApp() {
         document.getElementById('evSelect').appendChild(opt);
       });
 
-    const savedId = localStorage.getItem('ecm_eventId');
+    // Leggi evId dall'URL o dal localStorage
+    const _urlPag = new URLSearchParams(window.location.search);
+    const urlId = _urlPag.get('evId');
+    if (urlId) localStorage.setItem('ecm_eventId', urlId);
+    const savedId = urlId || localStorage.getItem('ecm_eventId');
     const autoId = (savedId && evList.find(e=>e.id===savedId)) ? savedId : evList.find(e=>e.pagamento&&e.pagamento!=='no')?.id || evList[0]?.id;
     if (autoId) {
       document.getElementById('evSelect').value = autoId;
