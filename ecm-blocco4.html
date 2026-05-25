@@ -224,7 +224,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
 import { requireAuth, injectUserBar } from './ecm-auth.js';
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
 const app = getApps().length ? getApps()[0] : initializeApp(FB);
@@ -239,6 +239,14 @@ async function initApp() {
   const auth = getAuth(app);
   if (!auth.currentUser) { try { await signInAnonymously(auth); } catch(e) {} }
   document.getElementById('fbDot').className='fb-dot ok';
+
+  // Admin navbar
+  onAuthStateChanged(auth, user => {
+    if (user && user.email === 'martinsosem@gmail.com') {
+      const el = document.getElementById('adminNavItem');
+      if (el) el.style.display = 'flex';
+    }
+  });
 
   const _urlP=new URLSearchParams(window.location.search);
   evId=_urlP.get('evId')||localStorage.getItem('ecm_eventId');
@@ -401,19 +409,7 @@ initApp();
 body{font-family:'Inter','DM Sans',system-ui,sans-serif}
 </style>
 
-<script type="module">
-import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-const ADMIN_EMAIL = "martinsosem@gmail.com";
-const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
-const app2=getApps().length?getApps()[0]:initializeApp(FB);
-onAuthStateChanged(getAuth(app2), user=>{
-  if(user && user.email===ADMIN_EMAIL){
-    const el=document.getElementById("adminNavItem");
-    if(el){ el.style.display="flex"; }
-  }
-});
-</script>
+
   </div>
   <div class="ecm-version-footer" id="ecmVersionFooter"></div>
 </div>
