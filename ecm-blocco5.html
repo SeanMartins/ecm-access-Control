@@ -395,7 +395,11 @@ function renderRisultati(dom,risposte){
       const tot=risD.length;
       content=d.opzioni.map(op=>{const n=risD.filter(r=>r===op).length;const p=tot?Math.round(n/tot*100):0;return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><div style="font-size:11px;color:var(--text2);min-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(op)}</div><div class="op-bar-bg"><div class="op-bar-fill" style="width:${p}%"></div></div><div style="font-size:11px;color:var(--text3);min-width:30px;text-align:right">${p}%</div></div>`;}).join('')+`<div style="font-size:11px;color:var(--text3);margin-top:4px">${tot} risposte</div>`;
     }else{
-      content=`<div style="max-height:150px;overflow-y:auto;display:flex;flex-direction:column;gap:4px">${risD.slice(0,15).map(r=>`<div style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--text2)">${esc(String(r))}</div>`).join('')}</div><div style="font-size:11px;color:var(--text3);margin-top:4px">${risD.length} risposte</div>`;
+      const testoItems = risD.slice(0,15).map(r =>
+        '<div style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--text2)">'+esc(String(r))+'</div>'
+      ).join('');
+      content = '<div style="max-height:150px;overflow-y:auto;display:flex;flex-direction:column;gap:4px">'+testoItems+'</div>'+
+        '<div style="font-size:11px;color:var(--text3);margin-top:4px">'+risD.length+' risposte</div>';
     }
     return`<div class="ris-card"><div style="font-size:13px;font-weight:500;margin-bottom:8px">${di+1}. ${esc(d.testo)}</div>${content}</div>`;
   }).join('');

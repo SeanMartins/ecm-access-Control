@@ -181,7 +181,14 @@ function renderDomanda(){
   }else if(d.tipo==='multipla'){
     inp.innerHTML=`<div class="opzioni-grid">${(d.opzioni||[]).map(op=>`<button type="button" class="opzione-btn${risposte[d.id]===op?' selected':''}" onclick="setOpzione('${d.id}','${op.replace(/'/g,"\\'")}',this)">${esc(op)}</button>`).join('')}</div>`;
   }else{
-    inp.innerHTML=`<textarea class="testo-area" placeholder="Scrivi qui la tua risposta..." oninput="risposte['${d.id}']=this.value">${risposte[d.id]||''}</textarea>`;
+    inp.innerHTML=`<textarea class="testo-area" id="textarea_${d.id}" placeholder="Scrivi qui la tua risposta...">${risposte[d.id]||''}</textarea>`;
+    // Usa addEventListener (non inline) per accedere allo scope del modulo
+    const ta = inp.querySelector('textarea');
+    if (ta) {
+      ta.addEventListener('input', function() { risposte[d.id] = this.value; });
+      // Focus e cursore alla fine
+      setTimeout(() => { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }, 50);
+    }
   }
 }
 
