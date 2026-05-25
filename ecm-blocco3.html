@@ -779,7 +779,7 @@ async function initFirebase() {
     });
 
     document.getElementById('fbDot').className = 'fb-dot ok';
-    document.getElementById('fbTxt').textContent = 'Firebase OK';
+    const _fbTxt = document.getElementById('fbTxt'); if(_fbTxt) _fbTxt.textContent = 'Firebase OK';
 
     if (!evId) { document.getElementById('noEvAlert').style.display='block'; return; }
 
