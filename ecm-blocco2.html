@@ -294,7 +294,7 @@ input[type=color]{padding:4px 8px;height:40px;cursor:pointer}
 // ── IMPORT ──────────────────────────────────────────────────────
 import { requireAuth, injectUserBar } from './ecm-auth.js';
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, getDocs, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // ── CONFIG ───────────────────────────────────────────────────────
@@ -395,6 +395,36 @@ async function initApp() {
     }
     evento = evSnap.data();
 
+    // Carica impostazioni badge salvate (incluso retro locandina)
+    try {
+      const badgeSettings = await getDoc(doc(db,'eventi',evId,'settings','badge'));
+      if (badgeSettings.exists()) {
+        const bs = badgeSettings.data();
+        if (bs.retroLocandina) {
+          retroData = bs.retroLocandina;
+          // Mostra preview
+          const pw = document.getElementById('retroPreviewWrap');
+          const pi = document.getElementById('retroPreviewImg');
+          const pn = document.getElementById('retroFileName');
+          if (pw) pw.style.display = 'flex';
+          if (pi) pi.src = retroData;
+          if (pn) pn.textContent = '✂ ' + (bs.retroFilename||'Locandina') + ' (salvata)';
+          console.log('Retro caricato da Firebase');
+        }
+        if (bs.printMode) {
+          printMode = bs.printMode;
+          const radio = document.querySelector('input[name="printMode"][value="'+printMode+'"]');
+          if (radio) {
+            radio.checked = true;
+            const rw = document.getElementById('retroWrap');
+            if (rw) rw.style.display = printMode === 'fronte-retro' ? 'block' : 'none';
+            document.getElementById('lblFronte').style.borderColor = printMode==='fronte' ? 'var(--accent)' : 'var(--border)';
+            document.getElementById('lblFronteRetro').style.borderColor = printMode==='fronte-retro' ? 'var(--accent)' : 'var(--border)';
+          }
+        }
+      }
+    } catch(e) { console.warn('Caricamento settings badge:', e.message); }
+
     const snap = await getDocs(collection(db,'eventi',evId,'partecipanti'));
     snap.forEach(d => parts.push({id:d.id,...d.data()}));
     parts.sort((a,b) => a.id.localeCompare(b.id));
@@ -453,6 +483,11 @@ async function initApp() {
       printMode = this.value;
       const rw = document.getElementById('retroWrap');
       if (rw) rw.style.display = this.value === 'fronte-retro' ? 'block' : 'none';
+      // Salva printMode su Firebase
+      if (evId) {
+        setDoc(doc(db,'eventi',evId,'settings','badge'), { printMode }, {merge:true})
+          .catch(e => console.warn('Salvataggio printMode:', e.message));
+      }
       // Aggiorna label styling
       document.getElementById('lblFronte').style.borderColor = printMode==='fronte' ? 'var(--accent)' : 'var(--border)';
       document.getElementById('lblFronteRetro').style.borderColor = printMode==='fronte-retro' ? 'var(--accent)' : 'var(--border)';
@@ -473,7 +508,7 @@ async function initApp() {
       const reader = new FileReader();
       reader.onload = e => {
         const img = new Image();
-        img.onload = () => {
+        img.onload = async () => {
           // Badge retro: proporzione fissa 85.6×54mm (carta di credito standard)
           // Facciamo autocrop centrato — taglia l'immagine per riempire esattamente
           const TARGET_W = 680; // px output (85.6mm @ 200dpi)
@@ -502,6 +537,17 @@ async function initApp() {
           canvas.height = TARGET_H;
           canvas.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, TARGET_W, TARGET_H);
           retroData = canvas.toDataURL('image/jpeg', 0.85);
+
+          // Salva retroData su Firebase (subcollection settings dell'evento)
+          try {
+            await setDoc(doc(db,'eventi',evId,'settings','badge'), {
+              retroLocandina: retroData,
+              retroFilename: f.name,
+              retroAggiornato: serverTimestamp()
+            }, {merge:true});
+            console.log('Retro salvato su Firebase');
+          } catch(e) { console.warn('Salvataggio retro:', e.message); }
+
           // Mostra preview
           const pw = document.getElementById('retroPreviewWrap');
           const pi = document.getElementById('retroPreviewImg');
@@ -525,6 +571,12 @@ async function initApp() {
     if (pw) pw.style.display = 'none';
     document.getElementById('retroInput').value = '';
     aggiornaRetroNelGrid();
+    // Rimuove retro da Firebase
+    if (evId) {
+      setDoc(doc(db,'eventi',evId,'settings','badge'), 
+        {retroLocandina: null, retroFilename: null}, {merge:true})
+        .catch(e => console.warn('Rimozione retro:', e.message));
+    }
   });
 
 }
