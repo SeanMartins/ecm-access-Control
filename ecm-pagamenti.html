@@ -275,6 +275,13 @@ const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-acces
 
 let db, auth;
 let partecipanti = [], currentEv = null, currentEvId = null;
+
+function getPrezzoCategoria(professione) {
+  const catPrezzi = currentEv?.categoriePrezzi || [];
+  if (!catPrezzi.length) return currentEv?.prezzo || 0;
+  const match = catPrezzi.find(cp => cp.nome && (professione||'').toLowerCase().includes(cp.nome.toLowerCase()));
+  return match ? match.prezzo : (currentEv?.prezzo || 0);
+}
 let editingPartId = null;
 
 // ── INIT ──────────────────────────────────────────────
