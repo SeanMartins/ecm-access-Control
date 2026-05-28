@@ -390,7 +390,7 @@ async function init() {
             <div class="sess-body">
               <div class="sess-titolo">${esc(s.titolo||'—')}</div>
               <div class="sess-meta">
-                ${salaNome ? `<span>🏛️ ${esc(salaNome)}</span>` : ''}
+                ${salaNome ? '<span>🏛️ '+esc(salaNome)+'</span>' : ''}
                 ${s.lingua && s.lingua !== 'it' ? `<span>🌐 ${s.lingua.toUpperCase()}</span>` : ''}
               </div>
               <div class="sess-tags">
