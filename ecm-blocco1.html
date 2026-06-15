@@ -390,6 +390,16 @@ async function initApp() {
   const params     = new URLSearchParams(window.location.search);
   const evIdFromUrl = params.get('evId');
   const isNuovo    = params.get('nuovo')==='1';
+  const isDuplicato = params.get('duplicato')==='1';
+
+  // Banner evento duplicato
+  if (isDuplicato) {
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:#FFF8E1;border:1px solid #F59E0B;border-radius:12px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;color:#92400E';
+    banner.innerHTML = '<span style="font-size:22px">📋</span><div><strong>Evento duplicato con successo!</strong> Aggiorna il nome, la data e le altre informazioni prima di salvare.</div>';
+    const main = document.querySelector('.section-card') || document.querySelector('main');
+    if (main) main.prepend(banner);
+  }
   let evId = isNuovo ? 'evt_'+Date.now() : evIdFromUrl || localStorage.getItem('ecm_eventId');
   if (evId) localStorage.setItem('ecm_eventId', evId);
 

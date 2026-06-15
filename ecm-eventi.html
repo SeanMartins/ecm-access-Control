@@ -573,6 +573,7 @@ function renderEvents(){
           ${isAdminMode&&!isArchiviato?`<button class="btn btn-warn btn-sm" onclick="openModal('${ev.id}','archivio')">📦</button>`:''}
           ${isAdminMode&&isArchiviato?`<button class="btn btn-outline btn-sm" onclick="openModal('${ev.id}','ripristina')">↩</button>`:''}
           ${!isArchiviato?`<button class="btn btn-outline btn-sm" title="Link iscrizione per sito esterno" onclick="apriLinkRegistrazione('${ev.id}','${esc(ev.nome||'')}')">🔗</button>`:''}
+          ${isAdminMode?`<button class="btn btn-outline btn-sm" title="Duplica evento" onclick="duplicaEvento('${ev.id}','${esc(ev.nome||'')}')">📋</button>`:''}
         </div>
         ${ev.creatoDA?`<div style="font-size:10px;color:var(--text3);margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">👤 Creato da: ${esc(ev.creatoDA)}</div>`:''}
       </div>
@@ -767,6 +768,57 @@ window.apriLinkRegistrazione = function(evId, evNome) {
   document.getElementById('linkRegModal').addEventListener('click', function(e) {
     if (e.target === this) this.classList.remove('show');
   }, { once: true });
+};
+
+// ── DUPLICA EVENTO ─────────────────────────────────────────────
+window.duplicaEvento = async function(evId, evNome) {
+  if (!confirm('Duplica "' + evNome + '"?
+Verrà creato un nuovo evento identico senza partecipanti, log e QR.')) return;
+
+  try {
+    // Carica i dati dell'evento originale
+    const { doc, getDoc, setDoc, collection } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    
+    const evSnap = await getDoc(doc(db, 'eventi', evId));
+    if (!evSnap.exists()) { alert('Evento non trovato.'); return; }
+    
+    const orig = evSnap.data();
+    const nuovoId = 'evt_' + Date.now();
+    const nuovoNome = orig.nome + ' (copia)';
+    
+    // Crea il nuovo evento copiando tutti i dati tranne quelli specifici
+    const nuovoEv = {
+      ...orig,
+      nome: nuovoNome,
+      data: '',
+      dataFine: '',
+      totPartecipanti: 0,
+      creatoAt: new Date().toISOString(),
+      duplicatoDa: evId,
+      stato: 'attivo',
+    };
+    
+    // Rimuovi campi che non devono essere duplicati
+    delete nuovoEv.qrGenerati;
+    
+    await setDoc(doc(db, 'eventi', nuovoId), nuovoEv);
+    
+    // Copia anche le impostazioni badge (logo retro)
+    try {
+      const badgeSnap = await getDoc(doc(db, 'eventi', evId, 'settings', 'badge'));
+      if (badgeSnap.exists()) {
+        await setDoc(doc(db, 'eventi', nuovoId, 'settings', 'badge'), badgeSnap.data());
+      }
+    } catch(e) {}
+    
+    // Feedback e redirect al nuovo evento
+    alert('Evento duplicato! Ora vai al Setup per aggiornare data e dettagli.');
+    localStorage.setItem('ecm_eventId', nuovoId);
+    window.location.href = 'ecm-blocco1.html?evId=' + nuovoId + '&duplicato=1';
+    
+  } catch(e) {
+    alert('Errore duplicazione: ' + e.message);
+  }
 };
 
 window.copyLink = function(elId, btnId) {
