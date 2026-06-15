@@ -331,7 +331,7 @@ header{border-bottom:1px solid var(--border);background:var(--surface);position:
 <script type="module">
 import { requireAuth, injectUserBar } from './ecm-auth.js';
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc, getDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, getDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
@@ -772,12 +772,11 @@ window.apriLinkRegistrazione = function(evId, evNome) {
 
 // ── DUPLICA EVENTO ─────────────────────────────────────────────
 window.duplicaEvento = async function(evId, evNome) {
-  if (!confirm('Duplica "' + evNome + '"?
-Verrà creato un nuovo evento identico senza partecipanti, log e QR.')) return;
+  if (!confirm('Duplica "' + evNome + '"?\nVerra creato un nuovo evento identico senza partecipanti, log e QR.')) return;
+
 
   try {
-    // Carica i dati dell'evento originale
-    const { doc, getDoc, setDoc, collection } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    // Usa le funzioni Firestore già importate
     
     const evSnap = await getDoc(doc(db, 'eventi', evId));
     if (!evSnap.exists()) { alert('Evento non trovato.'); return; }
