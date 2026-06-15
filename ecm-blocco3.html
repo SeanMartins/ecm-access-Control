@@ -762,7 +762,7 @@ async function salvaNP() {
 function resetNP() {
   ['npCF','npNome','npCognome','npProf'].forEach(id=>{ const el=document.getElementById(id); if(el)el.value=''; });
   document.getElementById('npCFHint').textContent='';
-  document.getElementById('ocrStatus').textContent='';
+  const _ocr = document.getElementById('ocrStatus'); if(_ocr) _ocr.textContent='';
   const msg=document.getElementById('npMsg'); if(msg)msg.style.display='none';
 }
 
@@ -834,7 +834,7 @@ async function initFirebase() {
     });
   } catch(e) {
     console.error('Firebase init error:', e);
-    document.getElementById('fbTxt').textContent = 'Errore';
+    const _fbTxt2 = document.getElementById('fbTxt'); if(_fbTxt2) _fbTxt2.textContent = 'Errore';
   }
 }
 

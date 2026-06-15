@@ -550,7 +550,7 @@ function renderEvents(){
     const tipoHTML=`<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:var(--surface2);border:1px solid var(--border);color:var(--text2);margin-left:6px">${tipoLabel}</span>`;
     const dateRange=ev.dataFine&&ev.dataFine!==ev.data?`${fmt(ev.data)} → ${fmt(ev.dataFine)}`:fmt(ev.data);
     return `<div class="event-card${isSelected?' selected':''}" id="card_${ev.id}">
-      ${isSelected?`<div class="selected-badge">✓ Selezionato</div>`:''}
+      ${isSelected?'<div class=\"selected-badge\">✓ Selezionato</div>':''}
       <div class="event-card-accent" style="background:${color}"></div>
       <div class="event-card-body">
         ${statoHTML}

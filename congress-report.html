@@ -309,7 +309,7 @@ function renderSessioniReport() {
           <div class="sess-stat"><div class="sess-stat-val" style="color:var(--success)">${pres}</div><div class="sess-stat-lbl">Presenti</div></div>
           <div class="sess-stat"><div class="sess-stat-val" style="color:var(--text3)">${tot-pres}</div><div class="sess-stat-lbl">Assenti</div></div>
           <div class="sess-stat"><div class="sess-stat-val" style="color:var(--congress)">${pct}%</div><div class="sess-stat-lbl">Presenza</div></div>
-          `:`<div style="color:var(--text3);font-size:12px">Nessun check-in</div>`}
+          `:'<div style="color:var(--text3);font-size:12px">Nessun check-in</div>'}
           <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();exportExcelSessione('${s.id}','${esc(s.titolo||'sessione')}')">📊</button>
         </div>
       </div>
