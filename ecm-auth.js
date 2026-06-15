@@ -89,6 +89,17 @@ export async function requireAuth() {
         const uDoc = await getDoc(doc(db, 'utenti', user.uid));
         if (uDoc.exists()) {
           _profilo = { uid: user.uid, ...uDoc.data() };
+          // Salva branding in localStorage per layout.js
+          const _p = _profilo;
+          if (_p.brandNome || _p.brandLogo) {
+            localStorage.setItem('ecm_brand', JSON.stringify({
+              nome: _p.brandNome || null,
+              sub: _p.brandSub || null,
+              logo: _p.brandLogo || null,
+            }));
+          } else {
+            localStorage.removeItem('ecm_brand');
+          }
         } else {
           // Utente Firebase Auth ma non in Firestore (es. Google login senza profilo)
           _profilo = { uid: user.uid, email: user.email, ruolo: 'viewer', moduli: ['ecm'] };
@@ -96,7 +107,8 @@ export async function requireAuth() {
 
         // Controlla stato e scadenza
         if (_profilo.stato === 'sospeso') {
-          await signOut(auth);
+          localStorage.removeItem('ecm_brand');
+  await signOut(auth);
           window.location.href = PAGINA_LOGIN + '?errore=sospeso';
           reject(new Error('Account sospeso'));
           return;

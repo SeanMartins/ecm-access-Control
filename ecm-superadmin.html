@@ -297,6 +297,40 @@ tr:hover td{background:var(--surface2)}
         <input type="date" class="form-input" id="uDataFine">
       </div>
       <div class="form-group"><label class="field-label">Organizzazione</label><input type="text" class="form-input" id="uOrg" placeholder="Nome ente/organizzazione"></div>
+    </div>
+
+    <!-- BRANDING ADMIN (visibile solo per ruolo admin) -->
+    <div id="brandingSection" style="display:none;border-top:1px solid var(--border);padding-top:16px;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:12px">🎨 Branding personalizzato</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:12px">Nome e logo che apparirà nella sidebar e nelle schermate dell'admin.</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="field-label">Nome azienda / ente</label>
+          <input type="text" class="form-input" id="uBrandNome" placeholder="Es. Società Medica Italiana">
+        </div>
+        <div class="form-group">
+          <label class="field-label">Sottotitolo (opzionale)</label>
+          <input type="text" class="form-input" id="uBrandSub" placeholder="Es. Formazione ECM">
+        </div>
+        <div class="form-group span2">
+          <label class="field-label">Logo azienda</label>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:6px">
+            <label style="cursor:pointer">
+              <input type="file" id="uBrandLogoInput" accept="image/*" style="display:none">
+              <div class="btn btn-outline btn-sm">📁 Carica logo</div>
+            </label>
+            <div id="uBrandLogoPreview" style="display:none;align-items:center;gap:8px">
+              <img id="uBrandLogoImg" style="height:40px;width:auto;border-radius:6px;border:1px solid var(--border)" alt="logo">
+              <span id="uBrandLogoName" style="font-size:11px;color:var(--text2)">—</span>
+              <button type="button" id="uBrandLogoRemove" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:15px">✕</button>
+            </div>
+            <div style="font-size:11px;color:var(--text3)">Max 2MB · PNG/JPG/SVG</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-grid" style="margin-bottom:14px">
       <div class="form-group"><label class="field-label">Telefono</label><input type="text" class="form-input" id="uTel"></div>
       <div class="form-group span2"><label class="field-label">Note interne</label><input type="text" class="form-input" id="uNote" placeholder="Evento assegnato, note..."></div>
     </div>
@@ -662,6 +696,22 @@ window.editUtente = function(uid) {
   document.getElementById('uNome').value = u.nome||'';
   document.getElementById('uCognome').value = u.cognome||'';
   document.getElementById('uEmail').value = u.email||'';
+  // Carica branding admin
+  if (u.ruolo === 'admin') {
+    const bs = document.getElementById('brandingSection');
+    if (bs) bs.style.display = 'block';
+    if (document.getElementById('uBrandNome')) document.getElementById('uBrandNome').value = u.brandNome||'';
+    if (document.getElementById('uBrandSub'))  document.getElementById('uBrandSub').value  = u.brandSub||'';
+    if (u.brandLogo) {
+      window._brandLogoData = u.brandLogo;
+      const pw = document.getElementById('uBrandLogoPreview');
+      const pi = document.getElementById('uBrandLogoImg');
+      const pn = document.getElementById('uBrandLogoName');
+      if (pw) pw.style.display = 'flex';
+      if (pi) pi.src = u.brandLogo;
+      if (pn) pn.textContent = 'Logo salvato';
+    }
+  }
   document.getElementById('uPassword').value = '';
   document.getElementById('uRuolo').value = u.ruolo||'admin';
   document.getElementById('uStato').value = u.stato||'attivo';
@@ -699,9 +749,14 @@ async function salvaUtente() {
   if(!nome||!cognome||!email){showErr('utenteErr','Compila nome, cognome ed email.');return;}
 
   const moduli = getModuliSelezionati();
+  // Branding (solo per ruolo admin)
+  const ruolo = document.getElementById('uRuolo').value;
+  const brandNome = document.getElementById('uBrandNome')?.value.trim() || '';
+  const brandSub = document.getElementById('uBrandSub')?.value.trim() || '';
+
   const payload = {
     nome, cognome, email,
-    ruolo: document.getElementById('uRuolo').value,
+    ruolo,
     stato: document.getElementById('uStato').value,
     dataInizio: document.getElementById('uDataInizio').value||null,
     dataFine: document.getElementById('uDataFine').value||null,
@@ -709,6 +764,12 @@ async function salvaUtente() {
     tel: document.getElementById('uTel').value.trim(),
     note: document.getElementById('uNote').value.trim(),
     moduli: moduli.length===MODULI.length ? ['tutti'] : moduli,
+    // Branding personalizzato per admin
+    ...(ruolo==='admin' && {
+      brandNome: brandNome || null,
+      brandSub: brandSub || null,
+      brandLogo: window._brandLogoData || null,
+    }),
     updatedAt: serverTimestamp()
   };
 
@@ -794,6 +855,57 @@ async function logAzione(tipo, dettaglio) {
 function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block';setTimeout(()=>e.style.display='none',5000);}
 function showOk(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block';}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ── LISTENER BRANDING ────────────────────────────────────────────
+// Mostra/nascondi sezione branding in base al ruolo
+const _uRuoloEl = document.getElementById('uRuolo');
+if (_uRuoloEl) {
+  _uRuoloEl.addEventListener('change', function() {
+    const bs = document.getElementById('brandingSection');
+    if (bs) bs.style.display = this.value === 'admin' ? 'block' : 'none';
+  });
+}
+
+// Upload logo branding
+window._brandLogoData = null;
+const _bli = document.getElementById('uBrandLogoInput');
+if (_bli) {
+  _bli.addEventListener('change', function() {
+    const f = this.files[0];
+    if (!f) return;
+    if (f.size > 2097152) { alert('Max 2MB.'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX = 200;
+        let w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h*MAX/w); w = MAX; }
+          else { w = Math.round(w*MAX/h); h = MAX; }
+        }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        window._brandLogoData = canvas.toDataURL('image/png');
+        const pw = document.getElementById('uBrandLogoPreview');
+        const pi = document.getElementById('uBrandLogoImg');
+        const pn = document.getElementById('uBrandLogoName');
+        if (pw) pw.style.display = 'flex';
+        if (pi) pi.src = window._brandLogoData;
+        if (pn) pn.textContent = f.name;
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(f);
+  });
+}
+document.getElementById('uBrandLogoRemove')?.addEventListener('click', () => {
+  window._brandLogoData = null;
+  const pw = document.getElementById('uBrandLogoPreview');
+  if (pw) pw.style.display = 'none';
+  if (document.getElementById('uBrandLogoInput')) document.getElementById('uBrandLogoInput').value = '';
+});
 
 initApp();
 </script>

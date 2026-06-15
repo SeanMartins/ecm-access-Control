@@ -98,12 +98,17 @@
     // Toggle button
     html += '<button class="sidebar-toggle" id="sidebarToggle" title="Comprimi">' + IC.chevron + '</button>';
 
-    // Logo
+    // Logo (personalizzato per admin o default)
+    var _brand = {};
+    try { _brand = JSON.parse(localStorage.getItem('ecm_brand') || '{}')} catch(e) {}
+    var _logoSrc = _brand.logo || 'logo.png';
+    var _brandNome = _brand.nome || 'Multimedia Meeting';
+    var _brandSub = _brand.sub || 'ECM Access Control';
     html += '<div class="sidebar-logo">' +
       '<div class="logo-icon" style="background:transparent;padding:0;overflow:hidden">' +
         '<img src="logo.png" alt="ECM" style="width:36px;height:36px;object-fit:cover;border-radius:10px" onerror="this.style.display=\'none\'">' +
       '</div>' +
-      '<div class="logo-text">Multimedia Meeting<span class="logo-sub">ECM Access Control</span></div>' +
+      '<div class="logo-text">' + _brandNome + '<span class="logo-sub">' + _brandSub + '</span></div>' +
     '</div>';
 
     // Nav
