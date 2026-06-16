@@ -131,6 +131,9 @@ textarea.form-input{resize:vertical;min-height:60px}
 
 <div class="ecm-content" id="mainContent" style="display:none">
 
+  <!-- Banner tipo documento -->
+  <div id="tipoDocBanner" style="display:none;padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:13px;font-weight:500"></div>
+
   <!-- TABS -->
   <div class="tabs">
     <button class="tab active" onclick="showTab('tab-template')">🎨 Template</button>
@@ -353,9 +356,9 @@ textarea.form-input{resize:vertical;min-height:60px}
   <div id="tab-pubblico" class="tab-panel">
     <div class="config-section download-public-section">
       <div class="config-title">🔗 Link pubblico per scaricare il certificato</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px" id="linkPublicDesc">
         Condividi questo link con i partecipanti: ognuno inserirà il proprio Codice Fiscale
-        e potrà scaricare il proprio certificato in PDF — solo se idoneo.
+        e potrà scaricare il proprio documento in PDF.
       </p>
 
       <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">
@@ -451,7 +454,23 @@ async function initApp() {
   const evSnap = await getDoc(doc(db,'eventi',evId));
   if (!evSnap.exists()) { showMsg('Evento non trovato.'); return; }
   evento = evSnap.data();
-  document.querySelector('.page-title').textContent = 'Certificati — ' + (evento.nome || '');
+  const tipoDoc = evento.tipoDoc || 'certificato';
+  const tipoLabel = tipoDoc === 'attestato' ? '📋 Attestato di Partecipazione' : '🏆 Certificato ECM';
+  document.querySelector('.page-title').textContent = tipoLabel + ' — ' + (evento.nome || '');
+
+  // Mostra banner tipo documento
+  const banner = document.getElementById('tipoDocBanner');
+  const sogliaEl = document.getElementById('sogliaInfo');
+  if (sogliaEl) sogliaEl.textContent = cfg?.soglia || 75;
+  if (banner) {
+    if (tipoDoc === 'attestato') {
+      banner.style.cssText = 'display:block;background:#FFF8E1;border:1px solid #F59E0B;color:#92400E;padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:13px';
+      banner.innerHTML = '📋 <strong>Attestato di Partecipazione</strong> — Verrà rilasciato a <strong>tutti i partecipanti</strong> registrati, indipendentemente dalla % di presenza.';
+    } else {
+      banner.style.cssText = 'display:block;background:#EFF6FF;border:1px solid #BFDBFE;color:#1D4ED8;padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:13px';
+      banner.innerHTML = '🏆 <strong>Certificato ECM</strong> — Verrà rilasciato solo ai partecipanti che hanno raggiunto la soglia minima di presenza (<span id="sogliaInfo"></span>%).';
+    }
+  }
 
   // Carica config certificati salvata
   const cfgSnap = await getDoc(doc(db,'eventi',evId,'settings','certificati'));
@@ -465,6 +484,15 @@ async function initApp() {
   const base = window.location.origin + window.location.pathname.replace('ecm-certificati.html','');
   const link = base + 'ecm-scarica-certificato.html?evId=' + evId;
   document.getElementById('linkPubblico').value = link;
+  // Aggiorna descrizione link pubblico
+  const descEl = document.getElementById('linkPublicDesc');
+  if (descEl) {
+    if (tipoDoc === 'attestato') {
+      descEl.innerHTML = 'Condividi questo link con i partecipanti: ognuno inserirà il proprio Codice Fiscale e potrà scaricare il proprio <strong>attestato di partecipazione</strong> in PDF. <span style="color:#059669">✓ Disponibile per tutti i partecipanti registrati.</span>';
+    } else {
+      descEl.innerHTML = 'Condividi questo link con i partecipanti: ognuno inserirà il proprio Codice Fiscale e potrà scaricare il proprio <strong>certificato ECM</strong> in PDF — solo se idoneo.';
+    }
+  }
   document.getElementById('embedCode').value =
     '<iframe src="' + link + '" width="100%" height="500" frameborder="0"></iframe>';
 
@@ -532,17 +560,20 @@ window.loadPartecipanti = async function() {
 };
 
 function calcPresenza(p) {
+  const tipoDoc = evento?.tipoDoc || 'certificato';
   const logsEnt = p.log.filter(l => l.tipo === 'entrata').sort((a,b)=>(a.tsISO||'').localeCompare(b.tsISO||''));
   const logsUsc = p.log.filter(l => l.tipo === 'uscita').sort((a,b)=>(a.tsISO||'').localeCompare(b.tsISO||''));
   let ore = 0;
-  logsEnt.forEach((ent, i) => {
+  logsEnt.forEach((ent) => {
     const usc = logsUsc.find(u => u.tsISO > ent.tsISO);
     if (usc) ore += (new Date(usc.tsISO) - new Date(ent.tsISO)) / 3600000;
   });
   const oreEv = evento?.oreMinime || 8;
   const pct = Math.min(100, Math.round(ore / oreEv * 100));
   const soglia = parseInt(document.getElementById('cfgSoglia')?.value || 75);
-  return { ore: ore.toFixed(1), pct, idoneo: pct >= soglia };
+  // Per attestato: tutti sono "idonei" (ricevono il documento)
+  const idoneo = tipoDoc === 'attestato' ? true : pct >= soglia;
+  return { ore: ore.toFixed(1), pct, idoneo, tipoDoc };
 }
 
 function renderTabella() {
@@ -553,8 +584,10 @@ function renderTabella() {
   if (currentFilter === 'non-idonei') lista = lista.filter(p => !calcPresenza(p).idoneo);
 
   const idoneiCount = partecipanti.filter(p => calcPresenza(p).idoneo).length;
-  document.getElementById('partInfoSub').textContent =
-    partecipanti.length + ' partecipanti · ' + idoneiCount + ' idonei · soglia ' + soglia + '%';
+  const tipoDocInfo = (evento?.tipoDoc || 'certificato') === 'attestato'
+      ? partecipanti.length + ' partecipanti · Tutti riceveranno l\'attestato'
+      : partecipanti.length + ' partecipanti · ' + idoneiCount + ' idonei (≥' + soglia + '%)';
+  document.getElementById('partInfoSub').textContent = tipoDocInfo;
 
   if (!lista.length) {
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px">Nessun partecipante trovato</td></tr>';
@@ -563,8 +596,11 @@ function renderTabella() {
 
   tbody.innerHTML = lista.map(p => {
     const pr = calcPresenza(p);
+    const tipoDoc = evento?.tipoDoc || 'certificato';
     const pillClass = pr.idoneo ? 'pill-ok' : (pr.pct > 0 ? 'pill-warn' : 'pill-no');
-    const pillLabel = pr.idoneo ? '✅ Idoneo' : '❌ Non idoneo';
+    const pillLabel = tipoDoc === 'attestato'
+      ? '📋 Attestato'
+      : (pr.idoneo ? '✅ Idoneo' : '❌ Non idoneo');
     return '<tr>' +
       '<td><strong>' + esc(p.cognome||'') + '</strong> ' + esc(p.nome||'') + '</td>' +
       '<td style="font-family:monospace;font-size:11px">' + esc(p.cf||'—') + '</td>' +
@@ -653,11 +689,11 @@ function buildCertHTML(p, isPreview) {
     '<div style="text-align:center;margin-bottom:12px">' +
       (logoBase64 ? '<img src="' + logoBase64 + '" style="height:45px;object-fit:contain;margin-bottom:8px"><br>' : '') +
       '<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:' + subTextCol + '">' + esc(org) + '</div>' +
-      '<div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:' + subTextCol + ';margin-top:3px">Certificato di Partecipazione</div>' +
+      '<div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:' + subTextCol + ';margin-top:3px">' + (evento?.tipoDoc === 'attestato' ? 'Attestato di Partecipazione' : 'Certificato ECM') + '</div>' +
       '<div style="width:50px;height:2px;background:' + ts.accent + ';margin:10px auto 0"></div>' +
     '</div>' +
     // Titolo
-    '<div style="font-size:20px;font-weight:bold;color:' + ts.titleColor + ';text-align:center;margin-bottom:8px">Attestato di Partecipazione</div>' +
+    '<div style="font-size:20px;font-weight:bold;color:' + ts.titleColor + ';text-align:center;margin-bottom:8px">' + (evento?.tipoDoc === 'attestato' ? 'Attestato di Partecipazione' : 'Certificato di Partecipazione ECM') + '</div>' +
     // Intro
     '<div style="font-size:12px;color:' + subTextCol + ';margin-bottom:6px">Si attesta che</div>' +
     '<div style="font-size:28px;font-weight:bold;color:' + ts.titleColor + ';text-align:center;margin-bottom:4px">' + esc((p.cognome||'') + ' ' + (p.nome||'')) + '</div>' +

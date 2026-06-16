@@ -279,11 +279,34 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-t
     </div>
     <div style="margin-top:22px">
       <div class="card-title" style="margin-bottom:12px"><span class="step-badge" style="background:var(--accent)">2</span>Crediti ECM</div>
+      <!-- Tipo documento -->
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:8px">📄 Tipo documento rilasciato ai partecipanti</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <label style="display:flex;align-items:flex-start;gap:10px;padding:12px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s" id="lbl-attestato" onclick="setTipoDoc('attestato')">
+            <input type="radio" name="tipoDoc" value="attestato" id="tipoDocAttestato" style="margin-top:2px">
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text)">📋 Attestato di Partecipazione</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:3px">Per tutti i partecipanti registrati, indipendentemente dalle ore di presenza.</div>
+            </div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:10px;padding:12px;border:2px solid var(--accent);border-radius:10px;cursor:pointer;background:var(--accent-light);transition:.2s" id="lbl-certificato" onclick="setTipoDoc('certificato')">
+            <input type="radio" name="tipoDoc" value="certificato" id="tipoDocCertificato" checked style="margin-top:2px">
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--accent)">🏆 Certificato ECM</div>
+              <div style="font-size:11px;color:var(--text2);margin-top:3px">Solo per chi raggiunge la soglia minima di presenza. Include crediti ECM.</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div id="creditiSection">
       <div class="crediti-row">
         <div class="credito-box"><label>Crediti totali</label><input type="number" id="creditiTot" value="4" min="0" step="0.5"></div>
         <div class="credito-box"><label>Ore minime</label><input type="number" id="oreMin" value="6" min="0" step="0.5"></div>
         <div class="credito-box"><label>% presenza min.</label><input type="number" id="percMin" value="90" min="0" max="100"></div>
       </div>
+      </div><!-- /creditiSection -->
     </div>
     <div style="margin-top:22px">
       <div class="card-title" style="margin-bottom:10px"><span class="step-badge" style="background:var(--accent2)">3</span>Logo evento</div>
@@ -424,6 +447,10 @@ async function initApp() {
         document.getElementById('evLuogo').value   = ev.luogo||'';
         document.getElementById('evDesc').value    = ev.desc||'';
         document.getElementById('creditiTot').value= ev.creditiTot||4;
+        // Carica tipo documento
+        const td = ev.tipoDoc || 'certificato';
+        const rdTd = document.querySelector('input[name="tipoDoc"][value="'+td+'"]');
+        if(rdTd) { rdTd.checked = true; setTipoDoc(td); }
         document.getElementById('oreMin').value    = ev.oreMin||6;
         document.getElementById('percMin').value   = ev.percMin||90;
         if (ev.logo) { logoData = ev.logo; showLogoPreview(ev.logoName||'logo', ev.logo); }
@@ -723,6 +750,7 @@ window.salvaEvento = async function salvaEvento(){
       dataFine:document.getElementById('evDataFine').value,
       luogo:document.getElementById('evLuogo').value,
       desc:document.getElementById('evDesc').value,
+      tipoDoc: document.querySelector('input[name="tipoDoc"]:checked')?.value || 'certificato',
       creditiTot:parseFloat(document.getElementById('creditiTot').value)||4,
       oreMin:parseFloat(document.getElementById('oreMin').value)||6,
       percMin:parseFloat(document.getElementById('percMin').value)||90,
@@ -767,6 +795,24 @@ function updateFooter(){
   document.getElementById('footerPart').textContent=parts.length;
 }
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// Tipo documento
+window.setTipoDoc = function(tipo) {
+  ['attestato','certificato'].forEach(t => {
+    const lbl = document.getElementById('lbl-'+t);
+    if (lbl) {
+      lbl.style.borderColor = t === tipo ? 'var(--accent)' : 'var(--border)';
+      lbl.style.background = t === tipo ? 'var(--accent-light)' : '';
+    }
+  });
+  const rd = document.querySelector('input[name="tipoDoc"][value="'+tipo+'"]');
+  if (rd) rd.checked = true;
+  // Mostra/nascondi sezione crediti ECM
+  const cs = document.getElementById('creditiSection');
+  if (cs) cs.style.display = tipo === 'certificato' ? 'block' : 'none';
+};
+// Inizializza
+setTipoDoc('certificato');
 
 initApp();
 </script>

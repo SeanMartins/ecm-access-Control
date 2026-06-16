@@ -45,8 +45,8 @@ h1{font-size:22px;font-weight:700;color:#1A1714;margin-bottom:6px;text-align:cen
     <div class="evento-data" id="eventoData"></div>
   </div>
 
-  <h1>📜 Il tuo Certificato</h1>
-  <p class="subtitle">Inserisci il tuo Codice Fiscale per scaricare il certificato di partecipazione in PDF.</p>
+  <h1 id="pageTitle">📜 Il tuo Documento</h1>
+  <p class="subtitle" id="pageSubtitle">Inserisci il tuo Codice Fiscale per scaricare il documento di partecipazione in PDF.</p>
 
   <div>
     <label class="field-label">Codice Fiscale</label>
@@ -109,6 +109,16 @@ async function init() {
     document.getElementById('eventoData').textContent = [fmt(evento.data), evento.luogo].filter(Boolean).join(' · ');
     document.getElementById('eventoInfo').style.display = 'block';
     if (cfg.org) document.getElementById('orgName').textContent = cfg.org;
+
+    // Aggiorna titolo in base al tipo documento
+    const tipoDoc = evento.tipoDoc || 'certificato';
+    const titolo = tipoDoc === 'attestato' ? '📋 Il tuo Attestato' : '🏆 Il tuo Certificato ECM';
+    const sottotitolo = tipoDoc === 'attestato'
+      ? 'Inserisci il tuo Codice Fiscale per scaricare l'attestato di partecipazione in PDF.'
+      : 'Inserisci il tuo Codice Fiscale per scaricare il certificato ECM in PDF (solo per chi ha raggiunto la soglia di presenza).';
+    document.getElementById('pageTitle').textContent = titolo;
+    document.getElementById('pageSubtitle').textContent = sottotitolo;
+    document.getElementById('btnScarica').textContent = tipoDoc === 'attestato' ? '📥 Scarica il mio attestato' : '📥 Scarica il mio certificato';
     if (cfg.logoBase64) {
       document.getElementById('logoArea').innerHTML = '<img src="' + cfg.logoBase64 + '" style="height:50px;object-fit:contain">';
     }
@@ -147,17 +157,21 @@ window.cercaCertificato = async function() {
     }
 
     const pr = calcPresenza(p);
+    const tipoDoc = evento?.tipoDoc || 'certificato';
     const soglia = parseInt(cfg?.soglia || 75);
     const chiPuo = cfg?.chiPuoScaricare || 'idonei';
 
-    if (chiPuo === 'idonei' && !pr.idoneo) {
-      const msg = cfg?.msgNonIdoneo || 'Non hai raggiunto la soglia minima di presenze richiesta per ottenere il certificato.';
-      showWarn('⚠️ ' + msg + ' (Presenza: ' + pr.pct + '% — Soglia: ' + soglia + '%)');
+    // Per attestato: tutti possono scaricare
+    // Per certificato: solo chi ha raggiunto la soglia (a meno che chiPuo=tutti)
+    if (tipoDoc === 'certificato' && chiPuo === 'idonei' && !pr.idoneo) {
+      const msg = cfg?.msgNonIdoneo || 'Non hai raggiunto la soglia minima di presenze richiesta per ottenere il certificato ECM.';
+      showWarn('⚠️ ' + msg + ' (Presenza: ' + pr.pct + '% — Soglia richiesta: ' + soglia + '%)');
       return;
     }
 
     // Genera e scarica il PDF
-    showOk('✅ Certificato trovato! Download in corso...');
+    const tipoDocMsg = (evento?.tipoDoc || 'certificato') === 'attestato' ? 'Attestato' : 'Certificato';
+    showOk('✅ ' + tipoDocMsg + ' trovato! Download in corso...');
     await generaPDF(p, pr);
 
   } catch(e) {
@@ -169,6 +183,7 @@ window.cercaCertificato = async function() {
 };
 
 function calcPresenza(p) {
+  const tipoDoc = evento?.tipoDoc || 'certificato';
   const logsEnt = p.log.filter(l => l.tipo === 'entrata').sort((a,b)=>(a.tsISO||'').localeCompare(b.tsISO||''));
   const logsUsc = p.log.filter(l => l.tipo === 'uscita').sort((a,b)=>(a.tsISO||'').localeCompare(b.tsISO||''));
   let ore = 0;
@@ -179,7 +194,9 @@ function calcPresenza(p) {
   const oreEv = evento?.oreMinime || 8;
   const pct = Math.min(100, Math.round(ore / oreEv * 100));
   const soglia = parseInt(cfg?.soglia || 75);
-  return { ore: ore.toFixed(1), pct, idoneo: pct >= soglia };
+  // Attestato: tutti idonei; Certificato: solo chi supera la soglia
+  const idoneo = tipoDoc === 'attestato' ? true : pct >= soglia;
+  return { ore: ore.toFixed(1), pct, idoneo };
 }
 
 async function generaPDF(p, pr) {
@@ -242,7 +259,7 @@ async function generaPDF(p, pr) {
   y += 6;
 
   pdf.setFontSize(8);
-  pdf.text('CERTIFICATO DI PARTECIPAZIONE', 148.5, y, { align:'center', charSpace: 1 });
+  pdf.text(evento?.tipoDoc === 'attestato' ? 'ATTESTATO DI PARTECIPAZIONE' : 'CERTIFICATO DI PARTECIPAZIONE ECM', 148.5, y, { align:'center', charSpace: 1 });
   y += 5;
 
   // Divider
@@ -255,7 +272,7 @@ async function generaPDF(p, pr) {
   pdf.setFontSize(20);
   pdf.setTextColor(titleR, titleG, titleB);
   pdf.setFont('helvetica','bold');
-  pdf.text('Attestato di Partecipazione', 148.5, y, { align:'center' });
+  pdf.text(evento?.tipoDoc === 'attestato' ? 'Attestato di Partecipazione' : 'Certificato di Partecipazione ECM', 148.5, y, { align:'center' });
   y += 10;
 
   // Intro
@@ -335,7 +352,8 @@ async function generaPDF(p, pr) {
   // Data/luogo a destra
   pdf.text(dataLuogo, 277, 200, { align:'right' });
 
-  const nomefile = 'certificato_' + (p.cognome||'').toLowerCase() + '_' + (p.nome||'').toLowerCase() + '.pdf';
+  const tipoPrefix = evento?.tipoDoc === 'attestato' ? 'attestato' : 'certificato';
+  const nomefile = tipoPrefix + '_' + (p.cognome||'').toLowerCase() + '_' + (p.nome||'').toLowerCase() + '.pdf';
   pdf.save(nomefile);
 }
 
