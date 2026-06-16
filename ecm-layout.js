@@ -110,7 +110,7 @@
     var _brandSub = _brand.sub || 'ECM Access Control';
     html += '<div class="sidebar-logo">' +
       '<div class="logo-icon" style="background:transparent;padding:0;overflow:hidden">' +
-        '<img src="logo.png" alt="ECM" style="width:36px;height:36px;object-fit:cover;border-radius:10px" onerror="this.style.display=\'none\'">' +
+        '<img src="' + _logoSrc + '" alt="ECM" style="width:36px;height:36px;object-fit:cover;border-radius:10px" onerror="this.src=\'logo.png\'">' +
       '</div>' +
       '<div class="logo-text">' + _brandNome + '<span class="logo-sub">' + _brandSub + '</span></div>' +
     '</div>';

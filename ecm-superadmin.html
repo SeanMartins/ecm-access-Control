@@ -718,6 +718,10 @@ window.editUtente = function(uid) {
       if (pw) pw.style.display = 'flex';
       if (pi) pi.src = u.brandLogo;
       if (pn) pn.textContent = 'Logo salvato';
+      // Pulsante per rimuovere il logo esistente
+      if (document.getElementById('uBrandLogoRemove')) {
+        document.getElementById('uBrandLogoRemove').dataset.rimuoviLogo = 'true';
+      }
     }
   }
   document.getElementById('uPassword').value = '';
@@ -776,7 +780,9 @@ async function salvaUtente() {
     ...(ruolo==='admin' && {
       brandNome: brandNome || null,
       brandSub: brandSub || null,
-      brandLogo: window._brandLogoData || null,
+      // '__REMOVE__' = rimozione esplicita; null = non modificare; data: = nuovo logo
+      ...(window._brandLogoData === '__REMOVE__' && { brandLogo: null }),
+      ...(window._brandLogoData && window._brandLogoData !== '__REMOVE__' && { brandLogo: window._brandLogoData }),
       maxOperatori: parseInt(document.getElementById('uMaxOp')?.value || '5') || 5,
     }),
     updatedAt: serverTimestamp()
@@ -918,7 +924,7 @@ if (_bli) {
   });
 }
 document.getElementById('uBrandLogoRemove')?.addEventListener('click', () => {
-  window._brandLogoData = null;
+  window._brandLogoData = '__REMOVE__';  // segnale esplicito di rimozione
   const pw = document.getElementById('uBrandLogoPreview');
   if (pw) pw.style.display = 'none';
   if (document.getElementById('uBrandLogoInput')) document.getElementById('uBrandLogoInput').value = '';
