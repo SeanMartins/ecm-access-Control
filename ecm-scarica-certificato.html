@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scarica il tuo Certificato ECM</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:linear-gradient(135deg,#F0F6FF 0%,#F5F3FF 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:white;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.12);padding:36px;max-width:440px;width:100%}
+.logo{text-align:center;margin-bottom:24px}
+.logo img{height:50px;object-fit:contain}
+.logo-text{font-size:13px;color:#9B948C;margin-top:6px}
+h1{font-size:22px;font-weight:700;color:#1A1714;margin-bottom:6px;text-align:center}
+.subtitle{font-size:13px;color:#6B6560;text-align:center;margin-bottom:24px;line-height:1.5}
+.field-label{font-size:11px;font-weight:700;color:#6B6560;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.form-input{width:100%;padding:12px 14px;border:1.5px solid #E8E4DE;border-radius:10px;font-size:15px;font-family:inherit;background:white;color:#1A1714;transition:.2s}
+.form-input:focus{outline:none;border-color:#2B4EFF;box-shadow:0 0 0 3px rgba(43,78,255,.1)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:.15s;margin-top:14px}
+.btn-primary{background:#2B4EFF;color:white}
+.btn-primary:hover{opacity:.9}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.msg{padding:12px 14px;border-radius:10px;font-size:13px;margin-top:14px;display:none;line-height:1.5}
+.msg-ok{background:#ECFDF5;color:#065F46;border:1px solid #6EE7B7}
+.msg-err{background:#FEF2F2;color:#991B1B;border:1px solid #FCA5A5}
+.msg-warn{background:#FFFBEB;color:#92400E;border:1px solid #FCD34D}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cert-preview{border:1px solid #E8E4DE;border-radius:12px;overflow:hidden;margin-top:16px;background:#f5f5f5;display:none}
+.evento-info{background:#F8F6F3;border-radius:10px;padding:12px 14px;margin-bottom:20px;display:none}
+.evento-nome{font-size:15px;font-weight:700;color:#1A1714}
+.evento-data{font-size:12px;color:#9B948C;margin-top:3px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div id="logoArea"></div>
+    <div class="logo-text" id="orgName">ECM Access Control</div>
+  </div>
+
+  <div class="evento-info" id="eventoInfo">
+    <div class="evento-nome" id="eventoNome"></div>
+    <div class="evento-data" id="eventoData"></div>
+  </div>
+
+  <h1>📜 Il tuo Certificato</h1>
+  <p class="subtitle">Inserisci il tuo Codice Fiscale per scaricare il certificato di partecipazione in PDF.</p>
+
+  <div>
+    <label class="field-label">Codice Fiscale</label>
+    <input type="text" class="form-input" id="cfInput" placeholder="RSSMRA80A01H501Z"
+      maxlength="16" style="text-transform:uppercase"
+      oninput="this.value=this.value.toUpperCase()"
+      onkeydown="if(event.key==='Enter')cercaCertificato()">
+  </div>
+
+  <button class="btn btn-primary" id="btnScarica" onclick="cercaCertificato()">
+    📥 Scarica il mio certificato
+  </button>
+
+  <div class="msg msg-ok" id="msgOk"></div>
+  <div class="msg msg-err" id="msgErr"></div>
+  <div class="msg msg-warn" id="msgWarn"></div>
+
+  <div class="cert-preview" id="certPreview"></div>
+
+  <p style="font-size:11px;color:#C0BAB4;text-align:center;margin-top:20px">
+    Powered by ECM Access Control · © 2026 Martins Osemwengie
+  </p>
+</div>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, collection, getDocs }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const FB = {
+  apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",
+  authDomain:"ecm-access-control.firebaseapp.com",
+  projectId:"ecm-access-control",
+  storageBucket:"ecm-access-control.firebasestorage.app",
+  messagingSenderId:"727782311741",
+  appId:"1:727782311741:web:4aaf570b1a05caf4192754"
+};
+const app = getApps().length ? getApps()[0] : initializeApp(FB);
+const db  = getFirestore(app);
+
+const urlP = new URLSearchParams(window.location.search);
+const evId = urlP.get('evId');
+let evento = null, cfg = null, partecipanti = [], logs = [];
+
+// Carica dati evento e config
+async function init() {
+  if (!evId) { showErr('Link non valido — manca l\'ID evento.'); return; }
+  try {
+    const [evSnap, cfgSnap] = await Promise.all([
+      getDoc(doc(db,'eventi',evId)),
+      getDoc(doc(db,'eventi',evId,'settings','certificati'))
+    ]);
+    if (!evSnap.exists()) { showErr('Evento non trovato.'); return; }
+    evento = evSnap.data();
+    cfg = cfgSnap.exists() ? cfgSnap.data() : {};
+
+    // Mostra info evento
+    document.getElementById('eventoNome').textContent = evento.nome || '';
+    const fmt = d => d ? new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}) : '';
+    document.getElementById('eventoData').textContent = [fmt(evento.data), evento.luogo].filter(Boolean).join(' · ');
+    document.getElementById('eventoInfo').style.display = 'block';
+    if (cfg.org) document.getElementById('orgName').textContent = cfg.org;
+    if (cfg.logoBase64) {
+      document.getElementById('logoArea').innerHTML = '<img src="' + cfg.logoBase64 + '" style="height:50px;object-fit:contain">';
+    }
+
+    // Carica partecipanti e log
+    const [pSnap, lSnap] = await Promise.all([
+      getDocs(collection(db,'eventi',evId,'partecipanti')),
+      getDocs(collection(db,'eventi',evId,'logs')).catch(() => ({ forEach: ()=>{} }))
+    ]);
+    pSnap.forEach(d => partecipanti.push({id:d.id,...d.data(),log:[]}));
+    lSnap.forEach(d => {
+      const l = {id:d.id,...d.data()};
+      const p = partecipanti.find(x => x.id === l.partecipanteId);
+      if (p) p.log.push(l);
+    });
+
+  } catch(e) {
+    showErr('Errore caricamento: ' + e.message);
+  }
+}
+
+window.cercaCertificato = async function() {
+  const cf = document.getElementById('cfInput').value.trim().toUpperCase();
+  if (!cf || cf.length < 11) { showErr('Inserisci un Codice Fiscale valido.'); return; }
+
+  const btn = document.getElementById('btnScarica');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Ricerca in corso...';
+  hideAll();
+
+  try {
+    const p = partecipanti.find(x => (x.cf||'').toUpperCase() === cf);
+    if (!p) {
+      showErr('Nessun partecipante trovato con questo Codice Fiscale. Verifica di essere registrato all\'evento.');
+      return;
+    }
+
+    const pr = calcPresenza(p);
+    const soglia = parseInt(cfg?.soglia || 75);
+    const chiPuo = cfg?.chiPuoScaricare || 'idonei';
+
+    if (chiPuo === 'idonei' && !pr.idoneo) {
+      const msg = cfg?.msgNonIdoneo || 'Non hai raggiunto la soglia minima di presenze richiesta per ottenere il certificato.';
+      showWarn('⚠️ ' + msg + ' (Presenza: ' + pr.pct + '% — Soglia: ' + soglia + '%)');
+      return;
+    }
+
+    // Genera e scarica il PDF
+    showOk('✅ Certificato trovato! Download in corso...');
+    await generaPDF(p, pr);
+
+  } catch(e) {
+    showErr('Errore: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '📥 Scarica il mio certificato';
+  }
+};
+
+function calcPresenza(p) {
+  const logsEnt = p.log.filter(l => l.tipo === 'entrata').sort((a,b)=>(a.tsISO||'').localeCompare(b.tsISO||''));
+  const logsUsc = p.log.filter(l => l.tipo === 'uscita').sort((a,b)=>(a.tsISO||'').localeCompare(b.tsISO||''));
+  let ore = 0;
+  logsEnt.forEach((ent) => {
+    const usc = logsUsc.find(u => u.tsISO > ent.tsISO);
+    if (usc) ore += (new Date(usc.tsISO) - new Date(ent.tsISO)) / 3600000;
+  });
+  const oreEv = evento?.oreMinime || 8;
+  const pct = Math.min(100, Math.round(ore / oreEv * 100));
+  const soglia = parseInt(cfg?.soglia || 75);
+  return { ore: ore.toFixed(1), pct, idoneo: pct >= soglia };
+}
+
+async function generaPDF(p, pr) {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+
+  const org       = cfg?.org || 'ECM Access Control';
+  const dataLuogo = cfg?.dataLuogo || (evento?.data ? new Date(evento.data).toLocaleDateString('it-IT') : '');
+  const firma     = cfg?.firma || '—';
+  const ruolo     = cfg?.ruolo || 'Responsabile Scientifico';
+  const crediti   = parseInt(cfg?.crediti || 0);
+  const evNome    = evento?.nome || 'Evento ECM';
+  const certNum   = 'ECM-' + p.id.slice(-6).toUpperCase() + '-' + new Date().getFullYear();
+  const template  = cfg?.template || 'classic';
+
+  // Sfondo colorato per template moderno
+  if (template === 'modern') {
+    pdf.setFillColor(10, 22, 40);
+    pdf.rect(0, 0, 297, 210, 'F');
+    pdf.setFillColor(30, 95, 168);
+    pdf.rect(0, 180, 297, 30, 'F');
+  } else if (template === 'medical') {
+    pdf.setFillColor(232, 245, 233);
+    pdf.rect(0, 0, 297, 210, 'F');
+  }
+
+  // Bordo per classic e minimal
+  if (template === 'classic') {
+    pdf.setDrawColor(26, 58, 92);
+    pdf.setLineWidth(0.8);
+    pdf.rect(8, 8, 281, 194);
+    pdf.setLineWidth(0.3);
+    pdf.rect(10, 10, 277, 190);
+  } else if (template === 'minimal') {
+    pdf.setDrawColor(34, 34, 34);
+    pdf.setLineWidth(1.5);
+    pdf.rect(5, 5, 287, 200);
+  }
+
+  const isDark = template === 'modern';
+  const accentR = isDark ? 0 : 26, accentG = isDark ? 180 : 58, accentB = isDark ? 216 : 92;
+  const titleR  = isDark ? 255 : 26, titleG = isDark ? 255 : 58, titleB = isDark ? 255 : 92;
+  const textR   = isDark ? 255 : 51, textG = isDark ? 255 : 51, textB = isDark ? 255 : 51;
+  const subR    = isDark ? 180 : 120, subG = isDark ? 200 : 120, subB = isDark ? 220 : 120;
+
+  let y = 25;
+
+  // Logo se disponibile
+  if (cfg?.logoBase64) {
+    try {
+      pdf.addImage(cfg.logoBase64, 'JPEG', 130, y-5, 37, 15, '', 'FAST');
+      y += 18;
+    } catch(e) {}
+  }
+
+  // Ente
+  pdf.setFontSize(9);
+  pdf.setTextColor(subR, subG, subB);
+  pdf.text(org.toUpperCase(), 148.5, y, { align:'center', charSpace: 1.5 });
+  y += 6;
+
+  pdf.setFontSize(8);
+  pdf.text('CERTIFICATO DI PARTECIPAZIONE', 148.5, y, { align:'center', charSpace: 1 });
+  y += 5;
+
+  // Divider
+  pdf.setDrawColor(accentR, accentG, accentB);
+  pdf.setLineWidth(0.8);
+  pdf.line(119, y, 178, y);
+  y += 10;
+
+  // Titolo
+  pdf.setFontSize(20);
+  pdf.setTextColor(titleR, titleG, titleB);
+  pdf.setFont('helvetica','bold');
+  pdf.text('Attestato di Partecipazione', 148.5, y, { align:'center' });
+  y += 10;
+
+  // Intro
+  pdf.setFontSize(11);
+  pdf.setTextColor(subR, subG, subB);
+  pdf.setFont('helvetica','normal');
+  pdf.text('Si attesta che', 148.5, y, { align:'center' });
+  y += 10;
+
+  // Nome
+  pdf.setFontSize(26);
+  pdf.setTextColor(titleR, titleG, titleB);
+  pdf.setFont('helvetica','bold');
+  pdf.text(((p.cognome||'') + ' ' + (p.nome||'')).trim(), 148.5, y, { align:'center' });
+  y += 8;
+
+  // CF e professione
+  if (p.cf) {
+    pdf.setFontSize(9); pdf.setFont('courier','normal');
+    pdf.setTextColor(subR, subG, subB);
+    pdf.text('C.F. ' + p.cf, 148.5, y, { align:'center' });
+    y += 6;
+  }
+  if (p.professione) {
+    pdf.setFontSize(10); pdf.setFont('helvetica','italic');
+    pdf.text(p.professione, 148.5, y, { align:'center' });
+    y += 7;
+  }
+
+  // Testo
+  pdf.setFontSize(11); pdf.setFont('helvetica','normal');
+  pdf.setTextColor(textR, textG, textB);
+  const testo = cfg?.testo || ('ha partecipato al ' + evNome + ', svoltosi il ' + dataLuogo + ', con una presenza del ' + pr.pct + '% (' + pr.ore + ' ore).');
+  const testoClean = testo.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  const lines = pdf.splitTextToSize(testoClean, 200);
+  pdf.text(lines, 148.5, y, { align:'center' });
+  y += lines.length * 5.5 + 6;
+
+  // Stats
+  const statX = [100, 148.5, crediti > 0 ? 197 : null].filter(Boolean);
+  const stats = [
+    { v: pr.pct + '%', l: 'Presenza' },
+    { v: pr.ore + 'h', l: 'Ore totali' },
+    ...(crediti > 0 ? [{ v: crediti + ' cr.', l: 'Crediti ECM' }] : [])
+  ];
+  stats.forEach((st, i) => {
+    const sx = statX[i];
+    pdf.setFillColor(accentR, accentG, accentB);
+    pdf.roundedRect(sx - 15, y - 7, 30, 14, 2, 2, 'F');
+    pdf.setFontSize(14); pdf.setFont('helvetica','bold'); pdf.setTextColor(255,255,255);
+    pdf.text(st.v, sx, y, { align:'center' });
+    pdf.setFontSize(7); pdf.setFont('helvetica','normal');
+    pdf.text(st.l.toUpperCase(), sx, y + 5, { align:'center' });
+  });
+  y += 20;
+
+  // Footer
+  pdf.setFontSize(8); pdf.setFont('helvetica','normal');
+  pdf.setTextColor(subR, subG, subB);
+  pdf.text(certNum, 20, 195);
+  pdf.text(new Date().toLocaleDateString('it-IT'), 20, 200);
+
+  // Firma
+  if (cfg?.firmaBase64) {
+    try {
+      pdf.addImage(cfg.firmaBase64, 'JPEG', 113, 183, 30, 12, '', 'FAST');
+    } catch(e) {}
+  }
+  pdf.line(110, 197, 186, 197);
+  pdf.setFontSize(9); pdf.setFont('helvetica','bold');
+  pdf.setTextColor(textR, textG, textB);
+  pdf.text(firma, 148.5, 202, { align:'center' });
+  pdf.setFontSize(8); pdf.setFont('helvetica','normal');
+  pdf.setTextColor(subR, subG, subB);
+  pdf.text(ruolo, 148.5, 207, { align:'center' });
+
+  // Data/luogo a destra
+  pdf.text(dataLuogo, 277, 200, { align:'right' });
+
+  const nomefile = 'certificato_' + (p.cognome||'').toLowerCase() + '_' + (p.nome||'').toLowerCase() + '.pdf';
+  pdf.save(nomefile);
+}
+
+function showOk(msg) {
+  hideAll(); const el = document.getElementById('msgOk');
+  el.textContent = msg; el.style.display = 'block';
+}
+function showErr(msg) {
+  hideAll(); const el = document.getElementById('msgErr');
+  el.textContent = msg; el.style.display = 'block';
+}
+function showWarn(msg) {
+  hideAll(); const el = document.getElementById('msgWarn');
+  el.textContent = msg; el.style.display = 'block';
+}
+function hideAll() {
+  ['msgOk','msgErr','msgWarn'].forEach(id => document.getElementById(id).style.display = 'none');
+}
+
+init();
+</script>
+</body>
+</html>
