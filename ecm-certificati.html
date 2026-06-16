@@ -758,9 +758,8 @@ async function generaPDF(p) {
     iframe.onload = resolve;
     iframe.srcdoc = '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
       '<style>*{box-sizing:border-box;margin:0;padding:0}body{width:297mm;height:210mm}' +
-      '.cert{width:297mm;height:210mm;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20mm 18mm;font-family:"Times New Roman",serif}' +
-      '</style></head><body>' + certHtml + '<div class="ecm-version-footer" id="ecmVersionFooter"></div>
-</body></html>';
+      '.cert{width:297mm;height:210mm;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20mm 18mm;font-family:serif}</style>' +
+      '</head><body>' + certHtml + '</body></html>';
   });
 
   // Usa jsPDF con html
