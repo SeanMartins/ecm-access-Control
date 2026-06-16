@@ -258,10 +258,10 @@ function renderPasto(pasto) {
     <div class="pasto-card">
       <div class="pasto-title">${icon} ${pasto.charAt(0).toUpperCase()+pasto.slice(1)} — <strong>${partPasto.length}</strong> persone</div>
       <div class="preferenza-grid">
-        ${Object.entries(byDieta).map(([d,ps])=>{const dI=DIETE[d]||DIETE.standard;return`<div class="pref-card"><div class="pref-icon">${dI.icon}</div><div class="pref-num">${ps.length}</div><div class="pref-label">${dI.label}</div></div>`;}).join('')}
+        ${Object.entries(byDieta).map(([d,ps])=>{const dI=DIETE[d]||DIETE.standard;return '<div class="pref-card"><div class="pref-icon">${dI.icon}</div><div class="pref-num">${ps.length}</div><div class="pref-label">${dI.label}</div></div>`;}).join('')}
       </div>
       <div class="table-wrap"><table><thead><tr><th>Cognome</th><th>Nome</th><th>Dieta</th><th>Allergie</th></tr></thead><tbody>
-        ${partPasto.map(p=>{const d=p.dieta||'standard';const dI=DIETE[d]||DIETE.standard;return`<tr><td style="font-weight:500">${esc(p.cognome||'')}</td><td>${esc(p.nome||'')}</td><td><span class="dieta-badge ${dI.cls}">${dI.icon} ${dI.label}</span></td><td style="font-size:11px">${(p.allergie||[]).map(a=>'<span class="allergia-badge">⚠️ '+esc(a)+'</span>').join('')||'—'}</td></tr>`;}).join('')}
+        ${partPasto.map(p=>{const d=p.dieta||'standard';const dI=DIETE[d]||DIETE.standard;return '<tr><td style="font-weight:500">${esc(p.cognome||'')}</td><td>${esc(p.nome||'')}</td><td><span class="dieta-badge ${dI.cls}">${dI.icon} ${dI.label}</span></td><td style="font-size:11px">${(p.allergie||[]).map(a=>'<span class="allergia-badge">⚠️ '+esc(a)+'</span>').join('')||'—'}</td></tr>`;}).join('')}
       </tbody></table></div>
     </div>`;
 }
@@ -273,7 +273,7 @@ function renderAllergie() {
       ⚠️ ${conAllergie.length} partecipanti con allergie o intolleranze
     </div>
     <div class="table-wrap"><table><thead><tr><th>Cognome</th><th>Nome</th><th>Dieta</th><th>Allergie / Intolleranze</th><th>Note catering</th></tr></thead><tbody>
-      ${conAllergie.map(p=>{const d=p.dieta||'standard';const dI=DIETE[d]||DIETE.standard;return`<tr><td style="font-weight:600">${esc(p.cognome||'')}</td><td>${esc(p.nome||'')}</td><td><span class="dieta-badge ${dI.cls}">${dI.icon} ${dI.label}</span></td><td>${(p.allergie||[]).map(a=>'<span class="allergia-badge">⚠️ '+esc(a)+'</span>').join(' ')}</td><td style="font-size:12px;color:var(--text2)">${esc(p.noteCatering||'—')}</td></tr>`;}).join('')}
+      ${conAllergie.map(p=>{const d=p.dieta||'standard';const dI=DIETE[d]||DIETE.standard;return '<tr><td style="font-weight:600">${esc(p.cognome||'')}</td><td>${esc(p.nome||'')}</td><td><span class="dieta-badge ${dI.cls}">${dI.icon} ${dI.label}</span></td><td>${(p.allergie||[]).map(a=>'<span class="allergia-badge">⚠️ '+esc(a)+'</span>').join(' ')}</td><td style="font-size:12px;color:var(--text2)">${esc(p.noteCatering||'—')}</td></tr>`;}).join('')}
     </tbody></table></div>`:
     '<div class="empty-state"><div style="font-size:32px;opacity:.3;margin-bottom:8px">✅</div><div>Nessun partecipante con allergie registrate</div></div>';
 }
