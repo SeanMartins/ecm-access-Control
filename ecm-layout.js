@@ -212,7 +212,16 @@
     if (logoutBtn) {
       logoutBtn.addEventListener('click', function() {
         localStorage.removeItem('ecm_op_user');
-        try { if (window.__ecmSignOut) window.__ecmSignOut(); else window.location.href = 'ecm-login-op.html'; } catch(e) { window.location.href = 'ecm-login-op.html'; }
+        try {
+          if (window.__ecmSignOut) {
+            window.__ecmSignOut();
+          } else {
+            // Fallback: pulisci tutto e vai al login principale
+            localStorage.removeItem('ecm_brand');
+            localStorage.removeItem('ecm_profilo');
+            localStorage.removeItem('ecm_op_user');
+            window.location.href = 'ecm-login.html';
+          } } catch(e) { window.location.href = 'ecm-login-op.html'; }
       });
     }
 

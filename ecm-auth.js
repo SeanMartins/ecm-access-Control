@@ -258,10 +258,22 @@ export async function injectUserBar(slotId) {
       window.location.href = PAGINA_LOGIN;
     });
 
-    // Anche window._logoutECM per compatibilità con vecchio codice
-    window._logoutECM = async () => {
-      document.getElementById('btnLogoutECM')?.click();
+    // Compatibilità con layout.js (sidebarLogout → __ecmSignOut)
+    window.__ecmSignOut = async () => {
+      try {
+        await addDoc(collection(getDB(), 'log_attivita'), {
+          tipo: 'logout', email: user.email,
+          dettaglio: 'Logout sidebar: ' + user.email,
+          ts: serverTimestamp(), data: new Date().toISOString()
+        });
+      } catch(e) {}
+      localStorage.removeItem('ecm_brand');
+      localStorage.removeItem('ecm_profilo');
+      await signOut(auth);
+      window.location.href = PAGINA_LOGIN;
     };
+    // Alias per compatibilità
+    window._logoutECM = window.__ecmSignOut;
   }
 
   // Usa authStateReady per avere l'utente corretto

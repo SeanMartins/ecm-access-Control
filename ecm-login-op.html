@@ -102,8 +102,20 @@ const db=getFirestore(app);
 const auth=getAuth(app);
 
 // Se già loggato con Google vai alla home
-onAuthStateChanged(auth, user=>{
-  if(user) window.location.href='ecm-home.html';
+// Redirect automatico SOLO se l'utente è un operatore/scanner
+// (non per admin Firebase che potrebbero arrivare qui per errore)
+onAuthStateChanged(auth, async user => {
+  if (!user) return; // non loggato — mostra la pagina di login
+  // Controlla se è un operatore locale (non un admin Firebase)
+  // Gli operatori locali hanno email = null o email vuota (signInAnonymously)
+  if (!user.email) {
+    // È un utente anonimo / operatore locale — ok reindirizza
+    window.location.href = 'ecm-home.html';
+    return;
+  }
+  // Ha una email Firebase → è un admin/superadmin → non reindirizzare qui
+  // Probabilmente è arrivato per sbaglio dopo un logout — portalo al login admin
+  window.location.href = 'ecm-login.html';
 });
 
 // Enter per login

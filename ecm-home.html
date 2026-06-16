@@ -332,7 +332,7 @@ if (!evId) {
 }
 
 document.getElementById('resetBtn').addEventListener('click', () => {
-  if (!confirm('Cambiare evento?\nL\`L'ID verra' rimosso da questo browser (i dati restano su Firebase).`)) return;
+  if (!confirm('Cambiare evento? L\'ID evento verra rimosso dal browser (i dati restano su Firebase).')) return;
   localStorage.removeItem('ecm_eventId');
   location.reload();
 });
