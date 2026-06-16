@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="mobile-web-app-capable" content="yes">
+<title>ECM — Congress Dashboard</title>
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
+<script src="ecm-layout.js"></script>
+<style>
+:root{--congress:#7C3AED;--congress-light:#EDE9FE;--accent:#2B4EFF;--accent-light:#EEF1FF;
+--success:#059669;--danger:#DC2626;--warn:#D97706;--text:#1A1714;--text2:#6B6560;--text3:#9B948C;
+--border:#E8E4DE;--surface:#F8F6F3;--surface2:#F0EDE8;--radius:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"DM Sans",sans-serif;background:var(--surface);color:var(--text)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:center}
+.stat-num{font-size:32px;font-weight:700;color:var(--congress)}
+.stat-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:24px}
+.module-card{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:20px;
+  display:flex;flex-direction:column;align-items:flex-start;gap:8px;cursor:pointer;
+  transition:.2s;text-decoration:none;color:inherit}
+.module-card:hover{border-color:var(--congress);transform:translateY(-2px);box-shadow:0 4px 16px rgba(124,58,237,.1)}
+.module-icon{font-size:28px}
+.module-name{font-size:14px;font-weight:600;color:var(--text)}
+.module-desc{font-size:12px;color:var(--text3);line-height:1.4}
+.section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--text3);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.ev-select-wrap{background:white;border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px;margin-bottom:20px}
+.form-input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;
+  font-size:13px;font-family:inherit;background:white;color:var(--text)}
+.form-input:focus{outline:none;border-color:var(--congress);box-shadow:0 0 0 2px var(--congress-light)}
+</style>
+</head>
+<body>
+<div class="ecm-sidebar" id="ecmSidebar"><div id="sidebarContent"></div></div>
+<div class="ecm-main">
+<div class="ecm-topbar">
+  <div class="page-title">🎪 Congress Dashboard</div>
+  <div class="topbar-right">
+    <span id="fbDot" class="fb-dot"></span>
+    <div id="userBarSlot"></div>
+  </div>
+</div>
+
+<div class="ecm-content" id="mainContent" style="display:none">
+  <!-- Selezione evento -->
+  <div class="ev-select-wrap">
+    <label style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:8px">Evento Congress selezionato</label>
+    <select class="form-input" id="evSelect" onchange="cambiaEvento(this.value)">
+      <option value="">— Seleziona evento —</option>
+    </select>
+  </div>
+
+  <!-- Stats -->
+  <div class="section-title">📊 Statistiche evento</div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" id="sTotPart">—</div><div class="stat-lbl">Partecipanti</div></div>
+    <div class="stat-card"><div class="stat-num" id="sTotSess">—</div><div class="stat-lbl">Sessioni</div></div>
+    <div class="stat-card"><div class="stat-num" id="sTotRel">—</div><div class="stat-lbl">Relatori</div></div>
+    <div class="stat-card"><div class="stat-num" id="sTotSale">—</div><div class="stat-lbl">Sale</div></div>
+    <div class="stat-card"><div class="stat-num" id="sTotStand">—</div><div class="stat-lbl">Stand</div></div>
+    <div class="stat-card"><div class="stat-num" id="sDentroOra">—</div><div class="stat-lbl">Dentro ora</div></div>
+  </div>
+
+  <!-- Moduli rapidi -->
+  <div class="section-title">🚀 Accesso rapido moduli</div>
+  <div class="module-grid">
+    <a class="module-card" id="lnkProgramma" href="congress-programma.html">
+      <div class="module-icon">📅</div>
+      <div class="module-name">Programma sessioni</div>
+      <div class="module-desc">Gestisci sessioni, relatori e sale</div>
+    </a>
+    <a class="module-card" id="lnkCheckin" href="congress-checkin.html">
+      <div class="module-icon">📷</div>
+      <div class="module-name">Check-in sessioni</div>
+      <div class="module-desc">Scanner QR per entrata/uscita sessioni</div>
+    </a>
+    <a class="module-card" id="lnkAgenda" href="congress-agenda.html">
+      <div class="module-icon">📋</div>
+      <div class="module-name">Agenda partecipante</div>
+      <div class="module-desc">Programma personalizzato per ogni iscritto</div>
+    </a>
+    <a class="module-card" id="lnkStand" href="convention-stand.html">
+      <div class="module-icon">🏪</div>
+      <div class="module-name">Stand espositivi</div>
+      <div class="module-desc">Mappa e gestione espositori</div>
+    </a>
+    <a class="module-card" id="lnkCatering" href="convention-catering.html">
+      <div class="module-icon">🍽️</div>
+      <div class="module-name">Catering</div>
+      <div class="module-desc">Gestione pasti, diete e allergie</div>
+    </a>
+    <a class="module-card" id="lnkNavette" href="convention-navette.html">
+      <div class="module-icon">🚌</div>
+      <div class="module-name">Navette</div>
+      <div class="module-desc">Prenotazioni transfer e parcheggi</div>
+    </a>
+    <a class="module-card" id="lnkReport" href="congress-report.html">
+      <div class="module-icon">📊</div>
+      <div class="module-name">Report presenze</div>
+      <div class="module-desc">Statistiche e presenze per sessione</div>
+    </a>
+    <a class="module-card" id="lnkCert" href="ecm-certificati.html">
+      <div class="module-icon">📜</div>
+      <div class="module-name">Certificati ECM</div>
+      <div class="module-desc">Template, download PDF e link pubblico</div>
+    </a>
+  </div>
+</div>
+
+<div id="loadingState" style="display:flex;align-items:center;justify-content:center;min-height:50vh;gap:10px;color:var(--text3)">
+  <span style="font-size:20px">⏳</span> Caricamento...
+</div>
+</div>
+
+<script type="module">
+import { requireAuth, injectUserBar } from "./ecm-auth.js";
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, getDoc }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",
+  projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",
+  messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+const app = getApps().length ? getApps()[0] : initializeApp(FB);
+const db = getFirestore(app);
+
+let evId = null, eventi = [];
+
+async function initApp() {
+  try { await requireAuth(); injectUserBar("userBarSlot"); } catch(e) {}
+
+  // Carica tutti gli eventi
+  const snap = await getDocs(collection(db,"eventi"));
+  eventi = [];
+  snap.forEach(d => eventi.push({id:d.id,...d.data()}));
+  eventi.sort((a,b) => (b.creatoAt||'').localeCompare(a.creatoAt||''));
+
+  const sel = document.getElementById("evSelect");
+  eventi.forEach(ev => {
+    const opt = document.createElement("option");
+    opt.value = ev.id;
+    const fmt = d => d ? new Date(d).toLocaleDateString("it-IT",{day:"2-digit",month:"short",year:"numeric"}) : "";
+    opt.textContent = (ev.nome||"Evento") + (ev.data ? " ("+fmt(ev.data)+")" : "");
+    sel.appendChild(opt);
+  });
+
+  // Pre-seleziona da URL o localStorage
+  const urlP = new URLSearchParams(window.location.search);
+  evId = urlP.get("evId") || localStorage.getItem("ecm_eventId");
+  if (evId && eventi.find(e => e.id === evId)) {
+    sel.value = evId;
+    await caricaStats(evId);
+  }
+
+  document.getElementById("loadingState").style.display = "none";
+  document.getElementById("mainContent").style.display = "block";
+}
+
+window.cambiaEvento = async function(id) {
+  evId = id;
+  if (!evId) return;
+  localStorage.setItem("ecm_eventId", evId);
+  // Aggiorna tutti i link con il nuovo evId
+  ["lnkProgramma","lnkCheckin","lnkAgenda","lnkStand","lnkCatering","lnkNavette","lnkReport","lnkCert"].forEach(lid => {
+    const a = document.getElementById(lid);
+    if (a) {
+      const base = a.href.split("?")[0];
+      a.href = base + "?evId=" + evId;
+    }
+  });
+  await caricaStats(evId);
+};
+
+async function caricaStats(id) {
+  try {
+    const [partSnap, sessSnap, relSnap, saleSnap, standSnap, logSnap] = await Promise.all([
+      getDocs(collection(db,"eventi",id,"partecipanti")),
+      getDocs(collection(db,"eventi",id,"sessioni")).catch(() => ({size:0,forEach:()=>{}})),
+      getDocs(collection(db,"eventi",id,"relatori")).catch(() => ({size:0,forEach:()=>{}})),
+      getDocs(collection(db,"eventi",id,"sale")).catch(() => ({size:0,forEach:()=>{}})),
+      getDocs(collection(db,"eventi",id,"stand")).catch(() => ({size:0,forEach:()=>{}})),
+      getDocs(collection(db,"eventi",id,"logs")).catch(() => ({size:0,docs:[]})),
+    ]);
+
+    // Dentro ora: log entrata senza corrispondente uscita nelle ultime 8h
+    const now = new Date();
+    const logsRecenti = [];
+    logSnap.forEach && logSnap.forEach(d => logsRecenti.push(d.data()));
+    const dentroOra = logsRecenti.filter(l => {
+      if (l.tipo !== "entrata") return false;
+      const t = l.tsISO ? new Date(l.tsISO) : null;
+      return t && (now - t) < 28800000; // ultime 8h
+    }).length;
+
+    document.getElementById("sTotPart").textContent = partSnap.size;
+    document.getElementById("sTotSess").textContent = sessSnap.size;
+    document.getElementById("sTotRel").textContent = relSnap.size;
+    document.getElementById("sTotSale").textContent = saleSnap.size;
+    document.getElementById("sTotStand").textContent = standSnap.size;
+    document.getElementById("sDentroOra").textContent = dentroOra;
+
+    // Aggiorna link con evId
+    await cambiaEvento(id);
+  } catch(e) {
+    console.warn("Stats:", e);
+  }
+}
+
+initApp();
+</script>
+</body>
+</html>

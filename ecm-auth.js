@@ -69,7 +69,7 @@ function getModuloCorrente() {
     'convention-manager':'convention','convention-programma':'convention','convention-stand':'convention',
     'convention-checkin':'convention','convention-catering':'convention','convention-navette':'convention',
     'convention-report':'convention','wedding-manager':'wedding','ecm-pagamenti':'pagamenti',
-    'ecm-admin':'admin','ecm-superadmin':'superadmin','ecm-certificati':'certificati','ecm-scarica-certificato':'pubblico'
+    'ecm-admin':'admin','ecm-superadmin':'superadmin','ecm-certificati':'certificati','ecm-scarica-certificato':'pubblico','congress-dashboard':'congress'
   };
   return mappa[page] || 'ecm';
 }

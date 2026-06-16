@@ -1,3 +1,4 @@
+// ECM Layout v=2026-06-16T11:30
 // ECM ACCESS CONTROL — Layout & Sidebar v2.2
 (function(window) {
   'use strict';
@@ -45,15 +46,20 @@
     { id:'badge',    key:'nav_badge',    icon:'badge',    href:'ecm-blocco2.html' },
     { id:'scanner',  key:'nav_scanner',  icon:'scanner',  href:'ecm-blocco3.html' },
     { id:'report',   key:'nav_report',   icon:'report',   href:'ecm-blocco4.html' },
+    { id:'certificati-ev', key:'nav_certificati', icon:'cert', href:'ecm-certificati.html' },
     { type:'section', key:'nav_participants' },
     { id:'register', key:'nav_register', icon:'register', href:'ecm-blocco6.html' },
     { id:'survey',   key:'nav_survey',   icon:'survey',   href:'ecm-blocco5.html' },
     { id:'quiz',     key:'nav_quiz',     icon:'quiz',     href:'ecm-blocco7.html' },
     { type:'section', key:'nav_congress' },
+    { id:'congress-dashboard', key:'nav_congress_dash', icon:'home', href:'congress-dashboard.html' },
     { id:'congress', key:'nav_congress_prog', icon:'congress', href:'congress-programma.html' },
     { id:'congress-checkin', key:'nav_congress_checkin', icon:'scanner', href:'congress-checkin.html' },
     { id:'congress-agenda', key:'nav_congress_agenda', icon:'report', href:'congress-agenda.html' },
     { id:'congress-report', key:'nav_congress_report', icon:'report', href:'congress-report.html' },
+    { id:'congress-stand', key:'nav_congress_stand', icon:'stand', href:'convention-stand.html' },
+    { id:'congress-catering', key:'nav_congress_catering', icon:'catering', href:'convention-catering.html' },
+    { id:'congress-navette', key:'nav_congress_navette', icon:'navette', href:'convention-navette.html' },
     { id:'congress-cert', key:'nav_congress_cert', icon:'cert', href:'ecm-certificati.html' },
     { id:'congress-archivio', key:'nav_congress_archivio', icon:'report', href:'congress-archivio.html' },
     { type:'section', key:'nav_convention' },

@@ -1,3 +1,4 @@
+// ECM i18n v=2026-06-16T11:30
 // ECM ACCESS CONTROL — i18n v2.2
 (function(window) {
   'use strict';
@@ -33,6 +34,12 @@
       nav_congress_agenda:'Agenda partecipante',
       nav_congress_checkin:'Check-in sessioni',
       nav_congress_prog:'Programma sessioni',
+      nav_congress_dash:'Dashboard',
+      nav_congress_stand:'Stand espositivi',
+      nav_congress_catering:'Catering',
+      nav_congress_navette:'Navette',
+      nav_certificati:'Certificati ECM',
+      nav_superadmin:'Super Admin',
       nav_congress_speakers:'Relatori',
       nav_wedding:'Wedding',
       nav_wedding_home:'Wedding Manager',
