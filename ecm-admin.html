@@ -205,19 +205,19 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(43
           <span class="role-icon">🔧</span>
           <div class="role-name">Operatore completo</div>
           <div class="role-desc">Tutti i blocchi: setup, badge, accessi, report</div>
-          <span class="role-limit lim-blue">Max 3 utenti</span>
+          <span class="role-limit lim-blue" id="limOperatore">Max ? utenti</span>
         </button>
         <button type="button" class="role-btn" id="rb-scanner" onclick="selectRole('scanner')">
           <span class="role-icon">📷</span>
           <div class="role-name">Scanner accessi</div>
           <div class="role-desc">Solo Blocco 3 — scansione entrate e uscite</div>
-          <span class="role-limit lim-green">Max 10 utenti</span>
+          <span class="role-limit lim-green" id="limScanner">Max ? utenti</span>
         </button>
         <button type="button" class="role-btn" id="rb-report" onclick="selectRole('report')">
           <span class="role-icon">📊</span>
           <div class="role-name">Solo report</div>
           <div class="role-desc">Lettura Blocco 3 e Blocco 4</div>
-          <span class="role-limit lim-warn">Max 5 utenti</span>
+          <span class="role-limit lim-warn" id="limReport">Max ? utenti</span>
         </button>
       </div>
     </div>
@@ -325,6 +325,26 @@ let selectedRole=null;
 let eventiModalUid=null;
 let tuttiEventi=[];
 
+// Carica e mostra i limiti reali all'avvio
+async function aggiornaBadgeLimiti() {
+  try {
+    const adminDoc = await getDoc(doc(db,'utenti',user.uid));
+    let maxOp = 20, maxSc = 10, maxRp = 5;
+    if (adminDoc.exists() && adminDoc.data().maxOperatori) {
+      maxOp = adminDoc.data().maxOperatori;
+      maxSc = Math.ceil(maxOp * 0.5);
+      maxRp = Math.ceil(maxOp * 0.25);
+    }
+    const lOp = document.getElementById('limOperatore');
+    const lSc = document.getElementById('limScanner');
+    const lRp = document.getElementById('limReport');
+    if (lOp) lOp.textContent = 'Max ' + maxOp + ' utenti';
+    if (lSc) lSc.textContent = 'Max ' + maxSc + ' utenti';
+    if (lRp) lRp.textContent = 'Max ' + maxRp + ' utenti';
+  } catch(e) { console.warn('Limiti:', e); }
+}
+aggiornaBadgeLimiti();
+
 // Scadenza default domani
 const tom=new Date(); tom.setDate(tom.getDate()+1);
 document.getElementById('newScadenza').value=tom.toISOString().slice(0,10);
@@ -392,6 +412,13 @@ window.creaUtente=async function(){
       }
     } catch(e) {}
     const limiti = { operatore: maxOp, scanner: maxScanner, report: maxReport };
+    // Aggiorna i badge nella UI con i limiti reali
+    const _limOp = document.getElementById('limOperatore');
+    const _limSc = document.getElementById('limScanner');
+    const _limRp = document.getElementById('limReport');
+    if (_limOp) _limOp.textContent = 'Max ' + maxOp + ' utenti';
+    if (_limSc) _limSc.textContent = 'Max ' + maxScanner + ' utenti';
+    if (_limRp) _limRp.textContent = 'Max ' + maxReport + ' utenti';
     if(countRole>=limiti[selectedRole]){
       showAlert('error','Limite raggiunto: max ' + limiti[selectedRole] + ' ' + selectedRole + '. Contatta il tuo amministratore per aumentare il limite.');
       btn.disabled=false; btn.innerHTML='Crea utente →'; return;
