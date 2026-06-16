@@ -350,7 +350,7 @@ function renderPartReport() {
   document.getElementById('partReport').innerHTML = `<table>
     <thead><tr>
       <th>CF</th><th>Cognome</th><th>Nome</th>
-      ${sessFiltrate.map(s=>'\2'+esc((s.titolo||'').slice(0,15))+'\4').join('')}
+      ${sessFiltrate.map(s=>'<span style="font-size:10px;background:var(--congress-light);color:var(--congress);padding:2px 7px;border-radius:4px;margin:2px">' + esc((s.titolo||'').slice(0,15)) + '</span>').join('')}
       <th>Presenze</th><th>%</th>
     </tr></thead>
     <tbody>

@@ -516,9 +516,8 @@ function precompilaDaEvento() {
   const luogo = evento.luogo || '';
   document.getElementById('cfgDataLuogo').value = [data, luogo].filter(Boolean).join(' — ');
   document.getElementById('cfgOrg').value = evento.org || 'Multimedia Meeting Group';
-  const c = parseInt(documento?.getElementById?.('cfgCrediti')?.value || evento.creditiEcm || 0);
-  const el = document.getElementById('cfgCrediti');
-  if (el) el.value = evento.creditiEcm || 0;
+  const elCred = document.getElementById('cfgCrediti');
+  if (elCred) elCred.value = evento.creditiEcm || 0;
 }
 
 function caricaConfig(cfg) {

@@ -650,7 +650,19 @@ async function loadIscrizioni() {
     document.getElementById('sTotIscritti').textContent = parts.length;
     const c = document.getElementById('iscrizioniContent');
     if (!parts.length) { c.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Nessun partecipante iscritto</div></div>'; return; }
-    c.innerHTML = `<div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead style="background:var(--surface2)"><tr><th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border)">Nome</th><th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border)">CF</th><th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border)">Sessioni</th></tr></thead><tbody>${parts.map(p=>'\2'+esc(p.nome||'')+'\4').join('')}</tbody></table></div>`;
+    c.innerHTML = '<div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead style="background:var(--surface2)"><tr>' +
+      '<th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border)">Nome</th>' +
+      '<th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border)">CF</th>' +
+      '<th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border)">Sessioni</th>' +
+      '</tr></thead><tbody>' +
+      parts.map(p =>
+        '<tr>' +
+          '<td style="padding:8px 12px;border-bottom:1px solid var(--border)">' + esc((p.cognome||'') + ' ' + (p.nome||'')) + '</td>' +
+          '<td style="padding:8px 12px;border-bottom:1px solid var(--border);font-family:monospace;font-size:11px">' + esc(p.cf||'—') + '</td>' +
+          '<td style="padding:8px 12px;border-bottom:1px solid var(--border)">' + esc(p.sessioni||'—') + '</td>' +
+        '</tr>'
+      ).join('') +
+      '</tbody></table></div>';
   } catch(e) { console.error(e); }
 }
 
@@ -771,7 +783,12 @@ function buildSaleSelect(selectedId, customNome) {
 function buildRelatoriCheck(selected) {
   const div = document.getElementById('relatoriCheckList');
   if (!relatori.length) { div.innerHTML = '<span style="font-size:12px;color:var(--text3)">Nessun relatore disponibile — aggiungili prima</span>'; return; }
-  div.innerHTML = relatori.map(r=>'\2'+esc((r.titolo?r.titolo+' ':'')+r.cognome+' '+r.nome)+'\4').join('');
+  div.innerHTML = relatori.map(r =>
+    '<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;margin-bottom:4px">' +
+      '<input type="checkbox" value="' + r.id + '">' +
+      '<span>' + esc((r.titolo ? r.titolo + ' ' : '') + (r.cognome||'') + ' ' + (r.nome||'')) + '</span>' +
+    '</label>'
+  ).join('');
   div.querySelectorAll('label').forEach(lbl => {
     lbl.querySelector('input').addEventListener('change', () => {
       const checked = lbl.querySelector('input').checked;
