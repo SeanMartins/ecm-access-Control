@@ -88,12 +88,14 @@ body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(135deg,
 <script type="module">
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
 const app = getApps().length ? getApps()[0] : initializeApp(FB);
 const auth = getAuth(app);
 const db = getFirestore(app);
+// Garantisce persistenza locale — FONDAMENTALE per evitare logout alla navigazione
+setPersistence(auth, browserLocalPersistence).catch(e => console.warn('persist:', e));
 const SUPER_ADMIN_EMAIL = 'martinsosem@gmail.com';
 
 // Carica messaggio di benvenuto personalizzato
