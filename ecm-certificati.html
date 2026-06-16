@@ -117,9 +117,8 @@ textarea.form-input{resize:vertical;min-height:60px}
 </head>
 <body>
 
-<div class="ecm-sidebar" id="sidebar">
-  <div id="sidebarContent"></div>
-</div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
 <div class="ecm-main" id="mainContent_outer">
 <div class="ecm-topbar">
   <div class="page-title">Certificati ECM</div>
@@ -443,7 +442,11 @@ let currentFilter = 'tutti';
 
 // ── INIT ─────────────────────────────────────────────────────
 async function initApp() {
-  try { await requireAuth(); injectUserBar('userBarSlot'); } catch(e) {}
+  try {
+    await requireAuth();
+    injectUserBar('userBarSlot');
+    if (typeof window.renderSidebar === 'function') window.renderSidebar('congress-cert');
+  } catch(e) {}
 
   const urlP = new URLSearchParams(window.location.search);
   evId = urlP.get('evId') || localStorage.getItem('ecm_eventId');
@@ -756,7 +759,8 @@ async function generaPDF(p) {
     iframe.srcdoc = '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
       '<style>*{box-sizing:border-box;margin:0;padding:0}body{width:297mm;height:210mm}' +
       '.cert{width:297mm;height:210mm;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20mm 18mm;font-family:"Times New Roman",serif}' +
-      '</style></head><body>' + certHtml + '</body></html>';
+      '</style></head><body>' + certHtml + '<div class="ecm-version-footer" id="ecmVersionFooter"></div>
+</body></html>';
   });
 
   // Usa jsPDF con html
@@ -952,5 +956,6 @@ function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'
 
 initApp();
 </script>
+<div class="ecm-version-footer" id="ecmVersionFooter"></div>
 </body>
 </html>

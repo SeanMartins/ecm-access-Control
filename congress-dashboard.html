@@ -36,7 +36,8 @@ body{font-family:"DM Sans",sans-serif;background:var(--surface);color:var(--text
 </style>
 </head>
 <body>
-<div class="ecm-sidebar" id="ecmSidebar"><div id="sidebarContent"></div></div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
 <div class="ecm-main">
 <div class="ecm-topbar">
   <div class="page-title">🎪 Congress Dashboard</div>
@@ -132,7 +133,11 @@ const db = getFirestore(app);
 let evId = null, eventi = [];
 
 async function initApp() {
-  try { await requireAuth(); injectUserBar("userBarSlot"); } catch(e) {}
+  try {
+    await requireAuth();
+    injectUserBar("userBarSlot");
+    if (typeof window.renderSidebar === 'function') window.renderSidebar('congress-dashboard');
+  } catch(e) {}
 
   // Carica tutti gli eventi
   const snap = await getDocs(collection(db,"eventi"));
@@ -213,5 +218,6 @@ async function caricaStats(id) {
 
 initApp();
 </script>
+<div class="ecm-version-footer" id="ecmVersionFooter"></div>
 </body>
 </html>
