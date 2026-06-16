@@ -294,13 +294,13 @@ function renderLista() {
     <div style="flex:1;min-width:0">
       <div style="font-size:15px;font-weight:600;margin-bottom:4px">${esc(s.azienda||'—')}</div>
       <div style="font-size:12px;color:var(--text3);display:flex;gap:12px;flex-wrap:wrap">
-        ${s.referente?'<span>👤 '+esc(s.referente)+'</span>':''}
-        ${s.email?'<span>📧 '+esc(s.email)+'</span>':''}
-        ${s.tel?'<span>📞 '+esc(s.tel)+'</span>':''}
-        ${s.posizione?'<span>📍 '+esc(s.posizione)+'</span>':''}
+        ${s.referente?`<span>👤 ${esc(s.referente)}</span>`:''}
+        ${s.email?`<span>📧 ${esc(s.email)}</span>`:''}
+        ${s.tel?`<span>📞 ${esc(s.tel)}</span>`:''}
+        ${s.posizione?`<span>📍 ${esc(s.posizione)}</span>`:''}
         <span>📐 ${DIMS[s.dim||'medium']||'—'}</span>
       </div>
-      ${s.prodotti?'<div style="font-size:12px;color:var(--text2);margin-top:4px">🏷️ '+esc(s.prodotti)+'</div>':''}
+      ${s.prodotti?`<div style="font-size:12px;color:var(--text2);margin-top:4px">🏷️ ${esc(s.prodotti)}</div>`:''}
     </div>
     <div style="display:flex;gap:5px;flex-shrink:0">
       <button class="btn btn-outline btn-sm" data-editst="${s.id}">✏️</button>

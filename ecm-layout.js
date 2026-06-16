@@ -54,7 +54,7 @@
     { id:'congress-checkin', key:'nav_congress_checkin', icon:'scanner', href:'congress-checkin.html' },
     { id:'congress-agenda', key:'nav_congress_agenda', icon:'report', href:'congress-agenda.html' },
     { id:'congress-report', key:'nav_congress_report', icon:'report', href:'congress-report.html' },
-    { id:'congress-cert', key:'nav_congress_cert', icon:'cert', href:'ecm-certificati.html' },
+    { id:'congress-cert', key:'nav_congress_cert', icon:'quiz', href:'congress-certificato.html' },
     { id:'congress-archivio', key:'nav_congress_archivio', icon:'report', href:'congress-archivio.html' },
     { type:'section', key:'nav_convention' },
     { id:'convention', key:'nav_conv_home', icon:'convention', href:'convention-manager.html' },
