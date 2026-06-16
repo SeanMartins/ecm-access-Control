@@ -118,6 +118,13 @@ main{max-width:800px;margin:0;padding:0}
 <link rel="stylesheet" href="ecm-layout.css">
 <script src="ecm-i18n.js"></script>
 <script src="ecm-layout.js"></script>
+  <!-- EmailJS per invio email con QR code -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script type="text/javascript">
+    // Inizializza EmailJS con Public Key
+    // NOTA: sostituire 'YOUR_PUBLIC_KEY' con la chiave di emailjs.com
+    (function(){ emailjs.init({ publicKey: 'YOUR_EMAILJS_PUBLIC_KEY' }); })();
+  </script>
 </head>
 <body>
 
@@ -242,6 +249,9 @@ main{max-width:800px;margin:0;padding:0}
         <button class="btn btn-primary" onclick="scaricaBadge()">⬇ Salva badge come immagine</button>
         <button class="btn btn-outline" onclick="location.reload()">← Registra un altro partecipante</button>
       </div>
+      <!-- Badge email inviata -->
+      <div id="emailSentBadge" style="display:none;margin-top:12px;padding:10px 14px;background:#ECFDF5;border:1px solid #6EE7B7;border-radius:10px;color:#065F46;font-size:13px;font-weight:500;align-items:center;gap:8px;justify-content:center"></div>
+
       <div style="margin-top:16px;padding:12px;background:var(--accent-light);border-radius:var(--radius);font-size:12px;color:var(--accent);text-align:center">
         📱 Mostra il QR all'ingresso per registrare la tua presenza
       </div>
@@ -468,7 +478,12 @@ function showBadge(partId,cf,nome,cognome,prof,qrDataUrl){
   document.getElementById('badgeIDDisplay').textContent='ID: '+partId;
   document.getElementById('badgeEvNome').textContent=ev.nome;
   document.getElementById('badgeEvMeta').textContent=fmt(ev.data)+(ev.luogo?' · '+ev.luogo:'');
-  document.getElementById('successSub').textContent=`Benvenuto/a ${nome}! Salva il badge — ti servira per l'accesso.`;
+  document.getElementById('successSub').textContent='Benvenuto/a '+nome+'! Salva il badge - ti servira per l\'accesso.';
+
+  // Invia email con QR code se l'email è disponibile
+  if (email) {
+    setTimeout(() => inviaEmailConQR(nome, cognome, email, partId, ev, qrDataUrl), 800);
+  }cesso.`;
 }
 
 // ── SCARICA BADGE ───────────────────────────────────────

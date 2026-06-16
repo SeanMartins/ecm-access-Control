@@ -255,6 +255,7 @@ export function injectUserBar(slotId) {
         });
       } catch(e) {}
       localStorage.removeItem('ecm_brand');
+      localStorage.removeItem('ecm_profilo');
       await signOut(auth);
       window.location.href = PAGINA_LOGIN;
     };

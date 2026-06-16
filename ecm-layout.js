@@ -68,7 +68,7 @@
     { type:'section', key:'nav_wedding' },
     { id:'wedding', key:'nav_wedding_home', icon:'wedding', href:'wedding-manager.html' },
     { type:'section', key:'nav_system' },
-    { id:'superadmin', key:'nav_superadmin', icon:'superadmin', href:'ecm-superadmin.html' },
+    { id:'superadmin', key:'nav_superadmin', icon:'superadmin', href:'ecm-superadmin.html', superOnly:true },
     { id:'tablet',   key:'nav_tablet',   icon:'tablet',   href:'ecm-connetti.html' },
     { id:'admin',    key:'nav_admin',    icon:'admin',    href:'ecm-admin.html', adminOnly:true }
   ];
@@ -88,6 +88,10 @@
     var op = null;
     try { op = JSON.parse(localStorage.getItem('ecm_op_user') || 'null'); } catch(e){}
     var isAdmin = !op;
+    // isSuperAdmin: l'email di superadmin è memorizzata nel profilo
+    var _ecmProfilo = null;
+    try { _ecmProfilo = JSON.parse(localStorage.getItem('ecm_profilo') || 'null'); } catch(e){}
+    var isSuperAdmin = _ecmProfilo && _ecmProfilo.ruolo === 'superadmin';
     var lang = (typeof window.getLang === 'function') ? window.getLang() : 'it';
     var langs = window.ECM_LANGS || {};
     var currentFlag = (langs[lang] && langs[lang].flag) || '🌐';
@@ -101,7 +105,7 @@
     // Logo (personalizzato per admin o default)
     var _brand = {};
     try { _brand = JSON.parse(localStorage.getItem('ecm_brand') || '{}')} catch(e) {}
-    var _logoSrc = _brand.logo || 'logo.png';
+    var _logoSrc = (_brand.logo && _brand.logo.length > 10) ? _brand.logo : 'logo.png';
     var _brandNome = _brand.nome || 'Multimedia Meeting';
     var _brandSub = _brand.sub || 'ECM Access Control';
     html += '<div class="sidebar-logo">' +
@@ -120,6 +124,7 @@
         return;
       }
       if (item.adminOnly && !isAdmin) return;
+      if (item.superOnly && !isSuperAdmin) return;
       if (item.id === 'scanner' && op && op.ruolo !== 'scanner' && op.ruolo !== 'operatore') return;
       var label = _t(item.key);
       var cls = 'nav-item' + (activeId === item.id ? ' active' : '');

@@ -380,9 +380,20 @@ window.creaUtente=async function(){
     const snap=await getDocs(collection(db,'utenti'));
     const existing=[]; snap.forEach(d=>existing.push(d.data()));
     const countRole=existing.filter(u=>u.ruolo===selectedRole&&u.attivo!==false).length;
-    const limiti={operatore:20,scanner:10,report:5};
+    // Leggi limite dal profilo admin (impostato dal superadmin)
+    const adminUid = user.uid;
+    let maxOp = 20, maxScanner = 10, maxReport = 5;
+    try {
+      const adminDoc = await getDoc(doc(db,'utenti',adminUid));
+      if (adminDoc.exists() && adminDoc.data().maxOperatori) {
+        maxOp = adminDoc.data().maxOperatori;
+        maxScanner = Math.ceil(maxOp * 0.5);
+        maxReport = Math.ceil(maxOp * 0.25);
+      }
+    } catch(e) {}
+    const limiti = { operatore: maxOp, scanner: maxScanner, report: maxReport };
     if(countRole>=limiti[selectedRole]){
-      showAlert('error',`Limite raggiunto: max ${limiti[selectedRole]} ${selectedRole}.`);
+      showAlert('error','Limite raggiunto: max ' + limiti[selectedRole] + ' ' + selectedRole + '. Contatta il tuo amministratore per aumentare il limite.');
       btn.disabled=false; btn.innerHTML='Crea utente →'; return;
     }
     if(existing.find(u=>u.username===username&&u.attivo!==false)){
