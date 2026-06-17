@@ -119,7 +119,7 @@ header{border-bottom:1px solid var(--border);background:rgba(13,15,20,0.85);back
   .block-card{padding:18px}
   .block-title{font-size:16px}
 }
-</style>
+.b5{border-top:3px solid #7C3AED}.b6{border-top:3px solid #059669}.b7{border-top:3px solid #DC2626}.b8{border-top:3px solid #0EA5E9}</style>
 <link rel="stylesheet" href="ecm-layout.css">
 <script src="ecm-i18n.js"></script>
 <script src="ecm-layout.js"></script>
@@ -170,65 +170,202 @@ header{border-bottom:1px solid var(--border);background:rgba(13,15,20,0.85);back
       <div class="status-item"><div class="status-num" id="sCrediti" style="color:var(--accent2)">—</div><div class="status-label">Crediti ECM</div></div>
     </div>
   </div>
+    <!-- FLUSSO OPERATIVO AGGIORNATO -->
   <div class="workflow">
-    <div class="wf-title">Flusso operativo</div>
+    <div class="wf-title">Flusso operativo ECM</div>
     <div class="wf-steps">
-      <div class="wf-step"><div class="wf-icon">⚙️</div><div class="wf-label">Setup evento</div><div class="wf-sub">Dati + Excel</div></div>
-      <div class="wf-step"><div class="wf-icon">🪪</div><div class="wf-label">Badge QR</div><div class="wf-sub">Genera + stampa</div></div>
-      <div class="wf-step"><div class="wf-icon">📷</div><div class="wf-label">Accessi live</div><div class="wf-sub">Multi-dispositivo</div></div>
-      <div class="wf-step"><div class="wf-icon">📊</div><div class="wf-label">Report ECM</div><div class="wf-sub">Crediti + export</div></div>
+      <div class="wf-step">
+        <div class="wf-icon">⚙️</div>
+        <div class="wf-label">Setup</div>
+        <div class="wf-sub">Crea evento e categorie</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-icon">📝</div>
+        <div class="wf-label">Registrazione</div>
+        <div class="wf-sub">Iscrizioni via QR link</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-icon">💳</div>
+        <div class="wf-label">Pagamenti</div>
+        <div class="wf-sub">Quote e bonifici</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-icon">🪪</div>
+        <div class="wf-label">Badge QR</div>
+        <div class="wf-sub">Genera e stampa</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-icon">📷</div>
+        <div class="wf-label">Accessi</div>
+        <div class="wf-sub">Scanner real-time</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-icon">📋</div>
+        <div class="wf-label">Survey &amp; Quiz</div>
+        <div class="wf-sub">Verifica apprendimento</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-icon">📊</div>
+        <div class="wf-label">Report</div>
+        <div class="wf-sub">Presenze e crediti</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-icon">📜</div>
+        <div class="wf-label">Certificati</div>
+        <div class="wf-sub">PDF per partecipante</div>
+      </div>
     </div>
   </div>
+
+  <!-- MODULI PRINCIPALI -->
   <div class="blocks-grid">
+
     <a class="block-card b1" href="ecm-blocco1.html">
-      <div class="block-header"><span class="block-num">Blocco 01</span><span class="block-icon">⚙️</span></div>
+      <div class="block-header"><span class="block-num">01</span><span class="block-icon">⚙️</span></div>
       <div class="block-title">Setup evento</div>
-      <div class="block-desc">Configura i dati dell'evento e importa il file Excel Co.Ge.A.P.S. — caricato su Firebase per tutti i dispositivi.</div>
+      <div class="block-desc">Configura l'evento: tipo documento (Attestato o Certificato ECM), categorie partecipanti, quote, crediti e importa da Excel.</div>
       <div class="block-features">
-        <div class="block-feature"><div class="feat-dot"></div>Nome, data, luogo, crediti ECM</div>
-        <div class="block-feature"><div class="feat-dot"></div>Import Excel con auto-detect colonne</div>
-        <div class="block-feature"><div class="feat-dot"></div>Caricamento batch su Firebase</div>
-        <div class="block-feature"><div class="feat-dot"></div>Validazione codici fiscali</div>
+        <div class="block-feature"><div class="feat-dot"></div>Attestato o Certificato ECM</div>
+        <div class="block-feature"><div class="feat-dot"></div>Categorie e quote personalizzate</div>
+        <div class="block-feature"><div class="feat-dot"></div>Import Excel Co.Ge.A.P.S.</div>
+        <div class="block-feature"><div class="feat-dot"></div>Duplica evento esistente</div>
       </div>
-      <div class="block-cta"><span>Apri Setup evento</span><span class="cta-arrow">→</span></div>
+      <div class="block-cta"><span>Apri Setup</span><span class="cta-arrow">→</span></div>
     </a>
-    <a class="block-card b2" href="ecm-blocco2.html">
-      <div class="block-header"><span class="block-num">Blocco 02</span><span class="block-icon">🪪</span></div>
+
+    <a class="block-card b2" href="ecm-blocco6.html">
+      <div class="block-header"><span class="block-num">02</span><span class="block-icon">📝</span></div>
+      <div class="block-title">Registrazione pubblica</div>
+      <div class="block-desc">Link QR per iscrizioni autonome. Il partecipante compila il form e riceve il badge via email. Zero lavoro manuale.</div>
+      <div class="block-features">
+        <div class="block-feature"><div class="feat-dot"></div>Form pubblico via QR code</div>
+        <div class="block-feature"><div class="feat-dot"></div>Email automatica con badge</div>
+        <div class="block-feature"><div class="feat-dot"></div>Approvazione admin opzionale</div>
+        <div class="block-feature"><div class="feat-dot"></div>Gestione liste d'attesa</div>
+      </div>
+      <div class="block-cta"><span>Apri Registrazione</span><span class="cta-arrow">→</span></div>
+    </a>
+
+    <a class="block-card b3" href="ecm-pagamenti.html">
+      <div class="block-header"><span class="block-num">03</span><span class="block-icon">💳</span></div>
+      <div class="block-title">Gestione pagamenti</div>
+      <div class="block-desc">Traccia quote per categoria professionale. Marca bonifici ricevuti, filtra per stato pagamento ed esporta.</div>
+      <div class="block-features">
+        <div class="block-feature"><div class="feat-dot"></div>Quote per categoria</div>
+        <div class="block-feature"><div class="feat-dot"></div>Stato: pagato / da pagare / esente</div>
+        <div class="block-feature"><div class="feat-dot"></div>Filtri e statistiche real-time</div>
+        <div class="block-feature"><div class="feat-dot"></div>Export per contabilità</div>
+      </div>
+      <div class="block-cta"><span>Apri Pagamenti</span><span class="cta-arrow">→</span></div>
+    </a>
+
+    <a class="block-card b4" href="ecm-blocco2.html">
+      <div class="block-header"><span class="block-num">04</span><span class="block-icon">🪪</span></div>
       <div class="block-title">Generazione badge</div>
-      <div class="block-desc">Genera QR code univoci salvati su Firebase. Disponibili su tutti i dispositivi connessi.</div>
+      <div class="block-desc">QR univoci per ogni partecipante salvati su Firebase. Stampa fronte/retro con locandina. Autocrop intelligente.</div>
       <div class="block-features">
-        <div class="block-feature"><div class="feat-dot"></div>QR code univoco per partecipante</div>
-        <div class="block-feature"><div class="feat-dot"></div>Badge con logo + nome + evento</div>
-        <div class="block-feature"><div class="feat-dot"></div>QR salvati su Firebase</div>
-        <div class="block-feature"><div class="feat-dot"></div>Stampa massiva o singola</div>
+        <div class="block-feature"><div class="feat-dot"></div>QR code univoco Firebase</div>
+        <div class="block-feature"><div class="feat-dot"></div>Badge personalizzato con logo</div>
+        <div class="block-feature"><div class="feat-dot"></div>Stampa fronte/retro + locandina</div>
+        <div class="block-feature"><div class="feat-dot"></div>Autocrop retro 85×54mm</div>
       </div>
-      <div class="block-cta"><span>Apri Generazione badge</span><span class="cta-arrow">→</span></div>
+      <div class="block-cta"><span>Apri Badge</span><span class="cta-arrow">→</span></div>
     </a>
-    <a class="block-card b3" href="ecm-blocco3.html">
-      <div class="block-header"><span class="block-num">Blocco 03</span><span class="block-icon">📷</span></div>
+
+    <a class="block-card b5" href="ecm-blocco3.html">
+      <div class="block-header"><span class="block-num">05</span><span class="block-icon">📷</span></div>
       <div class="block-title">Controllo accessi</div>
-      <div class="block-desc">Fino a 7 tablet sincronizzati in tempo reale. Ogni scansione aggiorna Firebase istantaneamente su tutti i dispositivi.</div>
+      <div class="block-desc">Fino a 10 scanner simultanei su qualsiasi dispositivo. Entrata/uscita real-time con stato pagamento visibile ad ogni scan.</div>
       <div class="block-features">
-        <div class="block-feature"><div class="feat-dot"></div>Scanner QR via fotocamera</div>
-        <div class="block-feature"><div class="feat-dot"></div>Modalità entrata / uscita</div>
-        <div class="block-feature"><div class="feat-dot"></div>Sincronizzazione Firebase real-time</div>
-        <div class="block-feature"><div class="feat-dot"></div>Dashboard presenti aggiornata live</div>
+        <div class="block-feature"><div class="feat-dot"></div>Scanner QR da fotocamera</div>
+        <div class="block-feature"><div class="feat-dot"></div>Entrata e uscita con timestamp</div>
+        <div class="block-feature"><div class="feat-dot"></div>Stato pagamento al scan</div>
+        <div class="block-feature"><div class="feat-dot"></div>Sync Firebase real-time</div>
       </div>
-      <div class="block-cta"><span>Apri Controllo accessi</span><span class="cta-arrow">→</span></div>
+      <div class="block-cta"><span>Apri Scanner</span><span class="cta-arrow">→</span></div>
     </a>
-    <a class="block-card b4" href="ecm-blocco4.html">
-      <div class="block-header"><span class="block-num">Blocco 04</span><span class="block-icon">📊</span></div>
-      <div class="block-title">Report finale</div>
-      <div class="block-desc">Legge tutti i log da Firebase, calcola le ore effettive e genera il report ECM pronto per l'upload su Co.Ge.A.P.S.</div>
+
+    <a class="block-card b6" href="ecm-blocco5.html">
+      <div class="block-header"><span class="block-num">06</span><span class="block-icon">📋</span></div>
+      <div class="block-title">Survey &amp; Quiz ECM</div>
+      <div class="block-desc">Questionari di soddisfazione e verifica apprendimento per la validazione ECM. Risultati in tempo reale.</div>
       <div class="block-features">
-        <div class="block-feature"><div class="feat-dot"></div>Ore presenze calcolate dai log</div>
+        <div class="block-feature"><div class="feat-dot"></div>Survey soddisfazione</div>
+        <div class="block-feature"><div class="feat-dot"></div>Quiz verifica apprendimento</div>
+        <div class="block-feature"><div class="feat-dot"></div>Grafici risultati live</div>
+        <div class="block-feature"><div class="feat-dot"></div>Export dati per provider ECM</div>
+      </div>
+      <div class="block-cta"><span>Apri Survey</span><span class="cta-arrow">→</span></div>
+    </a>
+
+    <a class="block-card b7" href="ecm-blocco4.html">
+      <div class="block-header"><span class="block-num">07</span><span class="block-icon">📊</span></div>
+      <div class="block-title">Report presenze</div>
+      <div class="block-desc">Calcola ore di presenza da ogni log di accesso. Identifica idonei e non idonei. Export Co.Ge.A.P.S. e grafici analisi.</div>
+      <div class="block-features">
+        <div class="block-feature"><div class="feat-dot"></div>Ore calcolate dai log accessi</div>
         <div class="block-feature"><div class="feat-dot"></div>Crediti ECM automatici</div>
+        <div class="block-feature"><div class="feat-dot"></div>Idonei vs non idonei</div>
         <div class="block-feature"><div class="feat-dot"></div>Export Excel Co.Ge.A.P.S.</div>
-        <div class="block-feature"><div class="feat-dot"></div>Grafici analisi presenze</div>
       </div>
-      <div class="block-cta"><span>Apri Report finale</span><span class="cta-arrow">→</span></div>
+      <div class="block-cta"><span>Apri Report</span><span class="cta-arrow">→</span></div>
     </a>
+
+    <a class="block-card b8" href="ecm-certificati.html">
+      <div class="block-header"><span class="block-num">08</span><span class="block-icon">📜</span></div>
+      <div class="block-title">Certificati ECM</div>
+      <div class="block-desc">4 template pronti o sfondo personalizzato. Scarica il PDF per ogni partecipante o genera il link pubblico per l'auto-download.</div>
+      <div class="block-features">
+        <div class="block-feature"><div class="feat-dot"></div>4 template: Classico, Moderno, Minimal, Medico</div>
+        <div class="block-feature"><div class="feat-dot"></div>Attestato o Certificato ECM</div>
+        <div class="block-feature"><div class="feat-dot"></div>PDF per ogni partecipante</div>
+        <div class="block-feature"><div class="feat-dot"></div>Link/QR pubblico per auto-download</div>
+      </div>
+      <div class="block-cta"><span>Apri Certificati</span><span class="cta-arrow">→</span></div>
+    </a>
+
   </div>
+
+  <!-- MODULI AVANZATI -->
+  <div style="margin-top:28px">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)">🚀 Moduli avanzati</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+
+      <a href="congress-dashboard.html" style="display:flex;align-items:center;gap:12px;padding:14px;background:white;border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);transition:.2s" onmouseover="this.style.borderColor='#7C3AED'" onmouseout="this.style.borderColor='var(--border)'">
+        <span style="font-size:26px">🎪</span>
+        <div>
+          <div style="font-size:13px;font-weight:600">Congress Manager</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">Sessioni, relatori, sale</div>
+        </div>
+      </a>
+
+      <a href="convention-manager.html" style="display:flex;align-items:center;gap:12px;padding:14px;background:white;border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);transition:.2s" onmouseover="this.style.borderColor='#0EA5E9'" onmouseout="this.style.borderColor='var(--border)'">
+        <span style="font-size:26px">🏢</span>
+        <div>
+          <div style="font-size:13px;font-weight:600">Convention Manager</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">Stand, catering, navette</div>
+        </div>
+      </a>
+
+      <a href="wedding-manager.html" style="display:flex;align-items:center;gap:12px;padding:14px;background:white;border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);transition:.2s" onmouseover="this.style.borderColor='#F59E0B'" onmouseout="this.style.borderColor='var(--border)'">
+        <span style="font-size:26px">💒</span>
+        <div>
+          <div style="font-size:13px;font-weight:600">Wedding Manager</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">Tavoli, ospiti, timeline</div>
+        </div>
+      </a>
+
+      <a href="ecm-eventi.html" style="display:flex;align-items:center;gap:12px;padding:14px;background:white;border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);transition:.2s" onmouseover="this.style.borderColor='#2B4EFF'" onmouseout="this.style.borderColor='var(--border)'">
+        <span style="font-size:26px">📅</span>
+        <div>
+          <div style="font-size:13px;font-weight:600">Lista eventi</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">Gestisci tutti gli eventi</div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
   <div class="ev-info" id="evInfo" style="display:none">
     <div class="ev-info-card"><div class="ev-label">Evento in corso</div><div class="ev-val" id="qaNome">—</div></div>
     <div class="ev-info-card"><div class="ev-label">Data</div><div class="ev-val" id="qaData">—</div></div>
