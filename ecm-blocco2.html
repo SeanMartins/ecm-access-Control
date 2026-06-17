@@ -147,7 +147,9 @@ input[type=color]{padding:4px 8px;height:40px;cursor:pointer}
   .badge-card{width:100%!important;max-width:330px}
   .page-title{font-size:22px}
 }
-</style>
+.badge-cert-qr{display:flex;justify-content:center;padding:3px 0;margin-top:3px;border-top:1px solid rgba(255,255,255,.3)}
+.badge-cert-qr img,.badge-cert-qr canvas{width:36px!important;height:36px!important}
+@media print{.badge-cert-qr{display:flex!important}}</style>
 <link rel="stylesheet" href="ecm-layout.css">
 <script src="ecm-i18n.js"></script>
 <script src="ecm-layout.js"></script>
@@ -672,6 +674,10 @@ function renderGrid(list){
   const ns=settings.size==='large'?'17px':settings.size==='small'?'13px':'15px';
   const ss=settings.size==='large'?'26px':settings.size==='small'?'18px':'22px';
 
+  // Link pubblico per scarica certificato
+  const base = window.location.origin + window.location.pathname.replace('ecm-blocco2.html','');
+  const certLink = currentEvId ? (base + 'ecm-scarica-certificato.html?evId=' + currentEvId) : null;
+
   document.getElementById('badgeGrid').innerHTML = list.map(p => {
     // Calcola i blocchi HTML senza backtick annidati
     const bannerHtml = ev.logo
@@ -701,12 +707,28 @@ function renderGrid(list){
         '<div class="badge-footer">' +
           '<div class="badge-footer-title">'+esc(ev.nome||'')+'</div>' +
           '<div class="badge-footer-meta">'+metaHtml+'</div>' +
+          (certLink ? '<div class="badge-cert-qr" id="certqr_'+p.id+'"></div>' : '') +
         '</div>' +
       '</div>' +
       '<div class="badge-item-overlay"><button class="ov-btn" data-pid="'+p.id+'">🖨️ Stampa</button></div>' +
       '<div class="badge-retro" id="retro_'+p.id+'" style="display:none">'+retroHtml+'</div>' +
     '</div>';
   }).join('');
+
+  // Genera QR certificati nel footer di ogni badge
+  if (certLink) {
+    list.forEach(p => {
+      const el = document.getElementById('certqr_'+p.id);
+      if (el && typeof QRCode !== 'undefined') {
+        el.innerHTML = '';
+        new QRCode(el, {
+          text: certLink + '&cf=' + encodeURIComponent(p.cf||''),
+          width: 40, height: 40,
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }
+    });
+  }
 
   // Applica visibilità retro e classe griglia
   const grid = document.getElementById('badgeGrid');

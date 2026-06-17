@@ -61,6 +61,7 @@
     { id:'congress-catering', key:'nav_congress_catering', icon:'catering', href:'convention-catering.html' },
     { id:'congress-navette', key:'nav_congress_navette', icon:'navette', href:'convention-navette.html' },
     { id:'congress-cert', key:'nav_congress_cert', icon:'cert', href:'ecm-certificati.html' },
+    { id:'proiezione', key:'nav_proiezione', icon:'tablet', href:'ecm-proiezione.html' },
     { id:'congress-archivio', key:'nav_congress_archivio', icon:'report', href:'congress-archivio.html' },
     { type:'section', key:'nav_convention' },
     { id:'convention', key:'nav_conv_home', icon:'convention', href:'convention-manager.html' },

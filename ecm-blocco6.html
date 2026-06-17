@@ -123,7 +123,18 @@ main{max-width:800px;margin:0;padding:0}
   <script type="text/javascript">
     // Inizializza EmailJS con Public Key
     // NOTA: sostituire 'YOUR_PUBLIC_KEY' con la chiave di emailjs.com
-    (function(){ emailjs.init({ publicKey: 'YOUR_EMAILJS_PUBLIC_KEY' }); })();
+    (function(){
+  // Configurazione EmailJS — sostituisci con le tue chiavi da emailjs.com
+  // Account UNICO per tutti gli admin — mittente neutro "ECM Access Control"
+  var EMAILJS_PUBLIC_KEY = 'YOUR_EMAILJS_PUBLIC_KEY';  // da emailjs.com > Account > Public Key
+  if (EMAILJS_PUBLIC_KEY !== 'YOUR_EMAILJS_PUBLIC_KEY') {
+    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+    window._emailjsReady = true;
+  } else {
+    console.warn('EmailJS non configurato — sostituisci YOUR_EMAILJS_PUBLIC_KEY');
+    window._emailjsReady = false;
+  }
+})();
   </script>
 </head>
 <body>

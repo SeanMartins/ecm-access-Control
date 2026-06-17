@@ -360,6 +360,15 @@ textarea.form-input{resize:vertical;min-height:60px}
         e potrà scaricare il proprio documento in PDF.
       </p>
 
+      <!-- Schermata proiezione -->
+      <div style="background:linear-gradient(135deg,#0A1628,#0D2545);border-radius:10px;padding:14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:white;margin-bottom:3px">🎬 Schermata proiezione</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.6)">Proietta questa schermata in sala a fine evento — mostra il QR per scaricare il documento</div>
+        </div>
+        <a id="btnProiezione" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#2B4EFF;color:white;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;flex-shrink:0">⛶ Apri schermata</a>
+      </div>
+
       <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">
         <div class="field-label" style="margin-bottom:6px">Link download certificato</div>
         <div style="display:flex;gap:8px">
@@ -487,6 +496,9 @@ async function initApp() {
   const base = window.location.origin + window.location.pathname.replace('ecm-certificati.html','');
   const link = base + 'ecm-scarica-certificato.html?evId=' + evId;
   document.getElementById('linkPubblico').value = link;
+  // Aggiorna link proiezione
+  const btnPro = document.getElementById('btnProiezione');
+  if (btnPro) btnPro.href = 'ecm-proiezione.html?evId=' + evId;
   // Aggiorna descrizione link pubblico
   const descEl = document.getElementById('linkPublicDesc');
   if (descEl) {
