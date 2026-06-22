@@ -156,6 +156,7 @@ async function initApp() {
     eventi = [];
     snap.forEach(d => eventi.push({id:d.id,...d.data()}));
     eventi.sort((a,b) => (b.creatoAt||'').localeCompare(a.creatoAt||''));
+    console.log('select popolato, cerco evId...');
 
     const sel = document.getElementById("evSelect");
     eventi.forEach(ev => {
@@ -166,16 +167,20 @@ async function initApp() {
       sel.appendChild(opt);
     });
 
-    // Pre-seleziona da URL o localStorage
     const urlP = new URLSearchParams(window.location.search);
     evId = urlP.get("evId") || localStorage.getItem("ecm_eventId");
+    console.log('evId trovato:', evId, '— in lista:', !!(evId && eventi.find(e => e.id === evId)));
     if (evId && eventi.find(e => e.id === evId)) {
       sel.value = evId;
+      console.log('chiamata caricaStats...');
       await caricaStats(evId);
+      console.log('caricaStats completata');
     }
 
+    console.log('mostro mainContent');
     document.getElementById("loadingState").style.display = "none";
     document.getElementById("mainContent").style.display = "block";
+    console.log('DONE');
   } catch(e) {
     console.error("Errore caricamento dashboard:", e);
     document.getElementById("loadingState").innerHTML =
