@@ -395,7 +395,7 @@ async function initApp() {
     evList.filter(e => e.stato !== 'archiviato' && e.tipo && e.tipo !== 'convention').forEach(ev => {
       const opt = document.createElement('option');
       opt.value = ev.id;
-      opt.textContent = (ev.nome||ev.id) + ' ['+e.tipo+']';
+      opt.textContent = (ev.nome||ev.id) + ' ['+ev.tipo+']';
       document.getElementById('evSelect').appendChild(opt);
     });
 
