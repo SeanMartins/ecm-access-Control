@@ -123,12 +123,14 @@ import { requireAuth, injectUserBar } from "./ecm-auth.js";
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, getDoc }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",
   projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",
   messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
 const app = getApps().length ? getApps()[0] : initializeApp(FB);
 const db = getFirestore(app);
+const auth = getAuth(app); // inizializza Auth esplicitamente in questo contesto
 
 let evId = null, eventi = [];
 
