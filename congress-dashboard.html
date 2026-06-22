@@ -132,23 +132,27 @@ let db, auth;
 let evId = null, eventi = [];
 
 async function initApp() {
+  console.log('initApp START');
   // Inizializza Firebase DENTRO initApp — stesso pattern di congress-checkin.html
   const app = getApps().length ? getApps()[0] : initializeApp(FB);
   db = getFirestore(app);
   auth = getAuth(app);
+  console.log('Firebase init OK, calling requireAuth...');
 
   try {
     await requireAuth();
+    console.log('requireAuth OK');
     injectUserBar("userBarSlot");
     if (typeof window.renderSidebar === 'function') window.renderSidebar('congress-dashboard');
   } catch(e) {
-    console.warn('Auth:', e.message);
+    console.warn('Auth catch:', e.message);
     return;
   }
 
+  console.log('Starting Firestore load...');
   try {
-    // Carica tutti gli eventi
     const snap = await getDocs(collection(db,"eventi"));
+    console.log('eventi loaded:', snap.size);
     eventi = [];
     snap.forEach(d => eventi.push({id:d.id,...d.data()}));
     eventi.sort((a,b) => (b.creatoAt||'').localeCompare(a.creatoAt||''));
