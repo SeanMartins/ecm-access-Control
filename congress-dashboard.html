@@ -121,31 +121,33 @@ body{font-family:"DM Sans",sans-serif;background:var(--surface);color:var(--text
 <script type="module">
 import { requireAuth, injectUserBar } from "./ecm-auth.js";
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, getDoc }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",
   projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",
   messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
-const app = getApps().length ? getApps()[0] : initializeApp(FB);
-const db = getFirestore(app);
-const auth = getAuth(app); // inizializza Auth esplicitamente in questo contesto
 
+let db, auth;
 let evId = null, eventi = [];
 
 async function initApp() {
+  // Inizializza Firebase DENTRO initApp — stesso pattern di congress-checkin.html
+  const app = getApps().length ? getApps()[0] : initializeApp(FB);
+  db = getFirestore(app);
+  auth = getAuth(app);
+
   try {
     await requireAuth();
     injectUserBar("userBarSlot");
     if (typeof window.renderSidebar === 'function') window.renderSidebar('congress-dashboard');
   } catch(e) {
-    // requireAuth ha già reindirizzato al login se necessario
+    console.warn('Auth:', e.message);
     return;
   }
 
   try {
-    // Carica tutti gli eventi — DOPO aver verificato l'autenticazione
+    // Carica tutti gli eventi
     const snap = await getDocs(collection(db,"eventi"));
     eventi = [];
     snap.forEach(d => eventi.push({id:d.id,...d.data()}));
