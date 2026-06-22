@@ -137,33 +137,42 @@ async function initApp() {
     await requireAuth();
     injectUserBar("userBarSlot");
     if (typeof window.renderSidebar === 'function') window.renderSidebar('congress-dashboard');
-  } catch(e) {}
-
-  // Carica tutti gli eventi
-  const snap = await getDocs(collection(db,"eventi"));
-  eventi = [];
-  snap.forEach(d => eventi.push({id:d.id,...d.data()}));
-  eventi.sort((a,b) => (b.creatoAt||'').localeCompare(a.creatoAt||''));
-
-  const sel = document.getElementById("evSelect");
-  eventi.forEach(ev => {
-    const opt = document.createElement("option");
-    opt.value = ev.id;
-    const fmt = d => d ? new Date(d).toLocaleDateString("it-IT",{day:"2-digit",month:"short",year:"numeric"}) : "";
-    opt.textContent = (ev.nome||"Evento") + (ev.data ? " ("+fmt(ev.data)+")" : "");
-    sel.appendChild(opt);
-  });
-
-  // Pre-seleziona da URL o localStorage
-  const urlP = new URLSearchParams(window.location.search);
-  evId = urlP.get("evId") || localStorage.getItem("ecm_eventId");
-  if (evId && eventi.find(e => e.id === evId)) {
-    sel.value = evId;
-    await caricaStats(evId);
+  } catch(e) {
+    // requireAuth ha già reindirizzato al login se necessario
+    return;
   }
 
-  document.getElementById("loadingState").style.display = "none";
-  document.getElementById("mainContent").style.display = "block";
+  try {
+    // Carica tutti gli eventi — DOPO aver verificato l'autenticazione
+    const snap = await getDocs(collection(db,"eventi"));
+    eventi = [];
+    snap.forEach(d => eventi.push({id:d.id,...d.data()}));
+    eventi.sort((a,b) => (b.creatoAt||'').localeCompare(a.creatoAt||''));
+
+    const sel = document.getElementById("evSelect");
+    eventi.forEach(ev => {
+      const opt = document.createElement("option");
+      opt.value = ev.id;
+      const fmt = d => d ? new Date(d).toLocaleDateString("it-IT",{day:"2-digit",month:"short",year:"numeric"}) : "";
+      opt.textContent = (ev.nome||"Evento") + (ev.data ? " ("+fmt(ev.data)+")" : "");
+      sel.appendChild(opt);
+    });
+
+    // Pre-seleziona da URL o localStorage
+    const urlP = new URLSearchParams(window.location.search);
+    evId = urlP.get("evId") || localStorage.getItem("ecm_eventId");
+    if (evId && eventi.find(e => e.id === evId)) {
+      sel.value = evId;
+      await caricaStats(evId);
+    }
+
+    document.getElementById("loadingState").style.display = "none";
+    document.getElementById("mainContent").style.display = "block";
+  } catch(e) {
+    console.error("Errore caricamento dashboard:", e);
+    document.getElementById("loadingState").innerHTML =
+      '<div style="color:#DC2626;padding:20px">⚠️ Errore caricamento: ' + e.message + '</div>';
+  }
 }
 
 window.cambiaEvento = async function(id) {
