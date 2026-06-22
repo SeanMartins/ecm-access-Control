@@ -154,9 +154,14 @@ async function initApp() {
     const snap = await getDocs(collection(db,"eventi"));
     console.log('eventi loaded:', snap.size);
     eventi = [];
-    snap.forEach(d => eventi.push({id:d.id,...d.data()}));
-    eventi.sort((a,b) => (b.creatoAt||'').localeCompare(a.creatoAt||''));
-    console.log('select popolato, cerco evId...');
+    try {
+      snap.forEach(d => { console.log('pushing:', d.id); eventi.push({id:d.id,...d.data()}); });
+      console.log('forEach OK');
+      eventi.sort((a,b) => (b.creatoAt||'').localeCompare(a.creatoAt||''));
+      console.log('sort OK');
+    } catch(err) {
+      console.error('ERRORE forEach/sort:', err);
+    }
 
     const sel = document.getElementById("evSelect");
     eventi.forEach(ev => {
