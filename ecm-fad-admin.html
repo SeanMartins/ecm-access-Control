@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="mobile-web-app-capable" content="yes">
+<title>ECM — Corsi FAD</title>
+<link rel="stylesheet" href="ecm-layout.css">
+<script src="ecm-i18n.js"></script>
+<script src="ecm-layout.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--fad:#0D9488;--fad-light:#CCFBF1;--accent:#2B4EFF;--accent-light:#EEF1FF;
+--success:#059669;--danger:#DC2626;--warn:#D97706;--text:#1A1714;--text2:#6B6560;--text3:#9B948C;
+--border:#E8E4DE;--surface:#F8F6F3;--surface2:#F0EDE8;--radius:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"DM Sans",sans-serif;background:var(--surface);color:var(--text)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;border:1px solid var(--border);
+  background:white;color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;text-decoration:none}
+.btn:hover{border-color:var(--fad);color:var(--fad)}
+.btn-primary{background:var(--fad);border-color:var(--fad);color:white}
+.btn-primary:hover{background:#0B7C72;color:white}
+.btn-danger{color:var(--danger)}
+.btn-danger:hover{border-color:var(--danger)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.card{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+.corso-card{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;cursor:pointer;transition:.15s}
+.corso-card:hover{border-color:var(--fad);box-shadow:0 4px 14px rgba(13,148,136,.1)}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-attivo{background:var(--fad-light);color:var(--fad)}
+.badge-bozza{background:var(--surface2);color:var(--text3)}
+.badge-archiviato{background:#FEE2E2;color:var(--danger)}
+.form-input,.form-select,.form-textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;
+  font-size:13px;font-family:inherit;background:white;color:var(--text)}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--fad);box-shadow:0 0 0 2px var(--fad-light)}
+.form-label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);display:block;margin:12px 0 5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:680px){.grid2,.grid3{grid-template-columns:1fr}}
+.section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--text3);margin:20px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.mod-row{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:white}
+.mod-icon{font-size:22px;width:36px;text-align:center}
+.mod-info{flex:1;min-width:0}
+.mod-title{font-size:14px;font-weight:600}
+.mod-meta{font-size:12px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.tab{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:white;color:var(--text2)}
+.tab.active{background:var(--fad);border-color:var(--fad);color:white}
+.q-card{border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;background:white}
+.q-opt{display:flex;align-items:center;gap:8px;margin-top:6px}
+.q-opt input[type=text]{flex:1}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-size:11px;text-transform:uppercase;color:var(--text3);padding:8px;border-bottom:2px solid var(--border)}
+td{padding:8px;border-bottom:1px solid var(--border)}
+.progress-bar{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;min-width:80px}
+.progress-fill{height:100%;background:var(--fad);border-radius:4px}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:200;padding:16px}
+.modal-bg.open{display:flex}
+.modal{background:white;border-radius:14px;padding:22px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:6px}
+.hint{font-size:12px;color:var(--text3);margin-top:4px;line-height:1.4}
+.link-box{display:flex;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;word-break:break-all}
+.empty{text-align:center;padding:36px;color:var(--text3);font-size:14px}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="ecm-sidebar" id="ecmSidebar"></aside>
+<div class="ecm-main">
+<div class="ecm-topbar">
+  <div class="page-title">🎓 Corsi FAD</div>
+  <div class="topbar-right">
+    <span id="fbDot" class="fb-dot"></span>
+    <div id="userBarSlot"></div>
+  </div>
+</div>
+
+<div class="ecm-content" id="mainContent" style="display:none">
+
+  <!-- ═══ VISTA LISTA CORSI ═══ -->
+  <div id="vistaLista">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:18px">
+      <div>
+        <div style="font-size:18px;font-weight:700">Formazione a distanza</div>
+        <div style="font-size:13px;color:var(--text3)">Corsi con lezioni video/PDF, sessioni live Zoom, quiz finale e attestato</div>
+      </div>
+      <button class="btn btn-primary" onclick="nuovoCorso()">+ Nuovo corso</button>
+    </div>
+    <div id="listaCorsi"><div class="empty">⏳ Caricamento corsi...</div></div>
+  </div>
+
+  <!-- ═══ VISTA EDITOR CORSO ═══ -->
+  <div id="vistaEditor" style="display:none">
+    <button class="btn btn-sm" onclick="tornaLista()" style="margin-bottom:14px">← Tutti i corsi</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+      <div style="font-size:18px;font-weight:700" id="edTitolo">Corso</div>
+      <span class="badge" id="edStato"></span>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="dettagli" onclick="cambiaTab('dettagli')">⚙️ Dettagli</div>
+      <div class="tab" data-tab="moduli" onclick="cambiaTab('moduli')">📚 Moduli</div>
+      <div class="tab" data-tab="quiz" onclick="cambiaTab('quiz')">❓ Quiz finale</div>
+      <div class="tab" data-tab="iscritti" onclick="cambiaTab('iscritti')">👥 Iscritti e risultati</div>
+      <div class="tab" data-tab="pubblica" onclick="cambiaTab('pubblica')">🔗 Link pubblico</div>
+    </div>
+
+    <!-- TAB DETTAGLI -->
+    <div id="tab-dettagli" class="card">
+      <label class="form-label">Titolo corso *</label>
+      <input class="form-input" id="fTitolo" placeholder="Es. Aggiornamento BLSD 2026">
+      <label class="form-label">Descrizione</label>
+      <textarea class="form-textarea" id="fDescrizione" rows="3" placeholder="Obiettivi formativi, destinatari..."></textarea>
+      <div class="grid3">
+        <div><label class="form-label">Crediti ECM</label><input class="form-input" id="fCrediti" type="number" min="0" step="0.5" value="0"></div>
+        <div><label class="form-label">Ore formative</label><input class="form-input" id="fOre" type="number" min="0" step="0.5" value="0"></div>
+        <div><label class="form-label">Stato</label>
+          <select class="form-select" id="fStato">
+            <option value="bozza">Bozza (non visibile)</option>
+            <option value="attivo">Attivo</option>
+            <option value="archiviato">Archiviato</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid3">
+        <div><label class="form-label">Soglia quiz (%)</label><input class="form-input" id="fSoglia" type="number" min="1" max="100" value="75">
+          <div class="hint">Normativa ECM: 75%</div></div>
+        <div><label class="form-label">Tentativi max quiz</label><input class="form-input" id="fTentativi" type="number" min="1" value="5">
+          <div class="hint">Normativa ECM: 5 tentativi</div></div>
+        <div><label class="form-label">Randomizza domande</label>
+          <select class="form-select" id="fRandom"><option value="si">Sì (doppia randomizzazione)</option><option value="no">No</option></select></div>
+      </div>
+      <div class="grid2">
+        <div><label class="form-label">Data inizio</label><input class="form-input" id="fInizio" type="date"></div>
+        <div><label class="form-label">Data fine</label><input class="form-input" id="fFine" type="date"></div>
+      </div>
+      <div class="grid2">
+        <div><label class="form-label">Ente / Provider</label><input class="form-input" id="fOrg" placeholder="Multimedia Meeting Group"></div>
+        <div><label class="form-label">Firma attestato (nome e ruolo)</label><input class="form-input" id="fFirma" placeholder="Dott. Mario Rossi — Resp. Scientifico"></div>
+      </div>
+      <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="salvaDettagli()">💾 Salva dettagli</button>
+        <button class="btn btn-danger" onclick="eliminaCorso()">🗑 Elimina corso</button>
+      </div>
+    </div>
+
+    <!-- TAB MODULI -->
+    <div id="tab-moduli" style="display:none">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <div style="font-size:14px;font-weight:600">Lezioni del corso (in ordine di fruizione)</div>
+          <button class="btn btn-primary btn-sm" onclick="apriModalModulo()">+ Aggiungi modulo</button>
+        </div>
+        <div class="hint" style="margin-top:6px">Il partecipante sblocca i moduli in sequenza. Il quiz finale si sblocca al completamento di tutti i moduli.</div>
+      </div>
+      <div id="listaModuli"><div class="empty">Nessun modulo. Aggiungi la prima lezione.</div></div>
+    </div>
+
+    <!-- TAB QUIZ -->
+    <div id="tab-quiz" style="display:none">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <div style="font-size:14px;font-weight:600">Domande del quiz finale (risposta multipla)</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" onclick="aggiungiDomanda()">+ Domanda</button>
+            <button class="btn btn-primary btn-sm" onclick="salvaQuiz()">💾 Salva quiz</button>
+          </div>
+        </div>
+        <div class="hint" style="margin-top:6px">Seleziona il pallino accanto all'opzione corretta. Soglia e tentativi si impostano nel tab Dettagli.</div>
+      </div>
+      <div id="listaDomande"></div>
+    </div>
+
+    <!-- TAB ISCRITTI -->
+    <div id="tab-iscritti" style="display:none">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <div style="font-size:14px;font-weight:600">Iscritti e avanzamento</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" onclick="caricaIscritti()">↻ Aggiorna</button>
+            <button class="btn btn-sm" onclick="esportaCSV()">⬇ Esporta CSV</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;margin-top:12px">
+          <table>
+            <thead><tr><th>Nome</th><th>CF</th><th>Progresso</th><th>Quiz</th><th>Esito</th><th>Attestato</th></tr></thead>
+            <tbody id="tbIscritti"><tr><td colspan="6" style="color:var(--text3)">—</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB LINK PUBBLICO -->
+    <div id="tab-pubblica" style="display:none">
+      <div class="card">
+        <div style="font-size:14px;font-weight:600;margin-bottom:10px">Link per i partecipanti</div>
+        <div class="link-box"><span id="linkPubblico" style="flex:1"></span><button class="btn btn-sm" onclick="copiaLink()">📋 Copia</button></div>
+        <div class="hint">I partecipanti si identificano con il Codice Fiscale (stesso sistema del questionario ECM). Il corso deve essere in stato <b>Attivo</b>.</div>
+        <div style="margin-top:16px;display:flex;justify-content:center"><div id="qrLink"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="loadingState" style="display:flex;align-items:center;justify-content:center;min-height:50vh;gap:10px;color:var(--text3)">
+  <span style="font-size:20px">⏳</span> Caricamento...
+</div>
+</div>
+
+<!-- ═══ MODAL MODULO ═══ -->
+<div class="modal-bg" id="modalModulo">
+  <div class="modal">
+    <div class="modal-title" id="mmTitolo">Nuovo modulo</div>
+    <label class="form-label">Titolo lezione *</label>
+    <input class="form-input" id="mTitolo" placeholder="Es. Modulo 1 — Introduzione">
+    <label class="form-label">Tipo di contenuto</label>
+    <select class="form-select" id="mTipo" onchange="aggiornaTipoModulo()">
+      <option value="video">🎬 Video (YouTube / Vimeo)</option>
+      <option value="pdf">📄 Dispensa PDF</option>
+      <option value="live">🔴 Sessione live Zoom</option>
+    </select>
+
+    <!-- VIDEO -->
+    <div id="mBoxVideo">
+      <label class="form-label">Link YouTube o Vimeo *</label>
+      <input class="form-input" id="mVideoUrl" placeholder="https://www.youtube.com/watch?v=... oppure https://vimeo.com/...">
+      <label class="form-label">Durata minima di visione (minuti) *</label>
+      <input class="form-input" id="mVideoDurata" type="number" min="1" value="10">
+      <div class="hint">Il modulo risulta completato dopo questo tempo di permanenza sulla lezione (tracciato solo a pagina visibile).</div>
+    </div>
+
+    <!-- PDF -->
+    <div id="mBoxPdf" style="display:none">
+      <label class="form-label">Carica PDF su Firebase Storage</label>
+      <input class="form-input" id="mPdfFile" type="file" accept="application/pdf">
+      <div class="hint">Richiede Storage attivo (piano Blaze). In alternativa incolla un link esterno qui sotto.</div>
+      <label class="form-label">Oppure link esterno (Drive, sito, ecc.)</label>
+      <input class="form-input" id="mPdfUrl" placeholder="https://...">
+      <label class="form-label">Tempo minimo di lettura (minuti) *</label>
+      <input class="form-input" id="mPdfDurata" type="number" min="1" value="5">
+    </div>
+
+    <!-- LIVE -->
+    <div id="mBoxLive" style="display:none">
+      <div class="grid2">
+        <div><label class="form-label">Data *</label><input class="form-input" id="mLiveData" type="date"></div>
+        <div><label class="form-label">Ora *</label><input class="form-input" id="mLiveOra" type="time"></div>
+      </div>
+      <label class="form-label">Link Zoom *</label>
+      <input class="form-input" id="mLiveLink" placeholder="https://zoom.us/j/123456789?pwd=...">
+      <div class="grid2">
+        <div><label class="form-label">Meeting ID</label><input class="form-input" id="mLiveId" placeholder="123 456 789"></div>
+        <div><label class="form-label">Passcode</label><input class="form-input" id="mLivePwd" placeholder="opzionale"></div>
+      </div>
+      <label class="form-label">Durata sessione (minuti)</label>
+      <input class="form-input" id="mLiveDurata" type="number" min="15" value="60">
+      <div class="hint">Il partecipante si collega dall'app con un clic: la presenza viene registrata con nome, CF e orario. Ogni accesso è tracciato individualmente.</div>
+    </div>
+
+    <div style="margin-top:18px;display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="chiudiModalModulo()">Annulla</button>
+      <button class="btn btn-primary" id="mSalvaBtn" onclick="salvaModulo()">💾 Salva modulo</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { requireAuth, injectUserBar } from "./ecm-auth.js";
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",
+  projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",
+  messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+
+let db, auth, storage;
+let corsi = [], corsoId = null, corso = null, moduli = [], domande = [], modEditId = null;
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+async function initApp() {
+  const app = getApps().length ? getApps()[0] : initializeApp(FB);
+  db = getFirestore(app);
+  auth = getAuth(app);
+  try { storage = getStorage(app); } catch(e) { storage = null; }
+
+  try {
+    await requireAuth();
+    injectUserBar("userBarSlot");
+    if (typeof window.renderSidebar === 'function') window.renderSidebar('fad-admin');
+  } catch(e) { console.warn('Auth:', e.message); return; }
+
+  await caricaCorsi();
+  document.getElementById("loadingState").style.display = "none";
+  document.getElementById("mainContent").style.display = "block";
+
+  const urlP = new URLSearchParams(window.location.search);
+  const cid = urlP.get('corsoId');
+  if (cid && corsi.find(c => c.id === cid)) apriCorso(cid);
+}
+
+// ═══════════ LISTA CORSI ═══════════
+async function caricaCorsi() {
+  const snap = await getDocs(collection(db,'corsi_fad'));
+  corsi = [];
+  snap.forEach(d => corsi.push({id:d.id, ...d.data()}));
+  corsi.sort((a,b) => (b.creatoAt||'').localeCompare(a.creatoAt||''));
+  renderLista();
+}
+
+function renderLista() {
+  const box = document.getElementById('listaCorsi');
+  if (!corsi.length) { box.innerHTML = '<div class="empty">🎓 Nessun corso FAD. Creane uno con "+ Nuovo corso".</div>'; return; }
+  box.innerHTML = '';
+  corsi.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'card corso-card';
+    const st = c.stato || 'bozza';
+    div.innerHTML =
+      '<div style="min-width:0"><div style="font-size:15px;font-weight:700">' + esc(c.titolo||'Corso senza titolo') + '</div>' +
+      '<div style="font-size:12px;color:var(--text3);margin-top:3px">' +
+      (c.crediti ? c.crediti + ' crediti ECM · ' : '') + (c.oreFormative ? c.oreFormative + ' ore · ' : '') +
+      'soglia ' + (c.sogliaQuiz||75) + '%</div></div>' +
+      '<span class="badge badge-' + st + '">' + st.toUpperCase() + '</span>';
+    div.addEventListener('click', () => apriCorso(c.id));
+    box.appendChild(div);
+  });
+}
+
+window.nuovoCorso = async function() {
+  const refDoc = await addDoc(collection(db,'corsi_fad'), {
+    titolo: 'Nuovo corso FAD', descrizione: '', crediti: 0, oreFormative: 0,
+    stato: 'bozza', sogliaQuiz: 75, tentativiMax: 5, randomizza: 'si',
+    dataInizio: '', dataFine: '', org: '', firma: '',
+    quiz: { domande: [] },
+    creatoAt: new Date().toISOString(), creatoDa: auth.currentUser?.email || ''
+  });
+  await caricaCorsi();
+  apriCorso(refDoc.id);
+};
+
+// ═══════════ EDITOR ═══════════
+async function apriCorso(id) {
+  corsoId = id;
+  const snap = await getDoc(doc(db,'corsi_fad',id));
+  if (!snap.exists()) return;
+  corso = {id, ...snap.data()};
+  domande = (corso.quiz && corso.quiz.domande) ? JSON.parse(JSON.stringify(corso.quiz.domande)) : [];
+
+  document.getElementById('vistaLista').style.display = 'none';
+  document.getElementById('vistaEditor').style.display = 'block';
+  document.getElementById('edTitolo').textContent = corso.titolo || 'Corso';
+  const st = corso.stato || 'bozza';
+  const b = document.getElementById('edStato');
+  b.className = 'badge badge-' + st; b.textContent = st.toUpperCase();
+
+  document.getElementById('fTitolo').value = corso.titolo || '';
+  document.getElementById('fDescrizione').value = corso.descrizione || '';
+  document.getElementById('fCrediti').value = corso.crediti || 0;
+  document.getElementById('fOre').value = corso.oreFormative || 0;
+  document.getElementById('fStato').value = st;
+  document.getElementById('fSoglia').value = corso.sogliaQuiz || 75;
+  document.getElementById('fTentativi').value = corso.tentativiMax || 5;
+  document.getElementById('fRandom').value = corso.randomizza || 'si';
+  document.getElementById('fInizio').value = corso.dataInizio || '';
+  document.getElementById('fFine').value = corso.dataFine || '';
+  document.getElementById('fOrg').value = corso.org || '';
+  document.getElementById('fFirma').value = corso.firma || '';
+
+  const url = window.location.origin + window.location.pathname.replace('ecm-fad-admin.html','') + 'ecm-fad-corso.html?corsoId=' + id;
+  document.getElementById('linkPubblico').textContent = url;
+  const qrEl = document.getElementById('qrLink'); qrEl.innerHTML = '';
+  if (typeof QRCode !== 'undefined') new QRCode(qrEl, {text:url, width:180, height:180, correctLevel:QRCode.CorrectLevel.M});
+
+  cambiaTab('dettagli');
+  await caricaModuli();
+  renderDomande();
+  caricaIscritti();
+}
+
+window.tornaLista = function() {
+  corsoId = null; corso = null;
+  document.getElementById('vistaEditor').style.display = 'none';
+  document.getElementById('vistaLista').style.display = 'block';
+  caricaCorsi();
+};
+
+window.cambiaTab = function(t) {
+  document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.dataset.tab === t));
+  ['dettagli','moduli','quiz','iscritti','pubblica'].forEach(x => {
+    const el = document.getElementById('tab-' + x);
+    if (el) el.style.display = (x === t) ? 'block' : 'none';
+  });
+};
+
+window.salvaDettagli = async function() {
+  const titolo = document.getElementById('fTitolo').value.trim();
+  if (!titolo) { alert('Inserisci il titolo del corso'); return; }
+  const dati = {
+    titolo,
+    descrizione: document.getElementById('fDescrizione').value.trim(),
+    crediti: parseFloat(document.getElementById('fCrediti').value) || 0,
+    oreFormative: parseFloat(document.getElementById('fOre').value) || 0,
+    stato: document.getElementById('fStato').value,
+    sogliaQuiz: parseInt(document.getElementById('fSoglia').value) || 75,
+    tentativiMax: parseInt(document.getElementById('fTentativi').value) || 5,
+    randomizza: document.getElementById('fRandom').value,
+    dataInizio: document.getElementById('fInizio').value,
+    dataFine: document.getElementById('fFine').value,
+    org: document.getElementById('fOrg').value.trim(),
+    firma: document.getElementById('fFirma').value.trim(),
+    aggiornatoAt: new Date().toISOString()
+  };
+  await updateDoc(doc(db,'corsi_fad',corsoId), dati);
+  corso = {...corso, ...dati};
+  document.getElementById('edTitolo').textContent = dati.titolo;
+  const b = document.getElementById('edStato');
+  b.className = 'badge badge-' + dati.stato; b.textContent = dati.stato.toUpperCase();
+  alert('✓ Dettagli salvati');
+};
+
+window.eliminaCorso = async function() {
+  if (!confirm('Eliminare definitivamente questo corso? I progressi dei partecipanti andranno persi.')) return;
+  if (!confirm('Confermi? L\'operazione non è reversibile.')) return;
+  const [modSnap, prgSnap] = await Promise.all([
+    getDocs(collection(db,'corsi_fad',corsoId,'moduli')),
+    getDocs(collection(db,'corsi_fad',corsoId,'progressi'))
+  ]);
+  const dels = [];
+  modSnap.forEach(d => dels.push(deleteDoc(d.ref)));
+  prgSnap.forEach(d => dels.push(deleteDoc(d.ref)));
+  await Promise.all(dels);
+  await deleteDoc(doc(db,'corsi_fad',corsoId));
+  tornaLista();
+};
+
+// ═══════════ MODULI ═══════════
+async function caricaModuli() {
+  const snap = await getDocs(collection(db,'corsi_fad',corsoId,'moduli'));
+  moduli = [];
+  snap.forEach(d => moduli.push({id:d.id, ...d.data()}));
+  moduli.sort((a,b) => (a.ordine||0) - (b.ordine||0));
+  renderModuli();
+}
+
+function renderModuli() {
+  const box = document.getElementById('listaModuli');
+  if (!moduli.length) { box.innerHTML = '<div class="empty">Nessun modulo. Aggiungi la prima lezione.</div>'; return; }
+  box.innerHTML = '';
+  const ICONS = {video:'🎬', pdf:'📄', live:'🔴'};
+  moduli.forEach((m, i) => {
+    const div = document.createElement('div');
+    div.className = 'mod-row';
+    let meta = '';
+    if (m.tipo === 'video') meta = 'Video · min ' + (m.durataMin||0) + ' min · ' + (m.url||'');
+    else if (m.tipo === 'pdf') meta = 'PDF · min ' + (m.durataMin||0) + ' min · ' + (m.url||'');
+    else if (m.tipo === 'live') meta = 'Live Zoom · ' + (m.liveData||'') + ' ' + (m.liveOra||'') + ' · ' + (m.durataMin||0) + ' min';
+    div.innerHTML =
+      '<div class="mod-icon">' + (ICONS[m.tipo]||'📚') + '</div>' +
+      '<div class="mod-info"><div class="mod-title">' + (i+1) + '. ' + esc(m.titolo||'') + '</div>' +
+      '<div class="mod-meta">' + esc(meta) + '</div></div>';
+    const up = document.createElement('button'); up.className='btn btn-sm'; up.textContent='↑';
+    up.addEventListener('click', () => spostaModulo(i,-1));
+    const down = document.createElement('button'); down.className='btn btn-sm'; down.textContent='↓';
+    down.addEventListener('click', () => spostaModulo(i,1));
+    const ed = document.createElement('button'); ed.className='btn btn-sm'; ed.textContent='✏️';
+    ed.addEventListener('click', () => apriModalModulo(m.id));
+    const del = document.createElement('button'); del.className='btn btn-sm btn-danger'; del.textContent='🗑';
+    del.addEventListener('click', async () => {
+      if (!confirm('Eliminare il modulo "' + (m.titolo||'') + '"?')) return;
+      await deleteDoc(doc(db,'corsi_fad',corsoId,'moduli',m.id));
+      await caricaModuli();
+    });
+    div.appendChild(up); div.appendChild(down); div.appendChild(ed); div.appendChild(del);
+    box.appendChild(div);
+  });
+}
+
+async function spostaModulo(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= moduli.length) return;
+  const a = moduli[i], b = moduli[j];
+  await Promise.all([
+    updateDoc(doc(db,'corsi_fad',corsoId,'moduli',a.id), {ordine: j}),
+    updateDoc(doc(db,'corsi_fad',corsoId,'moduli',b.id), {ordine: i})
+  ]);
+  await caricaModuli();
+}
+
+window.apriModalModulo = function(id) {
+  modEditId = id || null;
+  document.getElementById('mmTitolo').textContent = id ? 'Modifica modulo' : 'Nuovo modulo';
+  const m = id ? moduli.find(x => x.id === id) : null;
+  document.getElementById('mTitolo').value = m?.titolo || '';
+  document.getElementById('mTipo').value = m?.tipo || 'video';
+  document.getElementById('mVideoUrl').value = (m?.tipo==='video' && m?.url) || '';
+  document.getElementById('mVideoDurata').value = (m?.tipo==='video' && m?.durataMin) || 10;
+  document.getElementById('mPdfUrl').value = (m?.tipo==='pdf' && m?.url) || '';
+  document.getElementById('mPdfDurata').value = (m?.tipo==='pdf' && m?.durataMin) || 5;
+  const f = document.getElementById('mPdfFile'); if (f) f.value = '';
+  document.getElementById('mLiveData').value = m?.liveData || '';
+  document.getElementById('mLiveOra').value = m?.liveOra || '';
+  document.getElementById('mLiveLink').value = (m?.tipo==='live' && m?.url) || '';
+  document.getElementById('mLiveId').value = m?.meetingId || '';
+  document.getElementById('mLivePwd').value = m?.passcode || '';
+  document.getElementById('mLiveDurata').value = (m?.tipo==='live' && m?.durataMin) || 60;
+  aggiornaTipoModulo();
+  document.getElementById('modalModulo').classList.add('open');
+};
+
+window.chiudiModalModulo = function() {
+  document.getElementById('modalModulo').classList.remove('open');
+};
+
+window.aggiornaTipoModulo = function() {
+  const t = document.getElementById('mTipo').value;
+  document.getElementById('mBoxVideo').style.display = t === 'video' ? 'block' : 'none';
+  document.getElementById('mBoxPdf').style.display = t === 'pdf' ? 'block' : 'none';
+  document.getElementById('mBoxLive').style.display = t === 'live' ? 'block' : 'none';
+};
+
+window.salvaModulo = async function() {
+  const titolo = document.getElementById('mTitolo').value.trim();
+  const tipo = document.getElementById('mTipo').value;
+  if (!titolo) { alert('Inserisci il titolo della lezione'); return; }
+
+  const btn = document.getElementById('mSalvaBtn');
+  btn.disabled = true; btn.textContent = '⏳ Salvataggio...';
+
+  try {
+    const dati = { titolo, tipo, aggiornatoAt: new Date().toISOString() };
+
+    if (tipo === 'video') {
+      const url = document.getElementById('mVideoUrl').value.trim();
+      if (!url) throw new Error('Inserisci il link del video');
+      dati.url = url;
+      dati.durataMin = parseInt(document.getElementById('mVideoDurata').value) || 10;
+    }
+    else if (tipo === 'pdf') {
+      const file = document.getElementById('mPdfFile').files[0];
+      let url = document.getElementById('mPdfUrl').value.trim();
+      if (file) {
+        if (!storage) throw new Error('Firebase Storage non disponibile: usa un link esterno');
+        if (file.size > 20*1024*1024) throw new Error('PDF troppo grande (max 20 MB)');
+        const path = 'fad/' + corsoId + '/' + Date.now() + '_' + file.name.replace(/[^\w.\-]/g,'_');
+        const r = ref(storage, path);
+        await uploadBytes(r, file, {contentType:'application/pdf'});
+        url = await getDownloadURL(r);
+        dati.storagePath = path;
+      }
+      if (!url) throw new Error('Carica un PDF o inserisci un link esterno');
+      dati.url = url;
+      dati.durataMin = parseInt(document.getElementById('mPdfDurata').value) || 5;
+    }
+    else if (tipo === 'live') {
+      const link = document.getElementById('mLiveLink').value.trim();
+      const data = document.getElementById('mLiveData').value;
+      const ora = document.getElementById('mLiveOra').value;
+      if (!link || !data || !ora) throw new Error('Compila data, ora e link Zoom');
+      dati.url = link;
+      dati.liveData = data;
+      dati.liveOra = ora;
+      dati.meetingId = document.getElementById('mLiveId').value.trim();
+      dati.passcode = document.getElementById('mLivePwd').value.trim();
+      dati.durataMin = parseInt(document.getElementById('mLiveDurata').value) || 60;
+    }
+
+    if (modEditId) {
+      await updateDoc(doc(db,'corsi_fad',corsoId,'moduli',modEditId), dati);
+    } else {
+      dati.ordine = moduli.length;
+      dati.creatoAt = new Date().toISOString();
+      await addDoc(collection(db,'corsi_fad',corsoId,'moduli'), dati);
+    }
+    chiudiModalModulo();
+    await caricaModuli();
+  } catch(e) {
+    alert('⚠️ ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '💾 Salva modulo';
+  }
+};
+
+// ═══════════ QUIZ ═══════════
+function renderDomande() {
+  const box = document.getElementById('listaDomande');
+  if (!domande.length) { box.innerHTML = '<div class="empty">Nessuna domanda. Aggiungi la prima con "+ Domanda".</div>'; return; }
+  box.innerHTML = '';
+  domande.forEach((d, i) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    const head = document.createElement('div');
+    head.style.cssText = 'display:flex;gap:8px;align-items:center;margin-bottom:8px';
+    const lbl = document.createElement('div');
+    lbl.style.cssText = 'font-size:12px;font-weight:700;color:var(--fad);min-width:36px';
+    lbl.textContent = 'D.' + (i+1);
+    const inp = document.createElement('input');
+    inp.className = 'form-input'; inp.placeholder = 'Testo della domanda'; inp.value = d.testo || '';
+    inp.addEventListener('input', () => d.testo = inp.value);
+    const del = document.createElement('button');
+    del.className = 'btn btn-sm btn-danger'; del.textContent = '🗑';
+    del.addEventListener('click', () => { domande.splice(i,1); renderDomande(); });
+    head.appendChild(lbl); head.appendChild(inp); head.appendChild(del);
+    card.appendChild(head);
+
+    (d.opzioni||[]).forEach((op, j) => {
+      const row = document.createElement('div');
+      row.className = 'q-opt';
+      const radio = document.createElement('input');
+      radio.type = 'radio'; radio.name = 'corr_' + i; radio.checked = d.corretta === j;
+      radio.title = 'Risposta corretta';
+      radio.addEventListener('change', () => d.corretta = j);
+      const oi = document.createElement('input');
+      oi.type = 'text'; oi.className = 'form-input'; oi.placeholder = 'Opzione ' + (j+1); oi.value = op;
+      oi.addEventListener('input', () => d.opzioni[j] = oi.value);
+      const od = document.createElement('button');
+      od.className = 'btn btn-sm'; od.textContent = '✕';
+      od.addEventListener('click', () => {
+        d.opzioni.splice(j,1);
+        if (d.corretta === j) d.corretta = 0;
+        else if (d.corretta > j) d.corretta--;
+        renderDomande();
+      });
+      row.appendChild(radio); row.appendChild(oi); row.appendChild(od);
+      card.appendChild(row);
+    });
+
+    const addOp = document.createElement('button');
+    addOp.className = 'btn btn-sm'; addOp.style.marginTop = '8px'; addOp.textContent = '+ Opzione';
+    addOp.addEventListener('click', () => { d.opzioni = d.opzioni || []; d.opzioni.push(''); renderDomande(); });
+    card.appendChild(addOp);
+    box.appendChild(card);
+  });
+}
+
+window.aggiungiDomanda = function() {
+  domande.push({ id: 'q' + Date.now(), testo: '', opzioni: ['','',''], corretta: 0 });
+  renderDomande();
+};
+
+window.salvaQuiz = async function() {
+  const valide = domande.filter(d => d.testo.trim() && (d.opzioni||[]).filter(o => o.trim()).length >= 2);
+  if (valide.length !== domande.length && domande.length) {
+    if (!confirm('Alcune domande sono incomplete (serve testo + almeno 2 opzioni) e verranno scartate. Continuare?')) return;
+  }
+  const pulite = valide.map(d => ({
+    id: d.id, testo: d.testo.trim(),
+    opzioni: d.opzioni.map(o => o.trim()).filter(Boolean),
+    corretta: Math.min(d.corretta||0, d.opzioni.filter(o => o.trim()).length - 1)
+  }));
+  await updateDoc(doc(db,'corsi_fad',corsoId), { quiz: { domande: pulite }, aggiornatoAt: new Date().toISOString() });
+  domande = pulite;
+  renderDomande();
+  alert('✓ Quiz salvato (' + pulite.length + ' domande)');
+};
+
+// ═══════════ ISCRITTI ═══════════
+let iscritti = [];
+window.caricaIscritti = async function() {
+  if (!corsoId) return;
+  const snap = await getDocs(collection(db,'corsi_fad',corsoId,'progressi'));
+  iscritti = [];
+  snap.forEach(d => iscritti.push({id:d.id, ...d.data()}));
+  iscritti.sort((a,b) => (a.cognome||'').localeCompare(b.cognome||''));
+  const tb = document.getElementById('tbIscritti');
+  if (!iscritti.length) { tb.innerHTML = '<tr><td colspan="6" style="color:var(--text3)">Nessun iscritto ancora.</td></tr>'; return; }
+  const totMod = moduli.length || 1;
+  tb.innerHTML = '';
+  iscritti.forEach(p => {
+    const fatti = Object.values(p.moduli||{}).filter(m => m.completato).length;
+    const pct = Math.round(fatti / totMod * 100);
+    const q = p.quiz || {};
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>' + esc((p.cognome||'') + ' ' + (p.nome||'')) + '</td>' +
+      '<td style="font-family:monospace;font-size:12px">' + esc(p.cf||p.id) + '</td>' +
+      '<td><div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+      '<span style="font-size:11px;color:var(--text3)">' + fatti + '/' + totMod + '</span></td>' +
+      '<td>' + (q.tentativi ? q.tentativi + ' tent. · ' + (q.ultimoPunteggio!=null ? q.ultimoPunteggio + '%' : '—') : '—') + '</td>' +
+      '<td>' + (q.superato ? '<span class="badge badge-attivo">SUPERATO</span>' : (q.tentativi ? '<span class="badge badge-archiviato">NON SUPERATO</span>' : '—')) + '</td>' +
+      '<td>' + (p.certificato?.emesso ? '📜 ' + esc(p.certificato.numero||'') : '—') + '</td>';
+    tb.appendChild(tr);
+  });
+};
+
+window.esportaCSV = function() {
+  if (!iscritti.length) { alert('Nessun iscritto da esportare'); return; }
+  const totMod = moduli.length || 1;
+  const rows = [['Cognome','Nome','CF','Email','Moduli completati','Totale moduli','Tentativi quiz','Ultimo punteggio %','Superato','N. attestato']];
+  iscritti.forEach(p => {
+    const fatti = Object.values(p.moduli||{}).filter(m => m.completato).length;
+    const q = p.quiz || {};
+    rows.push([p.cognome||'', p.nome||'', p.cf||p.id, p.email||'', fatti, totMod,
+      q.tentativi||0, q.ultimoPunteggio!=null?q.ultimoPunteggio:'', q.superato?'SI':'NO', p.certificato?.numero||'']);
+  });
+  const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(';')).join('\n');
+  const blob = new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'fad_' + (corso?.titolo||'corso').replace(/[^\w]/g,'_') + '.csv';
+  a.click();
+};
+
+window.copiaLink = function() {
+  const t = document.getElementById('linkPubblico').textContent;
+  navigator.clipboard.writeText(t).then(() => alert('✓ Link copiato'));
+};
+
+document.getElementById('modalModulo').addEventListener('click', e => {
+  if (e.target.id === 'modalModulo') chiudiModalModulo();
+});
+
+initApp();
+</script>
+</body>
+</html>

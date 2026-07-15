@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Corso FAD — ECM Access Control</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--fad:#0D9488;--fad-light:#CCFBF1;--accent:#2B4EFF;--success:#059669;--danger:#DC2626;--warn:#D97706;
+--text:#1A1714;--text2:#6B6560;--text3:#9B948C;--border:#E8E4DE;--surface:#F8F6F3;--surface2:#F0EDE8;
+--radius:14px;--shadow:0 1px 3px rgba(0,0,0,.06)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"DM Sans","Segoe UI",sans-serif;background:var(--surface);color:var(--text);min-height:100vh}
+.header{background:white;border-bottom:1px solid var(--border);padding:16px 20px;box-shadow:var(--shadow)}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+.h-titolo{font-size:18px;font-weight:700}
+.h-meta{font-size:12px;color:var(--text3);margin-top:2px}
+.h-badge{display:inline-flex;align-items:center;gap:5px;background:var(--fad-light);color:var(--fad);
+  border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;margin-top:6px}
+.card{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:var(--shadow)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border-radius:10px;
+  border:none;background:var(--fad);color:white;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;text-decoration:none}
+.btn:hover{background:#0B7C72}
+.btn:disabled{background:var(--surface2);color:var(--text3);cursor:not-allowed}
+.btn-out{background:white;border:1px solid var(--border);color:var(--text)}
+.btn-out:hover{background:var(--surface)}
+.btn-full{width:100%}
+.form-input{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit}
+.form-input:focus{outline:none;border-color:var(--fad);box-shadow:0 0 0 3px var(--fad-light)}
+.form-label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);display:block;margin:14px 0 6px}
+.progress-wrap{margin:14px 0}
+.progress-bar{height:10px;background:var(--surface2);border-radius:6px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--fad),#14B8A6);border-radius:6px;transition:width .4s}
+.progress-lbl{font-size:12px;color:var(--text3);margin-top:5px;text-align:right}
+.mod-item{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--border);border-radius:12px;
+  margin-bottom:10px;background:white;cursor:pointer;transition:.15s}
+.mod-item:hover{border-color:var(--fad)}
+.mod-item.locked{opacity:.55;cursor:not-allowed}
+.mod-item.done{border-color:var(--success);background:#F0FDF4}
+.mod-ic{font-size:24px;width:40px;text-align:center;flex-shrink:0}
+.mod-tx{flex:1;min-width:0}
+.mod-t1{font-size:14px;font-weight:700}
+.mod-t2{font-size:12px;color:var(--text3);margin-top:2px}
+.mod-st{font-size:18px;flex-shrink:0}
+.player-box{position:relative;width:100%;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#000;margin:12px 0}
+.player-box iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.pdf-frame{width:100%;height:70vh;border:1px solid var(--border);border-radius:12px;margin:12px 0}
+.timer-box{display:flex;align-items:center;gap:10px;background:var(--fad-light);border-radius:10px;padding:12px 16px;margin-top:10px}
+.timer-num{font-size:20px;font-weight:800;color:var(--fad);font-variant-numeric:tabular-nums}
+.timer-lbl{font-size:12px;color:var(--text2);line-height:1.35}
+.q-opt{display:block;padding:14px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;cursor:pointer;font-size:14px;transition:.12s}
+.q-opt:hover{border-color:var(--fad)}
+.q-opt.sel{border-color:var(--fad);background:var(--fad-light);font-weight:600}
+.alert{border-radius:12px;padding:14px 16px;font-size:13px;margin-bottom:12px;line-height:1.4}
+.alert-ok{background:#F0FDF4;border:1px solid #BBF7D0;color:#166534}
+.alert-ko{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B}
+.alert-info{background:var(--fad-light);border:1px solid #99F6E4;color:#134E4A}
+.big-emoji{font-size:52px;text-align:center;margin:10px 0}
+.center{text-align:center}
+.live-chip{display:inline-block;background:#FEE2E2;color:var(--danger);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:800}
+.hidden{display:none!important}
+h2{font-size:17px;margin-bottom:6px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="max-width:760px;margin:0 auto">
+    <div class="h-titolo" id="hTitolo">Caricamento...</div>
+    <div class="h-meta" id="hMeta"></div>
+    <div class="h-badge">🎓 Corso FAD — Formazione a Distanza</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ═══ STATO: ERRORE ═══ -->
+  <div id="stErrore" class="hidden">
+    <div class="card center">
+      <div class="big-emoji">⚠️</div>
+      <h2 id="erroreMsg">Corso non disponibile</h2>
+    </div>
+  </div>
+
+  <!-- ═══ STATO: IDENTIFICAZIONE ═══ -->
+  <div id="stLogin" class="hidden">
+    <div class="card">
+      <h2>Identificati per iniziare</h2>
+      <div style="font-size:13px;color:var(--text3)">Il Codice Fiscale collega i tuoi progressi e l'attestato finale.</div>
+      <label class="form-label">Codice Fiscale *</label>
+      <input class="form-input" id="inCF" maxlength="16" placeholder="RSSMRA80A01H501U" style="text-transform:uppercase;font-family:monospace">
+      <div id="boxAnagrafica" class="hidden">
+        <label class="form-label">Nome *</label>
+        <input class="form-input" id="inNome">
+        <label class="form-label">Cognome *</label>
+        <input class="form-input" id="inCognome">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="inEmail" type="email" placeholder="per ricevere comunicazioni (facoltativa)">
+      </div>
+      <button class="btn btn-full" id="btnEntra" style="margin-top:16px" onclick="identificati()">Inizia il corso →</button>
+    </div>
+  </div>
+
+  <!-- ═══ STATO: HOME CORSO ═══ -->
+  <div id="stHome" class="hidden">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+        <div style="font-size:14px;font-weight:700" id="benvenuto"></div>
+        <button class="btn btn-out" style="padding:6px 12px;font-size:12px" onclick="cambiaUtente()">Cambia utente</button>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="pgFill" style="width:0%"></div></div>
+        <div class="progress-lbl" id="pgLbl">0%</div>
+      </div>
+      <div id="descrCorso" style="font-size:13px;color:var(--text2);line-height:1.5"></div>
+    </div>
+    <div id="listaModuli"></div>
+    <div class="card" id="cardQuiz">
+      <h2>❓ Quiz finale</h2>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:12px" id="quizInfo"></div>
+      <button class="btn btn-full" id="btnQuiz" onclick="avviaQuiz()" disabled>Completa tutti i moduli per sbloccare</button>
+    </div>
+    <div class="card hidden" id="cardCert">
+      <div class="big-emoji">📜</div>
+      <h2 class="center">Attestato disponibile</h2>
+      <div class="center" style="font-size:13px;color:var(--text3);margin-bottom:14px" id="certInfo"></div>
+      <button class="btn btn-full" onclick="scaricaCertificato()">⬇ Scarica attestato PDF</button>
+    </div>
+  </div>
+
+  <!-- ═══ STATO: MODULO APERTO ═══ -->
+  <div id="stModulo" class="hidden">
+    <button class="btn btn-out" style="margin-bottom:12px;padding:8px 14px;font-size:13px" onclick="chiudiModulo()">← Torna al corso</button>
+    <div class="card">
+      <h2 id="modTitolo"></h2>
+      <div id="modContenuto"></div>
+      <div class="timer-box hidden" id="timerBox">
+        <div class="timer-num" id="timerNum">0:00</div>
+        <div class="timer-lbl" id="timerLbl">Tempo di fruizione. Il modulo si completa automaticamente al raggiungimento del tempo minimo (conteggio attivo solo con pagina visibile).</div>
+      </div>
+      <div class="alert alert-ok hidden" id="modDone" style="margin-top:12px">✓ Modulo completato! Puoi tornare al corso.</div>
+    </div>
+  </div>
+
+  <!-- ═══ STATO: QUIZ ═══ -->
+  <div id="stQuiz" class="hidden">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:10px">
+        <span id="qProg"></span><span id="qTent"></span>
+      </div>
+      <h2 id="qTesto"></h2>
+      <div id="qOpzioni" style="margin-top:14px"></div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="btn btn-out" id="qPrev" onclick="quizPrev()" style="flex:1">← Indietro</button>
+        <button class="btn" id="qNext" onclick="quizNext()" style="flex:1">Avanti →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STATO: ESITO QUIZ ═══ -->
+  <div id="stEsito" class="hidden">
+    <div class="card center">
+      <div class="big-emoji" id="esitoEmoji">🎉</div>
+      <h2 id="esitoTitolo"></h2>
+      <div style="font-size:14px;color:var(--text2);margin:8px 0 16px" id="esitoSub"></div>
+      <div id="esitoAzioni"></div>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",
+  projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",
+  messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+
+let db, auth, corsoId, corso = null, moduli = [], prog = null, cf = '';
+let modApertoId = null, timerInt = null, secondiSessione = 0, ultimoSalvataggio = 0;
+let quizDomande = [], quizIdx = 0, quizRisposte = {};
+
+const STATI = ['stErrore','stLogin','stHome','stModulo','stQuiz','stEsito'];
+function mostra(id){ STATI.forEach(s => document.getElementById(s).classList.toggle('hidden', s !== id)); window.scrollTo(0,0); }
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function showError(msg){ document.getElementById('erroreMsg').textContent = msg; mostra('stErrore'); }
+
+async function initApp() {
+  const app = getApps().length ? getApps()[0] : initializeApp(FB);
+  db = getFirestore(app);
+  auth = getAuth(app);
+  try { await signInAnonymously(auth); } catch(e) {}
+
+  corsoId = new URLSearchParams(window.location.search).get('corsoId');
+  if (!corsoId) { showError('Link non valido: manca il corso.'); return; }
+
+  try {
+    const snap = await getDoc(doc(db,'corsi_fad',corsoId));
+    if (!snap.exists()) { showError('Corso non trovato.'); return; }
+    corso = snap.data();
+    if (corso.stato !== 'attivo') { showError('Questo corso non è attualmente attivo.'); return; }
+
+    document.getElementById('hTitolo').textContent = corso.titolo || 'Corso FAD';
+    document.getElementById('hMeta').textContent =
+      (corso.org ? corso.org + ' · ' : '') +
+      (corso.crediti ? corso.crediti + ' crediti ECM · ' : '') +
+      (corso.oreFormative ? corso.oreFormative + ' ore' : '');
+
+    const mSnap = await getDocs(collection(db,'corsi_fad',corsoId,'moduli'));
+    moduli = [];
+    mSnap.forEach(d => moduli.push({id:d.id, ...d.data()}));
+    moduli.sort((a,b) => (a.ordine||0) - (b.ordine||0));
+
+    // CF memorizzato?
+    const saved = localStorage.getItem('fad_cf_' + corsoId);
+    if (saved) { cf = saved; await caricaProgresso(true); }
+    else mostra('stLogin');
+  } catch(e) {
+    console.error(e);
+    showError('Errore di caricamento: ' + e.message);
+  }
+}
+
+// ═══════════ IDENTIFICAZIONE ═══════════
+document.getElementById('inCF').addEventListener('input', async function() {
+  this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  document.getElementById('boxAnagrafica').classList.add('hidden');
+});
+
+window.identificati = async function() {
+  const v = document.getElementById('inCF').value.trim().toUpperCase();
+  if (v.length !== 16) { alert('Il Codice Fiscale deve avere 16 caratteri'); return; }
+  cf = v;
+  const btn = document.getElementById('btnEntra');
+  btn.disabled = true; btn.textContent = '⏳ ...';
+  try {
+    const snap = await getDoc(doc(db,'corsi_fad',corsoId,'progressi',cf));
+    if (snap.exists()) {
+      prog = snap.data();
+      localStorage.setItem('fad_cf_' + corsoId, cf);
+      renderHome();
+    } else {
+      const box = document.getElementById('boxAnagrafica');
+      if (box.classList.contains('hidden')) {
+        box.classList.remove('hidden');
+        btn.textContent = 'Conferma e inizia →';
+        btn.disabled = false;
+        return;
+      }
+      const nome = document.getElementById('inNome').value.trim();
+      const cognome = document.getElementById('inCognome').value.trim();
+      if (!nome || !cognome) { alert('Inserisci nome e cognome'); btn.disabled = false; return; }
+      prog = {
+        cf, nome, cognome,
+        email: document.getElementById('inEmail').value.trim(),
+        moduli: {}, livePresenze: {}, quiz: {},
+        iscrittoAt: new Date().toISOString()
+      };
+      await setDoc(doc(db,'corsi_fad',corsoId,'progressi',cf), prog);
+      localStorage.setItem('fad_cf_' + corsoId, cf);
+      renderHome();
+    }
+  } catch(e) {
+    alert('Errore: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    if (btn.textContent.includes('⏳')) btn.textContent = 'Inizia il corso →';
+  }
+};
+
+async function caricaProgresso(silenzioso) {
+  try {
+    const snap = await getDoc(doc(db,'corsi_fad',corsoId,'progressi',cf));
+    if (snap.exists()) { prog = snap.data(); renderHome(); }
+    else if (silenzioso) { localStorage.removeItem('fad_cf_' + corsoId); mostra('stLogin'); }
+  } catch(e) { showError('Errore: ' + e.message); }
+}
+
+window.cambiaUtente = function() {
+  localStorage.removeItem('fad_cf_' + corsoId);
+  cf = ''; prog = null;
+  document.getElementById('inCF').value = '';
+  mostra('stLogin');
+};
+
+// ═══════════ HOME ═══════════
+function modCompletato(id){ return !!(prog?.moduli && prog.moduli[id] && prog.moduli[id].completato); }
+function tuttiCompletati(){ return moduli.length > 0 && moduli.every(m => modCompletato(m.id)); }
+
+function renderHome() {
+  document.getElementById('benvenuto').textContent = '👋 ' + (prog.nome||'') + ' ' + (prog.cognome||'');
+  document.getElementById('descrCorso').textContent = corso.descrizione || '';
+
+  const fatti = moduli.filter(m => modCompletato(m.id)).length;
+  const pct = moduli.length ? Math.round(fatti / moduli.length * 100) : 0;
+  document.getElementById('pgFill').style.width = pct + '%';
+  document.getElementById('pgLbl').textContent = fatti + ' / ' + moduli.length + ' moduli · ' + pct + '%';
+
+  const ICONS = {video:'🎬', pdf:'📄', live:'🔴'};
+  const box = document.getElementById('listaModuli');
+  box.innerHTML = '';
+  moduli.forEach((m, i) => {
+    const done = modCompletato(m.id);
+    const sbloccato = i === 0 || modCompletato(moduli[i-1].id);
+    const div = document.createElement('div');
+    div.className = 'mod-item' + (done ? ' done' : '') + (!sbloccato ? ' locked' : '');
+    let meta = '';
+    if (m.tipo === 'video') meta = 'Video · min. ' + (m.durataMin||0) + ' min';
+    else if (m.tipo === 'pdf') meta = 'Dispensa PDF · min. ' + (m.durataMin||0) + ' min';
+    else if (m.tipo === 'live') {
+      const dt = m.liveData ? new Date(m.liveData + 'T' + (m.liveOra||'00:00')) : null;
+      meta = 'Sessione live Zoom · ' + (dt ? dt.toLocaleDateString('it-IT',{day:'2-digit',month:'short'}) + ' ore ' + (m.liveOra||'') : '');
+    }
+    div.innerHTML =
+      '<div class="mod-ic">' + (ICONS[m.tipo]||'📚') + '</div>' +
+      '<div class="mod-tx"><div class="mod-t1">' + (i+1) + '. ' + esc(m.titolo||'') +
+      (m.tipo==='live' ? ' <span class="live-chip">LIVE</span>' : '') + '</div>' +
+      '<div class="mod-t2">' + esc(meta) + '</div></div>' +
+      '<div class="mod-st">' + (done ? '✅' : (sbloccato ? '▶️' : '🔒')) + '</div>';
+    if (sbloccato) div.addEventListener('click', () => apriModulo(m.id));
+    box.appendChild(div);
+  });
+
+  // Quiz
+  const nQ = (corso.quiz?.domande||[]).length;
+  const soglia = corso.sogliaQuiz || 75;
+  const tentMax = corso.tentativiMax || 5;
+  const q = prog.quiz || {};
+  document.getElementById('quizInfo').textContent =
+    nQ + ' domande · soglia superamento ' + soglia + '% · massimo ' + tentMax + ' tentativi' +
+    (q.tentativi ? ' · effettuati: ' + q.tentativi + (q.ultimoPunteggio!=null ? ' (ultimo: ' + q.ultimoPunteggio + '%)' : '') : '');
+
+  const btn = document.getElementById('btnQuiz');
+  const cardCert = document.getElementById('cardCert');
+  cardCert.classList.add('hidden');
+
+  if (q.superato) {
+    btn.disabled = true; btn.textContent = '✅ Quiz superato con ' + q.ultimoPunteggio + '%';
+    cardCert.classList.remove('hidden');
+    document.getElementById('certInfo').textContent =
+      (corso.crediti ? corso.crediti + ' crediti ECM · ' : '') + 'Attestato n. ' + (prog.certificato?.numero || generaNumeroCert());
+  } else if (!nQ) {
+    btn.disabled = true; btn.textContent = 'Quiz non ancora configurato';
+  } else if (q.tentativi >= tentMax) {
+    btn.disabled = true; btn.textContent = '⛔ Tentativi esauriti (' + tentMax + ')';
+  } else if (tuttiCompletati()) {
+    btn.disabled = false; btn.textContent = '▶ Avvia il quiz finale';
+  } else {
+    btn.disabled = true; btn.textContent = 'Completa tutti i moduli per sbloccare';
+  }
+
+  mostra('stHome');
+}
+
+// ═══════════ MODULO ═══════════
+function apriModulo(id) {
+  const m = moduli.find(x => x.id === id);
+  if (!m) return;
+  modApertoId = id;
+  document.getElementById('modTitolo').textContent = m.titolo || '';
+  const box = document.getElementById('modContenuto');
+  box.innerHTML = '';
+  document.getElementById('modDone').classList.toggle('hidden', !modCompletato(id));
+  document.getElementById('timerBox').classList.add('hidden');
+
+  if (m.tipo === 'video') {
+    const embed = videoEmbed(m.url);
+    if (embed) box.innerHTML = '<div class="player-box"><iframe src="' + embed + '" allow="autoplay;fullscreen" allowfullscreen></iframe></div>';
+    else box.innerHTML = '<div class="alert alert-info">Apri il video: <a href="' + esc(m.url) + '" target="_blank" rel="noopener">' + esc(m.url) + '</a></div>';
+    avviaTimer(m);
+  }
+  else if (m.tipo === 'pdf') {
+    box.innerHTML =
+      '<a class="btn btn-out btn-full" href="' + esc(m.url) + '" target="_blank" rel="noopener" style="margin:10px 0">📄 Apri la dispensa in una nuova scheda</a>' +
+      '<iframe class="pdf-frame" src="' + esc(m.url) + '"></iframe>';
+    avviaTimer(m);
+  }
+  else if (m.tipo === 'live') {
+    const dt = m.liveData ? new Date(m.liveData + 'T' + (m.liveOra||'00:00')) : null;
+    const now = new Date();
+    const apertura = dt ? new Date(dt.getTime() - 15*60000) : null;   // 15 min prima
+    const chiusura = dt ? new Date(dt.getTime() + (m.durataMin||60)*60000) : null;
+    const presente = prog.livePresenze && prog.livePresenze[id];
+
+    let html = '<div class="alert alert-info">🔴 <b>Sessione live su Zoom</b><br>' +
+      (dt ? dt.toLocaleDateString('it-IT',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}) + ' alle ' + (m.liveOra||'') : '') +
+      (m.durataMin ? ' · durata ' + m.durataMin + ' min' : '') +
+      (m.meetingId ? '<br>Meeting ID: <b>' + esc(m.meetingId) + '</b>' : '') +
+      (m.passcode ? ' · Passcode: <b>' + esc(m.passcode) + '</b>' : '') + '</div>';
+
+    if (presente) {
+      html += '<div class="alert alert-ok">✓ Presenza registrata il ' + new Date(presente.joinTs).toLocaleString('it-IT') + '</div>';
+    }
+    box.innerHTML = html;
+
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-full';
+    if (dt && now < apertura) {
+      btn.disabled = true;
+      btn.textContent = '🔒 Il collegamento si apre 15 minuti prima della sessione';
+    } else if (dt && chiusura && now > chiusura && !presente) {
+      btn.disabled = true;
+      btn.textContent = '⌛ Sessione terminata';
+    } else {
+      btn.textContent = presente ? '↩ Rientra su Zoom' : '🎥 Collegati su Zoom (registra la presenza)';
+      btn.addEventListener('click', () => joinLive(m));
+    }
+    box.appendChild(btn);
+  }
+  mostra('stModulo');
+}
+
+function videoEmbed(url) {
+  if (!url) return null;
+  let m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/);
+  if (m) return 'https://www.youtube-nocookie.com/embed/' + m[1] + '?rel=0';
+  m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (m) return 'https://player.vimeo.com/video/' + m[1];
+  return null;
+}
+
+function avviaTimer(m) {
+  const richiesto = (m.durataMin || 0) * 60;
+  const giaFatti = (prog.moduli && prog.moduli[m.id] && prog.moduli[m.id].secondi) || 0;
+  if (modCompletato(m.id)) return;
+
+  secondiSessione = giaFatti;
+  ultimoSalvataggio = giaFatti;
+  document.getElementById('timerBox').classList.remove('hidden');
+  aggiornaTimerUI(richiesto);
+
+  if (timerInt) clearInterval(timerInt);
+  timerInt = setInterval(async () => {
+    if (document.hidden) return;               // conta solo a pagina visibile
+    secondiSessione++;
+    aggiornaTimerUI(richiesto);
+    if (secondiSessione >= richiesto) {
+      clearInterval(timerInt); timerInt = null;
+      await salvaModuloProgresso(m.id, secondiSessione, true);
+      document.getElementById('modDone').classList.remove('hidden');
+      document.getElementById('timerBox').classList.add('hidden');
+    } else if (secondiSessione - ultimoSalvataggio >= 30) {
+      ultimoSalvataggio = secondiSessione;
+      salvaModuloProgresso(m.id, secondiSessione, false);
+    }
+  }, 1000);
+}
+
+function aggiornaTimerUI(richiesto) {
+  const resto = Math.max(0, richiesto - secondiSessione);
+  const mm = Math.floor(resto/60), ss = resto % 60;
+  document.getElementById('timerNum').textContent = mm + ':' + String(ss).padStart(2,'0');
+}
+
+async function salvaModuloProgresso(modId, secondi, completato) {
+  prog.moduli = prog.moduli || {};
+  prog.moduli[modId] = {
+    secondi,
+    completato: completato || modCompletato(modId),
+    ts: new Date().toISOString()
+  };
+  try {
+    await setDoc(doc(db,'corsi_fad',corsoId,'progressi',cf), { moduli: prog.moduli }, { merge: true });
+  } catch(e) { console.warn('Salvataggio progresso:', e.message); }
+}
+
+async function joinLive(m) {
+  prog.livePresenze = prog.livePresenze || {};
+  if (!prog.livePresenze[m.id]) {
+    prog.livePresenze[m.id] = { joinTs: new Date().toISOString(), nome: prog.nome, cognome: prog.cognome, cf };
+    prog.moduli = prog.moduli || {};
+    prog.moduli[m.id] = { completato: true, secondi: (m.durataMin||60)*60, ts: new Date().toISOString(), tipo: 'live' };
+    try {
+      await setDoc(doc(db,'corsi_fad',corsoId,'progressi',cf),
+        { livePresenze: prog.livePresenze, moduli: prog.moduli }, { merge: true });
+    } catch(e) { console.warn(e); }
+  }
+  window.open(m.url, '_blank', 'noopener');
+  apriModulo(m.id);  // refresh vista
+}
+
+window.chiudiModulo = function() {
+  if (timerInt) {
+    clearInterval(timerInt); timerInt = null;
+    if (modApertoId && !modCompletato(modApertoId) && secondiSessione > ultimoSalvataggio) {
+      salvaModuloProgresso(modApertoId, secondiSessione, false);
+    }
+  }
+  modApertoId = null;
+  renderHome();
+};
+
+// ═══════════ QUIZ ═══════════
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+window.avviaQuiz = function() {
+  const base = (corso.quiz?.domande||[]).map(d => ({...d, opzioni:[...d.opzioni]}));
+  if (corso.randomizza !== 'no') {
+    shuffle(base);
+    base.forEach(d => {
+      const idx = d.opzioni.map((o,i) => i);
+      shuffle(idx);
+      d.opzioni = idx.map(i => d.opzioni[i]);
+      d.corretta = idx.indexOf(d.corretta);
+    });
+  }
+  quizDomande = base;
+  quizIdx = 0; quizRisposte = {};
+  renderQuizDomanda();
+  mostra('stQuiz');
+};
+
+function renderQuizDomanda() {
+  const d = quizDomande[quizIdx];
+  document.getElementById('qProg').textContent = 'Domanda ' + (quizIdx+1) + ' di ' + quizDomande.length;
+  const q = prog.quiz || {};
+  document.getElementById('qTent').textContent = 'Tentativo ' + ((q.tentativi||0)+1) + ' di ' + (corso.tentativiMax||5);
+  document.getElementById('qTesto').textContent = d.testo;
+  const box = document.getElementById('qOpzioni');
+  box.innerHTML = '';
+  d.opzioni.forEach((op, j) => {
+    const div = document.createElement('div');
+    div.className = 'q-opt' + (quizRisposte[d.id] === j ? ' sel' : '');
+    div.textContent = op;
+    div.addEventListener('click', () => { quizRisposte[d.id] = j; renderQuizDomanda(); });
+    box.appendChild(div);
+  });
+  document.getElementById('qPrev').style.visibility = quizIdx === 0 ? 'hidden' : 'visible';
+  document.getElementById('qNext').textContent = quizIdx === quizDomande.length-1 ? '✓ Consegna' : 'Avanti →';
+}
+
+window.quizPrev = function(){ if (quizIdx > 0) { quizIdx--; renderQuizDomanda(); } };
+
+window.quizNext = async function() {
+  const d = quizDomande[quizIdx];
+  if (quizRisposte[d.id] == null) { alert('Seleziona una risposta'); return; }
+  if (quizIdx < quizDomande.length - 1) { quizIdx++; renderQuizDomanda(); return; }
+
+  // Consegna
+  let corrette = 0;
+  quizDomande.forEach(q => { if (quizRisposte[q.id] === q.corretta) corrette++; });
+  const punteggio = Math.round(corrette / quizDomande.length * 100);
+  const soglia = corso.sogliaQuiz || 75;
+  const superato = punteggio >= soglia;
+
+  const q = prog.quiz || {};
+  prog.quiz = {
+    tentativi: (q.tentativi||0) + 1,
+    ultimoPunteggio: punteggio,
+    superato: superato || !!q.superato,
+    ts: new Date().toISOString()
+  };
+  if (superato && !prog.certificato?.emesso) {
+    prog.certificato = { emesso: true, ts: new Date().toISOString(), numero: generaNumeroCert() };
+  }
+  try {
+    await setDoc(doc(db,'corsi_fad',corsoId,'progressi',cf),
+      { quiz: prog.quiz, certificato: prog.certificato || {} }, { merge: true });
+  } catch(e) { console.warn(e); }
+
+  document.getElementById('esitoEmoji').textContent = superato ? '🎉' : '😞';
+  document.getElementById('esitoTitolo').textContent = superato ? 'Quiz superato!' : 'Quiz non superato';
+  document.getElementById('esitoSub').textContent =
+    'Punteggio: ' + punteggio + '% (' + corrette + '/' + quizDomande.length + ' corrette) · soglia ' + soglia + '%';
+  const az = document.getElementById('esitoAzioni');
+  az.innerHTML = '';
+  if (superato) {
+    const b1 = document.createElement('button');
+    b1.className = 'btn btn-full'; b1.textContent = '⬇ Scarica attestato PDF';
+    b1.addEventListener('click', scaricaCertificato);
+    az.appendChild(b1);
+  } else if ((prog.quiz.tentativi||0) < (corso.tentativiMax||5)) {
+    const b2 = document.createElement('button');
+    b2.className = 'btn btn-full'; b2.textContent = '↻ Riprova il quiz';
+    b2.addEventListener('click', avviaQuiz);
+    az.appendChild(b2);
+  } else {
+    az.innerHTML = '<div class="alert alert-ko">Hai esaurito i tentativi disponibili. Contatta il provider del corso.</div>';
+  }
+  const back = document.createElement('button');
+  back.className = 'btn btn-out btn-full'; back.style.marginTop = '8px'; back.textContent = '← Torna al corso';
+  back.addEventListener('click', renderHome);
+  az.appendChild(back);
+  mostra('stEsito');
+};
+
+function generaNumeroCert() {
+  return 'FAD-' + cf.slice(0,6) + '-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-5);
+}
+
+// ═══════════ CERTIFICATO PDF ═══════════
+window.scaricaCertificato = function() {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+
+  // Bordo classic
+  pdf.setDrawColor(13, 148, 136);
+  pdf.setLineWidth(0.8); pdf.rect(8, 8, 281, 194);
+  pdf.setLineWidth(0.3); pdf.rect(10, 10, 277, 190);
+
+  let y = 32;
+  pdf.setFontSize(10); pdf.setTextColor(120,120,120);
+  pdf.text((corso.org || 'ECM ACCESS CONTROL').toUpperCase(), 148.5, y, {align:'center', charSpace:1.5});
+  y += 14;
+  pdf.setFontSize(28); pdf.setTextColor(13, 90, 84); pdf.setFont(undefined,'bold');
+  pdf.text('ATTESTATO DI FORMAZIONE', 148.5, y, {align:'center'});
+  y += 8;
+  pdf.setFontSize(12); pdf.setTextColor(120,120,120); pdf.setFont(undefined,'normal');
+  pdf.text('Formazione a Distanza (FAD)', 148.5, y, {align:'center'});
+  y += 16;
+  pdf.setFontSize(12); pdf.setTextColor(51,51,51);
+  pdf.text('Si attesta che', 148.5, y, {align:'center'});
+  y += 12;
+  pdf.setFontSize(24); pdf.setTextColor(26,23,20); pdf.setFont(undefined,'bold');
+  pdf.text(((prog.nome||'') + ' ' + (prog.cognome||'')).trim().toUpperCase(), 148.5, y, {align:'center'});
+  y += 7;
+  pdf.setFontSize(10); pdf.setTextColor(120,120,120); pdf.setFont(undefined,'normal');
+  pdf.text('C.F. ' + cf, 148.5, y, {align:'center'});
+  y += 14;
+  pdf.setFontSize(12); pdf.setTextColor(51,51,51);
+  pdf.text('ha completato con esito positivo il corso', 148.5, y, {align:'center'});
+  y += 10;
+  pdf.setFontSize(16); pdf.setTextColor(13, 90, 84); pdf.setFont(undefined,'bold');
+  const titoloLines = pdf.splitTextToSize('"' + (corso.titolo||'') + '"', 240);
+  pdf.text(titoloLines, 148.5, y, {align:'center'});
+  y += titoloLines.length * 8 + 6;
+  pdf.setFontSize(11); pdf.setTextColor(51,51,51); pdf.setFont(undefined,'normal');
+  const dettagli = [];
+  if (corso.oreFormative) dettagli.push(corso.oreFormative + ' ore formative');
+  if (corso.crediti) dettagli.push(corso.crediti + ' crediti ECM');
+  if (prog.quiz?.ultimoPunteggio != null) dettagli.push('quiz superato con ' + prog.quiz.ultimoPunteggio + '%');
+  if (dettagli.length) pdf.text(dettagli.join(' · '), 148.5, y, {align:'center'});
+  y = 172;
+  pdf.setFontSize(9); pdf.setTextColor(120,120,120);
+  pdf.text('Attestato n. ' + (prog.certificato?.numero || generaNumeroCert()) +
+    ' · Rilasciato il ' + new Date().toLocaleDateString('it-IT'), 30, y);
+  if (corso.firma) {
+    pdf.text(corso.firma, 250, y - 6, {align:'center'});
+    pdf.setDrawColor(150,150,150); pdf.setLineWidth(0.3);
+    pdf.line(215, y - 10, 285, y - 10);
+  }
+  pdf.save('Attestato_FAD_' + (prog.cognome||'') + '_' + (prog.nome||'') + '.pdf');
+};
+
+// Salva il progresso quando la pagina viene chiusa a metà modulo
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && modApertoId && timerInt && secondiSessione > ultimoSalvataggio) {
+    ultimoSalvataggio = secondiSessione;
+    salvaModuloProgresso(modApertoId, secondiSessione, false);
+  }
+});
+
+initApp();
+</script>
+</body>
+</html>

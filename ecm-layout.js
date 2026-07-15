@@ -71,6 +71,8 @@
     { id:'convention-catering', key:'nav_conv_catering', icon:'catering', href:'convention-catering.html' },
     { id:'convention-navette', key:'nav_conv_navette', icon:'navette', href:'convention-navette.html' },
     { id:'convention-report', key:'nav_conv_report', icon:'report', href:'convention-report.html' },
+    { type:'section', key:'nav_fad' },
+    { id:'fad-admin', key:'nav_fad_admin', icon:'quiz', href:'ecm-fad-admin.html' },
     { type:'section', key:'nav_payments' },
     { id:'pagamenti', key:'nav_payments_mgmt', icon:'payments', href:'ecm-pagamenti.html' },
     { type:'section', key:'nav_wedding' },
