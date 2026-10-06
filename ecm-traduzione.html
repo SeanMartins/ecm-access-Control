@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0A1628">
+<title>Traduzione live</title>
+<link rel="manifest" href="manifest.json">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0A1628;--card:#12233d;--line:#1d3557;--fg:#f2f5fa;--muted:#8fa3bf;--acc:#2B4EFF;--acc2:#00B4D8;--ok:#3ecf8e}
+html,body{background:var(--bg);color:var(--fg);font-family:'DM Sans',-apple-system,system-ui,Segoe UI,Roboto,sans-serif}
+header{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px calc(10px);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.title{width:100%;display:flex;align-items:baseline;gap:8px}
+.title b{font-size:15px}
+#status{margin-left:auto;font-size:12px;color:var(--muted)}
+#status.on{color:var(--ok)}
+select,button{background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:15px;font-family:inherit}
+#audioBtn.on{background:linear-gradient(135deg,var(--acc),var(--acc2));border-color:transparent;font-weight:600}
+#speaker{width:100%;font-size:12px;color:var(--muted)}
+main{padding:12px 16px 90px;max-width:760px;margin:auto}
+.line{background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.src{color:var(--muted);font-size:14px;line-height:1.4}
+.tr{font-size:21px;line-height:1.42;margin-top:4px}
+.hide-src .src{display:none}
+.empty{color:var(--muted);text-align:center;padding:60px 20px;line-height:1.6}
+</style>
+</head>
+<body>
+<header>
+  <div class="title"><b id="evName">Traduzione live</b><span id="status">connessione…</span></div>
+  <select id="lang" aria-label="Lingua"></select>
+  <button id="audioBtn" hidden>Audio: off</button>
+  <button id="toggle">Originale: sì</button>
+  <div id="speaker"></div>
+</header>
+<main id="feed"><div class="empty" id="empty">In attesa della traduzione…<br>La pagina si aggiorna da sola.</div></main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, collection, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const FB={apiKey:"AIzaSyBfq6dHq7JQRC2AtBf7obTM6End2NftwxA",authDomain:"ecm-access-control.firebaseapp.com",projectId:"ecm-access-control",storageBucket:"ecm-access-control.firebasestorage.app",messagingSenderId:"727782311741",appId:"1:727782311741:web:4aaf570b1a05caf4192754"};
+const NAMES={it:"Italiano",en:"English",fr:"Français",es:"Español",de:"Deutsch",ru:"Русский"};
+const $=id=>document.getElementById(id);
+const ev=(new URLSearchParams(location.search).get('ev')||'').replace(/[^A-Za-z0-9_-]/g,'');
+
+// ── UI subito, prima di qualsiasi await ──
+let lang=null, showSrc=true, targets=[];
+const lines=new Map();
+$('toggle').addEventListener('click',e=>{showSrc=!showSrc;$('feed').classList.toggle('hide-src',!showSrc);e.target.textContent='Originale: '+(showSrc?'sì':'no');});
+$('lang').addEventListener('change',()=>{lang=$('lang').value;try{localStorage.setItem('trad_lang',lang)}catch(e){};render();listenAudio();});
+
+if(!ev){$('empty').textContent='Codice evento mancante: apri il link o il QR code fornito in sala.';}
+
+// ── Audio in cuffia ──
+let ctx=null, audioOn=false, nextTime=0, chain=Promise.resolve(), wakeLock=null;
+const MAX_LAG=8;
+$('audioBtn').addEventListener('click',async()=>{
+  audioOn=!audioOn;
+  $('audioBtn').classList.toggle('on',audioOn);
+  $('audioBtn').textContent='Audio: '+(audioOn?'on':'off');
+  if(audioOn){
+    try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+    if(!ctx)ctx=new(window.AudioContext||window.webkitAudioContext)();
+    await ctx.resume();
+    const b=ctx.createBuffer(1,1,22050),s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start(0);
+    try{wakeLock=await navigator.wakeLock.request('screen')}catch(e){}
+  }else{nextTime=0;chain=Promise.resolve();try{wakeLock&&wakeLock.release()}catch(e){}}
+});
+document.addEventListener('visibilitychange',async()=>{if(audioOn&&document.visibilityState==='visible'){try{wakeLock=await navigator.wakeLock.request('screen')}catch(e){}}});
+
+function playBytes(u8){
+  chain=chain.then(async()=>{
+    if(!audioOn||!ctx)return;
+    if(nextTime-ctx.currentTime>MAX_LAG)return;
+    const buf=u8.buffer.slice(u8.byteOffset,u8.byteOffset+u8.byteLength);
+    const audio=await ctx.decodeAudioData(buf);
+    const src=ctx.createBufferSource();src.buffer=audio;src.connect(ctx.destination);
+    const at=Math.max(ctx.currentTime+0.05,nextTime);src.start(at);nextTime=at+audio.duration+0.15;
+  }).catch(()=>{});
+}
+
+// ── Sottotitoli ──
+function render(){
+  const feed=$('feed');
+  const ids=[...lines.keys()].sort((a,b)=>lines.get(a).n-lines.get(b).n);
+  if(!ids.length)return;
+  $('empty')?.remove();
+  for(const id of ids){
+    const l=lines.get(id);
+    if(!l.el){l.el=document.createElement('div');l.el.className='line';l.el.innerHTML='<div class="src"></div><div class="tr"></div>';}
+    l.el.querySelector('.src').textContent=l.src||'';
+    l.el.querySelector('.tr').textContent=(l.tr&&l.tr[lang])||'…';
+    feed.appendChild(l.el);   // riordina in coda
+  }
+  window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+}
+
+let db, unsubAudio=null;
+function listenAudio(){
+  if(unsubAudio){unsubAudio();unsubAudio=null}
+  if(!db||!lang)return;
+  let first=true;
+  const q=query(collection(db,'traduzioni',ev,'audio_'+lang),orderBy('n','desc'),limit(3));
+  unsubAudio=onSnapshot(q,snap=>{
+    if(first){first=false;return}          // ignora le clip già passate
+    snap.docChanges().forEach(ch=>{
+      if(ch.type!=='added')return;
+      const d=ch.doc.data();
+      if(d.dati&&d.dati.toUint8Array)playBytes(d.dati.toUint8Array());
+    });
+  });
+}
+
+function setSpeaker(d){
+  $('speaker').textContent=(d.speaker?d.speaker+' · ':'')+'voce '+(d.gender==='M'?'maschile':'femminile');
+}
+
+async function initApp(){
+  if(!ev)return;
+  const app=initializeApp(FB);
+  db=getFirestore(app);
+  $('evName').textContent='Traduzione · '+ev;
+
+  onSnapshot(doc(db,'traduzioni',ev),s=>{
+    $('status').textContent='live';$('status').className='on';
+    if(!s.exists()){$('empty')&&($('empty').textContent='Evento non ancora avviato. Resta su questa pagina.');return}
+    const d=s.data();
+    const t=(d.targets||[]).join(',');
+    if(t!==targets.join(',')){
+      targets=d.targets||[];
+      const sel=$('lang');sel.innerHTML='';
+      targets.forEach(x=>sel.add(new Option(NAMES[x]||x,x)));
+      let saved=null;try{saved=localStorage.getItem('trad_lang')}catch(e){}
+      lang=targets.includes(saved)?saved:targets[0];sel.value=lang;
+      listenAudio();render();
+    }
+    $('audioBtn').hidden=false;
+    setSpeaker(d);
+  },()=>{$('status').textContent='errore di connessione';$('status').className=''});
+
+  const qf=query(collection(db,'traduzioni',ev,'frasi'),orderBy('n','desc'),limit(30));
+  onSnapshot(qf,snap=>{
+    snap.docChanges().forEach(ch=>{
+      if(ch.type==='removed'){const l=lines.get(ch.doc.id);if(l&&l.el)l.el.remove();lines.delete(ch.doc.id);return}
+      const d=ch.doc.data();const old=lines.get(ch.doc.id)||{};
+      lines.set(ch.doc.id,{...old,n:d.n||0,src:d.src||'',tr:d.tr||{}});
+    });
+    render();
+  });
+}
+initApp();
+</script>
+</body>
+</html>
