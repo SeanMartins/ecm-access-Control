@@ -6,14 +6,122 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // ── ACCESSO APERTO PER SVILUPPO/TESTING ──
-    // Permette lettura/scrittura a tutti gli utenti autenticati
-    // (incluso signInAnonymously)
-    // NOTA: restringere dopo il go-live
+    function isStaff() {
+      return isAuth() && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+
+    function isSuperAdmin() {
+      return isAuth() && request.auth.token.email == 'martinsosem@gmail.com';
+    }
+
+    match /traduzioni/{ev}/{doc=**} { allow read: if true; allow write: if isStaff(); }
+
+    function isOwnUser(userId) {
+      return isAuth() && request.auth.uid == userId;
+    }
+
+    match /utenti/{userId} {
+      allow read: if isOwnUser(userId) || isStaff();
+      allow write: if isStaff();
+    }
+
+    match /log_attivita/{logId} {
+      allow read: if isStaff();
+      allow create: if isAuth();
+      allow update, delete: if isStaff();
+    }
+
+    match /corsi_fad/{corsoId} {
+      allow read: if true;
+      allow write: if isStaff();
+
+      match /moduli/{moduloId} {
+        allow read: if true;
+        allow write: if isStaff();
+      }
+
+      match /progressi/{cf} {
+        allow read: if isAuth();
+        allow write: if isAuth();
+      }
+    }
+
+    match /eventi/{eventId} {
+      allow read: if true;
+      allow write: if isStaff();
+
+      match /sessioni/{sessId} {
+        allow read: if true;
+        allow write: if isStaff();
+
+        match /checkin/{checkinId} {
+          allow read: if isStaff();
+          allow write: if isAuth();
+        }
+      }
+      match /sale/{salaId} { allow read: if true; allow write: if isStaff(); }
+      match /relatori/{relId} { allow read: if true; allow write: if isStaff(); }
+      match /settings/{settingId} { allow read: if true; allow write: if isStaff(); }
+
+      match /partecipanti/{partId} {
+        allow read: if isAuth();
+        allow write: if isAuth();
+      }
+      match /certificati/{certId} {
+        allow read: if isAuth();
+        allow write: if isStaff();
+      }
+      match /logs/{logId} {
+        allow read: if isAuth();
+        allow write: if isAuth();
+      }
+
+      match /stand/{standId} { allow read: if true; allow write: if isStaff(); }
+      match /workshops/{wsId} { allow read: if true; allow write: if isStaff(); }
+      match /navette/{navId} { allow read: if true; allow write: if isStaff(); }
+      match /parcheggi/{pId} { allow read: if true; allow write: if isStaff(); }
+      match /prenotazioni_trasporto/{pId} { allow read: if isAuth(); allow write: if isAuth(); }
+
+      match /{checkinCol}/{docId} {
+        allow read: if isStaff() && checkinCol.matches('checkin_.*');
+        allow write: if isAuth() && checkinCol.matches('checkin_.*');
+      }
+
+      match /ospiti/{gId} { allow read: if isStaff(); allow write: if isStaff(); }
+      match /tavoli/{tId} { allow read: if isStaff(); allow write: if isStaff(); }
+      match /fornitori/{fId} { allow read: if isStaff(); allow write: if isStaff(); }
+      match /budget/{bId} { allow read: if isStaff(); allow write: if isStaff(); }
+      match /timeline/{tlId} { allow read: if isStaff(); allow write: if isStaff(); }
+      match /menu/{mId} { allow read: if isStaff(); allow write: if isStaff(); }
+
+      match /survey/{docId} {
+        allow read: if isAuth();
+        allow write: if isAuth();
+        match /risposte/{rDoc} {
+          allow read: if isStaff();
+          allow write: if isAuth();
+          match /lista/{lDoc} {
+            allow read: if isStaff();
+            allow write: if isAuth();
+          }
+        }
+      }
+      match /questionario/{docId} {
+        allow read: if isAuth();
+        allow write: if isAuth();
+        match /risposte/{rDoc} {
+          allow read: if isStaff();
+          allow write: if isAuth();
+          match /lista/{lDoc} {
+            allow read: if isStaff();
+            allow write: if isAuth();
+          }
+        }
+      }
+    }
 
     match /{document=**} {
-      allow read: if true;
-      allow write: if isAuth();
+      allow read, write: if false;
     }
   }
 }
