@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=600, height=600, initial-scale=1.0, user-scalable=no">
+<meta name="description" content="Slide del congresso tradotte nella tua lingua e traduzione simultanea, sugli occhiali Meta Ray-Ban Display.">
+<meta name="mrbd-web-app-capable" content="yes">
+<meta name="theme-color" content="#000000">
+<title>Simulive</title>
+<!--
+  Web app per Meta Ray-Ban Display (display 600×600, monoculare, additivo: il nero è trasparente).
+  Due modalità con lo stesso file:
+   • cloud  (?ev=codice-evento)  → legge Firestore "regia-trad-simu" via REST (niente SDK: la connessione
+                                    degli occhiali è lenta, ~500 Kbps, e il SDK Firebase pesa troppo)
+   • locale (aperta da http://PC-regia:8000/occhiali) → legge il server di traduzione
+  Comandi: Neural Band / touch sulla stanghetta → frecce sposta il fuoco, pizzico (Invio) attiva.
+  L'audio della traduzione arriva dal telefono: gli occhiali fanno da cuffia Bluetooth.
+-->
+<style>
+:root{--fg:#fff;--muted:#9aa4b2;--acc:#3fd0ff;--live:#ff4d5e;--focus:#3fd0ff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#000;color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;height:100%;overflow:hidden}
+body{display:grid;place-items:center}
+#root{width:600px;height:600px;position:relative;overflow:hidden;background:#000}
+#stage{position:absolute;left:0;top:0;width:600px;height:536px}
+#slide{position:absolute;left:0;top:0;width:600px;height:338px;display:flex;align-items:center;justify-content:center}
+#slide img{max-width:600px;max-height:338px;display:block}
+#slide img.inv{filter:invert(1) hue-rotate(180deg)}
+#badge{position:absolute;top:6px;right:8px;font-size:15px;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:6px;background:rgba(0,0,0,.65)}
+#badge.live{color:var(--live)}
+#badge.browse{color:var(--muted)}
+#cap{position:absolute;left:14px;right:14px;top:350px;bottom:6px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+#cap p{font-size:26px;line-height:1.28;font-weight:500}
+#cap p.old{color:var(--muted);font-size:21px;margin-bottom:6px}
+#txt{position:absolute;inset:0 18px 0 18px;padding-top:14px;display:none;overflow:hidden}
+#txt h1{font-size:30px;line-height:1.2;margin-bottom:12px;font-weight:700}
+#txt div{font-size:24px;line-height:1.3;margin-bottom:8px;color:#e8edf3}
+#msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px;font-size:24px;line-height:1.4;color:var(--muted)}
+/* viste */
+#root.v-frasi #slide,#root.v-testo #slide{display:none}
+#root.v-frasi #cap{top:14px}
+#root.v-frasi #cap p{font-size:32px}
+#root.v-frasi #cap p.old{font-size:24px}
+#root.v-slide #cap,#root.v-testo #cap{display:none}
+#root.v-slide #slide{top:99px}
+#root.v-testo #txt{display:block}
+/* barra comandi */
+#rail{position:absolute;left:0;right:0;bottom:0;height:64px;display:flex;gap:6px;padding:6px 8px}
+#rail button{flex:1;background:rgba(255,255,255,.06);color:var(--fg);border:2px solid transparent;border-radius:12px;font:600 19px/1 inherit;font-family:inherit}
+#rail button:focus{outline:none;border-color:var(--focus);background:rgba(63,208,255,.16)}
+#rail button[disabled]{opacity:.35}
+#rail .on{color:var(--live)}
+</style>
+</head>
+<body>
+<div id="root" class="v-mix">
+  <div id="stage">
+    <div id="slide"><img id="img" alt=""><span id="badge"></span></div>
+    <div id="cap"></div>
+    <div id="txt"></div>
+    <div id="msg">Collegamento…</div>
+  </div>
+  <nav id="rail">
+    <button id="bPrev" aria-label="Slide precedente">◀</button>
+    <button id="bLive" aria-label="Torna alla slide in onda">● Live</button>
+    <button id="bNext" aria-label="Slide successiva">▶</button>
+    <button id="bView" aria-label="Cambia vista">Vista</button>
+    <button id="bLang" aria-label="Lingua">EN</button>
+    <button id="bInv" aria-label="Contrasto">A</button>
+  </nav>
+</div>
+<script>
+(function(){
+"use strict";
+var P=new URLSearchParams(location.search);
+var EV=(P.get("ev")||"").replace(/[^A-Za-z0-9_-]/g,"");
+var CLOUD=!!EV;
+var KEY="AIzaSyDmCC3nhACqSnmJbD6HIn9T5bAgRIv50Gk";  // chiave web pubblica del progetto (sola lettura per i partecipanti)
+var DOCS="https://firestore.googleapis.com/v1/projects/regia-trad-simu/databases/(default)/documents";
+var VIEWS=["mix","slide","testo","frasi"];
+var T={ // etichette nella lingua scelta
+  it:{wait:"In attesa della presentazione…",noev:"Evento non ancora avviato.",off:"Connessione persa: riprovo…",view:{mix:"Vista",slide:"Slide",testo:"Testo",frasi:"Frasi"},live:"LIVE",nolive:"non in onda"},
+  en:{wait:"Waiting for the presentation…",noev:"The event has not started yet.",off:"Connection lost: retrying…",view:{mix:"View",slide:"Slide",testo:"Text",frasi:"Speech"},live:"LIVE",nolive:"not live"},
+  fr:{wait:"En attente de la présentation…",noev:"L'événement n'a pas encore commencé.",off:"Connexion perdue…",view:{mix:"Vue",slide:"Diapo",testo:"Texte",frasi:"Paroles"},live:"DIRECT",nolive:"hors direct"},
+  es:{wait:"Esperando la presentación…",noev:"El evento aún no ha comenzado.",off:"Conexión perdida…",view:{mix:"Vista",slide:"Diapo",testo:"Texto",frasi:"Voz"},live:"EN VIVO",nolive:"no en vivo"},
+  de:{wait:"Warten auf die Präsentation…",noev:"Die Veranstaltung hat noch nicht begonnen.",off:"Verbindung verloren…",view:{mix:"Ansicht",slide:"Folie",testo:"Text",frasi:"Rede"},live:"LIVE",nolive:"nicht live"},
+  ru:{wait:"Ожидание презентации…",noev:"Мероприятие ещё не началось.",off:"Нет соединения…",view:{mix:"Вид",slide:"Слайд",testo:"Текст",frasi:"Речь"},live:"ЭФИР",nolive:"не в эфире"}
+};
+function store(k,v){try{if(v===undefined)return localStorage.getItem("sl_"+k);localStorage.setItem("sl_"+k,v)}catch(e){return null}}
+var $=function(id){return document.getElementById(id)};
+var st={targets:[],source:"it",lang:P.get("lang")||store("lang")||null,view:store("view")||"mix",inv:store("inv")||"auto",
+        live:{deck:null,n:1},show:{deck:null,n:1},decks:{},browsing:false,lines:[],lastCapN:-1,ok:false};
+if(VIEWS.indexOf(st.view)<0)st.view="mix";
+function L(){return T[st.lang]||T.en}
+var cache={},order=[];   // immagini già scaricate: deck_lang_n → {src,light,txt}
+
+/* ---------------- rete ---------------- */
+var ctrl=null;
+function get(url,opt){
+  return fetch(url,opt).then(function(r){if(r.status===404)return null;if(!r.ok)throw new Error(r.status);return r.json()});
+}
+function fv(v){ // valore Firestore REST → JS
+  if(!v)return null;
+  if("stringValue"in v)return v.stringValue; if("integerValue"in v)return +v.integerValue; if("doubleValue"in v)return v.doubleValue;
+  if("booleanValue"in v)return v.booleanValue; if("bytesValue"in v)return v.bytesValue; if("nullValue"in v)return null;
+  if("arrayValue"in v)return (v.arrayValue.values||[]).map(fv);
+  if("mapValue"in v){var o={},f=v.mapValue.fields||{};for(var k in f)o[k]=fv(f[k]);return o}
+  return null;
+}
+function fields(doc){var o={},f=(doc&&doc.fields)||{};for(var k in f)o[k]=fv(f[k]);return o}
+function pad(n){return("00"+n).slice(-3)}
+
+function pollState(){
+  var u=CLOUD?DOCS+"/traduzioni/"+EV+"?key="+KEY+"&mask.fieldPaths=slide&mask.fieldPaths=decks&mask.fieldPaths=targets&mask.fieldPaths=source"
+             :"/api/stato?lang="+(st.lang||"");
+  return get(u).then(function(d){
+    if(CLOUD){
+      if(!d){message(L().noev);return}
+      d=fields(d);
+      st.decks=d.decks||{};
+    }else{
+      st.decks={}; if(d.deck)st.decks[d.deck.id]=d.deck;
+      if(d.last&&st.lang&&d.last[st.lang]){var x=d.last[st.lang];if(x.id!==st.lastCapN){st.lastCapN=x.id;pushLine(x.text)}}
+    }
+    if(d.targets&&d.targets.join()!==st.targets.join()){st.targets=d.targets;if(!st.lang||st.targets.indexOf(st.lang)<0)st.lang=st.targets[0];labels()}
+    if(d.source)st.source=d.source;
+    st.ok=true;
+    var s=d.slide;
+    if(s&&s.deck&&(s.deck!==st.live.deck||s.n!==st.live.n)){
+      st.live={deck:s.deck,n:s.n};
+      if(!st.browsing){st.show={deck:s.deck,n:s.n};render()}
+      else badge();
+      prefetchNext();
+    }else if(!s||!s.deck){if(!st.lines.length&&st.view!=="frasi")message(L().wait)}
+  }).catch(function(){message(L().off)});
+}
+
+function pollCaptions(){
+  if(!CLOUD||!st.lang||st.view==="slide"||st.view==="testo")return Promise.resolve();
+  return get(DOCS+"/traduzioni/"+EV+":runQuery?key="+KEY,{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({structuredQuery:{from:[{collectionId:"frasi"}],orderBy:[{field:{fieldPath:"n"},direction:"DESCENDING"}],limit:3,
+      select:{fields:[{fieldPath:"tr"},{fieldPath:"n"}]}}})}).then(function(rows){
+    var items=(rows||[]).filter(function(r){return r.document}).map(function(r){return fields(r.document)}).reverse();
+    var next=items.map(function(x){return x.tr&&x.tr[st.lang]}).filter(Boolean);
+    if(next.join("|")!==st.lines.join("|")){st.lines=next.slice(-2);drawCap()}
+  }).catch(function(){});
+}
+
+function slideData(deck,n){
+  var d=st.decks[deck]; if(!d)return Promise.resolve(null);
+  var lang=(d.lingue||[]).indexOf(st.lang)>=0?st.lang:st.source;
+  var key=deck+"_"+lang+"_"+pad(n);
+  if(cache[key])return Promise.resolve(cache[key]);
+  var p;
+  if(CLOUD){
+    p=get(DOCS+"/traduzioni/"+EV+"/slideg/"+key+"?key="+KEY+"&mask.fieldPaths=g&mask.fieldPaths=light&mask.fieldPaths=txt").then(function(doc){
+      if(!doc)return null; var f=fields(doc);
+      return {src:"data:image/jpeg;base64,"+f.g,light:!!f.light,txt:f.txt||""};
+    });
+  }else{
+    p=get("/api/slidetxt?deck="+deck+"&lang="+lang+"&n="+n).then(function(t){
+      return {src:"/slide/"+deck+"/"+lang+"/"+pad(n)+"_g.jpg?v="+(d.v||0),light:!!(t&&t.light),txt:(t&&t.txt)||""};
+    });
+  }
+  return p.then(function(v){
+    if(v){cache[key]=v;order.push(key);while(order.length>24)delete cache[order.shift()]}
+    return v;
+  });
+}
+function prefetchNext(){
+  var d=st.decks[st.live.deck]; if(!d||!d.n)return;
+  var i=d.n.indexOf(st.live.n); if(i>=0&&d.n[i+1])slideData(st.live.deck,d.n[i+1]);
+}
+
+/* ---------------- disegno ---------------- */
+function message(t){var m=$("msg");m.textContent=t||"";m.style.display=t?"flex":"none"}
+function badge(){
+  var b=$("badge");
+  if(!st.show.deck){b.textContent="";return}
+  var d=st.decks[st.show.deck],tot=d&&d.n?d.n.length:"",pos=d&&d.n?d.n.indexOf(st.show.n)+1:"";
+  if(st.browsing&&(st.show.n!==st.live.n||st.show.deck!==st.live.deck)){b.className="browse";b.textContent=pos+"/"+tot+" · "+L().nolive}
+  else{b.className="live";b.textContent="● "+L().live+"  "+pos+"/"+tot}
+  $("bLive").classList.toggle("on",!st.browsing);
+}
+var renderSeq=0;
+function render(){
+  var seq=++renderSeq, s=st.show;
+  if(!s.deck){badge();return}
+  slideData(s.deck,s.n).then(function(v){
+    if(seq!==renderSeq||!v)return;
+    message("");
+    var img=$("img");
+    img.src=v.src;
+    img.className=(st.inv==="on"||(st.inv==="auto"&&v.light))?"inv":"";
+    drawTxt(v.txt);
+    badge();
+  }).catch(function(){message(L().off)});
+}
+function drawTxt(t){
+  var box=$("txt");box.textContent="";
+  var lines=(t||"").split("\n").filter(Boolean);
+  if(!lines.length)return;
+  var h=document.createElement("h1");h.textContent=lines[0];box.appendChild(h);
+  lines.slice(1).forEach(function(l){var d=document.createElement("div");d.textContent=l.trim();box.appendChild(d)});
+  // rimpicciolisce finché il testo sta nello schermo
+  var size=24,title=30;
+  while(box.scrollHeight>box.clientHeight&&size>15){size-=1;title-=1;
+    h.style.fontSize=title+"px";[].forEach.call(box.querySelectorAll("div"),function(d){d.style.fontSize=size+"px"})}
+}
+function pushLine(t){st.lines.push(t);st.lines=st.lines.slice(-2);drawCap()}
+function drawCap(){
+  var c=$("cap");c.textContent="";
+  st.lines.forEach(function(t,i){var p=document.createElement("p");if(i<st.lines.length-1)p.className="old";p.textContent=t;c.appendChild(p)});
+  if(st.lines.length&&!st.show.deck)message("");
+}
+function labels(){
+  $("bView").textContent=L().view[st.view]||st.view;
+  $("bLang").textContent=(st.lang||"–").toUpperCase();
+  $("bInv").textContent=st.inv==="auto"?"Auto":st.inv==="on"?"Inv":"Orig";
+  $("root").className="v-"+st.view;
+  badge();
+}
+
+/* ---------------- comandi ---------------- */
+function step(dir){
+  var s=st.browsing?st.show:st.live, d=st.decks[s.deck]; if(!d||!d.n)return;
+  var i=d.n.indexOf(s.n), j=Math.max(0,Math.min(d.n.length-1,i+dir));
+  st.browsing=true; st.show={deck:s.deck,n:d.n[j]};
+  if(st.show.n===st.live.n&&st.show.deck===st.live.deck)st.browsing=false;
+  render();
+}
+$("bPrev").onclick=function(){step(-1)};
+$("bNext").onclick=function(){step(1)};
+$("bLive").onclick=function(){st.browsing=false;st.show={deck:st.live.deck,n:st.live.n};render()};
+$("bView").onclick=function(){st.view=VIEWS[(VIEWS.indexOf(st.view)+1)%VIEWS.length];store("view",st.view);labels();render();tick(true)};
+$("bLang").onclick=function(){
+  if(!st.targets.length)return;
+  var all=st.targets.concat(st.targets.indexOf(st.source)<0?[st.source]:[]);
+  st.lang=all[(all.indexOf(st.lang)+1)%all.length];store("lang",st.lang);st.lines=[];st.lastCapN=-1;drawCap();labels();render();tick(true);
+};
+$("bInv").onclick=function(){st.inv=st.inv==="auto"?"on":st.inv==="on"?"off":"auto";store("inv",st.inv);labels();render()};
+
+// frecce: il fuoco scorre sulla barra (sinistra/destra); su/giù = slide precedente/successiva
+var rail=[].slice.call(document.querySelectorAll("#rail button"));
+document.addEventListener("keydown",function(e){
+  var i=rail.indexOf(document.activeElement);
+  if(e.key==="ArrowRight"||e.key==="ArrowLeft"){
+    e.preventDefault();
+    var j=i<0?1:(i+(e.key==="ArrowRight"?1:-1)+rail.length)%rail.length; rail[j].focus();
+  }else if(e.key==="ArrowUp"){e.preventDefault();step(-1)}
+  else if(e.key==="ArrowDown"){e.preventDefault();step(1)}
+  else if(e.key==="Enter"&&i<0){e.preventDefault();rail[1].focus()}
+});
+
+/* ---------------- ciclo ---------------- */
+var timer=null,capTimer=null;
+function tick(now){
+  clearTimeout(timer);clearTimeout(capTimer);
+  if(document.hidden)return;     // app in pausa: niente traffico
+  var loop=function(){pollState().then(function(){timer=setTimeout(loop,CLOUD?2000:1000)})};
+  var cap=function(){pollCaptions().then(function(){capTimer=setTimeout(cap,1500)})};
+  loop(); if(CLOUD)cap();
+}
+document.addEventListener("visibilitychange",function(){tick(true)});
+if(!CLOUD&&location.protocol==="file:")message("Apri questa pagina dal link dell'evento.");
+else{labels();tick(true)}
+rail[1].focus();
+})();
+</script>
+</body>
+</html>

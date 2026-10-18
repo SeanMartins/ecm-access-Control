@@ -8,23 +8,37 @@
 <link rel="manifest" href="manifest.json">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0A1628;--card:#12233d;--line:#1d3557;--fg:#f2f5fa;--muted:#8fa3bf;--acc:#2B4EFF;--acc2:#00B4D8;--ok:#3ecf8e}
+:root{--bg:#0A1628;--card:#12233d;--line:#1d3557;--fg:#f2f5fa;--muted:#8fa3bf;--acc:#2B4EFF;--acc2:#00B4D8;--ok:#3ecf8e;--live:#ff4d5e}
 html,body{background:var(--bg);color:var(--fg);font-family:'DM Sans',-apple-system,system-ui,Segoe UI,Roboto,sans-serif}
-header{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px calc(10px);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+header{position:sticky;top:0;z-index:3;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .title{width:100%;display:flex;align-items:baseline;gap:8px}
 .title b{font-size:15px}
 #status{margin-left:auto;font-size:12px;color:var(--muted)}
 #status.on{color:var(--ok)}
 select,button{background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:15px;font-family:inherit}
-#audioBtn.on{background:linear-gradient(135deg,var(--acc),var(--acc2));border-color:transparent;font-weight:600}
+button.on{background:linear-gradient(135deg,var(--acc),var(--acc2));border-color:transparent;font-weight:600}
 #speaker{width:100%;font-size:12px;color:var(--muted)}
-main{padding:12px 16px 90px;max-width:760px;margin:auto}
+/* slide tradotta */
+#slideWrap{position:sticky;z-index:2;background:var(--bg);padding:10px 16px 6px;max-width:760px;margin:auto}
+#slideBox{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden;touch-action:pan-y}
+#slideBox img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transition:opacity .2s}
+#slideBox .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;text-align:center;padding:20px}
+.sbar{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;color:var(--muted);min-height:34px}
+.sbar .pos{font-variant-numeric:tabular-nums}
+.sbar .live{color:var(--live);font-weight:700;letter-spacing:.04em}
+.sbar button{padding:6px 10px;font-size:13px}
+.sbar .sp{flex:1}
+#back{background:var(--live);border-color:transparent;color:#fff;font-weight:600}
+#slideBox:fullscreen{border-radius:0;aspect-ratio:auto}
+main{padding:8px 16px 90px;max-width:760px;margin:auto}
 .line{background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:10px}
 .src{color:var(--muted);font-size:14px;line-height:1.4}
 .tr{font-size:21px;line-height:1.42;margin-top:4px}
 .src,.tr{overflow-wrap:anywhere;word-break:break-word}
 .hide-src .src{display:none}
 .empty{color:var(--muted);text-align:center;padding:60px 20px;line-height:1.6}
+body.with-slide .empty{padding:24px 20px}
+body.with-slide main .line .tr{font-size:19px}
 </style>
 </head>
 <body>
@@ -32,35 +46,65 @@ main{padding:12px 16px 90px;max-width:760px;margin:auto}
   <div class="title"><b id="evName">Traduzione live</b><span id="status">connessione…</span></div>
   <select id="lang" aria-label="Lingua"></select>
   <button id="audioBtn" hidden>Audio: off</button>
+  <button id="slideBtn" hidden>Slide</button>
   <button id="toggle">Originale: sì</button>
   <div id="speaker"></div>
 </header>
+<section id="slideWrap" hidden>
+  <div id="slideBox"><div class="ph" id="ph"></div><img id="sImg" alt=""></div>
+  <div class="sbar">
+    <span class="live" id="liveTag"></span><span class="pos" id="pos"></span><span class="sp"></span>
+    <button id="back" hidden></button>
+    <button id="prevS" aria-label="◀">◀</button><button id="nextS" aria-label="▶">▶</button>
+    <button id="fsBtn" aria-label="⛶">⛶</button>
+  </div>
+</section>
 <main id="feed"><div class="empty" id="empty">In attesa della traduzione…<br>La pagina si aggiorna da sola.</div></main>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, collection, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const FB={apiKey:"AIzaSyDmCC3nhACqSnmJbD6HIn9T5bAgRIv50Gk",authDomain:"regia-trad-simu.firebaseapp.com",projectId:"regia-trad-simu",storageBucket:"regia-trad-simu.firebasestorage.app",messagingSenderId:"1021371167974",appId:"1:1021371167974:web:ef6240fd4f0a2a845ff727"}; // progetto REGIA TRAD-SIMU (separato da ECM)
 const NAMES={it:"Italiano",en:"English",fr:"Français",es:"Español",de:"Deutsch",ru:"Русский"};
+// etichette dell'interfaccia nella lingua scelta dal partecipante
+const UI={
+  it:{audio:"Audio",orig:"Originale",yes:"sì",no:"no",slide:"Slide",live:"● IN ONDA",back:"Torna alla slide in onda",wait:"In attesa della traduzione…<br>La pagina si aggiorna da sola.",noev:"Evento non ancora avviato. Resta su questa pagina.",nos:"Le slide compaiono qui quando il relatore inizia.",male:"voce maschile",female:"voce femminile",err:"errore di connessione"},
+  en:{audio:"Audio",orig:"Original",yes:"on",no:"off",slide:"Slides",live:"● LIVE",back:"Back to the live slide",wait:"Waiting for the translation…<br>This page updates by itself.",noev:"The event has not started yet. Stay on this page.",nos:"Slides appear here when the speaker starts.",male:"male voice",female:"female voice",err:"connection error"},
+  fr:{audio:"Audio",orig:"Original",yes:"oui",no:"non",slide:"Diapos",live:"● EN DIRECT",back:"Revenir à la diapo en direct",wait:"En attente de la traduction…<br>La page se met à jour seule.",noev:"L'événement n'a pas encore commencé.",nos:"Les diapos apparaissent ici au début de l'intervention.",male:"voix masculine",female:"voix féminine",err:"erreur de connexion"},
+  es:{audio:"Audio",orig:"Original",yes:"sí",no:"no",slide:"Diapositivas",live:"● EN VIVO",back:"Volver a la diapositiva en vivo",wait:"Esperando la traducción…<br>La página se actualiza sola.",noev:"El evento aún no ha comenzado.",nos:"Las diapositivas aparecen aquí cuando empieza el ponente.",male:"voz masculina",female:"voz femenina",err:"error de conexión"},
+  de:{audio:"Audio",orig:"Original",yes:"ein",no:"aus",slide:"Folien",live:"● LIVE",back:"Zurück zur aktuellen Folie",wait:"Warten auf die Übersetzung…<br>Die Seite aktualisiert sich selbst.",noev:"Die Veranstaltung hat noch nicht begonnen.",nos:"Die Folien erscheinen hier, sobald der Vortrag beginnt.",male:"männliche Stimme",female:"weibliche Stimme",err:"Verbindungsfehler"},
+  ru:{audio:"Звук",orig:"Оригинал",yes:"да",no:"нет",slide:"Слайды",live:"● ЭФИР",back:"К текущему слайду",wait:"Ожидание перевода…<br>Страница обновляется сама.",noev:"Мероприятие ещё не началось.",nos:"Слайды появятся, когда начнётся доклад.",male:"мужской голос",female:"женский голос",err:"ошибка соединения"}
+};
 const $=id=>document.getElementById(id);
 const ev=(new URLSearchParams(location.search).get('ev')||'').replace(/[^A-Za-z0-9_-]/g,'');
+const pad=n=>String(n).padStart(3,'0');
 
-// ── UI subito, prima di qualsiasi await ──
-let lang=null, showSrc=true, targets=[];
+let lang=null, showSrc=true, targets=[], source='it', lastSpeaker={};
 const lines=new Map();
-$('toggle').addEventListener('click',e=>{showSrc=!showSrc;$('feed').classList.toggle('hide-src',!showSrc);e.target.textContent='Originale: '+(showSrc?'sì':'no');});
-$('lang').addEventListener('change',()=>{lang=$('lang').value;try{localStorage.setItem('trad_lang',lang)}catch(e){};render();listenAudio();});
+const t=k=>(UI[lang]||UI[(navigator.language||'').slice(0,2)]||UI.en)[k];
+function labels(){
+  document.documentElement.lang=lang||'it';
+  $('audioBtn').textContent=t('audio')+': '+(audioOn?t('yes'):t('no'));
+  $('toggle').textContent=t('orig')+': '+(showSrc?t('yes'):t('no'));
+  $('slideBtn').textContent=t('slide');
+  $('back').textContent=t('back');
+  $('empty')&&($('empty').innerHTML=t('wait'));
+  setSpeaker(lastSpeaker);
+  drawSlideBar();
+}
+$('toggle').addEventListener('click',()=>{showSrc=!showSrc;$('feed').classList.toggle('hide-src',!showSrc);labels();});
+$('lang').addEventListener('change',()=>{lang=$('lang').value;try{localStorage.setItem('trad_lang',lang)}catch(e){};labels();render();listenAudio();showSlide();});
 
 if(!ev){$('empty').textContent='Codice evento mancante: apri il link o il QR code fornito in sala.';}
 
-// ── Audio in cuffia ──
+// ── Audio in cuffia (anche negli occhiali Meta collegati in Bluetooth) ──
 let ctx=null, audioOn=false, nextTime=0, chain=Promise.resolve(), wakeLock=null;
 const MAX_LAG=8;
 $('audioBtn').addEventListener('click',async()=>{
   audioOn=!audioOn;
   $('audioBtn').classList.toggle('on',audioOn);
-  $('audioBtn').textContent='Audio: '+(audioOn?'on':'off');
+  labels();
   if(audioOn){
     try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
     if(!ctx)ctx=new(window.AudioContext||window.webkitAudioContext)();
@@ -92,8 +136,8 @@ function render(){
     const l=lines.get(id);
     if(!l.el){l.el=document.createElement('div');l.el.className='line';l.el.innerHTML='<div class="src"></div><div class="tr"></div>';}
     l.el.querySelector('.src').textContent=l.src||'';
-    const t=(l.tr&&l.tr[lang])||'';l.el.querySelector('.tr').textContent=(t&&!t.startsWith('[errore'))?t:'…';
-    feed.appendChild(l.el);   // riordina in coda
+    const tt=(l.tr&&l.tr[lang])||'';l.el.querySelector('.tr').textContent=(tt&&!tt.startsWith('[errore'))?tt:'…';
+    feed.appendChild(l.el);
   }
   window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
 }
@@ -105,7 +149,7 @@ function listenAudio(){
   let first=true;
   const q=query(collection(db,'traduzioni',ev,'audio_'+lang),orderBy('n','desc'),limit(3));
   unsubAudio=onSnapshot(q,snap=>{
-    if(first){first=false;return}          // ignora le clip già passate
+    if(first){first=false;return}
     snap.docChanges().forEach(ch=>{
       if(ch.type!=='added')return;
       const d=ch.doc.data();
@@ -113,10 +157,79 @@ function listenAudio(){
     });
   });
 }
-
 function setSpeaker(d){
-  $('speaker').textContent=(d.speaker?d.speaker+' · ':'')+'voce '+(d.gender==='M'?'maschile':'femminile');
+  lastSpeaker=d||{};
+  if(!d||!d.gender){$('speaker').textContent='';return}
+  $('speaker').textContent=(d.speaker?d.speaker+' · ':'')+(d.gender==='M'?t('male'):t('female'));
 }
+
+// ── Slide tradotta: la stessa slide del relatore, con le scritte nella propria lingua ──
+let decks={}, live={deck:null,n:1}, shown=null, browsing=false, slideOn=true, sSeq=0;
+const imgCache=new Map();
+try{slideOn=localStorage.getItem('trad_slide')!=='0'}catch(e){}
+$('slideBtn').addEventListener('click',()=>{slideOn=!slideOn;try{localStorage.setItem('trad_slide',slideOn?'1':'0')}catch(e){};updateSlideVis();});
+function updateSlideVis(){
+  const has=Object.keys(decks).length>0;
+  $('slideBtn').hidden=!has;
+  $('slideBtn').classList.toggle('on',slideOn&&has);
+  $('slideWrap').hidden=!(slideOn&&has);
+  document.body.classList.toggle('with-slide',slideOn&&has);
+  $('slideWrap').style.top=document.querySelector('header').offsetHeight+'px';
+}
+function slideLang(d){return (d.lingue||[]).includes(lang)?lang:source}
+async function slideUrl(deck,n){
+  const d=decks[deck]; if(!d)return null;
+  const key=`${deck}_${slideLang(d)}_${pad(n)}`, v=d.v||0;
+  const hit=imgCache.get(key);
+  if(hit&&hit.v===v)return hit.url;
+  const s=await getDoc(doc(db,'traduzioni',ev,'slide',key));
+  if(!s.exists())return null;
+  const b=s.data().img;
+  const url=URL.createObjectURL(new Blob([b.toUint8Array()],{type:'image/jpeg'}));
+  if(hit)URL.revokeObjectURL(hit.url);
+  imgCache.set(key,{url,v});
+  if(imgCache.size>40){const k=imgCache.keys().next().value;URL.revokeObjectURL(imgCache.get(k).url);imgCache.delete(k)}
+  return url;
+}
+async function showSlide(){
+  const s=browsing&&shown?shown:live;
+  if(!s.deck){$('ph').textContent=t('nos');$('sImg').removeAttribute('src');drawSlideBar();return}
+  const seq=++sSeq;
+  drawSlideBar();
+  try{
+    const url=await slideUrl(s.deck,s.n);
+    if(seq!==sSeq)return;
+    if(url){$('sImg').src=url;$('ph').textContent=''}
+  }catch(e){}
+  // precarica la successiva
+  const d=decks[s.deck]; const i=d?d.n.indexOf(s.n):-1;
+  if(d&&d.n[i+1])slideUrl(s.deck,d.n[i+1]).catch(()=>{});
+}
+function drawSlideBar(){
+  const s=browsing&&shown?shown:live, d=decks[s.deck];
+  const tot=d&&d.n?d.n.length:'';
+  $('pos').textContent=d?`${d.n.indexOf(s.n)+1} / ${tot}`:'';
+  const isLive=!browsing||!shown||(shown.deck===live.deck&&shown.n===live.n);
+  $('liveTag').textContent=d&&isLive?t('live'):'';
+  $('back').hidden=isLive;
+}
+function stepSlide(dir){
+  const s=browsing&&shown?shown:live, d=decks[s.deck]; if(!d)return;
+  const i=d.n.indexOf(s.n), j=Math.max(0,Math.min(d.n.length-1,i+dir));
+  shown={deck:s.deck,n:d.n[j]}; browsing=!(shown.deck===live.deck&&shown.n===live.n);
+  showSlide();
+}
+$('prevS').addEventListener('click',()=>stepSlide(-1));
+$('nextS').addEventListener('click',()=>stepSlide(1));
+$('back').addEventListener('click',()=>{browsing=false;shown=null;showSlide()});
+$('fsBtn').addEventListener('click',()=>{const b=$('slideBox');
+  if(document.fullscreenElement)document.exitFullscreen();else if(b.requestFullscreen)b.requestFullscreen().then(()=>{try{screen.orientation.lock('landscape')}catch(e){}}).catch(()=>{});
+  else if(b.webkitEnterFullscreen)b.webkitEnterFullscreen();});
+// scorrere con il dito sulla slide
+let tx=null;
+$('slideBox').addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+$('slideBox').addEventListener('touchend',e=>{if(tx==null)return;const dx=e.changedTouches[0].clientX-tx;tx=null;if(Math.abs(dx)>40)stepSlide(dx<0?1:-1)});
+window.addEventListener('resize',updateSlideVis);
 
 async function initApp(){
   if(!ev)return;
@@ -126,20 +239,29 @@ async function initApp(){
 
   onSnapshot(doc(db,'traduzioni',ev),s=>{
     $('status').textContent='live';$('status').className='on';
-    if(!s.exists()){$('empty')&&($('empty').textContent='Evento non ancora avviato. Resta su questa pagina.');return}
+    if(!s.exists()){$('empty')&&($('empty').textContent=t('noev'));return}
     const d=s.data();
-    const t=(d.targets||[]).join(',');
-    if(t!==targets.join(',')){
+    if(d.source)source=d.source;
+    const tl=(d.targets||[]).join(',');
+    if(tl!==targets.join(',')){
       targets=d.targets||[];
       const sel=$('lang');sel.innerHTML='';
       targets.forEach(x=>sel.add(new Option(NAMES[x]||x,x)));
       let saved=null;try{saved=localStorage.getItem('trad_lang')}catch(e){}
       lang=targets.includes(saved)?saved:targets[0];sel.value=lang;
-      listenAudio();render();
+      listenAudio();render();labels();
     }
     $('audioBtn').hidden=false;
     setSpeaker(d);
-  },()=>{$('status').textContent='errore di connessione';$('status').className=''});
+    const nd=d.decks||{};
+    const changed=JSON.stringify(nd)!==JSON.stringify(decks);
+    decks=nd;
+    const sl=d.slide||{};
+    const moved=sl.deck!==live.deck||sl.n!==live.n;
+    if(sl.deck)live={deck:sl.deck,n:sl.n};
+    updateSlideVis();
+    if(moved||changed)showSlide();
+  },()=>{$('status').textContent=t('err');$('status').className=''});
 
   const qf=query(collection(db,'traduzioni',ev,'frasi'),orderBy('n','desc'),limit(30));
   onSnapshot(qf,snap=>{
@@ -151,6 +273,7 @@ async function initApp(){
     render();
   });
 }
+labels();
 initApp();
 </script>
 </body>
