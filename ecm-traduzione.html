@@ -59,6 +59,7 @@ body.with-slide main .line .tr{font-size:19px}
     <button id="fsBtn" aria-label="⛶">⛶</button>
   </div>
 </section>
+<div id="pauseBar" hidden style="background:#3a1418;color:#ffd0d2;text-align:center;padding:8px 14px;font-size:14px;font-weight:600"></div>
 <main id="feed"><div class="empty" id="empty">In attesa della traduzione…<br>La pagina si aggiorna da sola.</div></main>
 
 <script type="module">
@@ -94,7 +95,7 @@ function labels(){
   drawSlideBar();
 }
 $('toggle').addEventListener('click',()=>{showSrc=!showSrc;$('feed').classList.toggle('hide-src',!showSrc);labels();});
-$('lang').addEventListener('change',()=>{lang=$('lang').value;try{localStorage.setItem('trad_lang',lang)}catch(e){};labels();render();listenAudio();showSlide();});
+$('lang').addEventListener('change',()=>{lang=$('lang').value;try{localStorage.setItem('trad_lang',lang)}catch(e){};labels();render();listenAudio();showSlide();showPause();});
 
 if(!ev){$('empty').textContent='Codice evento mancante: apri il link o il QR code fornito in sala.';}
 
@@ -135,14 +136,21 @@ function render(){
   for(const id of ids){
     const l=lines.get(id);
     if(!l.el){l.el=document.createElement('div');l.el.className='line';l.el.innerHTML='<div class="src"></div><div class="tr"></div>';}
-    l.el.querySelector('.src').textContent=l.src||'';
-    const tt=(l.tr&&l.tr[lang])||'';l.el.querySelector('.tr').textContent=(tt&&!tt.startsWith('[errore'))?tt:'…';
+    l.el.querySelector('.src').textContent=(l.stesso&&l.stesso[lang])?'':(l.src||'');
+    // frase tolta dalla regia: sparisce; stessa lingua di chi ascolta: il testo originale è già la traduzione
+    if(l.tolta){l.el.style.display='none';feed.appendChild(l.el);continue}
+    const tt=(l.stesso&&l.stesso[lang])?l.src:((l.tr&&l.tr[lang])||'');
+    // frasi dell'interprete: solo nella sua lingua; con l'interprete in voce le frasi del relatore non aspettano la traduzione AI
+    l.el.style.display=l.interprete&&!tt?'none':'';
+    l.el.querySelector('.tr').textContent=(tt&&!tt.startsWith('[errore'))?tt:(fonti[lang]==='interprete'?'':'…');
     feed.appendChild(l.el);
   }
   window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
 }
 
-let db, unsubAudio=null;
+let db, unsubAudio=null, fonti={}, pausa={tutto:false,lingue:[]};
+const PAUSA={it:'Traduzione in pausa',en:'Translation paused',fr:'Traduction en pause',es:'Traducción en pausa',de:'Übersetzung pausiert'};
+function showPause(){const p=pausa.tutto||(pausa.lingue||[]).includes(lang);$('pauseBar').hidden=!p;$('pauseBar').textContent=PAUSA[lang]||PAUSA.en;}
 function listenAudio(){
   if(unsubAudio){unsubAudio();unsubAudio=null}
   if(!db||!lang)return;
@@ -253,6 +261,10 @@ async function initApp(){
     }
     $('audioBtn').hidden=false;
     setSpeaker(d);
+    const nf={};for(const k in d)if(k.startsWith('fonte_'))nf[k.slice(6)]=d[k];
+    if(JSON.stringify(nf)!==JSON.stringify(fonti)){fonti=nf;render();}
+    if(d.pausa&&JSON.stringify(d.pausa)!==JSON.stringify(pausa)){pausa=d.pausa;}
+    showPause();
     const nd=d.decks||{};
     const changed=JSON.stringify(nd)!==JSON.stringify(decks);
     decks=nd;
@@ -268,7 +280,7 @@ async function initApp(){
     snap.docChanges().forEach(ch=>{
       if(ch.type==='removed'){const l=lines.get(ch.doc.id);if(l&&l.el)l.el.remove();lines.delete(ch.doc.id);return}
       const d=ch.doc.data();const old=lines.get(ch.doc.id)||{};
-      lines.set(ch.doc.id,{...old,n:d.n||0,src:d.src||'',tr:d.tr||{}});
+      lines.set(ch.doc.id,{...old,n:d.n||0,src:d.src||'',tr:d.tr||{},interprete:!!d.interprete,tolta:!!d.tolta,stesso:d.stesso||{}});
     });
     render();
   });
